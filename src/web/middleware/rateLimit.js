@@ -11,8 +11,9 @@
 // otherwise every client collapses onto the proxy's address and shares one
 // bucket. Raise RATE_LIMIT_API_PER_MIN (or set it to 0) if that bites.
 
-const { rateLimit } = require('express-rate-limit');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 const config = require('../../config');
+const { tokenRateKey } = require('./bearer');
 
 function jsonHandler(req, res) {
   res.status(429).json({ ok: false, error: 'Too many requests - slow down and try again shortly.' });
@@ -52,4 +53,22 @@ const authLimiter = config.rateLimit.authPer15Min
     })
   : passthrough;
 
-module.exports = { apiLimiter, authLimiter };
+/**
+ * Per-token ceiling on the public /api/v1 surface. Buckets on the SHA-256 of
+ * the presented Bearer token; a missing/malformed token falls back to the
+ * IPv6-safe per-IP key so a pre-auth flood is still capped (needs TRUST_PROXY
+ * behind a proxy, same caveat as above).
+ */
+const publicApiLimiter = config.rateLimit.publicApiPerMin
+  ? rateLimit({
+      windowMs: 60_000,
+      limit: config.rateLimit.publicApiPerMin,
+      standardHeaders: 'draft-7',
+      legacyHeaders: false,
+      handler: jsonHandler,
+      validate,
+      keyGenerator: (req) => tokenRateKey(req) || ipKeyGenerator(req.ip),
+    })
+  : passthrough;
+
+module.exports = { apiLimiter, authLimiter, publicApiLimiter };

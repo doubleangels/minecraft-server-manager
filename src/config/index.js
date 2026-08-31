@@ -284,6 +284,9 @@ const config = {
   rateLimit: {
     apiPerMin: numFromEnv('RATE_LIMIT_API_PER_MIN', 1200, { min: 0, max: 1_000_000 }),
     authPer15Min: numFromEnv('RATE_LIMIT_AUTH_PER_15MIN', 100, { min: 0, max: 1_000_000 }),
+    // Per-token ceiling on the public /api/v1 surface (keyed on the token, IP
+    // fallback when absent). 0 = off.
+    publicApiPerMin: numFromEnv('RATE_LIMIT_PUBLIC_API_PER_MIN', 120, { min: 0, max: 1_000_000 }),
   },
 };
 

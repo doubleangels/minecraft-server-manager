@@ -159,6 +159,22 @@ function setCountry(cc) {
   return clean;
 }
 
+// ---------------------------------------------------------------------------
+// Public read-only API (/api/v1). Off by default - it is an internet-facing
+// surface, so serving it is a deliberate opt-in even though it stays inert
+// until an admin also mints a token (services/apiTokens.js).
+
+/** Whether GET /api/v1 is served. */
+function isPublicApiEnabled() {
+  return get('public_api_enabled', false) === true;
+}
+
+/** Enable or disable the public API. Returns the new state. */
+function setPublicApiEnabled(on) {
+  set('public_api_enabled', Boolean(on));
+  return Boolean(on);
+}
+
 /** A BCP-47 locale for date/number formatting, from host language + chosen country. */
 function resolveLocale() {
   let sysLoc = 'en-US';
@@ -200,6 +216,8 @@ module.exports = {
   setPublicHost,
   publicAddress,
   normalizeHost,
+  isPublicApiEnabled,
+  setPublicApiEnabled,
   getTimezone,
   setTimezone,
   getCountry,

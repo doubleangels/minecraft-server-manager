@@ -136,5 +136,47 @@
     <button class="btn btn-sm mt-3" id="user-add">{{{icon 'plus' 'size-3.5'}}} Add user</button>
     <p class="help mt-2 max-w-prose">Roles: <b>Admin</b> can do everything. <b>Operator</b> can manage servers, but not storage, users, or update policies. <b>Viewer</b> is read-only.</p>
   </div>
+
+  <div class="card p-4 lg:col-span-2" id="api-tokens-card">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h3 class="font-semibold">Public API</h3>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" id="public-api-enabled" {{#if publicApiEnabled}}checked{{/if}}>
+        <span>Serve <span class="font-mono">/api/v1</span></span>
+      </label>
+    </div>
+    <p class="help mt-1 max-w-prose">Read-only HTTP API for fetching server status. Callers authenticate with a
+      Bearer token below: <span class="font-mono">Authorization: Bearer msm_&hellip;</span>. Endpoints are
+      <span class="font-mono">GET /api/v1/servers</span> and <span class="font-mono">/api/v1/servers/:id</span>
+      (name, type, state, CPU, memory, uptime, player counts). Server-to-server / CLI only &ndash; no browser CORS.
+      A token's full value is shown once, at creation.</p>
+    <div class="mt-4 overflow-x-auto">
+      <table class="table-base" id="api-tokens-table">
+        <thead><tr><th>Label</th><th>Prefix</th><th>Scope</th><th>Created</th><th>Last used</th><th>Expires</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
+        <tbody>
+          {{#each apiTokens}}
+            <tr data-token-id="{{id}}">
+              <td class="font-medium">{{label}}</td>
+              <td class="font-mono text-xs">{{tokenPrefix}}&hellip;</td>
+              <td>{{#if scope.all}}All servers{{else}}{{scope.serverIds.length}} server(s){{/if}}</td>
+              <td class="whitespace-nowrap text-xs text-ink-faint" data-ts="{{createdAt}}">{{createdAt}}</td>
+              <td class="whitespace-nowrap text-xs text-ink-faint">{{#if lastUsedAt}}<span data-ts="{{lastUsedAt}}">{{lastUsedAt}}</span>{{else}}never{{/if}}</td>
+              <td class="whitespace-nowrap text-xs text-ink-faint">{{#if expiresAt}}<span data-ts="{{expiresAt}}">{{expiresAt}}</span>{{else}}never{{/if}}</td>
+              <td>{{#if (eq status 'active')}}<span class="badge badge-ok">Active</span>{{else}}<span class="badge">{{status}}</span>{{/if}}</td>
+              <td class="text-right">
+                {{#unless revokedAt}}
+                  <button class="btn btn-ghost btn-sm text-danger" data-token-revoke data-token-id="{{id}}" data-label="{{label}}">Revoke</button>
+                {{/unless}}
+              </td>
+            </tr>
+          {{else}}
+            <tr><td colspan="8" class="text-sm text-ink-faint">No API tokens yet.</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    <button class="btn btn-sm mt-3" id="api-token-add">{{{icon 'plus' 'size-3.5'}}} New token</button>
+    <script type="application/json" id="api-token-servers">{{json serverOptions}}</script>
+  </div>
 </div>
 <script type="module" src="/js/pages/settings.js"></script>

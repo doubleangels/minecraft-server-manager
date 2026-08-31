@@ -777,7 +777,8 @@ router.get(
 router.get('/settings', requireRole('admin'), (req, res) => {
   const apiKeys = require('../../services/apiKeys');
   const config = require('../../config');
-  const publicHost = require('../../services/settings').getPublicHost();
+  const settings = require('../../services/settings');
+  const publicHost = settings.getPublicHost();
   res.render('settings', {
     title: 'Settings',
     active: 'settings',
@@ -787,6 +788,11 @@ router.get('/settings', requireRole('admin'), (req, res) => {
     users: require('../../services/auth').listUsers(),
     panel: { host: config.host, port: config.port },
     defaults: config.defaults,
+    publicApiEnabled: settings.isPublicApiEnabled(),
+    apiTokens: require('../../services/apiTokens').listTokens(),
+    serverOptions: require('../../services/servers')
+      .listServers()
+      .map((s) => ({ id: s.id, name: s.display_name })),
   });
 });
 

@@ -85,6 +85,9 @@ copy to migrate.**
   propose the newest fully-compatible loader + MC version pair and installs the set on creation.
 - **Public status page**: optional unauthenticated `/status/<slug>` per server (name, version,
   player count only).
+- **Public API**: optional read-only `/api/v1`, authenticated with admin-minted Bearer tokens that
+  are scopable per server, revocable, and expiring; server list + live status. See
+  [docs/public-api.md](docs/public-api.md).
 
 ---
 

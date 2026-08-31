@@ -94,6 +94,124 @@ function init() {
     });
   });
 
+  // ---- Public API (/api/v1) ----
+  document.getElementById('public-api-enabled')?.addEventListener('change', async (e) => {
+    const el = e.currentTarget;
+    const enabled = el.checked;
+    el.disabled = true;
+    try {
+      const res = await post('/api/settings/public-api', { enabled });
+      if (res) {
+        toast(res.enabled ? 'Public API enabled.' : 'Public API disabled.');
+      } else {
+        el.checked = !enabled; // revert - post() already toasted why
+      }
+    } finally {
+      el.disabled = false;
+    }
+  });
+
+  document.getElementById('api-token-add')?.addEventListener('click', () => {
+    let servers = [];
+    try {
+      servers = JSON.parse(document.getElementById('api-token-servers')?.textContent || '[]');
+    } catch {
+      /* no server picker */
+    }
+    const content = document.createElement('div');
+    content.className = 'space-y-3';
+    content.innerHTML = `
+      <div><label class="label" for="at-label">Label</label>
+        <input class="input" id="at-label" autocomplete="off" placeholder="e.g. status dashboard"></div>
+      <div><span class="label">Scope</span>
+        <label class="flex items-center gap-2 text-sm"><input type="radio" name="at-scope" value="all" checked> All servers</label>
+        <label class="flex items-center gap-2 text-sm"><input type="radio" name="at-scope" value="some"> Specific servers</label>
+      </div>
+      <div><label class="label" for="at-servers">Servers</label>
+        <select class="input" id="at-servers" multiple size="6" disabled>
+          ${servers.map((s) => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div><label class="label" for="at-expires">Expires (optional)</label>
+        <input class="input" id="at-expires" type="datetime-local"></div>`;
+    const scopeRadios = content.querySelectorAll('input[name="at-scope"]');
+    const serverSel = content.querySelector('#at-servers');
+    scopeRadios.forEach((r) =>
+      r.addEventListener('change', () => {
+        serverSel.disabled = content.querySelector('input[name="at-scope"]:checked').value !== 'some';
+      })
+    );
+    openModal({
+      title: 'New API token',
+      content,
+      actions: [
+        { label: 'Cancel', kind: 'ghost' },
+        {
+          label: 'Create',
+          kind: 'primary',
+          busyLabel: 'Creating…',
+          onClick: async () => {
+            const scopeAll = content.querySelector('input[name="at-scope"]:checked').value === 'all';
+            const serverIds = scopeAll ? [] : [...serverSel.selectedOptions].map((o) => o.value);
+            const expiresRaw = content.querySelector('#at-expires').value;
+            const body = {
+              label: content.querySelector('#at-label').value.trim(),
+              scopeAll,
+              serverIds,
+              expiresAt: expiresRaw ? new Date(expiresRaw).toISOString() : undefined,
+            };
+            const res = await post('/api/api-tokens', body);
+            if (!res) return false;
+            revealTokenModal(res.token.token);
+          },
+        },
+      ],
+    });
+  });
+
+  function revealTokenModal(token) {
+    const content = document.createElement('div');
+    content.className = 'space-y-3';
+    const field = document.createElement('input');
+    field.className = 'input font-mono';
+    field.readOnly = true;
+    field.value = token;
+    content.appendChild(field);
+    content.insertAdjacentHTML(
+      'beforeend',
+      '<p class="notice notice-danger">This is the only time the full token is shown. Copy it now.</p>'
+    );
+    openModal({
+      title: 'Copy your API token now',
+      size: 'sm',
+      content,
+      actions: [
+        {
+          label: 'Copy',
+          kind: 'ghost',
+          onClick: async () => {
+            try {
+              await navigator.clipboard.writeText(token);
+              toast('Copied.');
+            } catch {
+              field.select();
+              toast('Press Ctrl+C to copy.', { kind: 'error' });
+            }
+            return false; // keep the modal open so they can confirm the copy
+          },
+        },
+        { label: 'Done', kind: 'primary', onClick: () => setTimeout(() => location.reload(), 300) },
+      ],
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(
+      /[&<>"']/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+    );
+  }
+
   // ---- Users ----
   document.getElementById('users-table')?.addEventListener('change', async (e) => {
     const select = e.target.closest('[data-user-role]');
@@ -132,6 +250,28 @@ function init() {
     const passBtn = e.target.closest('[data-user-password]');
     const totpResetBtn = e.target.closest('[data-user-totp-reset]');
     const delBtn = e.target.closest('[data-user-delete]');
+    const tokenRevokeBtn = e.target.closest('[data-token-revoke]');
+    if (tokenRevokeBtn) {
+      const { tokenId, label } = tokenRevokeBtn.dataset;
+      const ok = await confirmDialog({
+        title: `Revoke token "${label}"?`,
+        message: 'Any client using this token loses access immediately. This cannot be undone.',
+        confirmLabel: 'Revoke',
+        danger: true,
+      });
+      if (!ok) return;
+      await withBusy(tokenRevokeBtn, async () => {
+        const res = await fetch(`/api/api-tokens/${tokenId}`, { method: 'DELETE' });
+        const data = await res.json().catch(() => ({}));
+        if (data.ok) {
+          toast('Token revoked.');
+          document.querySelector(`#api-tokens-table tr[data-token-id="${CSS.escape(tokenId)}"]`)?.remove();
+        } else {
+          toast(data.error || friendlyError(res, { action: 'revoke that token' }), { kind: 'error' });
+        }
+      });
+      return;
+    }
     if (passBtn) {
       passwordModal(passBtn.dataset.userId, passBtn.dataset.username);
     } else if (totpResetBtn) {

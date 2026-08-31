@@ -278,6 +278,12 @@ function createApp() {
   app.use(['/login', '/login/2fa', '/setup'], authLimiter);
   app.use(require('./routes/auth'));
   app.use('/status', require('./routes/status')); // public, read-only, opt-in per server
+  // Public, read-only API: Bearer-token auth (no cookie), GET-only. Mounted in
+  // the public zone - BEFORE requireAuth (there is no session to load) and
+  // BEFORE `app.use('/api', apiLimiter)` so the panel-wide per-IP limiter does
+  // not also apply here; the router brings its own per-token publicApiLimiter.
+  // originGuard/requireWrite below are GET-only no-ops for it. Keep this order.
+  app.use('/api/v1', require('./routes/apiV1'));
   // Cap /api request volume before any auth/DB work runs on a flood.
   app.use('/api', apiLimiter);
   app.use(requireAuth);

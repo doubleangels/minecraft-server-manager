@@ -138,3 +138,10 @@ test('/settings and /storage pages are admin only', async () => {
     assert.equal(asAdmin.status, 200, `${path} should render for an admin`);
   }
 });
+
+test('/api/v1 sits in the public zone: a cookieless call is a Bearer 401, not a login redirect', async () => {
+  await app.req('POST', '/api/settings/public-api', { cookie: adminCookie, body: { enabled: true } });
+  const r = await app.req('GET', '/api/v1/servers');
+  assert.equal(r.status, 401); // token auth answered - never a 302 to /login
+  assert.match(r.json.error, /Authorization/);
+});

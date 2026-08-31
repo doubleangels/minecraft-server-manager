@@ -470,6 +470,79 @@ router.post(
   })
 );
 
+// ---- Public read-only API tokens (Settings page) - admin only ----
+// These manage credentials for GET /api/v1 (see routes/apiV1.js). The tokens
+// themselves are Bearer-only and never touch a session.
+const apiTokens = require('../../services/apiTokens');
+
+router.get('/api-tokens', requireRoleKeys('admin'), (req, res) => {
+  res.json({ ok: true, enabled: settingsService.isPublicApiEnabled(), tokens: apiTokens.listTokens() });
+});
+
+const apiTokenCreateSchema = z
+  .object({
+    label: z.string().trim().min(1).max(60),
+    scopeAll: z.coerce.boolean().default(false),
+    serverIds: z
+      .array(
+        z
+          .string()
+          .trim()
+          .regex(/^srv_[A-Za-z0-9_-]{1,40}$/)
+      )
+      .max(200)
+      .optional(),
+    expiresAt: z.string().datetime().optional(),
+  })
+  .refine((v) => v.scopeAll || (v.serverIds && v.serverIds.length > 0), {
+    message: 'Choose specific servers or grant access to all servers',
+  });
+
+router.post(
+  '/api-tokens',
+  requireRoleKeys('admin'),
+  asyncHandler((req, res, next) => {
+    const input = apiTokenCreateSchema.parse(req.body);
+    if (!input.scopeAll) for (const id of input.serverIds) requireServer(id); // 404 on unknown id
+    const created = apiTokens.createToken(
+      {
+        label: input.label,
+        scopeAll: input.scopeAll,
+        serverIds: input.scopeAll ? [] : input.serverIds,
+        expiresAt: input.expiresAt || null,
+      },
+      { actor: req.user.username }
+    );
+    // created.token is the plaintext - returned to the caller exactly once.
+    res.status(201).json({ ok: true, token: created });
+  })
+);
+
+router.delete(
+  '/api-tokens/:id',
+  requireRoleKeys('admin'),
+  asyncHandler((req, res, next) => {
+    apiTokens.revokeToken(req.params.id, { actor: req.user.username }); // throws 404 if unknown/already revoked
+    res.json({ ok: true });
+  })
+);
+
+router.post(
+  '/settings/public-api',
+  requireRoleKeys('admin'),
+  asyncHandler((req, res, next) => {
+    const { enabled } = z.object({ enabled: z.coerce.boolean() }).parse(req.body);
+    const now = settingsService.setPublicApiEnabled(enabled);
+    eventsService.recordEvent({
+      actor: req.user.username,
+      type: 'config-changed',
+      summary: `Public API ${now ? 'enabled' : 'disabled'}`,
+    });
+    logger.info('Toggled the public API.', { enabled: now, actor: req.user.username });
+    res.json({ ok: true, enabled: now });
+  })
+);
+
 // ---- Modpacks: resolve/preview, install (always pinned), upgrade, rollback ----
 const packs = require('../../services/packs');
 const upgrade = require('../../updates/upgrade');
