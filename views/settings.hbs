@@ -149,7 +149,8 @@
       Bearer token below: <span class="font-mono">Authorization: Bearer msm_&hellip;</span>. Endpoints are
       <span class="font-mono">GET /api/v1/servers</span> and <span class="font-mono">/api/v1/servers/:id</span>
       (name, type, state, CPU, memory, uptime, player counts). Server-to-server / CLI only &ndash; no browser CORS.
-      A token's full value is shown once, at creation.</p>
+      A token's full value is shown once, at creation. Creating the first token turns the API on; untick to pause it
+      without revoking tokens.</p>
     <div class="mt-4 overflow-x-auto">
       <table class="table-base" id="api-tokens-table">
         <thead><tr><th>Label</th><th>Prefix</th><th>Scope</th><th>Created</th><th>Last used</th><th>Expires</th><th>Status</th><th class="text-right">Actions</th></tr></thead>

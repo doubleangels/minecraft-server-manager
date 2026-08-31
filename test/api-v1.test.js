@@ -25,15 +25,24 @@ test.before(async () => {
   cookie = await app.adminCookie();
   app.seedServer('srv_v1a');
   app.seedServer('srv_v1b');
-  await app.req('POST', '/api/settings/public-api', { cookie, body: { enabled: true } });
-  const all = await mint({ label: 'all', scopeAll: true });
-  tokAll = all.token;
-  tokAllId = all.id;
+  // Deliberately do NOT enable the API here - creating the first token must.
+  const first = await app.req('POST', '/api/api-tokens', { cookie, body: { label: 'all', scopeAll: true } });
+  assert.equal(first.status, 201);
+  assert.equal(first.json.enabled, true, 'creating the first token must enable the API');
+  tokAll = first.json.token.token;
+  tokAllId = first.json.token.id;
   tokScoped = (await mint({ label: 'scoped', serverIds: ['srv_v1a'] })).token;
 });
 
 test.after(async () => {
   await app.stop();
+});
+
+test('the API is already serving after the first token was created (no manual toggle)', async () => {
+  const r = await app.req('GET', '/api/v1/servers', auth(tokAll));
+  assert.equal(r.status, 200);
+  const state = await app.req('GET', '/api/api-tokens', { cookie });
+  assert.equal(state.json.enabled, true);
 });
 
 test('disabled => 404 even with a valid token; re-enabling restores it', async () => {

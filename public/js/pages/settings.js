@@ -172,11 +172,32 @@ function init() {
   function revealTokenModal(token) {
     const content = document.createElement('div');
     content.className = 'space-y-3';
+
+    const row = document.createElement('div');
+    row.className = 'flex flex-wrap gap-2';
     const field = document.createElement('input');
-    field.className = 'input font-mono';
+    field.className = 'input min-w-0 flex-1 font-mono';
     field.readOnly = true;
     field.value = token;
-    content.appendChild(field);
+    field.addEventListener('focus', () => field.select());
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'btn';
+    copyBtn.textContent = 'Copy';
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(token);
+        copyBtn.textContent = 'Copied';
+        toast('Token copied to the clipboard.');
+        setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+      } catch {
+        field.focus();
+        toast('Press Ctrl+C to copy.', { kind: 'error' });
+      }
+    });
+    row.append(field, copyBtn);
+    content.appendChild(row);
+
     content.insertAdjacentHTML(
       'beforeend',
       '<p class="notice notice-danger">This is the only time the full token is shown. Copy it now.</p>'
@@ -185,23 +206,7 @@ function init() {
       title: 'Copy your API token now',
       size: 'sm',
       content,
-      actions: [
-        {
-          label: 'Copy',
-          kind: 'ghost',
-          onClick: async () => {
-            try {
-              await navigator.clipboard.writeText(token);
-              toast('Copied.');
-            } catch {
-              field.select();
-              toast('Press Ctrl+C to copy.', { kind: 'error' });
-            }
-            return false; // keep the modal open so they can confirm the copy
-          },
-        },
-        { label: 'Done', kind: 'primary', onClick: () => setTimeout(() => location.reload(), 300) },
-      ],
+      actions: [{ label: 'Done', kind: 'primary', onClick: () => setTimeout(() => location.reload(), 300) }],
     });
   }
 

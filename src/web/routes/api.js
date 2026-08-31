@@ -513,8 +513,20 @@ router.post(
       },
       { actor: req.user.username }
     );
+    // A token that can't be used is a footgun - minting one turns the surface
+    // on. Turning it back off stays a deliberate, separate action.
+    let enabled = settingsService.isPublicApiEnabled();
+    if (!enabled) {
+      enabled = settingsService.setPublicApiEnabled(true);
+      eventsService.recordEvent({
+        actor: req.user.username,
+        type: 'config-changed',
+        summary: 'Public API enabled (first token created)',
+      });
+      logger.info('Enabled the public API alongside a new token.', { actor: req.user.username });
+    }
     // created.token is the plaintext - returned to the caller exactly once.
-    res.status(201).json({ ok: true, token: created });
+    res.status(201).json({ ok: true, token: created, enabled });
   })
 );
 

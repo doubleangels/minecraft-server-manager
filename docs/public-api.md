@@ -5,21 +5,20 @@ status dashboard, an uptime monitor, a Discord bot, a home-automation rule. It i
 served by the panel itself and returns the same live data the panel's own pages
 show (from the in-memory cache), so polling it never touches Docker.
 
-It is **off by default** and **admin-gated**. Nothing is exposed until an admin
-both enables the API and mints a token.
+It is **off until an admin uses it** and **admin-gated**. Nothing is exposed
+until a token exists.
 
 ## Enabling it
 
-**Settings → Public API**:
+**Settings → Public API → New token** - give it a label, choose its scope (all
+servers, or a specific subset), and optionally an expiry date. The full token is
+shown **once**, in a dialog; copy it now - only a short prefix is kept afterwards,
+for identification in the list.
 
-1. Tick **Serve `/api/v1`**.
-2. **New token** - give it a label, choose its scope (all servers, or a specific
-   subset), and optionally an expiry date.
-3. The full token is shown **once**, in a dialog. Copy it now - only a short
-   prefix is kept afterwards, for identification in the list.
-
-Revoke a token from the same table at any time; clients using it lose access
-immediately.
+Creating the first token turns the API on automatically (the **Serve `/api/v1`**
+switch is a pause control - untick it to stop serving without revoking any
+tokens). Revoke a token from the same table at any time; clients using it lose
+access immediately.
 
 Tokens are stored as a SHA-256 hash (never in plaintext), survive a panel
 restart, and outlive the servers they are scoped to (a deleted server simply
