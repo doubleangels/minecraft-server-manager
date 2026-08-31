@@ -11,18 +11,123 @@ const { cleanText } = require('../utils/ansi');
 const { recordEvent } = require('../events');
 const { dataPath } = require('../storage/pathGuard');
 
+// camelCase (≤1.21) -> snake_case (26.x). Every op tries the snake_case form
+// first and falls back to camelCase, so this map just needs both spellings.
+// snake_case = the camelCase key with an underscore before each capital.
 const GAMERULES = {
+  // World rules
   keepInventory: 'keep_inventory',
   doDaylightCycle: 'do_daylight_cycle',
   doWeatherCycle: 'do_weather_cycle',
-  mobGriefing: 'mob_griefing',
-  doMobSpawning: 'do_mob_spawning',
-  doFireTick: 'do_fire_tick',
-  fallDamage: 'fall_damage',
-  naturalRegeneration: 'natural_regeneration',
-  doInsomnia: 'do_insomnia',
   doImmediateRespawn: 'do_immediate_respawn',
+  doLimitedCrafting: 'do_limited_crafting',
+  doTileDrops: 'do_tile_drops',
+  doEntityDrops: 'do_entity_drops',
+  doFireTick: 'do_fire_tick',
+  allowFireTicksAwayFromPlayer: 'allow_fire_ticks_away_from_player',
+  doVinesSpread: 'do_vines_spread',
+  waterSourceConversion: 'water_source_conversion',
+  lavaSourceConversion: 'lava_source_conversion',
+  tntExplodes: 'tnt_explodes',
+  projectilesCanBreakBlocks: 'projectiles_can_break_blocks',
+  blockExplosionDropDecay: 'block_explosion_drop_decay',
+  mobExplosionDropDecay: 'mob_explosion_drop_decay',
+  tntExplosionDropDecay: 'tnt_explosion_drop_decay',
+  enderPearlsVanishOnDeath: 'ender_pearls_vanish_on_death',
+  globalSoundEvents: 'global_sound_events',
+  spectatorsGenerateChunks: 'spectators_generate_chunks',
+  reducedDebugInfo: 'reduced_debug_info',
+  disableElytraMovementCheck: 'disable_elytra_movement_check',
+  // Mobs & damage
+  doMobSpawning: 'do_mob_spawning',
+  mobGriefing: 'mob_griefing',
+  doInsomnia: 'do_insomnia',
+  doMobLoot: 'do_mob_loot',
+  doPatrolSpawning: 'do_patrol_spawning',
+  doTraderSpawning: 'do_trader_spawning',
+  doWardenSpawning: 'do_warden_spawning',
+  disableRaids: 'disable_raids',
+  forgiveDeadPlayers: 'forgive_dead_players',
+  universalAnger: 'universal_anger',
+  naturalRegeneration: 'natural_regeneration',
+  fallDamage: 'fall_damage',
+  fireDamage: 'fire_damage',
+  drowningDamage: 'drowning_damage',
+  freezeDamage: 'freeze_damage',
+  // Chat & messages
+  showDeathMessages: 'show_death_messages',
+  announceAdvancements: 'announce_advancements',
+  sendCommandFeedback: 'send_command_feedback',
+  commandBlockOutput: 'command_block_output',
+  logAdminCommands: 'log_admin_commands',
 };
+
+// gamerule toggle -> { slug for the -on/-off QUICK_ACTIONS, on/off toast text }.
+// The chip in world-controls.hbs carries data-wc-toggle="<slug>" data-rule="<key>".
+const RULE_TOGGLES = {
+  keepInventory: ['keepinv', 'Keep inventory'],
+  doDaylightCycle: ['daycycle', 'Day/night cycle'], // also handled via /time resume|pause below
+  doWeatherCycle: ['weathercycle', 'Weather cycle'],
+  doImmediateRespawn: ['instantrespawn', 'Instant respawn'],
+  doLimitedCrafting: ['limitedcraft', 'Limited crafting'],
+  doTileDrops: ['tiledrops', 'Block drops'],
+  doEntityDrops: ['entitydrops', 'Entity drops'],
+  doFireTick: ['firetick', 'Fire spread'],
+  allowFireTicksAwayFromPlayer: ['firetickaway', 'Fire ticks away from players'],
+  doVinesSpread: ['vinesspread', 'Vines spread'],
+  waterSourceConversion: ['waterconv', 'Water source conversion'],
+  lavaSourceConversion: ['lavaconv', 'Lava source conversion'],
+  tntExplodes: ['tntexplodes', 'TNT explosions'],
+  projectilesCanBreakBlocks: ['projbreak', 'Projectiles break blocks'],
+  blockExplosionDropDecay: ['blockdropdecay', 'Block-explosion drop decay'],
+  mobExplosionDropDecay: ['mobdropdecay', 'Mob-explosion drop decay'],
+  tntExplosionDropDecay: ['tntdropdecay', 'TNT-explosion drop decay'],
+  enderPearlsVanishOnDeath: ['pearlvanish', 'Ender pearls vanish on death'],
+  globalSoundEvents: ['globalsound', 'Global sound events'],
+  spectatorsGenerateChunks: ['specchunks', 'Spectators generate chunks'],
+  reducedDebugInfo: ['reduceddebug', 'Reduced debug info'],
+  disableElytraMovementCheck: ['noelytracheck', 'Elytra movement check'],
+  doMobSpawning: ['mobspawn', 'Mob spawning'],
+  mobGriefing: ['mobgrief', 'Mob griefing'],
+  doInsomnia: ['phantoms', 'Phantoms'],
+  doMobLoot: ['mobloot', 'Mob loot'],
+  doPatrolSpawning: ['patrols', 'Pillager patrols'],
+  doTraderSpawning: ['traders', 'Wandering traders'],
+  doWardenSpawning: ['wardens', 'Warden spawning'],
+  disableRaids: ['noraids', 'Raids'],
+  forgiveDeadPlayers: ['forgivedead', 'Forgive dead players'],
+  universalAnger: ['universalanger', 'Universal anger'],
+  naturalRegeneration: ['naturalregen', 'Natural regeneration'],
+  fallDamage: ['falldmg', 'Fall damage'],
+  fireDamage: ['firedmg', 'Fire damage'],
+  drowningDamage: ['drowndmg', 'Drowning damage'],
+  freezeDamage: ['freezedmg', 'Freeze damage'],
+  showDeathMessages: ['deathmsg', 'Death messages'],
+  announceAdvancements: ['advancements', 'Advancement announcements'],
+  sendCommandFeedback: ['cmdfeedback', 'Command feedback'],
+  commandBlockOutput: ['cmdblockout', 'Command block output'],
+  logAdminCommands: ['logadmin', 'Admin command logging'],
+};
+
+// A few rules read as a negation ("disable…"): the chip is labelled by the
+// negation (data-rule value maps straight through), so ON = rule true = the
+// thing is off. Word the toast for the effect, not the flag.
+const INVERTED_RULES = new Set(['disableRaids', 'disableElytraMovementCheck']);
+
+/** Build the '<slug>-on' / '<slug>-off' gamerule entries for QUICK_ACTIONS. */
+function ruleToggleActions() {
+  const out = {};
+  for (const [rule, [slug, name]] of Object.entries(RULE_TOGGLES)) {
+    if (INVERTED_RULES.has(rule)) {
+      out[`${slug}-on`] = { rule, value: 'true', label: `${name} disabled` };
+      out[`${slug}-off`] = { rule, value: 'false', label: `${name} enabled` };
+    } else {
+      out[`${slug}-on`] = { rule, value: 'true', label: `${name} ON` };
+      out[`${slug}-off`] = { rule, value: 'false', label: `${name} OFF` };
+    }
+  }
+  return out;
+}
 
 const QUICK_ACTIONS = {
   'time-day': { cmd: ['time', 'set', 'day'], label: 'Time set to day' },
@@ -32,8 +137,10 @@ const QUICK_ACTIONS = {
   'weather-clear': { cmd: ['weather', 'clear'], label: 'Weather cleared' },
   'weather-rain': { cmd: ['weather', 'rain'], label: 'Rain started' },
   'weather-thunder': { cmd: ['weather', 'thunder'], label: 'Thunderstorm started' },
-  'keepinv-on': { rule: 'keepInventory', value: 'true', label: 'Keep inventory ON' },
-  'keepinv-off': { rule: 'keepInventory', value: 'false', label: 'Keep inventory OFF' },
+  // Every boolean gamerule from RULE_TOGGLES as a '<slug>-on' / '<slug>-off' pair.
+  ...ruleToggleActions(),
+  // Overrides for the toggles that need a friendlier or non-gamerule form. These
+  // must come after the spread so they win.
   // 26.x moved the day/night cycle out of gamerules into /time resume|pause.
   'daycycle-on': {
     variants: [
@@ -49,22 +156,9 @@ const QUICK_ACTIONS = {
     ],
     label: 'Day/night cycle FROZEN',
   },
-  'weathercycle-on': { rule: 'doWeatherCycle', value: 'true', label: 'Weather cycle ON' },
   'weathercycle-off': { rule: 'doWeatherCycle', value: 'false', label: 'Weather cycle FROZEN' },
-  'mobgrief-on': { rule: 'mobGriefing', value: 'true', label: 'Mob griefing ON' },
   'mobgrief-off': { rule: 'mobGriefing', value: 'false', label: 'Mob griefing OFF (no creeper holes)' },
-  'mobspawn-on': { rule: 'doMobSpawning', value: 'true', label: 'Mob spawning ON' },
-  'mobspawn-off': { rule: 'doMobSpawning', value: 'false', label: 'Mob spawning OFF' },
-  'firetick-on': { rule: 'doFireTick', value: 'true', label: 'Fire spread ON' },
-  'firetick-off': { rule: 'doFireTick', value: 'false', label: 'Fire spread OFF' },
-  'falldmg-on': { rule: 'fallDamage', value: 'true', label: 'Fall damage ON' },
-  'falldmg-off': { rule: 'fallDamage', value: 'false', label: 'Fall damage OFF' },
-  'naturalregen-on': { rule: 'naturalRegeneration', value: 'true', label: 'Natural regen ON' },
-  'naturalregen-off': { rule: 'naturalRegeneration', value: 'false', label: 'Natural regen OFF' },
-  'phantoms-on': { rule: 'doInsomnia', value: 'true', label: 'Phantoms ON' },
   'phantoms-off': { rule: 'doInsomnia', value: 'false', label: 'Phantoms OFF (no insomnia)' },
-  'instantrespawn-on': { rule: 'doImmediateRespawn', value: 'true', label: 'Instant respawn ON' },
-  'instantrespawn-off': { rule: 'doImmediateRespawn', value: 'false', label: 'Instant respawn OFF' },
   // PvP has no gamerule - it's the server.properties `pvp` value (see below).
   'pvp-on': { prop: 'pvp', value: true, label: 'PvP enabled - applies on restart' },
   'pvp-off': { prop: 'pvp', value: false, label: 'PvP disabled - applies on restart' },
@@ -91,13 +185,32 @@ async function tryVariants(serverId, variants) {
   return out;
 }
 
-async function queryGamerule(serverId, rule) {
-  const out = await tryVariants(serverId, [
-    ['gamerule', GAMERULES[rule]], // 26.x snake_case
-    ['gamerule', rule], // legacy camelCase
-  ]);
+function parseGameruleBool(out) {
   const m = /(?:is currently set to|is):?\s*(true|false)/i.exec(out) || /\b(true|false)\s*$/i.exec(out.trim());
   return m ? m[1].toLowerCase() === 'true' : null;
+}
+
+// spelling: 'snake' | 'camel' to force one form (getState, once it knows the
+// server's era), or undefined to try snake_case then camelCase.
+async function queryGamerule(serverId, rule, spelling) {
+  const snake = ['gamerule', GAMERULES[rule]];
+  const camel = ['gamerule', rule];
+  if (spelling) return parseGameruleBool(await rcon(serverId, spelling === 'snake' ? snake : camel));
+  return parseGameruleBool(await tryVariants(serverId, [snake, camel]));
+}
+
+/** Run fn over items at most `limit` at a time; resolves to the results array. */
+async function mapLimit(items, limit, fn) {
+  const results = new Array(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      results[i] = await fn(items[i]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
 }
 
 async function setGamerule(serverId, rule, value) {
@@ -189,10 +302,21 @@ async function getState(serverId) {
       /* clock still works without a day count */
     }
   }
-  for (const rule of Object.keys(GAMERULES)) {
-    const value = await queryGamerule(serverId, rule);
-    if (value !== null) state[rule] = value;
-  }
+  // ~40 gamerules would be ~80 sequential RCON round trips per poll if every one
+  // tried both spellings. Probe the first rule with both, learn the server's era,
+  // then fan the rest out concurrently (small pool - don't flood the daemon).
+  const rules = Object.keys(GAMERULES);
+  const first = rules[0];
+  const firstSnake = await rcon(serverId, ['gamerule', GAMERULES[first]]);
+  const spelling = looksLikeError(firstSnake) ? 'camel' : 'snake';
+  const firstVal =
+    spelling === 'snake' ? parseGameruleBool(firstSnake) : await queryGamerule(serverId, first, 'camel');
+  if (firstVal !== null) state[first] = firstVal;
+  const rest = rules.slice(1);
+  const values = await mapLimit(rest, 6, (rule) => queryGamerule(serverId, rule, spelling));
+  rest.forEach((rule, i) => {
+    if (values[i] !== null) state[rule] = values[i];
+  });
   state.pvp = readPvp(serverId); // from server.properties - the pending/effective value
   return state;
 }
