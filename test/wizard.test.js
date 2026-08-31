@@ -44,8 +44,8 @@ test('chatbot configuration and transcripts are admin-only', async () => {
   assert.equal((await app.req('GET', `/api/servers/${serverId}/wizard`, { cookie: adminCookie })).status, 200);
   assert.equal((await app.req('GET', '/wizard-transcripts', { cookie: adminCookie })).status, 200);
 
-  const adminPage = await app.req('GET', `/servers/${serverId}/integrations`, { cookie: adminCookie });
-  const operatorPage = await app.req('GET', `/servers/${serverId}/integrations`, { cookie: operatorCookie });
+  const adminPage = await app.req('GET', `/servers/${serverId}/chatbot`, { cookie: adminCookie });
+  const operatorPage = await app.req('GET', `/servers/${serverId}/chatbot`, { cookie: operatorCookie });
   assert.match(adminPage.text, /Chatbot settings/);
   assert.match(adminPage.text, /Basic users/);
   assert.match(adminPage.text, /Refresh this server's transcripts/);

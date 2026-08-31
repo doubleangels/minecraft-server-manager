@@ -1,5 +1,6 @@
 <div class="grid gap-4 lg:grid-cols-2" id="ig-root" data-server-id="{{server.id}}" data-invite="{{json integrations.invite}}">
 
+  {{#if (eq sub 'chatbot')}}
   {{#if integrations.wizard}}
   <div class="card p-4 lg:col-span-2" id="ig-wizard">
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -145,9 +146,15 @@
     <div class="mt-4 hidden max-h-80 overflow-auto rounded-md border border-line bg-inset p-3 text-xs" id="ig-wz-transcript-list"></div>
     <div class="mt-4 hidden max-h-80 overflow-auto rounded-md border border-line bg-inset p-3 text-xs" id="ig-wz-power-audit-list"></div>
   </div>
+  {{else}}
+  <div class="card p-6 text-center text-sm text-ink-faint lg:col-span-2">
+    Chatbot configuration is visible only to admins.
+  </div>
+  {{/if}}
   {{/if}}
 
-  <div class="card p-4">
+  {{#if (eq sub 'discord')}}
+  <div class="card p-4 lg:col-span-2">
     <div class="mb-4 flex items-center justify-between gap-3">
       <h3 class="flex items-center gap-2 font-semibold">{{{icon 'webhook' 'size-4 text-link'}}} Discord Notifications</h3>
       <span class="msm-toggle"><input type="checkbox" id="ig-dc-enabled" {{#if integrations.discord.enabled}}checked{{/if}}><span></span></span>
@@ -187,8 +194,10 @@
       </div>
     </div>
   </div>
+  {{/if}}
 
-  <div class="card p-4">
+  {{#if (eq sub 'status-page')}}
+  <div class="card p-4 lg:col-span-2">
     <div class="mb-4 flex items-center justify-between gap-3">
       <h3 class="flex items-center gap-2 font-semibold">{{{icon 'globe' 'size-4 text-ok'}}} Public Status Page</h3>
       <span class="msm-toggle"><input type="checkbox" id="ig-sp-enabled" {{#if integrations.statusPage.enabled}}checked{{/if}}><span></span></span>
@@ -214,7 +223,9 @@
       </div>
     </div>
   </div>
+  {{/if}}
 
+  {{#if (eq sub 'invites')}}
   <div class="card p-4 lg:col-span-2">
     <h3 class="mb-4 flex items-center gap-2 font-semibold">{{{icon 'send' 'size-4 text-warn'}}} Invite Friends</h3>
     <div class="grid gap-4 lg:grid-cols-2">
@@ -276,6 +287,7 @@
       </div>
     </div>
   </div>
+  {{/if}}
 </div>
 
 <script type="module" src="/js/pages/integrations.js"></script>

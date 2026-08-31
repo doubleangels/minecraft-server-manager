@@ -32,41 +32,52 @@ const SERVER_TABS = [
   'overview',
   'console',
   'chat',
-  'players',
   'commands',
+  'players',
   'inventory',
+  'analytics',
   'mods',
   'map',
   'files',
   'worlds',
   'backups',
   'history',
-  'analytics',
   'metrics',
-  'integrations',
   'settings',
+  'discord',
+  'status-page',
+  'invites',
+  'chatbot',
 ];
 
-// Two-level information architecture: the 15 tabs are grouped into a handful of
-// domain sections (top nav), each with a sub-nav of related sections. Inventory is
-// not a top tab any more - it lives per-player on the player page. All existing
-// routes still work; only the navigation is reorganized.
+// Two-level information architecture: the tabs are grouped into a handful of
+// domain sections (top nav), each with a sub-nav of related sections. Grouped by
+// user intent: Console is everything you say to / automate on the running
+// server; Players is only about people; World is world-scoped; Settings holds
+// the per-integration pages. All existing routes still work (see the
+// /integrations redirect below); only the navigation is reorganized.
 const TAB_GROUPS = [
   { key: 'overview', label: 'Overview', icon: 'layout-dashboard', tabs: ['overview'] },
-  { key: 'console', label: 'Console', icon: 'terminal', tabs: ['console', 'chat'] },
-  { key: 'players', label: 'Players', icon: 'users', tabs: ['players', 'inventory', 'analytics', 'commands'] },
-  { key: 'world', label: 'World', icon: 'earth', tabs: ['worlds', 'mods', 'map', 'files'] },
+  { key: 'console', label: 'Console', icon: 'terminal', tabs: ['console', 'chat', 'commands'] },
+  { key: 'players', label: 'Players', icon: 'users', tabs: ['players', 'inventory', 'analytics'] },
+  { key: 'mods', label: 'Mods', icon: 'puzzle', tabs: ['mods'] },
+  { key: 'world', label: 'World', icon: 'earth', tabs: ['worlds', 'map', 'files'] },
   { key: 'backups', label: 'Backups', icon: 'archive', tabs: ['backups'] },
-  { key: 'insights', label: 'Insights', icon: 'activity', tabs: ['metrics', 'history'] },
-  { key: 'settings', label: 'Settings', icon: 'settings', tabs: ['settings', 'integrations'] },
+  { key: 'monitoring', label: 'Monitoring', icon: 'activity', tabs: ['history', 'metrics'] },
+  {
+    key: 'settings',
+    label: 'Settings',
+    icon: 'settings',
+    tabs: ['settings', 'discord', 'status-page', 'invites', 'chatbot'],
+  },
 ];
 const SUB_LABELS = {
   console: 'Console',
   chat: 'Chat',
+  commands: 'Commands',
   players: 'Roster',
   inventory: 'Inventory',
   analytics: 'Stats',
-  commands: 'Chat Commands',
   worlds: 'Worlds',
   mods: 'Mods',
   map: 'Map',
@@ -74,11 +85,16 @@ const SUB_LABELS = {
   metrics: 'Metrics',
   history: 'History',
   settings: 'Configuration',
-  integrations: 'Integrations',
+  discord: 'Discord',
+  'status-page': 'Status Page',
+  invites: 'Invites',
+  chatbot: 'Chatbot',
 };
+// Sub-nav entries only shown to admins (the API 403s these for other roles).
+const ADMIN_ONLY_TABS = new Set(['chatbot']);
 
 /** Build the two-level nav (top groups + contextual sub-nav) for a given active tab. */
-function buildNav(id, tab, server) {
+function buildNav(id, tab, server, { isAdmin = false } = {}) {
   const crashes = server && server.crashesUnread;
   const group = TAB_GROUPS.find((g) => g.tabs.includes(tab)) || TAB_GROUPS[0];
   const groups = TAB_GROUPS.map((g) => ({
@@ -88,9 +104,10 @@ function buildNav(id, tab, server) {
     active: g.key === group.key,
     badge: g.tabs.includes('history') && crashes ? crashes : null,
   }));
+  const visibleSubTabs = group.tabs.filter((t) => isAdmin || !ADMIN_ONLY_TABS.has(t));
   const sub =
-    group.tabs.length > 1
-      ? group.tabs.map((t) => ({
+    visibleSubTabs.length > 1
+      ? visibleSubTabs.map((t) => ({
           label: SUB_LABELS[t] || t,
           href: `/servers/${id}/${t}`,
           active: t === tab,
@@ -246,11 +263,17 @@ router.get(
       active: 'servers',
       server,
       tab: 'players',
-      nav: buildNav(row.id, 'players', server),
+      nav: buildNav(row.id, 'players', server, { isAdmin: req.user.role === 'admin' }),
       player,
     });
   })
 );
+
+// Back-compat: the old single Integrations tab is now four per-integration
+// pages under Settings. Land on the first one.
+router.get('/servers/:id/integrations', (req, res) => {
+  res.redirect(302, `/servers/${req.params.id}/discord`);
+});
 
 router.get(
   '/servers/:id{/:tab}',
@@ -274,7 +297,7 @@ router.get(
       server,
       tab,
       tabs: SERVER_TABS,
-      nav: buildNav(row.id, tab, server),
+      nav: buildNav(row.id, tab, server, { isAdmin: req.user.role === 'admin' }),
       mods: [],
       backups: [],
       worlds: [],
@@ -413,17 +436,22 @@ router.get(
             .filter((f) => f.scope === 'env' && !(s.id === 'gameplay' && EXCLUDED_GAMEPLAY_KEYS.has(f.key))),
         }))
         .filter((s) => s.fields.length);
-    } else if (tab === 'integrations') {
-      context.integrations = {
-        discord: require('../../integrations/discord').getConfig(row.id),
-        statusPage: require('../../integrations/statusPage').getStatusPage(row.id),
-        invite: await require('../../integrations/invites')
+    } else if (tab === 'discord' || tab === 'status-page' || tab === 'invites' || tab === 'chatbot') {
+      // Each integration is its own page now; hydrate only the slice it needs.
+      // integrations.hbs switches on `sub` and renders exactly one card.
+      context.integrationsSub = tab;
+      context.integrations = {};
+      if (tab === 'discord') {
+        context.integrations.discord = require('../../integrations/discord').getConfig(row.id);
+      } else if (tab === 'status-page') {
+        context.integrations.statusPage = require('../../integrations/statusPage').getStatusPage(row.id);
+      } else if (tab === 'invites') {
+        context.integrations.invite = await require('../../integrations/invites')
           .inviteInfo(row.id)
-          .catch(() => null),
-      };
-      // Chatbot endpoint/model/prompt and transcript controls are admin-only.
-      // Do not even hydrate them into a non-admin render context.
-      if (req.user.role === 'admin') {
+          .catch(() => null);
+      } else if (tab === 'chatbot' && req.user.role === 'admin') {
+        // Chatbot endpoint/model/prompt and transcript controls are admin-only.
+        // Do not even hydrate them into a non-admin render context.
         context.integrations.wizard = require('../../services/wizard').getConfig(row.id);
       }
     } else if (tab === 'players') {

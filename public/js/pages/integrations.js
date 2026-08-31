@@ -1,4 +1,7 @@
-// Integrations tab: Discord webhook config, invite helper, public status page.
+// Integrations pages (under Settings): Discord webhook config, invite helper,
+// public status page, and chatbot settings. Each renders as its own page now,
+// so every DOM lookup below is guarded - a section that isn't on the current
+// page simply gets no handlers wired.
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { setBusy, withBusy } from '../lib/loading.js';
