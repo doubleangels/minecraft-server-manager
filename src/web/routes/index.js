@@ -334,6 +334,8 @@ router.get(
       context.mods = await require('../../services/mods')
         .listContent(row.id)
         .catch(() => []);
+      // Toggles the "Update all" toolbar button (ignored updates don't count).
+      context.hasModUpdates = context.mods.some((m) => m.updateAvailable);
       // Same gate as the wizard: CurseForge search/import needs the stored key.
       try {
         context.curseforgeEnabled = Boolean(require('../../services/apiKeys').getKey('curseforge'));

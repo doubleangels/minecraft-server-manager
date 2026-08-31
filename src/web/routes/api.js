@@ -1252,6 +1252,17 @@ router.use('/servers/:id/items', require('./items'));
 // ---- Mods manager ----
 const mods = require('../../services/mods');
 
+// Applying a mod update only swaps the jar on disk; the running JVM keeps the
+// old classes until the server restarts. Restart only when it's actually up -
+// a stopped server picks the new jars up on its next start.
+const MOD_RESTART_STATES = new Set(['running', 'starting', 'unhealthy', 'stalled']);
+async function restartAfterModUpdate(serverId, actor) {
+  const server = servers.getServer(serverId);
+  if (!server || !MOD_RESTART_STATES.has(server.status)) return false;
+  await servers.restartServer(serverId, { actor });
+  return true;
+}
+
 router.get(
   '/servers/:id/mods',
   asyncHandler(async (req, res, next) => {
@@ -1292,7 +1303,8 @@ router.post(
 // Update one overlay mod to its latest checked version. Accepts the
 // installed filename ({file}) or the server_content row id ({contentId}).
 // Re-downloads through the platform (pinned to the checked version id),
-// replaces the old file and preserves the enabled/disabled state.
+// replaces the old file, preserves the enabled/disabled state, then restarts
+// the server if it was running so the new jar is actually loaded.
 router.post(
   '/servers/:id/mods/update',
   asyncHandler(async (req, res, next) => {
@@ -1306,51 +1318,83 @@ router.post(
     const server = requireServer(req.params.id);
     const actor = req.user.username;
 
-    const row = contentId
-      ? db.get('SELECT * FROM server_content WHERE id = ? AND server_id = ?', contentId, server.id)
-      : db.get('SELECT * FROM server_content WHERE server_id = ? AND filename = ?', server.id, file);
-    if (!row)
-      throw Object.assign(new Error('This file is not panel-managed - reinstall it from a URL instead'), {
-        status: 404,
-      });
-    if (row.managed_by === 'pack') {
-      throw Object.assign(new Error('Pack-managed content updates with the pack - upgrade the modpack instead'), {
-        status: 409,
-      });
-    }
-    const lib = row.library_id ? db.get('SELECT * FROM library_files WHERE id = ?', row.library_id) : null;
-    if (!lib || !lib.project_id) {
-      throw Object.assign(new Error('No update source is known for this mod (installed from a direct URL or upload)'), {
-        status: 409,
-      });
-    }
-    const check = db.get("SELECT * FROM update_checks WHERE subject_type = 'content' AND subject_id = ?", row.id);
-    if (!check || !check.latest_version) {
-      throw Object.assign(new Error('No newer version is known - run an update check first'), { status: 409 });
-    }
-
-    let ref;
-    if (lib.platform === 'modrinth') {
-      ref = `https://modrinth.com/mod/${lib.project_id}/version/${check.latest_version}`;
-    } else if (lib.platform === 'curseforge') {
-      ref = `https://www.curseforge.com/minecraft/mc-mods/${lib.project_id}/files/${check.latest_version}`;
-    } else {
-      throw Object.assign(new Error(`Cannot auto-update content from platform "${lib.platform}"`), { status: 409 });
-    }
-
-    const wasEnabled = Boolean(row.enabled);
-    await mods.removeContent(server.id, row.filename, { actor });
-    const result = await mods.installFromUrl(server.id, ref, { actor, kind: row.kind });
-    if (!wasEnabled) await mods.setEnabled(server.id, result.filename, false, { actor });
+    const result = await mods.applyOverlayUpdate(server.id, { file, contentId }, { actor });
+    const restarted = await restartAfterModUpdate(server.id, actor);
     res.json({
       ok: true,
+      restarted,
       installed: {
-        name: result.library.name,
+        name: result.name,
         filename: result.filename,
-        version: result.library.version,
-        enabled: wasEnabled,
+        version: result.version,
+        enabled: result.wasEnabled,
       },
     });
+  })
+);
+
+// Ignore / un-ignore the currently-offered update for one overlay mod. An
+// ignored build stops showing on the mods tab, the Updates page and the
+// sidebar count; a later, genuinely newer build re-surfaces on its own.
+router.post(
+  '/servers/:id/mods/ignore-update',
+  asyncHandler(async (req, res, next) => {
+    const { file, contentId, ignore } = z
+      .object({
+        file: z.string().min(1).max(200).optional(),
+        contentId: z.string().trim().max(40).optional(),
+        ignore: z.boolean(),
+      })
+      .refine((v) => Boolean(v.file) || Boolean(v.contentId), { message: 'Provide file or contentId' })
+      .parse(req.body);
+    const server = requireServer(req.params.id);
+    const out = mods.setIgnoredUpdate(server.id, { file, contentId }, { ignore, actor: req.user.username });
+    res.json({ ok: true, ...out });
+  })
+);
+
+// Apply every non-ignored overlay-mod update for this server, then restart it
+// once (if it was running). Long operation - returns {ok, taskId}; the task
+// result is { updated, failed, restarted }.
+router.post(
+  '/servers/:id/mods/update-all',
+  asyncHandler((req, res, next) => {
+    const server = requireServer(req.params.id);
+    const actor = req.user.username;
+    const taskId = tasks.run(
+      `Updating mods on ${server.display_name}`,
+      { serverId: server.id, actor },
+      async (t) => {
+        const rows = db.all(
+          `SELECT sc.id, sc.name
+             FROM server_content sc
+             JOIN library_files lf ON lf.id = sc.library_id
+             JOIN update_checks uc ON uc.subject_type = 'content' AND uc.subject_id = sc.id
+            WHERE sc.server_id = ? AND sc.managed_by = 'overlay' AND lf.project_id IS NOT NULL
+              AND uc.latest_name IS NOT NULL AND uc.latest_name != sc.version
+              AND (sc.ignored_update_version IS NULL OR sc.ignored_update_version != uc.latest_name)`,
+          server.id
+        );
+        const updated = [];
+        const failed = [];
+        for (const row of rows) {
+          t.step(`Updating ${row.name}`);
+          try {
+            const r = await mods.applyOverlayUpdate(server.id, { contentId: row.id }, { actor });
+            updated.push({ name: r.name, version: r.version });
+          } catch (err) {
+            failed.push({ name: row.name, error: err.message });
+          }
+        }
+        let restarted = false;
+        if (updated.length) {
+          t.step('Restarting server');
+          restarted = await restartAfterModUpdate(server.id, actor);
+        }
+        return { updated, failed, restarted };
+      }
+    );
+    res.status(202).json({ ok: true, taskId });
   })
 );
 

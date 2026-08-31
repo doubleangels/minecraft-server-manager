@@ -156,10 +156,21 @@ async function listContent(serverId) {
   }
   // latest_name is only set when the checker saw a genuinely newer build;
   // compare name-to-name (latest_version holds the platform id, not a name).
-  const updateAvailableFor = (row) => {
+  // A row whose ignored_update_version matches the pending build is treated as
+  // up to date here (no badge, no bulk apply) but still reported via
+  // updateIgnoredFor so the UI can show it and offer "un-ignore".
+  const pendingUpdateFor = (row) => {
     if (!row) return null;
     const check = updateChecks.get(row.id);
     return check && check.latest_name && check.latest_name !== row.version ? check.latest_name : null;
+  };
+  const updateAvailableFor = (row) => {
+    const pending = pendingUpdateFor(row);
+    return pending && pending !== row.ignored_update_version ? pending : null;
+  };
+  const updateIgnoredFor = (row) => {
+    const pending = pendingUpdateFor(row);
+    return pending && pending === row.ignored_update_version ? pending : null;
   };
 
   // Datapacks and resource packs work on every server type (vanilla included),
@@ -197,6 +208,7 @@ async function listContent(serverId) {
         iconUrl:
           lib && lib.icon_rel_path ? `/${lib.icon_rel_path}` : (lib && lib.icon_url) || (row && row.icon_url) || null,
         updateAvailable: updateAvailableFor(row),
+        updateIgnored: updateIgnoredFor(row),
         // Provenance, when known - lets search UIs badge already-installed hits.
         platform: (lib && lib.platform) || null,
         projectId: (lib && lib.project_id) || null,
@@ -529,6 +541,98 @@ async function removeContent(serverId, file, { actor = 'system' } = {}) {
   return { freedBytes: freed };
 }
 
+/** Resolve an overlay content row by row id or installed filename. */
+function overlayRow(serverId, { file, contentId }) {
+  const row = contentId
+    ? db.get('SELECT * FROM server_content WHERE id = ? AND server_id = ?', contentId, serverId)
+    : db.get('SELECT * FROM server_content WHERE server_id = ? AND filename = ?', serverId, file);
+  if (!row) throw httpError(404, 'This file is not panel-managed - reinstall it from a URL instead');
+  if (row.managed_by === 'pack') {
+    throw httpError(409, 'Pack-managed content updates with the pack - upgrade the modpack instead');
+  }
+  return row;
+}
+
+/**
+ * Ignore (or un-ignore) the currently-offered update for one overlay mod.
+ * Ignoring pins the pending version name so it stops surfacing on the mods
+ * tab, the Updates page, and the sidebar count; a later, genuinely newer
+ * build re-surfaces on its own. `ignore: false` clears it.
+ */
+function setIgnoredUpdate(serverId, { file, contentId }, { ignore, actor = 'system' } = {}) {
+  const server = serversService.getServer(serverId);
+  if (!server) throw httpError(404, 'Server not found');
+  const row = overlayRow(serverId, { file, contentId });
+
+  if (ignore) {
+    const check = db.get(
+      "SELECT * FROM update_checks WHERE subject_type = 'content' AND subject_id = ?",
+      row.id
+    );
+    if (!check || !check.latest_name || check.latest_name === row.version) {
+      throw httpError(409, 'No pending update to ignore - run an update check first');
+    }
+    db.run('UPDATE server_content SET ignored_update_version = ? WHERE id = ?', check.latest_name, row.id);
+    recordEvent({
+      serverId,
+      actor,
+      type: 'mod-update-ignored',
+      summary: `Update ignored for ${row.name}: ${check.latest_name} will not be offered`,
+    });
+    return { ignored: check.latest_name };
+  }
+
+  db.run('UPDATE server_content SET ignored_update_version = NULL WHERE id = ?', row.id);
+  recordEvent({
+    serverId,
+    actor,
+    type: 'mod-update-unignored',
+    summary: `Update no longer ignored for ${row.name}`,
+  });
+  return { ignored: null };
+}
+
+/**
+ * Apply the latest checked update to one overlay mod: re-download the pinned
+ * build through its platform, swap the old file, keep the enabled/disabled
+ * state. Shared by the single-mod update route and the bulk "Update all" task.
+ * Does NOT restart the server - the caller decides that.
+ */
+async function applyOverlayUpdate(serverId, { file, contentId }, { actor = 'system' } = {}) {
+  const server = serversService.getServer(serverId);
+  if (!server) throw httpError(404, 'Server not found');
+  const row = overlayRow(serverId, { file, contentId });
+
+  const lib = row.library_id ? db.get('SELECT * FROM library_files WHERE id = ?', row.library_id) : null;
+  if (!lib || !lib.project_id) {
+    throw httpError(409, 'No update source is known for this mod (installed from a direct URL or upload)');
+  }
+  const check = db.get("SELECT * FROM update_checks WHERE subject_type = 'content' AND subject_id = ?", row.id);
+  if (!check || !check.latest_version) {
+    throw httpError(409, 'No newer version is known - run an update check first');
+  }
+
+  let ref;
+  if (lib.platform === 'modrinth') {
+    ref = `https://modrinth.com/mod/${lib.project_id}/version/${check.latest_version}`;
+  } else if (lib.platform === 'curseforge') {
+    ref = `https://www.curseforge.com/minecraft/mc-mods/${lib.project_id}/files/${check.latest_version}`;
+  } else {
+    throw httpError(409, `Cannot auto-update content from platform "${lib.platform}"`);
+  }
+
+  const wasEnabled = Boolean(row.enabled);
+  await removeContent(serverId, row.filename, { actor });
+  const result = await installFromUrl(serverId, ref, { actor, kind: row.kind });
+  if (!wasEnabled) await setEnabled(serverId, result.filename, false, { actor });
+  return {
+    name: result.library.name,
+    filename: result.filename,
+    version: result.library.version,
+    wasEnabled,
+  };
+}
+
 /** Re-apply the overlay after a pack install/update (belt-and-braces). */
 async function reapplyOverlay(serverId, { actor = 'system' } = {}) {
   const server = serversService.getServer(serverId);
@@ -763,6 +867,8 @@ module.exports = {
   classifyModSource,
   setEnabled,
   removeContent,
+  setIgnoredUpdate,
+  applyOverlayUpdate,
   reapplyOverlay,
   contentDir,
   contentKindOf,

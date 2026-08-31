@@ -63,8 +63,29 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
       const res = await withBusy(btn, 'Updating…', () => post(`/api/servers/${serverId}/mods/update`, { file }));
       if (res) {
         const inst = res.installed || {};
-        toast(`Updated to ${inst.name || file}${inst.version ? ` ${inst.version}` : ''}.`);
+        toast(
+          `Updated to ${inst.name || file}${inst.version ? ` ${inst.version}` : ''}.` +
+            (res.restarted ? ' Restarting the server.' : '')
+        );
         setTimeout(() => location.reload(), 700);
+      }
+    } else if (e.target.closest('[data-mod-ignore-update]')) {
+      const btn = e.target.closest('[data-mod-ignore-update]');
+      const res = await withBusy(btn, () =>
+        post(`/api/servers/${serverId}/mods/ignore-update`, { file, ignore: true })
+      );
+      if (res) {
+        toast(`Update ignored for ${row.dataset.name || file}.`, { kind: 'success' });
+        setTimeout(() => location.reload(), 600);
+      }
+    } else if (e.target.closest('[data-mod-unignore-update]')) {
+      const btn = e.target.closest('[data-mod-unignore-update]');
+      const res = await withBusy(btn, () =>
+        post(`/api/servers/${serverId}/mods/ignore-update`, { file, ignore: false })
+      );
+      if (res) {
+        toast(`Update no longer ignored for ${row.dataset.name || file}.`, { kind: 'success' });
+        setTimeout(() => location.reload(), 600);
       }
     } else if (e.target.closest('[data-mod-toggle]')) {
       const btn = e.target.closest('[data-mod-toggle]');
@@ -583,6 +604,40 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
     }
   }
   document.getElementById('mods-search')?.addEventListener('click', () => openModSearch({ allowDatapacks: true }));
+
+  // ---- Update all: apply every non-ignored overlay update, then one restart ----
+  document.getElementById('mods-update-all')?.addEventListener('click', async () => {
+    const pending = document.querySelectorAll('#mods-table [data-mod-update]').length;
+    const ok = await confirmDialog({
+      title: 'Update all mods?',
+      message: `Applies ${pending} available update${pending === 1 ? '' : 's'}, then restarts the server once if it is running. Ignored updates are skipped.`,
+      confirmLabel: 'Update all',
+    });
+    if (!ok) return;
+    let result;
+    try {
+      result = await runTask({
+        title: 'Updating mods',
+        start: async () => {
+          const res = await post(`/api/servers/${serverId}/mods/update-all`, {});
+          if (!res) throw Object.assign(new Error('Update failed to start'), { dismissed: true });
+          return res.taskId;
+        },
+      });
+    } catch (err) {
+      if (!err.dismissed) toast(err.message, { kind: 'error', timeout: 9000 });
+      return;
+    }
+    const updated = (result && result.updated) || [];
+    const failed = (result && result.failed) || [];
+    toast(
+      `Updated ${updated.length} mod${updated.length === 1 ? '' : 's'}` +
+        (failed.length ? `, ${failed.length} failed` : '') +
+        (result && result.restarted ? ' — server restarting.' : '.'),
+      { kind: failed.length ? 'warn' : 'success', timeout: failed.length ? 9000 : 5000 }
+    );
+    setTimeout(() => location.reload(), 900);
+  });
 
   // ---- Manual-download resolver: MODS_NEED_DOWNLOAD.txt → guided actions ----
   const pendingBox = document.getElementById('mods-pending');

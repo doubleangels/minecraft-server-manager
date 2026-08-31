@@ -7,6 +7,9 @@
     </select>
     {{/if}}
     <div class="ml-auto flex flex-wrap gap-2">
+      {{#if hasModUpdates}}
+      <button class="btn btn-sm text-warn" id="mods-update-all" data-tip="Apply every available update, then restart the server once">{{{icon 'circle-arrow-up' 'size-3.5'}}} Update all</button>
+      {{/if}}
       <button class="btn btn-sm" id="mods-search">{{{icon 'search' 'size-3.5'}}} Search mods</button>
       <button class="btn btn-sm" id="mods-import-zip" data-tip="CurseForge modpack export or any zip of mod jars">{{{icon 'archive' 'size-3.5'}}} Import zip</button>
       <button class="btn btn-primary btn-sm" id="mods-add-url">{{{icon 'plus' 'size-3.5'}}} Add by URL</button>
@@ -63,6 +66,7 @@
             <td>
               {{default version '-'}}
               {{#if updateAvailable}}<span class="badge badge-warn ml-1" data-tip="Update available">→ {{updateAvailable}}</span>{{/if}}
+              {{#if updateIgnored}}<span class="badge ml-1 text-ink-faint" data-tip="This update is ignored and won't be applied">ignored → {{updateIgnored}}</span>{{/if}}
             </td>
             <td class="text-right text-ink-faint">{{bytes size}}</td>
             <td>
@@ -77,7 +81,11 @@
             <td class="text-right">
               <div class="inline-flex gap-1">
                 {{#if updateAvailable}}
-                  <button class="btn btn-ghost btn-sm text-warn" data-mod-update data-tip="Update to {{updateAvailable}}">{{{icon 'circle-arrow-up' 'size-3.5'}}} Update</button>
+                  <button class="btn btn-ghost btn-sm text-warn" data-mod-update data-tip="Update to {{updateAvailable}}, then restart the server">{{{icon 'circle-arrow-up' 'size-3.5'}}} Update</button>
+                  <button class="btn btn-ghost btn-sm" data-mod-ignore-update data-tip="Stop offering {{updateAvailable}}">{{{icon 'bell-off' 'size-3.5'}}} Ignore</button>
+                {{/if}}
+                {{#if updateIgnored}}
+                  <button class="btn btn-ghost btn-sm" data-mod-unignore-update data-tip="Offer {{updateIgnored}} again">{{{icon 'bell' 'size-3.5'}}} Un-ignore</button>
                 {{/if}}
                 {{#unless missing}}
                   <button class="btn btn-ghost btn-sm" data-mod-toggle data-tip="{{#if (eq source 'pack')}}Pack mods take effect on the next restart.{{else}}Takes effect instantly.{{/if}}">{{#if enabled}}Disable{{else}}Enable{{/if}}</button>

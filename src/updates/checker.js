@@ -112,7 +112,9 @@ async function checkAll({ actor = 'scheduler' } = {}) {
             latestName: latest.name,
             changelogUrl: isNew ? changelogUrl : null,
           });
-          if (isNew)
+          // Cache stays accurate above so "un-ignore" needs no re-check; only
+          // keep an ignored build out of the findings notification.
+          if (isNew && latest.name !== row.ignored_update_version)
             findings.push({
               server: server.display_name,
               kind: 'mod',
@@ -316,8 +318,9 @@ function listOutdated() {
         `SELECT sc.*, s.display_name, s.id AS sid FROM server_content sc JOIN servers s ON s.id = sc.server_id AND s.deleted_at IS NULL WHERE sc.id = ?`,
         c.subject_id
       );
-      // Name-to-name: skip rows the user already updated since the last check.
-      if (row && c.latest_name && c.latest_name !== row.version) {
+      // Name-to-name: skip rows the user already updated since the last check,
+      // and rows whose pending build the user chose to ignore.
+      if (row && c.latest_name && c.latest_name !== row.version && c.latest_name !== row.ignored_update_version) {
         rows.push({
           serverId: row.sid,
           server: row.display_name,
@@ -405,7 +408,8 @@ function countOutdated() {
          JOIN server_content sc ON sc.id = c.subject_id
          JOIN servers s ON s.id = sc.server_id AND s.deleted_at IS NULL
          WHERE c.subject_type = 'content' AND c.latest_version IS NOT NULL
-           AND c.latest_name IS NOT NULL AND c.latest_name != sc.version)
+           AND c.latest_name IS NOT NULL AND c.latest_name != sc.version
+           AND (sc.ignored_update_version IS NULL OR sc.ignored_update_version != c.latest_name))
       +
       (SELECT COUNT(*) FROM update_checks c
          JOIN servers s ON s.id = c.subject_id AND s.deleted_at IS NULL
