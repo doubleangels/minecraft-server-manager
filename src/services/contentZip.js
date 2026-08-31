@@ -303,8 +303,11 @@ async function applyOverridesTo(serverId, zipPath, overridesPrefix, { actor = 's
   if (totalBytes > MAX_OVERRIDE_BYTES) throw httpError(413, 'Overrides tree is too large');
 
   // Reversibility first: copy aside everything the extraction would replace.
+  // backupRel is a POSIX-style path on purpose: it's reported to callers, stored
+  // in the history event, and compared against '/'-separated zip entry names
+  // below - path.join would use '\' on Windows and break all three.
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const backupRel = path.join('.import-backups', stamp);
+  const backupRel = `.import-backups/${stamp}`;
   const backupDir = path.join(serverDir, backupRel);
   let backedUp = 0;
   for (const e of overrideFiles) {
