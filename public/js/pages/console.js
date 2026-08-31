@@ -51,11 +51,17 @@ function init(serverId) {
   // The panel opens a short-lived RCON connection every poll cycle, so the
   // server logs this pair of lines every ~20s. They classify as INFO, so the
   // level checkboxes can't isolate them - hence a dedicated toggle. Kept tight
-  // so panel-issued "[rcon]: …" command output is never matched.
+  // so panel-issued "[rcon]: …" command output is never matched. The last entry
+  // catches the plugin echo ("[Essentials] Rcon issued server command: /…", and
+  // the plain "[Server] …" core variant) for the read-only polls the panel runs
+  // on a timer: `list` for player counts, and `time query …` / bare `gamerule
+  // <name>` reads while the World Controls page is open. Scoped to those forms
+  // so a state-changing command you type (time set, gamerule x true, …) shows.
   const RCON_NOISE = [
     /Thread RCON Client\b.*\b(started|shutting down)\b/i,
     /Thread RCON Listener started\b/i,
     /\bRCON running on \b/i,
+    /Rcon issued server command:\s*\/?(list|time query \w+|gamerule \S+)\s*$/i,
   ];
   let hideRconNoise = true;
   try {

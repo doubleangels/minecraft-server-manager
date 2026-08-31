@@ -10,7 +10,7 @@ The **Console** tab streams the server log in real time and gives you a command 
 
 The console is also where the panel reads the server's state: it watches the log to classify the boot phase ("Loading mods", "Generating world", "Finishing startup") and calls `list` to track who's online, so the dashboard and server cards always reflect reality.
 
-That polling opens a short-lived RCON connection every cycle, which the server logs as a `Thread RCON Client … started` / `shutting down` pair every ~20 seconds. The **Hide RCON noise** toggle above the log filters those lines out (along with the RCON listener startup lines). It's on by default and remembered per browser; turn it off to see the raw stream.
+That polling opens a short-lived RCON connection every cycle, which the server logs as a `Thread RCON Client … started` / `shutting down` pair every ~20 seconds, and (on servers whose core or plugins echo it) a `Rcon issued server command: …` line for each read-only poll - `list` for player counts, plus `time query …` and `gamerule <name>` reads while the World Controls page is open. The **Hide RCON noise** toggle above the log filters those lines out (along with the RCON listener startup lines). It's on by default and remembered per browser; turn it off to see the raw stream.
 
 Commands sent from the panel can be announced in-game under a per-server label, so players know an operator acted rather than a mystery console.
 
