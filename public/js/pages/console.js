@@ -48,6 +48,22 @@ function init(serverId) {
   const filters = { INFO: true, WARN: true, ERROR: true };
   const filterInput = document.getElementById('console-filter');
 
+  // The panel opens a short-lived RCON connection every poll cycle, so the
+  // server logs this pair of lines every ~20s. They classify as INFO, so the
+  // level checkboxes can't isolate them - hence a dedicated toggle. Kept tight
+  // so panel-issued "[rcon]: …" command output is never matched.
+  const RCON_NOISE = [
+    /Thread RCON Client\b.*\b(started|shutting down)\b/i,
+    /Thread RCON Listener started\b/i,
+    /\bRCON running on \b/i,
+  ];
+  let hideRconNoise = true;
+  try {
+    hideRconNoise = localStorage.getItem('msm-console-hide-rcon') !== '0';
+  } catch {
+    /* private mode / storage disabled - keep the default */
+  }
+
   function classify(text) {
     if (/\/(ERROR|FATAL)\]/.test(text)) return 'ERROR';
     if (/\/WARN\]/.test(text)) return 'WARN';
@@ -140,7 +156,8 @@ function init(serverId) {
         match = el.textContent.toLowerCase().includes(q.toLowerCase());
       }
     }
-    el.classList.toggle('hidden', !filters[el.dataset.level] || !match);
+    const noisy = hideRconNoise && RCON_NOISE.some((re) => re.test(el.textContent));
+    el.classList.toggle('hidden', !filters[el.dataset.level] || !match || noisy);
   }
 
   function refilter() {
@@ -230,6 +247,23 @@ function init(serverId) {
       refilter();
     });
   });
+
+  const noiseToggle = document.getElementById('console-hide-rcon');
+  if (noiseToggle) {
+    noiseToggle.checked = hideRconNoise;
+    noiseToggle.addEventListener('change', () => {
+      hideRconNoise = noiseToggle.checked;
+      try {
+        localStorage.setItem('msm-console-hide-rcon', hideRconNoise ? '1' : '0');
+      } catch {
+        /* storage disabled - the toggle still works for this session */
+      }
+      refilter();
+    });
+  }
+  // The server-rendered initial tail is visible until something filters it -
+  // run one pass now so a stored "hide" preference applies before any WS line.
+  refilter();
 
   // The send control stays busy until the RCON response (cmd-result/error) or
   // ws ack arrives. Entries self-remove; a failsafe timeout catches lost acks.
