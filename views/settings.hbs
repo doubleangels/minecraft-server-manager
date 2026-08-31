@@ -141,8 +141,8 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
       <h3 class="font-semibold">Public API</h3>
       <label class="flex items-center gap-2 text-sm">
-        <input type="checkbox" id="public-api-enabled" {{#if publicApiEnabled}}checked{{/if}}>
         <span>Serve <span class="font-mono">/api/v1</span></span>
+        <span class="msm-toggle"><input type="checkbox" id="public-api-enabled" {{#if publicApiEnabled}}checked{{/if}}><span></span></span>
       </label>
     </div>
     <p class="help mt-1 max-w-prose">Read-only HTTP API for fetching server status. Callers authenticate with a
