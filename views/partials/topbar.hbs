@@ -36,7 +36,7 @@
     </button>
     <template id="user-menu">
       <div class="px-3 py-2 text-xs text-ink-faint">{{user.username}} · {{capitalize user.role}}</div>
-      <button type="button" class="w-full text-left" data-open-avatar-picker>Profile picture</button>
+      <button type="button" class="w-full text-left" data-open-avatar-picker>Profile Picture</button>
       <button type="button" class="w-full text-left" data-open-2fa>{{#if user.totpEnabled}}Manage 2FA{{else}}Set up 2FA{{/if}}</button>
       <form method="post" action="/logout"><button type="submit" class="w-full text-left">Sign out</button></form>
     </template>
