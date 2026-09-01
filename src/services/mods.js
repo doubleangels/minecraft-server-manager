@@ -243,9 +243,13 @@ function isPackServer(server) {
 
 /**
  * Classify an install reference. Pure routing decision, no network.
- * Returns { kind: 'modrinth' | 'curseforge' | 'direct' | 'invalid', ref }.
+ * Returns { kind: 'modrinth' | 'curseforge' | 'hangar' | 'spiget' | 'github'
+ *           | 'direct' | 'invalid', ref }.
  *  - modrinth:  modrinth.com page URLs and bare project slugs
  *  - curseforge: curseforge.com page URLs
+ *  - hangar:    hangar.papermc.io project/version page URLs
+ *  - spiget:    spigotmc.org resource page URLs
+ *  - github:    github.com repo/release URLs and bare "owner/repo" refs
  *  - direct:    any other URL, INCLUDING cdn.modrinth.com file links -
  *               those are downloads, not project pages
  */
@@ -261,8 +265,14 @@ function classifyModSource(input) {
     const host = url.hostname.toLowerCase().replace(/^www\./, '');
     if (host === 'modrinth.com') return { kind: 'modrinth', ref };
     if (host === 'curseforge.com') return { kind: 'curseforge', ref };
+    if (host === 'hangar.papermc.io') return { kind: 'hangar', ref };
+    if (host === 'spigotmc.org') return { kind: 'spiget', ref };
+    if (host === 'github.com' && require('./githubApi').parseRepoRef(ref)) return { kind: 'github', ref };
     return { kind: 'direct', ref };
   }
+  // A slash can never appear in a Modrinth slug, so "owner/repo" is
+  // unambiguously a GitHub ref.
+  if (/^[\w.-]+\/[\w.-]+$/.test(ref) && !ref.includes('..')) return { kind: 'github', ref };
   // Modrinth slug charset (their documented rule): [\w!@$()`.+,"\-'] ×3–64.
   // \w keeps underscores valid - sodium_extra style slugs used to 500.
   if (/^[\w!@$()`.+,"\-']{3,64}$/.test(ref)) return { kind: 'modrinth', ref };
@@ -296,7 +306,10 @@ async function installFromUrl(serverId, input, { actor = 'system', kind, onProgr
 
   const source = classifyModSource(input);
   if (source.kind === 'invalid') {
-    throw httpError(400, 'Enter a Modrinth/CurseForge URL, a direct download URL, or a Modrinth project slug');
+    throw httpError(
+      400,
+      'Enter a Modrinth/CurseForge/Hangar/SpigotMC/GitHub URL, a direct download URL, a Modrinth slug, or a GitHub owner/repo'
+    );
   }
 
   let downloadUrl = source.ref;
@@ -348,6 +361,7 @@ async function installFromUrl(serverId, input, { actor = 'system', kind, onProgr
       iconUrl: resolved.iconUrl,
       mcVersions: version.game_versions,
       loaders: version.loaders,
+      expectedHashes: file.hashes || {},
     });
   } else if (source.kind === 'curseforge') {
     const resolved = await curseforge.resolveUrl(source.ref);
@@ -374,6 +388,87 @@ async function installFromUrl(serverId, input, { actor = 'system', kind, onProgr
       version: file.name,
       iconUrl: resolved.iconUrl,
       mcVersions: file.gameVersions,
+      expectedHashes: require('../utils/contentHashes').fromCurseforge(file.hashes),
+    });
+  } else if (source.kind === 'hangar') {
+    const hangar = require('./hangarApi');
+    const resolved = await hangar.resolveUrl(source.ref);
+    const versions = await hangar.getVersions(resolved.slug, { mcVersion });
+    let version = resolved.versionName
+      ? versions.find((v) => v.name === resolved.versionName) ||
+        (await hangar.getVersions(resolved.slug, {})).find((v) => v.name === resolved.versionName)
+      : versions[0];
+    if (!version) {
+      throw httpError(
+        404,
+        `No ${resolved.name} build matches this server${mcVersion ? ` (Minecraft ${mcVersion})` : ''}`
+      );
+    }
+    if (!version.downloadUrl)
+      throw httpError(409, `${resolved.name} publishes no downloadable Paper file for this version`);
+    downloadUrl = version.downloadUrl;
+    Object.assign(meta, {
+      platform: 'hangar',
+      projectId: resolved.slug,
+      fileId: version.name,
+      name: resolved.name,
+      filename: version.filename,
+      version: version.name,
+      iconUrl: resolved.iconUrl,
+      mcVersions: version.gameVersions,
+      expectedHashes: version.sha256 ? { sha256: version.sha256 } : {},
+    });
+  } else if (source.kind === 'spiget') {
+    const spiget = require('./spigetApi');
+    const ref = spiget.parseResourceRef(source.ref);
+    if (!ref) throw httpError(400, 'Could not read a SpigotMC resource id from that URL');
+    const resource = await spiget.getResource(ref.resourceId);
+    if (resource.external) {
+      throw httpError(
+        409,
+        `${resource.name} is hosted outside SpigotMC and can't be auto-downloaded - download it in a browser (${resource.pageUrl}) and upload the jar instead`
+      );
+    }
+    const versions = await spiget.getVersions(ref.resourceId);
+    const version = ref.versionId ? versions.find((v) => v.versionId === ref.versionId) : versions[0];
+    if (!version) throw httpError(404, `No downloadable version of ${resource.name} was found`);
+    downloadUrl = spiget.downloadUrl(ref.resourceId, version.versionId);
+    Object.assign(meta, {
+      platform: 'spiget',
+      projectId: String(ref.resourceId),
+      fileId: version.versionId,
+      name: resource.name,
+      filename: `${resource.name.replace(/[^\w.-]+/g, '-')}-${version.name}.jar`,
+      version: version.name,
+      iconUrl: resource.iconUrl,
+      mcVersions: resource.testedVersions, // resource-level "tested" majors; Spiget has no per-version tags
+    });
+  } else if (source.kind === 'github') {
+    const github = require('./githubApi');
+    const ref = github.parseRepoRef(source.ref);
+    const repoInfo = await github.getRepo(ref.repo);
+    const releases = await github.getReleases(ref.repo);
+    const withJars = releases.filter((r) => r.assets.length);
+    const release = ref.tag
+      ? releases.find((r) => r.tag === ref.tag)
+      : withJars.find((r) => !r.prerelease) || withJars[0];
+    if (!release) {
+      throw httpError(
+        404,
+        ref.tag ? `No release tagged ${ref.tag} in ${ref.repo}` : `No release with jar assets in ${ref.repo}`
+      );
+    }
+    const asset = github.pickAsset(release.assets, ref.asset);
+    if (!asset) throw httpError(404, `Release ${release.tag} of ${ref.repo} has no jar assets`);
+    downloadUrl = asset.downloadUrl;
+    Object.assign(meta, {
+      platform: 'github',
+      projectId: ref.repo,
+      fileId: release.tag,
+      name: repoInfo.name || ref.repo,
+      filename: asset.name,
+      version: release.tag,
+      iconUrl: repoInfo.iconUrl,
     });
   }
   // source.kind === 'direct' → plain download of the URL as-is.
@@ -432,7 +527,7 @@ async function installResolved(
     kind === 'mod' &&
     overrideLoader &&
     Array.isArray(meta.loaders) &&
-    !meta.loaders.includes(overrideLoader);
+    !require('../utils/loaderCompat').loaderAccepts(overrideLoader, meta.loaders);
   const overrideBits = [
     versionOverridden ? `not listed for ${server.mc_version}` : null,
     loaderOverridden ? `not built for ${overrideLoader}` : null,
@@ -617,6 +712,13 @@ async function applyOverlayUpdate(serverId, { file, contentId }, { actor = 'syst
     ref = `https://modrinth.com/mod/${lib.project_id}/version/${check.latest_version}`;
   } else if (lib.platform === 'curseforge') {
     ref = `https://www.curseforge.com/minecraft/mc-mods/${lib.project_id}/files/${check.latest_version}`;
+  } else if (lib.platform === 'hangar') {
+    // The owner segment is decorative - Hangar's version endpoints address by slug.
+    ref = `https://hangar.papermc.io/p/${lib.project_id}/versions/${encodeURIComponent(check.latest_version)}`;
+  } else if (lib.platform === 'spiget') {
+    ref = `https://www.spigotmc.org/resources/${lib.project_id}?version=${check.latest_version}`;
+  } else if (lib.platform === 'github') {
+    ref = `https://github.com/${lib.project_id}/releases/tag/${encodeURIComponent(check.latest_version)}`;
   } else {
     throw httpError(409, `Cannot auto-update content from platform "${lib.platform}"`);
   }
