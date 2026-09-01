@@ -23,13 +23,39 @@ test('looksLikeError passes a normal success line through', () => {
 });
 
 test('every curated World Controls chip maps to a real quick action', () => {
-  // Slugs the trimmed world-controls.hbs always shows.
-  const curatedToggles = ['keepinv', 'daycycle', 'mobspawn', 'mobgrief', 'phantoms', 'firetick', 'deathmsg', 'pvp'];
+  // Slugs the curated (always-visible) section of world-controls.hbs shows.
+  const curatedToggles = [
+    'keepinv',
+    'instantrespawn',
+    'daycycle',
+    'weathercycle',
+    'mobspawn',
+    'mobgrief',
+    'phantoms',
+    'naturalregen',
+    'falldmg',
+    'firetick',
+    'tntexplodes',
+    'deathmsg',
+    'advancements',
+    'cmdfeedback',
+    'pvp',
+  ];
   for (const slug of curatedToggles) {
     assert.ok(QUICK_ACTIONS[`${slug}-on`], `${slug}-on missing`);
     assert.ok(QUICK_ACTIONS[`${slug}-off`], `${slug}-off missing`);
   }
-  for (const key of ['time-day', 'time-night', 'weather-clear', 'weather-rain', 'save-all', 'difficulty-normal']) {
+  for (const key of [
+    'time-day',
+    'time-noon',
+    'time-night',
+    'time-midnight',
+    'weather-clear',
+    'weather-rain',
+    'weather-thunder',
+    'save-all',
+    'difficulty-normal',
+  ]) {
     assert.ok(QUICK_ACTIONS[key], `${key} missing`);
   }
 });
