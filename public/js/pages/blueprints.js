@@ -114,7 +114,7 @@ function showPreview(preview, importBody) {
     actions: [
       { label: 'Cancel', kind: 'ghost' },
       {
-        label: 'Create server',
+        label: 'Create Server',
         kind: 'primary',
         onClick: () => {
           // Kick off after this modal closes so the progress modal is on top.
@@ -195,9 +195,9 @@ function showReport(server, report) {
     title: 'Blueprint Import Finished',
     content,
     actions: [
-      { label: 'Stay here', kind: 'ghost' },
+      { label: 'Stay Here', kind: 'ghost' },
       {
-        label: 'Open server',
+        label: 'Open Server',
         kind: 'primary',
         onClick: () => {
           location.href = `/servers/${server.id}`;

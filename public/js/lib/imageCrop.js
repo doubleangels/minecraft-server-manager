@@ -48,7 +48,7 @@ export function openCropModal(file) {
           actions: [
             { label: 'Cancel', kind: 'ghost' },
             {
-              label: 'Use photo',
+              label: 'Use Photo',
               kind: 'primary',
               busyLabel: 'Processing…',
               onClick: async () => {

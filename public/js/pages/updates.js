@@ -73,7 +73,7 @@ async function upgradePack(row, { serverId, serverName, subject, current, latest
     message: `${serverName} moves from ${current} to ${latest}. The panel takes an automatic backup first, applies the new version, and starts the server back up, watching that it comes back healthy.`,
     detail:
       'Your custom mods are preserved, and you can roll back with one click if it does not come up. The server is briefly offline during the swap.',
-    confirmLabel: 'Upgrade now',
+    confirmLabel: 'Upgrade Now',
   });
   if (!ok) return;
   try {
@@ -98,7 +98,7 @@ async function offerRollback(serverId, serverName, errorMessage) {
     title: 'Upgrade failed. Roll back?',
     message: errorMessage || 'The server did not come back healthy after the upgrade.',
     detail: 'Rolling back restores the automatic pre-update backup and pins the previous pack version.',
-    confirmLabel: 'Roll back',
+    confirmLabel: 'Roll Back',
     danger: true,
   });
   if (!ok) return;
@@ -119,7 +119,7 @@ async function upgradeMod(row, btn, { serverId, subject, current, latest, conten
   const ok = await confirmDialog({
     title: `Update ${subject}?`,
     message: `${current} → ${latest}. The old file is replaced, and the enabled or disabled state is kept.`,
-    confirmLabel: 'Update mod',
+    confirmLabel: 'Update Mod',
   });
   if (!ok) return;
   toast(`Updating ${subject}…`, { kind: 'info' });
@@ -142,7 +142,7 @@ async function upgradeImage(row, { serverId, serverName, current, latest }) {
     title: 'Update the server image?',
     message: `${serverName} moves from ${current} to ${latest}. The panel rebuilds the container on the newer image.`,
     detail: 'Your world and files are untouched; only the container is replaced. The server is briefly offline.',
-    confirmLabel: 'Update now',
+    confirmLabel: 'Update Now',
   });
   if (!ok) return;
   try {
@@ -176,7 +176,7 @@ async function upgradeMcVersion(row, { serverId, serverName, current, latest, ta
     title: targetVersion ? 'Update the Minecraft version?' : 'Update the loader build?',
     message,
     detail: 'The server is briefly offline while the container is rebuilt.',
-    confirmLabel: 'Update now',
+    confirmLabel: 'Update Now',
   });
   if (!ok) return;
   try {

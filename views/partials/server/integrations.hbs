@@ -136,11 +136,11 @@
     </div>
 
     <div class="mt-4 flex flex-wrap items-center gap-2">
-      <button class="btn btn-primary" id="ig-wz-save">Save chatbot</button>
-      <button class="btn" id="ig-wz-test">Test connection</button>
-      <button class="btn" id="ig-wz-transcripts">Refresh this server's transcripts</button>
-      <button class="btn" id="ig-wz-power-audit">Refresh power audit</button>
-      <a class="btn btn-ghost" href="/wizard-transcripts">All transcript archives</a>
+      <button class="btn btn-primary" id="ig-wz-save">Save Chatbot</button>
+      <button class="btn" id="ig-wz-test">Test Connection</button>
+      <button class="btn" id="ig-wz-transcripts">Refresh This Server's Transcripts</button>
+      <button class="btn" id="ig-wz-power-audit">Refresh Power Audit</button>
+      <a class="btn btn-ghost" href="/wizard-transcripts">All Transcript Archives</a>
       <span class="hidden text-xs text-warn" data-ig-dirty="wz">Unsaved changes</span>
     </div>
     <div class="mt-4 hidden max-h-80 overflow-auto rounded-md border border-line bg-inset p-3 text-xs" id="ig-wz-transcript-list"></div>
@@ -185,10 +185,10 @@
       <div class="flex items-center gap-2">
         <button class="btn btn-primary" id="ig-dc-save">Save</button>
         {{#if integrations.discord.hasWebhook}}
-          <button class="btn" id="ig-dc-test">{{{icon 'send' 'size-4'}}} Send test</button>
+          <button class="btn" id="ig-dc-test">{{{icon 'send' 'size-4'}}} Send Test</button>
         {{else}}
           {{! Disabled controls swallow hover - the wrapper carries the "why". }}
-          <span data-tip="Save a webhook URL first"><button class="btn" id="ig-dc-test" disabled>{{{icon 'send' 'size-4'}}} Send test</button></span>
+          <span data-tip="Save a webhook URL first"><button class="btn" id="ig-dc-test" disabled>{{{icon 'send' 'size-4'}}} Send Test</button></span>
         {{/if}}
         <span class="hidden text-xs text-warn" data-ig-dirty="dc">Unsaved changes</span>
       </div>
@@ -216,8 +216,8 @@
       <div class="flex flex-wrap items-center gap-2">
         <button class="btn btn-primary" id="ig-sp-save">Save</button>
         {{#if (and integrations.statusPage.enabled integrations.statusPage.path)}}
-          <a class="btn" href="{{integrations.statusPage.path}}" target="_blank" rel="noopener" id="ig-sp-link">{{{icon 'link' 'size-4'}}} Open page</a>
-          <button class="btn btn-ghost" id="ig-sp-copy">{{{icon 'copy' 'size-4'}}} Copy link</button>
+          <a class="btn" href="{{integrations.statusPage.path}}" target="_blank" rel="noopener" id="ig-sp-link">{{{icon 'link' 'size-4'}}} Open Page</a>
+          <button class="btn btn-ghost" id="ig-sp-copy">{{{icon 'copy' 'size-4'}}} Copy Link</button>
         {{/if}}
         <span class="hidden text-xs text-warn" data-ig-dirty="sp">Unsaved changes</span>
       </div>
@@ -248,9 +248,9 @@
           <pre class="max-h-44 overflow-auto whitespace-pre-wrap rounded-md border border-line bg-inset p-3 font-mono text-xs text-ink-soft" id="ig-invite-text">{{integrations.invite.inviteText}}</pre>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button class="btn btn-primary" id="ig-copy-invite">{{{icon 'copy' 'size-4'}}} Copy invite text</button>
+          <button class="btn btn-primary" id="ig-copy-invite">{{{icon 'copy' 'size-4'}}} Copy Invite Text</button>
           {{#if integrations.invite.modded}}
-            <button class="btn" id="ig-mrpack">{{{icon 'download' 'size-4'}}} Download client modpack (.mrpack)</button>
+            <button class="btn" id="ig-mrpack">{{{icon 'download' 'size-4'}}} Download Client Modpack (.mrpack)</button>
           {{/if}}
         </div>
       </div>

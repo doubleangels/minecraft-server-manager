@@ -154,7 +154,7 @@ document.addEventListener('click', async (e) => {
     const ok = await confirmDialog({
       title: `Delete ${name}?`,
       message: 'This permanently deletes the container, its world, mods, and config. Backups are kept.',
-      confirmLabel: 'Delete forever',
+      confirmLabel: 'Delete Forever',
       danger: true,
       requireText: name,
     });
@@ -182,7 +182,7 @@ document.addEventListener('click', async (e) => {
       title: `Force stop ${name}?`,
       message:
         'A force stop skips the normal shutdown, so any unsaved world changes can be lost. Use Stop instead unless the server is frozen.',
-      confirmLabel: 'Force stop',
+      confirmLabel: 'Force Stop',
       danger: true,
     });
     if (!ok) return;

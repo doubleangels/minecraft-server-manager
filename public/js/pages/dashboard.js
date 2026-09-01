@@ -102,7 +102,7 @@ const STATUS_META = {
   updating: { label: 'Updating', dot: 'bg-diamond-500', text: 'text-link', pulse: true },
   stopped: { label: 'Stopped', dot: 'bg-stone-500', text: 'text-ink-faint', pulse: false },
   crashed: { label: 'Crashed', dot: 'bg-redstone-500', text: 'text-danger', pulse: false },
-  'over-quota': { label: 'Over quota', dot: 'bg-redstone-500', text: 'text-danger', pulse: false },
+  'over-quota': { label: 'Over Quota', dot: 'bg-redstone-500', text: 'text-danger', pulse: false },
 };
 
 function applyStatus(card, status) {

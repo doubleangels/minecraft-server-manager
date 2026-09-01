@@ -310,7 +310,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: 'Install selected',
+          label: 'Install Selected',
           kind: 'primary',
           onClick: async () => {
             const selections = rows
@@ -550,7 +550,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
         <div class="notice notice-warn flex-wrap items-center gap-2 text-xs">
           <span class="text-warn">This resource is hosted outside SpigotMC — download it in a browser, then upload the jar here.</span>
           <a class="btn btn-sm" target="_blank" rel="noopener" href="https://www.spigotmc.org/resources/${encodeURIComponent(hit.ref)}">Open SpigotMC</a>
-          <button class="btn btn-sm" data-role="upload">Upload jar</button>
+          <button class="btn btn-sm" data-role="upload">Upload Jar</button>
           <input type="file" accept=".jar,.zip" class="hidden" data-role="file">
         </div>`;
       wireFallbackUpload(box);
@@ -599,7 +599,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
         <div class="notice notice-warn flex-wrap items-center gap-2 text-xs">
           <span class="text-warn">The author disallows automated downloads — grab <b data-role="build"></b> in a browser, then upload the jar here.</span>
           <a class="btn btn-sm" target="_blank" rel="noopener" href="https://www.curseforge.com/minecraft/${cfSection}/${encodeURIComponent(hit.ref)}/files">Open CurseForge</a>
-          <button class="btn btn-sm" data-role="upload">Upload jar</button>
+          <button class="btn btn-sm" data-role="upload">Upload Jar</button>
           <input type="file" accept=".jar,.zip" class="hidden" data-role="file">
         </div>`;
       box.querySelector('[data-role="build"]').textContent = build.name || build.versionNumber || 'the file';
@@ -700,7 +700,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
     pendingBox.innerHTML = `
       <div class="notice notice-warn flex-wrap gap-3">
         <span class="text-warn">${list.length} ${list.length === 1 ? 'mod' : 'mods'} in this modpack couldn't be auto-downloaded — the pack won't finish installing until each is resolved.</span>
-        <button class="btn btn-sm ml-auto" id="mods-pending-open">Resolve now</button>
+        <button class="btn btn-sm ml-auto" id="mods-pending-open">Resolve Now</button>
       </div>`;
     pendingBox.querySelector('#mods-pending-open').addEventListener('click', () => openPendingModal(list));
     if (autoOpen && !pendingAutoOpened) {
@@ -740,9 +740,9 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
             <div class="truncate font-mono text-xs text-ink-faint"></div>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button class="btn btn-sm" data-act="exclude">Exclude from pack</button>
-            <button class="btn btn-sm" data-act="search">Find replacement</button>
-            <button class="btn btn-sm" data-act="upload">Upload jar</button>
+            <button class="btn btn-sm" data-act="exclude">Exclude from Pack</button>
+            <button class="btn btn-sm" data-act="search">Find Replacement</button>
+            <button class="btn btn-sm" data-act="upload">Upload Jar</button>
             <a class="btn btn-sm" target="_blank" rel="noopener" data-act="open">Open CF page</a>
           </div>
           <input type="file" accept=".jar,.zip" class="hidden" data-role="file">`;

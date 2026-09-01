@@ -457,7 +457,7 @@ function init(root) {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: 'Run now',
+          label: 'Run Now',
           kind: 'primary',
           busyLabel: 'Running…',
           onClick: async ({ body }) => {

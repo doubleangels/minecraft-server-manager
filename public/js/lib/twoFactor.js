@@ -87,7 +87,7 @@ function openManageModal(trigger) {
     actions: [
       { label: 'Close', kind: 'ghost' },
       {
-        label: 'Regenerate backup codes',
+        label: 'Regenerate Backup Codes',
         busyLabel: 'Regenerating…',
         onClick: async () => {
           const password = content.querySelector('#tf-mgmt-password').value;

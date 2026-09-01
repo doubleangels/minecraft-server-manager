@@ -254,7 +254,7 @@ async function showInsights(serverId, crash, card) {
     content,
     actions: [
       {
-        label: 'Open paste',
+        label: 'Open Paste',
         kind: 'ghost',
         onClick: () => {
           window.open(ins.url, '_blank', 'noopener');
@@ -286,7 +286,7 @@ async function openViewer(serverId, crash, card) {
     content: renderReport(text),
     actions: [
       {
-        label: 'Copy full report',
+        label: 'Copy Full Report',
         kind: 'ghost',
         onClick: () => {
           copyToClipboard(text, 'Full report copied to clipboard.');
@@ -294,7 +294,7 @@ async function openViewer(serverId, crash, card) {
         },
       },
       {
-        label: 'Copy stack trace',
+        label: 'Copy Stack Trace',
         kind: 'ghost',
         onClick: () => {
           copyToClipboard(extractTrace(text), 'Stack trace copied to clipboard.');

@@ -355,7 +355,7 @@ function init(root) {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: 'Ban player',
+          label: 'Ban Player',
           kind: 'danger',
           busyLabel: 'Banning…',
           onClick: async ({ body }) => {

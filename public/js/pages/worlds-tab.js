@@ -96,7 +96,7 @@ function init(serverId, serverName, serverStatus) {
         title: `Delete world "${world}"?`,
         message: 'Removes this world and all of its dimensions from the server. It is not the active world.',
         detail: `${fmtBytes(size)} will be freed. No automatic backup is taken for worlds that aren't active.`,
-        confirmLabel: 'Delete world',
+        confirmLabel: 'Delete World',
         danger: true,
         requireText: world,
       });
@@ -151,7 +151,7 @@ function init(serverId, serverName, serverStatus) {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: 'Copy world',
+          label: 'Copy World',
           kind: 'primary',
           busyLabel: 'Copying…',
           onClick: async () => {
@@ -319,7 +319,7 @@ function init(serverId, serverName, serverStatus) {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: 'Reset world',
+          label: 'Reset World',
           kind: 'danger',
           busyLabel: 'Resetting…',
           onClick: async () => {

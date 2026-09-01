@@ -16,7 +16,7 @@
       Whitelist enforced
     </label>
     <div class="ml-auto flex gap-2">
-      <button class="btn btn-primary btn-sm" id="players-add">{{{icon 'user-plus' 'size-3.5'}}} Add player</button>
+      <button class="btn btn-primary btn-sm" id="players-add">{{{icon 'user-plus' 'size-3.5'}}} Add Player</button>
     </div>
   </div>
 
@@ -105,9 +105,9 @@
                 {{/if}}
                 <button class="btn btn-ghost btn-sm" data-menu="player-menu-{{@index}}" data-tip="More actions">{{{icon 'ellipsis' 'size-3.5'}}}</button>
                 <template id="player-menu-{{@index}}">
-                  <button data-act="op-level" data-name="{{name}}">{{{icon 'shield' 'size-3.5'}}} Set operator level…</button>
-                  <button data-act="ban-reason" data-name="{{name}}">{{{icon 'ban' 'size-3.5'}}} Ban with reason…</button>
-                  <button data-act="notes" data-name="{{name}}">{{{icon 'sticky-note' 'size-3.5'}}} Moderator notes…</button>
+                  <button data-act="op-level" data-name="{{name}}">{{{icon 'shield' 'size-3.5'}}} Set Operator Level…</button>
+                  <button data-act="ban-reason" data-name="{{name}}">{{{icon 'ban' 'size-3.5'}}} Ban with Reason…</button>
+                  <button data-act="notes" data-name="{{name}}">{{{icon 'sticky-note' 'size-3.5'}}} Moderator Notes…</button>
                   {{#if uuid}}<button data-act="copy-uuid" data-uuid="{{uuid}}">{{{icon 'clipboard-copy' 'size-3.5'}}} Copy UUID</button>{{/if}}
                 </template>
               </div>

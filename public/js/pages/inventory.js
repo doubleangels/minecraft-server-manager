@@ -312,7 +312,7 @@ function init(root) {
           !(await confirmDialog({
             title: `Delete ${item.displayName || prettyId(item.id)}?`,
             message: `Removes ${item.count}× ${item.id} from ${where}. Take a snapshot first if you might want it back.`,
-            confirmLabel: 'Delete item',
+            confirmLabel: 'Delete Item',
             danger: true, // without this the destructive confirm rendered as a green primary
           }))
         )
@@ -367,7 +367,7 @@ function init(root) {
       title: 'Change Count',
       header: itemHeader(item, slotName(at.container, at.slot)),
       value: item.count,
-      confirmLabel: 'Set count',
+      confirmLabel: 'Set Count',
       onSubmit: (n) =>
         postEdit(
           `/player/${currentUuid}/slot`,
@@ -852,7 +852,7 @@ function init(root) {
       title: item ? `Add ${item.name}` : 'Add Item',
       header,
       value: 1,
-      confirmLabel: 'Add to save file',
+      confirmLabel: 'Add to Save File',
       onSubmit: async (n, body) => {
         let itemId = item ? item.id : null;
         if (!itemId) {
@@ -978,7 +978,7 @@ function init(root) {
                 title: `Clear the entire inventory of ${player}?`,
                 message:
                   'Every item they carry will be deleted. This cannot be undone, so take a snapshot first if you might need it back.',
-                confirmLabel: 'Clear everything',
+                confirmLabel: 'Clear Everything',
                 danger: true, // the most destructive dialog on the tab must not look like a positive action
               }))
             )

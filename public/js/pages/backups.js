@@ -40,7 +40,7 @@ document.addEventListener('click', async (e) => {
       title: `Restore this backup?`,
       message: `${serverName || 'The server'} is stopped first, a safety backup of the current state is taken, then the server's files are replaced with this archive.`,
       detail: `${file}\n${fmtBytes(size)} · ${reason || 'manual'}`,
-      confirmLabel: 'Restore backup',
+      confirmLabel: 'Restore Backup',
       danger: true,
     });
     if (!ok) return;

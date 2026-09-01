@@ -48,8 +48,8 @@ test('chatbot configuration and transcripts are admin-only', async () => {
   const operatorPage = await app.req('GET', `/servers/${serverId}/chatbot`, { cookie: operatorCookie });
   assert.match(adminPage.text, /Chatbot settings/);
   assert.match(adminPage.text, /Basic users/);
-  assert.match(adminPage.text, /Refresh this server's transcripts/);
-  assert.match(adminPage.text, /Refresh power audit/);
+  assert.match(adminPage.text, /Refresh This Server's Transcripts/);
+  assert.match(adminPage.text, /Refresh Power Audit/);
   assert.match(adminPage.text, /Player outreach/);
   assert.match(adminPage.text, /@wizard chat/);
   assert.match(adminPage.text, /Power controllers/);

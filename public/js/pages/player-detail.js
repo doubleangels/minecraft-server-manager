@@ -163,7 +163,7 @@ function init(root) {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: 'Ban player',
+          label: 'Ban Player',
           kind: 'danger',
           busyLabel: 'Banning…',
           onClick: async ({ body }) => {
@@ -253,7 +253,7 @@ function init(root) {
         actions: [
           { label: 'Cancel', kind: 'ghost' },
           {
-            label: 'Add note',
+            label: 'Add Note',
             kind: 'primary',
             busyLabel: 'Adding…',
             onClick: async ({ body }) => {
