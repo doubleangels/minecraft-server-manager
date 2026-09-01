@@ -193,14 +193,29 @@ async function listContent(serverId) {
       seen.add(baseName);
       const row = byFile.get(baseName);
       const stat = await fsp.stat(path.join(dirAbs, entry.name)).catch(() => null);
-      const lib = row && row.library_id ? libById.get(row.library_id) : null;
+      // A file with no server_content row but an exact library_files match by
+      // name+category is an orphaned custom install - the row was dropped (e.g.
+      // migration 016) or never written while the file stayed on disk. Adopt the
+      // library metadata so it shows its real name/icon/version instead of a
+      // bare "unknown file" placeholder.
+      const adoptedLib =
+        !row && !isPackServer(server) && !server.pack
+          ? db.get('SELECT * FROM library_files WHERE filename = ? AND category = ?', baseName, kind)
+          : null;
+      const lib = (row && row.library_id ? libById.get(row.library_id) : null) || adoptedLib;
       items.push({
         id: row ? row.id : null,
-        name: row ? row.name : prettifyJarName(baseName),
+        name: row ? row.name : (adoptedLib && adoptedLib.name) || prettifyJarName(baseName),
         file: baseName,
         kind: row ? row.kind : kind,
-        source: row ? row.managed_by : server.pack || isPackServer(server) ? 'pack' : 'unknown',
-        version: row ? row.version : null,
+        source: row
+          ? row.managed_by
+          : adoptedLib
+            ? 'overlay'
+            : server.pack || isPackServer(server)
+              ? 'pack'
+              : 'unknown',
+        version: row ? row.version : (adoptedLib && adoptedLib.version) || null,
         size: stat ? stat.size : 0,
         enabled: !isDisabled,
         disabledVia: row && row.managed_by === 'pack' && !isDisabled ? null : undefined,

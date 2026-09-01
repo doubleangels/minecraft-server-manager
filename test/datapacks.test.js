@@ -60,6 +60,31 @@ test('listContent works for a mod-type (non-plugin) server too', async () => {
   assert.equal(items.find((i) => i.file === 'terralith.zip')?.kind, 'datapack');
 });
 
+test('listContent adopts an orphaned datapack file from its library_files match', async () => {
+  const id = app.seedServer('srv_dp_orphan'); // PAPER, no pack
+  const dpDir = dataPath('servers', id, 'world/datapacks');
+  await fsp.mkdir(dpDir, { recursive: true });
+  await fsp.writeFile(path.join(dpDir, 'sky-void-additions-1.5.2.zip'), 'x');
+
+  // A library row exists (the shared copy), but the server_content row that
+  // linked it to this server is gone - the exact state migration 016 left.
+  db.run(
+    `INSERT INTO library_files (id, category, name, filename, rel_path, sha256, size_bytes, version, icon_url, platform, project_id)
+     VALUES ('lib_orphan_dp', 'datapack', 'Sky Void Additions', 'sky-void-additions-1.5.2.zip',
+             'library/lib_orphan_dp', 'sha-orphan-dp', 100, '1.5.2',
+             'https://example.invalid/icon.png', 'modrinth', 'sky-void-additions')`
+  );
+
+  const item = (await mods.listContent(id)).find((i) => i.file === 'sky-void-additions-1.5.2.zip');
+  assert.ok(item, 'orphan datapack file is listed');
+  assert.equal(item.name, 'Sky Void Additions'); // library name, not prettifyJarName
+  assert.equal(item.version, '1.5.2');
+  assert.equal(item.iconUrl, 'https://example.invalid/icon.png');
+  assert.equal(item.source, 'overlay'); // shows as custom, not a bare "file"
+  assert.equal(item.kind, 'datapack');
+  assert.equal(item.enabled, true);
+});
+
 test('installFromUrl auto-detects a Modrinth datapack and does not filter its version by loader', async () => {
   const id = app.seedServer('srv_dp_install');
   db.run(`UPDATE servers SET type = 'FORGE', mc_version = '1.21.1' WHERE id = ?`, id);

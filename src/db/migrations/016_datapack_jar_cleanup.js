@@ -1,22 +1,25 @@
 'use strict';
 
-// Datapacks and resource packs are only ever .zip archives. Earlier builds of
-// the "add by URL / search" flow could resolve a Modrinth project to its
-// Fabric/Quilt "mod-wrapped" .jar (a separate version, version_number like
-// "1.5.2+mod") and record it as a datapack/resourcepack overlay. A .jar in
-// world/datapacks/ or resourcepacks/ is ignored by the game, so the file was
-// dead weight and its row lingered as a phantom "Missing" entry - typically
-// right next to the real .zip the user had added by hand. Drop those rows; the
-// shared library_files copy stays and is swept later if nothing references it.
-// A genuine datapack/resource pack is never a .jar, so this can't hit one.
+// NO-OP (kept so the migration version number stays stable).
+//
+// This migration originally ran:
+//   DELETE FROM server_content
+//     WHERE managed_by = 'overlay' AND kind IN ('datapack','resourcepack')
+//       AND lower(filename) LIKE '%.jar'
+// to drop "mod-wrapped .jar" rows that the old add-by-URL flow could resolve for
+// a Modrinth datapack project. In practice that delete was too blunt: it also
+// removed rows for .jar datapacks that were installed and enabled on Fabric
+// servers, and - because it left the file on disk - turned each into an
+// unlabelled orphan row (no icon, no name, no version, "file" badge) that looked
+// more broken than the phantom it replaced.
+//
+// The bad-resolve is now prevented at install time (installFromUrl /
+// pickDownloadFile filter datapack/resourcepack sources to a real .zip and
+// reject a direct .jar URL), and listContent() adopts any remaining orphaned
+// custom file from its library_files match, so no cleanup delete is needed here.
 
-function up(db) {
-  db.run(
-    `DELETE FROM server_content
-      WHERE managed_by = 'overlay'
-        AND kind IN ('datapack', 'resourcepack')
-        AND lower(filename) LIKE '%.jar'`
-  );
+function up() {
+  // intentionally empty
 }
 
 module.exports = { up };
