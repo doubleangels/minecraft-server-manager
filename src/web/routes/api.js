@@ -955,11 +955,45 @@ router.post(
   asyncHandler((req, res, next) => {
     const actor = req.user.username;
     const taskId = tasks.run('Checking for updates', { actor }, async (t) => {
-      t.step('Querying CurseForge, Modrinth and the registry');
+      t.step(
+        'Querying Modrinth, CurseForge, Hangar, SpigotMC and GitHub for mods/plugins, plus the Minecraft, loader-build and Docker-image registries'
+      );
       const findings = await checker.checkAll({ actor });
       return { findings };
     });
     res.status(202).json({ ok: true, taskId });
+  })
+);
+
+// Ignore / un-ignore the update currently offered for one Updates-page row.
+// Content rows route to the per-mod store (server_content.ignored_update_version);
+// pack / image / mc_version / loader_build rows to update_checks.ignored_version.
+// An ignored row stays visible (greyed) on the Updates page but drops out of the
+// sidebar badge and the digest; a genuinely newer build re-surfaces on its own.
+router.post(
+  '/updates/ignore',
+  asyncHandler(async (req, res, next) => {
+    const { subjectType, serverId, contentId, ignore } = z
+      .object({
+        subjectType: z.enum(['content', 'pack', 'image', 'mc_version', 'loader_build']),
+        serverId: z.string().trim().max(40).optional(),
+        contentId: z.string().trim().max(40).optional(),
+        ignore: z.boolean(),
+      })
+      .parse(req.body);
+    const actor = req.user.username;
+    if (subjectType === 'content') {
+      if (!serverId || !contentId) {
+        throw Object.assign(new Error('serverId and contentId are required for content'), { status: 400 });
+      }
+      const server = requireServer(serverId);
+      const out = mods.setIgnoredUpdate(server.id, { contentId }, { ignore, actor });
+      return res.json({ ok: true, ...out });
+    }
+    if (!serverId) throw Object.assign(new Error('serverId is required'), { status: 400 });
+    const server = requireServer(serverId);
+    const out = checker.setUpdateIgnored(subjectType, server.id, { ignore, actor });
+    res.json({ ok: true, ...out });
   })
 );
 
@@ -974,7 +1008,7 @@ router.post(
       `Checking updates for ${server.display_name}`,
       { serverId: server.id, actor },
       async (t) => {
-        t.step('Querying update sources');
+        t.step('Querying Modrinth, CurseForge, Hangar, SpigotMC, GitHub and the Minecraft/loader/image registries');
         const findings = await checker.checkAll({ actor });
         return { findings: findings.filter((f) => f.server === server.display_name) };
       }

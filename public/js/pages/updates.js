@@ -8,6 +8,8 @@
 //   Docker image rows (data-image-upgrade): POST /api/servers/:id/image/upgrade.
 //   Standalone MC-version/loader-build rows (data-target-version and/or
 //   data-target-build): POST /api/servers/:id/mcversion/upgrade.
+//   Any row: Ignore / Un-ignore via POST /api/updates/ignore ({subjectType,
+//   serverId, contentId?, ignore}) - an ignored row stays visible but greyed.
 
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
@@ -38,6 +40,12 @@ document.getElementById('updates-check-all')?.addEventListener('click', async ()
 });
 
 document.getElementById('updates-table')?.addEventListener('click', async (e) => {
+  const ignoreBtn = e.target.closest('[data-update-ignore], [data-update-unignore]');
+  if (ignoreBtn) {
+    const row = ignoreBtn.closest('[data-update-row]');
+    if (row) await toggleIgnore(row, ignoreBtn, ignoreBtn.hasAttribute('data-update-ignore'));
+    return;
+  }
   const btn = e.target.closest('[data-update-upgrade]');
   if (!btn) return;
   const row = btn.closest('[data-update-row]');
@@ -66,6 +74,31 @@ document.getElementById('updates-table')?.addEventListener('click', async (e) =>
     await upgradeMcVersion(row, { serverId, serverName, current, latest, targetVersion, targetBuild, envKey });
   }
 });
+
+// Ignore / un-ignore one row. subjectType tells the API which store to use
+// (content → per-mod flag, everything else → update_checks.ignored_version).
+async function toggleIgnore(row, btn, ignore) {
+  const { serverId, subjectType, contentId, subject, latest } = row.dataset;
+  try {
+    await withBusy(btn, ignore ? 'Ignoring…' : 'Restoring…', () =>
+      postJSON('/api/updates/ignore', {
+        subjectType: subjectType || (contentId ? 'content' : ''),
+        serverId,
+        contentId: contentId || undefined,
+        ignore,
+      })
+    );
+    toast(
+      ignore
+        ? `Ignoring ${latest} for ${subject}. It won't be offered until a newer build appears.`
+        : `${subject} updates are offered again.`,
+      { kind: 'success' }
+    );
+    setTimeout(() => location.reload(), 700);
+  } catch (err) {
+    toast(err.message || 'That could not be changed. Please try again.', { kind: 'error', timeout: 9000 });
+  }
+}
 
 async function upgradePack(row, { serverId, serverName, subject, current, latest, versionId }) {
   const ok = await confirmDialog({

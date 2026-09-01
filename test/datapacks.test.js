@@ -102,6 +102,81 @@ test('installFromUrl auto-detects a Modrinth datapack and does not filter its ve
   }
 });
 
+test('installFromUrl picks the .zip datapack build, never a same-version mod .jar', async () => {
+  const id = app.seedServer('srv_dp_zip_pref');
+  db.run(`UPDATE servers SET type = 'FABRIC', mc_version = '1.21.1' WHERE id = ?`, id);
+
+  const realResolveUrl = modrinth.resolveUrl;
+  const realGetVersions = modrinth.getVersions;
+  const realDownload = library.downloadToLibrary;
+  const realInstall = library.installToServer;
+
+  let downloadedUrl = null;
+  modrinth.resolveUrl = async () => ({
+    projectId: 'dp1',
+    slug: 'sky-void-additions',
+    title: 'Sky Void Additions',
+    iconUrl: null,
+    projectType: 'datapack',
+    versionId: null,
+  });
+  // A "+mod" version (jar-only) sorts newest; the datapack version has the .zip.
+  modrinth.getVersions = async () => [
+    {
+      id: 'v-mod',
+      version_number: '1.5.2+mod',
+      game_versions: ['1.21.1'],
+      loaders: ['fabric', 'quilt'],
+      files: [
+        {
+          url: 'https://example.invalid/sky-void-additions-1.5.2.jar',
+          filename: 'sky-void-additions-1.5.2.jar',
+          primary: true,
+        },
+      ],
+    },
+    {
+      id: 'v-dp',
+      version_number: '1.5.2',
+      game_versions: ['1.21.1'],
+      loaders: ['datapack'],
+      files: [
+        {
+          url: 'https://example.invalid/sky-void-additions-1.5.2.zip',
+          filename: 'sky-void-additions-1.5.2.zip',
+          primary: true,
+        },
+      ],
+    },
+  ];
+  library.downloadToLibrary = async (url, meta) => {
+    downloadedUrl = url;
+    return fakeLibraryRow('lib_dpzip', meta);
+  };
+  library.installToServer = async () => ({ filename: 'sky-void-additions-1.5.2.zip' });
+
+  try {
+    const result = await mods.installFromUrl(id, 'https://modrinth.com/datapack/sky-void-additions', { actor: 'test' });
+    assert.equal(downloadedUrl, 'https://example.invalid/sky-void-additions-1.5.2.zip');
+    assert.equal(result.filename, 'sky-void-additions-1.5.2.zip');
+  } finally {
+    modrinth.resolveUrl = realResolveUrl;
+    modrinth.getVersions = realGetVersions;
+    library.downloadToLibrary = realDownload;
+    library.installToServer = realInstall;
+  }
+});
+
+test('installFromUrl refuses a direct .jar URL when the kind is datapack', async () => {
+  const id = app.seedServer('srv_dp_jar_reject');
+  db.run(`UPDATE servers SET type = 'PAPER' WHERE id = ?`, id);
+  await assert.rejects(
+    () =>
+      mods.installFromUrl(id, 'https://example.invalid/some-datapack-mod-1.0.jar', { actor: 'test', kind: 'datapack' }),
+    /must be a \.zip/i
+  );
+});
+
 test('removeContent finds and deletes a row-less datapack (no server_content row)', async () => {
   const id = app.seedServer('srv_dp_orphan_remove');
   db.run(`UPDATE servers SET type = 'FABRIC' WHERE id = ?`, id);
@@ -284,16 +359,26 @@ test('installFromUrl still honors an explicit kind over auto-detection', async (
     projectType: 'mod', // NOT a datapack
     versionId: null,
   });
-  modrinth.getVersions = async () => [{ id: 'v1', version_number: '1.0', game_versions: [], loaders: [], files: [] }];
-  modrinth.primaryFile = () => ({ url: 'https://example.invalid/sodium.jar', filename: 'sodium.jar' });
+  // A real datapack build ships a .zip (a .jar here would be a mod-wrapped
+  // build, which installFromUrl now refuses for datapack/resourcepack kinds).
+  modrinth.getVersions = async () => [
+    {
+      id: 'v1',
+      version_number: '1.0',
+      game_versions: [],
+      loaders: [],
+      files: [{ url: 'https://example.invalid/sodium-datapack.zip', filename: 'sodium-datapack.zip', primary: true }],
+    },
+  ];
+  modrinth.primaryFile = (v) => v.files[0];
   library.downloadToLibrary = async (url, meta) => fakeLibraryRow('lib_x1', meta);
-  library.installToServer = async () => ({ filename: 'sodium.jar' });
+  library.installToServer = async () => ({ filename: 'sodium-datapack.zip' });
 
   try {
     // Caller explicitly says datapack even though Modrinth reports it as a mod -
     // the explicit kind must win, same as it always has.
     await mods.installFromUrl(id, 'https://modrinth.com/mod/sodium', { actor: 'test', kind: 'datapack' });
-    const row = db.get('SELECT * FROM server_content WHERE server_id = ? AND filename = ?', id, 'sodium.jar');
+    const row = db.get('SELECT * FROM server_content WHERE server_id = ? AND filename = ?', id, 'sodium-datapack.zip');
     assert.equal(row.kind, 'datapack');
   } finally {
     modrinth.resolveUrl = realResolveUrl;

@@ -279,6 +279,31 @@ function classifyModSource(input) {
   return { kind: 'invalid', ref };
 }
 
+/** Datapacks and resource packs are only ever .zip archives. */
+function isZipOnlyKind(kind) {
+  return kind === 'datapack' || kind === 'resourcepack';
+}
+
+// Pick the file to download from a resolved registry version. For a mod/plugin
+// that's just the registry's "primary" file. For a datapack/resource pack it
+// MUST be the .zip: several Modrinth projects also publish a Fabric/Quilt
+// "mod-wrapped" build as its own version whose only file is a .jar (version
+// number like "1.5.2+mod"). A .jar dropped into world/datapacks/ or
+// resourcepacks/ is silently ignored by the game and then lingers forever as a
+// phantom "Missing" overlay row next to the real .zip. Returns null when a
+// zip-only kind has no .zip to offer, so the caller can fail with a clear message.
+function pickDownloadFile(version, kind) {
+  const files = Array.isArray(version.files) ? version.files : [];
+  if (isZipOnlyKind(kind)) {
+    const zip = files.find((f) => /\.zip(\?|#|$)/i.test(f.filename || f.url || ''));
+    if (zip) return zip;
+    // Empty/stubbed file lists (odd API states, tests) carry no signal either
+    // way - defer to the registry's own primary pick rather than hard-failing.
+    return files.length ? null : modrinth.primaryFile(version);
+  }
+  return modrinth.primaryFile(version);
+}
+
 /**
  * Install content from any source reference: direct URL, Modrinth URL/slug,
  * or CurseForge URL. Downloads into the library, links into the server dir,
@@ -341,6 +366,20 @@ async function installFromUrl(serverId, input, { actor = 'system', kind, onProgr
         return loaders.length === 0 || loaders.some((l) => PLUGIN_LOADERS.has(l));
       });
     }
+    // Datapack/resource pack: some projects publish a "+mod" version (jar-only,
+    // often newest) alongside the real datapack version - keep only versions
+    // that actually ship a .zip so newest-first can't land on the mod jar. If
+    // the API returned no file lists at all (stubs/edge states), leave it be.
+    if (
+      isZipOnlyKind(targetKind) &&
+      !resolved.versionId &&
+      versions.some((v) => Array.isArray(v.files) && v.files.length)
+    ) {
+      const withZip = versions.filter((v) =>
+        (v.files || []).some((f) => /\.zip(\?|#|$)/i.test(f.filename || f.url || ''))
+      );
+      if (withZip.length) versions = withZip;
+    }
     if (!versions.length)
       throw httpError(
         404,
@@ -349,7 +388,12 @@ async function installFromUrl(serverId, input, { actor = 'system', kind, onProgr
           : `No ${resolved.title} build matches ${versionLoader || 'this loader'} ${mcVersion || ''}`.trim()
       );
     const version = versions[0];
-    const file = modrinth.primaryFile(version);
+    const file = pickDownloadFile(version, targetKind);
+    if (!file)
+      throw httpError(
+        409,
+        `That ${resolved.title} version has no ${targetKind === 'resourcepack' ? 'resource pack' : 'datapack'} (.zip) file - it's only published as a mod jar. Install the datapack version, or add it as a mod instead.`
+      );
     downloadUrl = file.url;
     Object.assign(meta, {
       platform: 'modrinth',
@@ -472,6 +516,16 @@ async function installFromUrl(serverId, input, { actor = 'system', kind, onProgr
     });
   }
   // source.kind === 'direct' → plain download of the URL as-is.
+  // A datapack/resource pack must be a .zip; a .jar here is a mod-wrapped build
+  // that the game ignores in world/datapacks/ or resourcepacks/ (and then shows
+  // up as a phantom "Missing" overlay row). Registry sources already pick the
+  // right file above - this only catches a pasted direct .jar URL.
+  if (isZipOnlyKind(targetKind) && /\.jar(\?|#|$)/i.test(meta.filename || downloadUrl)) {
+    throw httpError(
+      409,
+      `A ${targetKind === 'resourcepack' ? 'resource pack' : 'datapack'} must be a .zip - this download is a .jar (a mod-wrapped build). Install the .zip, or add it as a mod instead.`
+    );
+  }
   meta.category = targetKind; // may have changed above (Modrinth datapack/resourcepack auto-detect)
 
   return installResolved(serverId, { downloadUrl, meta, kind: targetKind }, { actor, onProgress, ignoreVersion });
@@ -660,10 +714,7 @@ function setIgnoredUpdate(serverId, { file, contentId }, { ignore, actor = 'syst
   const row = overlayRow(serverId, { file, contentId });
 
   if (ignore) {
-    const check = db.get(
-      "SELECT * FROM update_checks WHERE subject_type = 'content' AND subject_id = ?",
-      row.id
-    );
+    const check = db.get("SELECT * FROM update_checks WHERE subject_type = 'content' AND subject_id = ?", row.id);
     if (!check || !check.latest_name || check.latest_name === row.version) {
       throw httpError(409, 'No pending update to ignore - run an update check first');
     }
