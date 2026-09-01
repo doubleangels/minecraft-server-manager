@@ -13,6 +13,7 @@ const httpError = require('../utils/httpError');
 const fs = require('node:fs');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { nanoid } = require('nanoid');
 const db = require('../db');
 const { dataPath } = require('../storage/pathGuard');
@@ -29,6 +30,66 @@ const onRescanFailed = (err) =>
   logger.debug('A background library rescan failed to start.', { err: serializeError(err, { includeStack: false }) });
 
 const PLUGIN_TYPES = new Set(['PAPER', 'PURPUR', 'PUFFERFISH', 'LEAF', 'FOLIA', 'SPIGOT', 'BUKKIT', 'CANYON']);
+
+// --- Orphan adoption (listContent) -------------------------------------------
+// Files on disk with no server_content row get matched back to a library_files
+// row so they show their real name/version/icon instead of a bare placeholder.
+// Caches keep the cost near zero on repeat renders.
+const adoptHashCache = new Map(); // `${abs}:${mtimeMs}:${size}` -> sha256 | null
+const metaRepairInFlight = new Set(); // library ids currently being refreshed
+
+function stripContentExt(name) {
+  return name.replace(/\.(jar|zip)$/i, '');
+}
+
+/** A library name that is really just the file name carries no display value. */
+function nameIsFilenameLike(name, filename) {
+  if (!name) return true;
+  const n = name.trim().toLowerCase();
+  return n === filename.toLowerCase() || n === stripContentExt(filename).toLowerCase();
+}
+
+async function sha256File(abs, stat) {
+  const key = `${abs}:${stat ? stat.mtimeMs : 0}:${stat ? stat.size : 0}`;
+  if (adoptHashCache.has(key)) return adoptHashCache.get(key);
+  let hex;
+  try {
+    const hash = crypto.createHash('sha256');
+    await require('node:stream/promises').pipeline(fs.createReadStream(abs), hash);
+    hex = hash.digest('hex');
+  } catch {
+    hex = null;
+  }
+  adoptHashCache.set(key, hex);
+  return hex;
+}
+
+/** Write the overlay server_content row a confidently-adopted orphan should have
+ *  had, so toggle/delete/update-check start keying off it and later renders skip
+ *  the on-disk match. Best-effort - a listing never fails because this did. */
+function healOverlayRow(serverId, lib, filename, kind) {
+  try {
+    db.run(
+      `INSERT INTO server_content (id, server_id, library_id, kind, managed_by, name, filename, version, icon_url)
+       VALUES (?, ?, ?, ?, 'overlay', ?, ?, ?, ?)
+       ON CONFLICT(server_id, filename) DO NOTHING`,
+      `sc_${nanoid(8)}`,
+      serverId,
+      lib.id,
+      kind,
+      lib.name || prettifyJarName(filename),
+      filename,
+      lib.version || null,
+      lib.icon_url || null
+    );
+  } catch (err) {
+    logger.debug('Could not heal an orphaned overlay row.', {
+      serverId,
+      filename,
+      err: String(err && err.message),
+    });
+  }
+}
 
 // Content filenames must be bare names inside the server's content dir. dataPath()
 // only guarantees containment within DATA_DIR, so a `file` like "../../../panel.db"
@@ -173,6 +234,52 @@ async function listContent(serverId) {
     return pending && pending === row.ignored_update_version ? pending : null;
   };
 
+  // Orphan adoption index. On a pack server a row-less file *is* pack-managed, so
+  // only non-pack servers adopt. Built lazily and once - a listing with no
+  // orphans never touches library_files here.
+  const canAdopt = !isPackServer(server) && !server.pack;
+  let adoptIndex = null;
+  const buildAdoptIndex = () => {
+    if (adoptIndex) return adoptIndex;
+    const byExactName = new Map();
+    const byLowerName = new Map();
+    const bySha = new Map();
+    const byStem = new Map();
+    for (const r of db.all(
+      `SELECT id, name, filename, version, icon_url, icon_rel_path, platform, project_id, file_id,
+              mc_versions_json, loaders_json, sha256, category
+       FROM library_files WHERE category IN ('mod','plugin','datapack','resourcepack')`
+    )) {
+      if (!byExactName.has(r.filename)) byExactName.set(r.filename, r);
+      const lower = r.filename.toLowerCase();
+      if (!byLowerName.has(lower)) byLowerName.set(lower, r);
+      if (r.sha256 && !bySha.has(r.sha256)) bySha.set(r.sha256, r);
+      const stem = stripContentExt(r.filename).toLowerCase();
+      if (!byStem.has(stem)) byStem.set(stem, []);
+      byStem.get(stem).push(r);
+    }
+    adoptIndex = { byExactName, byLowerName, bySha, byStem };
+    return adoptIndex;
+  };
+
+  // Match a row-less on-disk file to a library row. `confident` gates DB healing
+  // (writing the missing server_content row) - only exact-name and hash matches
+  // are certain enough; case- and stem-only matches drive display but nothing more.
+  const matchOrphanLib = async (baseName, kind, absPath, stat) => {
+    if (!canAdopt) return { lib: null, confident: false };
+    const { byExactName, byLowerName, bySha, byStem } = buildAdoptIndex();
+    const exact = byExactName.get(baseName);
+    if (exact) return { lib: exact, confident: true };
+    const lower = byLowerName.get(baseName.toLowerCase());
+    if (lower) return { lib: lower, confident: false };
+    const sha = await sha256File(absPath, stat);
+    const shaHit = sha && bySha.get(sha);
+    if (shaHit) return { lib: shaHit, confident: true };
+    const stemHits = byStem.get(stripContentExt(baseName).toLowerCase());
+    if (stemHits && stemHits.length === 1) return { lib: stemHits[0], confident: false };
+    return { lib: null, confident: false };
+  };
+
   // Datapacks and resource packs work on every server type (vanilla included),
   // unlike mods/plugins which are loader/platform-specific - always scan all
   // three dirs, not just the one matching this server's type.
@@ -192,20 +299,43 @@ async function listContent(serverId) {
       if (!baseName.endsWith('.jar') && !baseName.endsWith('.zip')) continue;
       seen.add(baseName);
       const row = byFile.get(baseName);
-      const stat = await fsp.stat(path.join(dirAbs, entry.name)).catch(() => null);
-      // A file with no server_content row but an exact library_files match by
-      // name+category is an orphaned custom install - the row was dropped (e.g.
-      // migration 016) or never written while the file stayed on disk. Adopt the
-      // library metadata so it shows its real name/icon/version instead of a
-      // bare "unknown file" placeholder.
-      const adoptedLib =
-        !row && !isPackServer(server) && !server.pack
-          ? db.get('SELECT * FROM library_files WHERE filename = ? AND category = ?', baseName, kind)
-          : null;
+      const absPath = path.join(dirAbs, entry.name);
+      const stat = await fsp.stat(absPath).catch(() => null);
+
+      // A file with no server_content row is an orphaned custom install - the row
+      // was dropped (e.g. migration 016) or never written while the file stayed
+      // on disk. Match it back to a library_files row so it shows its real
+      // name/version/icon instead of a bare placeholder, and heal the missing
+      // row when the match is certain.
+      let adoptedLib = null;
+      if (!row) {
+        const m = await matchOrphanLib(baseName, kind, absPath, stat);
+        adoptedLib = m.lib;
+        if (adoptedLib && m.confident) healOverlayRow(serverId, adoptedLib, baseName, kind);
+      }
+
       const lib = (row && row.library_id ? libById.get(row.library_id) : null) || adoptedLib;
+
+      // If the backing library row knows its platform project but is missing a
+      // usable icon or its display name/version, refresh it in the background so
+      // the next render is complete. Deduped per library id, never awaited.
+      if (lib && lib.platform && lib.project_id && !metaRepairInFlight.has(lib.id)) {
+        const iconMissing = !lib.icon_rel_path && !lib.icon_url;
+        const metaMissing = !lib.version || nameIsFilenameLike(lib.name, lib.filename || baseName);
+        if (iconMissing || metaMissing) {
+          metaRepairInFlight.add(lib.id);
+          library
+            .ensureContentMeta(lib)
+            .catch(() => {})
+            .finally(() => metaRepairInFlight.delete(lib.id));
+        }
+      }
+
+      const adoptedName = adoptedLib && !nameIsFilenameLike(adoptedLib.name, baseName) ? adoptedLib.name : null;
+
       items.push({
         id: row ? row.id : null,
-        name: row ? row.name : (adoptedLib && adoptedLib.name) || prettifyJarName(baseName),
+        name: row ? row.name : adoptedName || prettifyJarName(baseName),
         file: baseName,
         kind: row ? row.kind : kind,
         source: row
@@ -403,6 +533,19 @@ async function installFromUrl(serverId, input, { actor = 'system', kind, onProgr
           : `No ${resolved.title} build matches ${versionLoader || 'this loader'} ${mcVersion || ''}`.trim()
       );
     const version = versions[0];
+    // Modrinth types some datapack projects as `mod` (they also ship a Fabric
+    // wrapper). When "Add by URL" left the kind unset and the build we picked is
+    // a .zip tagged `datapack`, treat it as a datapack so it lands in
+    // world/datapacks/ and is stored with category 'datapack' - otherwise it
+    // installs as a mod and later renders as an unlabelled "file" row.
+    if (
+      !kind &&
+      targetKind === 'mod' &&
+      (version.loaders || []).map((l) => String(l).toLowerCase()).includes('datapack')
+    ) {
+      const zip = (version.files || []).find((f) => /\.zip(\?|#|$)/i.test(f.filename || f.url || ''));
+      if (zip) targetKind = 'datapack';
+    }
     const file = pickDownloadFile(version, targetKind);
     if (!file)
       throw httpError(

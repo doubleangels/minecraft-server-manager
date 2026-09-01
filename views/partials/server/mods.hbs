@@ -42,7 +42,7 @@
             <td class="w-full max-w-0">
               <div class="flex items-center gap-2.5">
                 {{#if iconUrl}}
-                  <img src="{{iconUrl}}" alt="" class="size-8 shrink-0 rounded bg-inset object-cover">
+                  <img src="{{iconUrl}}" alt="" loading="lazy" data-mod-icon class="size-8 shrink-0 rounded bg-inset object-cover">
                 {{else}}
                   <span class="grid size-8 shrink-0 place-items-center rounded bg-inset text-ink-faint">{{{icon 'puzzle' 'size-4'}}}</span>
                 {{/if}}
@@ -100,6 +100,10 @@
       </tbody>
     </table>
   </div>
+  {{! Cloned in by the global image-error handler (app.js) when a /library/icons
+      request 404s, so a stale icon path degrades to this exact placeholder
+      instead of a broken-image glyph. }}
+  <template id="mod-icon-fallback"><span class="grid size-8 shrink-0 place-items-center rounded bg-inset text-ink-faint">{{{icon 'puzzle' 'size-4'}}}</span></template>
   {{else}}
     {{> empty-state iconName='puzzle' title='No Mods Installed Yet' message='Search Modrinth or CurseForge; add a mod, plugin, or datapack by URL; or import a zip with the buttons above. Custom content lives in the shared library and survives pack updates.'}}
   {{/if}}

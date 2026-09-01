@@ -26,6 +26,7 @@ const TASK_TYPES = {
   'storage-scan': { label: 'Storage re-scan', serverScoped: false },
   'tmp-clean': { label: 'Purge tmp', serverScoped: false },
   'ban-expiry-sweep': { label: 'Ban expiry sweep', serverScoped: false },
+  'content-meta-backfill': { label: 'Content metadata backfill', serverScoped: false },
 };
 
 async function runTask(schedule) {
@@ -83,6 +84,9 @@ async function runTask(schedule) {
       break;
     case 'ban-expiry-sweep':
       await require('./players').sweepExpiredBans();
+      break;
+    case 'content-meta-backfill':
+      await require('./contentIcons').backfillContentMeta();
       break;
     default:
       throw new Error(`Unknown task type ${schedule.task_type}`);
@@ -166,6 +170,7 @@ function seedGlobalDefaults() {
     { task_type: 'storage-scan', cron: '0 */6 * * *' },
     { task_type: 'tmp-clean', cron: '30 4 * * *' },
     { task_type: 'ban-expiry-sweep', cron: '*/15 * * * *' },
+    { task_type: 'content-meta-backfill', cron: '20 3 * * *' },
   ];
   for (const d of defaults) {
     const exists = db.get('SELECT 1 AS x FROM schedules WHERE task_type = ? AND server_id IS NULL', d.task_type);

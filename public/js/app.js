@@ -29,9 +29,25 @@ document.addEventListener(
   (e) => {
     const img = e.target;
     if (!(img instanceof HTMLImageElement)) return;
+
     const fallback = img.dataset.fallbackIcon;
-    if (!fallback || img.src === new URL(fallback, location.href).href) return;
-    img.src = fallback;
+    if (fallback && img.src !== new URL(fallback, location.href).href) {
+      img.src = fallback;
+      return;
+    }
+
+    // Mod-list icons have no fallback URL - swap in the server-rendered puzzle
+    // placeholder template so a dead /library/icons path never shows a
+    // broken-image glyph. Guarded so it can't loop.
+    if (img.dataset.modIcon !== undefined && !img.dataset.iconFailed) {
+      img.dataset.iconFailed = '1';
+      const tpl = document.getElementById('mod-icon-fallback');
+      if (tpl && tpl.content.firstElementChild) {
+        img.replaceWith(tpl.content.firstElementChild.cloneNode(true));
+      } else {
+        img.remove();
+      }
+    }
   },
   true
 );

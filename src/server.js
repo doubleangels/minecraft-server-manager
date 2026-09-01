@@ -211,6 +211,18 @@ function startBackgroundServices(httpServer) {
   setTimeout(runMaintenance, 60_000).unref();
   setInterval(runMaintenance, 24 * 3600 * 1000).unref();
 
+  // One-shot after boot so a freshly-updated panel repairs missing mod/datapack
+  // icons and names right away instead of waiting for the nightly
+  // content-meta-backfill schedule. Steady-state repair happens lazily from the
+  // Mods tab render.
+  setTimeout(
+    () =>
+      require('./services/contentIcons')
+        .backfillContentMeta()
+        .catch(() => {}),
+    90_000
+  ).unref();
+
   // Docker integration comes up in the background - the panel must stay usable
   // when the daemon is down (setup wizard handles that state).
   (async () => {

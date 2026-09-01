@@ -141,3 +141,26 @@ test('cached library icons are served authed-only (the /library/icons static mou
   const escape = await app.req('GET', '/library/icons/../mods/secret.jar', { cookie });
   assert.notEqual(escape.status, 200);
 });
+
+test('the Mods tab marks icon <img>s and ships the puzzle fallback template', async () => {
+  const fsp = require('node:fs/promises');
+  const path = require('node:path');
+  const { dataPath } = require('../src/storage/pathGuard');
+  const id = app.seedServer('srv_modicons'); // PAPER, no pack
+  const dpDir = dataPath('servers', id, 'world/datapacks');
+  await fsp.mkdir(dpDir, { recursive: true });
+  await fsp.writeFile(path.join(dpDir, 'render-dp.zip'), 'x');
+  db.run(
+    `INSERT INTO server_content (id, server_id, kind, managed_by, name, filename, version, icon_url)
+     VALUES ('sc_render', ?, 'datapack', 'overlay', 'Render DP', 'render-dp.zip', '1.0',
+             'https://example.invalid/render.png')`,
+    id
+  );
+
+  const r = await app.req('GET', `/servers/${id}/mods`, { cookie, headers: { Accept: 'text/html' } });
+  assert.equal(r.status, 200);
+  assert.match(r.text, /<img[^>]*\bdata-mod-icon\b/);
+  const templates = r.text.match(/<template id="mod-icon-fallback">/g) || [];
+  assert.equal(templates.length, 1, 'exactly one fallback template');
+  assert.match(r.text, /<template id="mod-icon-fallback">.*bg-inset.*<\/template>/s);
+});

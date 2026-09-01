@@ -3,6 +3,7 @@
 require('./helpers/env');
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
 const app = require('./helpers/app'); // migrates the DB + gives us seedServer()
@@ -404,6 +405,212 @@ test('installFromUrl still honors an explicit kind over auto-detection', async (
     // the explicit kind must win, same as it always has.
     await mods.installFromUrl(id, 'https://modrinth.com/mod/sodium', { actor: 'test', kind: 'datapack' });
     const row = db.get('SELECT * FROM server_content WHERE server_id = ? AND filename = ?', id, 'sodium-datapack.zip');
+    assert.equal(row.kind, 'datapack');
+  } finally {
+    modrinth.resolveUrl = realResolveUrl;
+    modrinth.getVersions = realGetVersions;
+    modrinth.primaryFile = realPrimaryFile;
+    library.downloadToLibrary = realDownload;
+    library.installToServer = realInstall;
+  }
+});
+
+// --- robust orphan adoption -------------------------------------------------
+
+/** Stub the background metadata repair so adoption tests never hit the network. */
+function muteMetaRepair() {
+  const real = library.ensureContentMeta;
+  library.ensureContentMeta = async () => {};
+  return () => {
+    library.ensureContentMeta = real;
+  };
+}
+
+test('listContent adopts an orphan whose library row has a drifted category', async () => {
+  const id = app.seedServer('srv_dp_catdrift'); // PAPER, no pack
+  const restore = muteMetaRepair();
+  const dpDir = dataPath('servers', id, 'world/datapacks');
+  await fsp.mkdir(dpDir, { recursive: true });
+  await fsp.writeFile(path.join(dpDir, 'skyblock-advancements-1.0.12.zip'), 'x');
+
+  // Modrinth typed this datapack project as a "mod", so category = 'mod'.
+  db.run(
+    `INSERT INTO library_files (id, category, name, filename, rel_path, sha256, size_bytes, version, icon_url, platform, project_id)
+     VALUES ('lib_catdrift', 'mod', 'Skyblock Advancements', 'skyblock-advancements-1.0.12.zip',
+             'library/lib_catdrift', 'sha-catdrift', 100, '1.0.12',
+             'https://example.invalid/adv.png', 'modrinth', 'skyblock-advancements')`
+  );
+
+  try {
+    const item = (await mods.listContent(id)).find((i) => i.file === 'skyblock-advancements-1.0.12.zip');
+    assert.equal(item.name, 'Skyblock Advancements');
+    assert.equal(item.version, '1.0.12');
+    assert.equal(item.iconUrl, 'https://example.invalid/adv.png');
+    assert.equal(item.source, 'overlay');
+    assert.equal(item.kind, 'datapack');
+  } finally {
+    restore();
+  }
+});
+
+test('listContent adopts an orphan by file hash when the name gained/lost an extension', async () => {
+  const id = app.seedServer('srv_dp_hash');
+  const restore = muteMetaRepair();
+  const dpDir = dataPath('servers', id, 'world/datapacks');
+  await fsp.mkdir(dpDir, { recursive: true });
+  const bytes = 'datapack-zip-bytes';
+  await fsp.writeFile(path.join(dpDir, 'standard-skyblock-2.1.6.zip'), bytes);
+  const sha = crypto.createHash('sha256').update(Buffer.from(bytes)).digest('hex');
+
+  // Library row recorded a .jar name (a mod-wrapped build) - only the hash matches.
+  db.run(
+    `INSERT INTO library_files (id, category, name, filename, rel_path, sha256, size_bytes, version, platform, project_id)
+     VALUES ('lib_hash', 'datapack', 'Standard Skyblock', 'ab12cd34-standard-skyblock-2.1.6.jar',
+             'library/lib_hash', ?, 100, '2.1.6', 'modrinth', 'standard-skyblock')`,
+    sha
+  );
+
+  try {
+    const item = (await mods.listContent(id)).find((i) => i.file === 'standard-skyblock-2.1.6.zip');
+    assert.equal(item.name, 'Standard Skyblock');
+    assert.equal(item.version, '2.1.6');
+    assert.equal(item.source, 'overlay');
+  } finally {
+    restore();
+  }
+});
+
+test('a confident adoption heals the missing overlay server_content row', async () => {
+  const id = app.seedServer('srv_dp_heal');
+  const restore = muteMetaRepair();
+  const dpDir = dataPath('servers', id, 'world/datapacks');
+  await fsp.mkdir(dpDir, { recursive: true });
+  await fsp.writeFile(path.join(dpDir, 'skyvoid-biome-islands.zip'), 'x');
+  db.run(
+    `INSERT INTO library_files (id, category, name, filename, rel_path, sha256, size_bytes, version, platform, project_id)
+     VALUES ('lib_heal', 'datapack', 'Skyvoid Biome Islands', 'skyvoid-biome-islands.zip',
+             'library/lib_heal', 'sha-heal', 100, '1.0', 'modrinth', 'skyvoid-biome-islands')`
+  );
+
+  try {
+    await mods.listContent(id);
+    const row = db.get(
+      'SELECT * FROM server_content WHERE server_id = ? AND filename = ?',
+      id,
+      'skyvoid-biome-islands.zip'
+    );
+    assert.ok(row, 'overlay row was healed');
+    assert.equal(row.managed_by, 'overlay');
+    assert.equal(row.library_id, 'lib_heal');
+    assert.equal(row.kind, 'datapack');
+
+    // Second render now resolves through the row, still as custom content.
+    const item = (await mods.listContent(id)).find((i) => i.file === 'skyvoid-biome-islands.zip');
+    assert.equal(item.source, 'overlay');
+    assert.equal(item.name, 'Skyvoid Biome Islands');
+  } finally {
+    restore();
+  }
+});
+
+test('a pack server neither adopts nor heals a row-less datapack file', async () => {
+  const id = app.seedServer('srv_dp_packguard');
+  const restore = muteMetaRepair();
+  db.run(`UPDATE servers SET type = 'AUTO_CURSEFORGE' WHERE id = ?`, id);
+  const dpDir = dataPath('servers', id, 'world/datapacks');
+  await fsp.mkdir(dpDir, { recursive: true });
+  await fsp.writeFile(path.join(dpDir, 'pack-bundled-dp.zip'), 'x');
+  db.run(
+    `INSERT INTO library_files (id, category, name, filename, rel_path, sha256, size_bytes, version, platform, project_id)
+     VALUES ('lib_packguard', 'datapack', 'Pack Bundled DP', 'pack-bundled-dp.zip',
+             'library/lib_packguard', 'sha-packguard', 100, '1.0', 'modrinth', 'pack-bundled-dp')`
+  );
+
+  try {
+    const item = (await mods.listContent(id)).find((i) => i.file === 'pack-bundled-dp.zip');
+    assert.equal(item.source, 'pack');
+    assert.equal(
+      db.get('SELECT COUNT(*) AS n FROM server_content WHERE server_id = ?', id).n,
+      0,
+      'no overlay row was written on a pack server'
+    );
+  } finally {
+    restore();
+  }
+});
+
+test('an ambiguous stem-only match drives display but is not healed', async () => {
+  const id = app.seedServer('srv_dp_ambig');
+  const restore = muteMetaRepair();
+  const dpDir = dataPath('servers', id, 'world/datapacks');
+  await fsp.mkdir(dpDir, { recursive: true });
+  await fsp.writeFile(path.join(dpDir, 'ambiguous-pack.zip'), 'x');
+  // Two rows share the lower-cased stem 'ambiguous-pack'; neither matches the
+  // on-disk 'ambiguous-pack.zip' by exact name, case-folded name, or hash.
+  db.run(
+    `INSERT INTO library_files (id, category, name, filename, rel_path, sha256, size_bytes)
+     VALUES ('lib_ambig_a', 'datapack', 'A', 'ambiguous-pack.jar', 'library/a', 'sha-a', 100),
+            ('lib_ambig_b', 'datapack', 'B', 'Ambiguous-Pack.jar', 'library/b', 'sha-b', 100)`
+  );
+
+  try {
+    const item = (await mods.listContent(id)).find((i) => i.file === 'ambiguous-pack.zip');
+    assert.equal(item.source, 'unknown', 'stays a bare file row');
+    assert.equal(db.get('SELECT COUNT(*) AS n FROM server_content WHERE server_id = ?', id).n, 0);
+  } finally {
+    restore();
+  }
+});
+
+test('installFromUrl routes a Modrinth "mod" that is really a datapack (loader tag) to world/datapacks', async () => {
+  const id = app.seedServer('srv_dp_moddetect');
+  db.run(`UPDATE servers SET type = 'FABRIC', mc_version = '1.21.1' WHERE id = ?`, id);
+
+  const realResolveUrl = modrinth.resolveUrl;
+  const realGetVersions = modrinth.getVersions;
+  const realPrimaryFile = modrinth.primaryFile;
+  const realDownload = library.downloadToLibrary;
+  const realInstall = library.installToServer;
+
+  let seenCategory = null;
+  modrinth.resolveUrl = async () => ({
+    projectId: 'p-mod-dp',
+    slug: 'sky-void-additions',
+    title: 'Sky Void Additions',
+    iconUrl: 'https://example.invalid/svA.png',
+    projectType: 'mod', // Modrinth types it as a mod
+    versionId: null,
+  });
+  modrinth.getVersions = async () => [
+    {
+      id: 'v9',
+      version_number: '1.5.2',
+      game_versions: ['1.21.1'],
+      loaders: ['datapack'], // ... but the build is tagged datapack
+      files: [
+        {
+          url: 'https://example.invalid/sky-void-additions-1.5.2.zip',
+          filename: 'sky-void-additions-1.5.2.zip',
+          primary: true,
+        },
+      ],
+    },
+  ];
+  modrinth.primaryFile = (v) => v.files[0];
+  library.downloadToLibrary = async (url, meta) => {
+    seenCategory = meta.category;
+    return fakeLibraryRow('lib_moddetect', meta);
+  };
+  library.installToServer = async () => ({ filename: 'sky-void-additions-1.5.2.zip' });
+
+  try {
+    await mods.installFromUrl(id, 'https://modrinth.com/mod/sky-void-additions', { actor: 'test' });
+    assert.equal(seenCategory, 'datapack', 'library stored it under the datapack category');
+    const row = db.get(
+      'SELECT * FROM server_content WHERE server_id = ? AND filename = ?',
+      id,
+      'sky-void-additions-1.5.2.zip'
+    );
     assert.equal(row.kind, 'datapack');
   } finally {
     modrinth.resolveUrl = realResolveUrl;
