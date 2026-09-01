@@ -27,12 +27,13 @@ function init(serverId) {
 
   // ---- Back up now ----
   document.getElementById('bk-now')?.addEventListener('click', async () => {
+    const shrink = document.getElementById('bk-shrink')?.checked || false;
     try {
       await runTask({
-        title: 'Creating backup…',
-        start: () => postJson(`/api/servers/${serverId}/backups`),
+        title: shrink ? 'Backing up, then shrinking the world…' : 'Creating backup…',
+        start: () => postJson(`/api/servers/${serverId}/backups`, shrink ? { shrink: true } : undefined),
       });
-      toast('Backup created.');
+      toast(shrink ? 'Backup created. World shrink ran if the server was stopped.' : 'Backup created.');
       reload();
     } catch (err) {
       if (err.dismissed) return; // progress hidden - the task tray takes over

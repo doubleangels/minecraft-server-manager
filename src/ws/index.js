@@ -303,10 +303,22 @@ async function handleStats(ws, serverId) {
     cleanup();
   });
   ws.on('close', cleanup);
+  const liveCache = require('../services/liveCache');
   unsubscribe = subscribeStats(
     serverId,
     (sample) => {
-      if (ws.readyState === ws.OPEN) ws.send(JSON.stringify({ kind: 'stats', ...sample }));
+      if (ws.readyState !== ws.OPEN) return;
+      // Fold in the latest cached tick-performance sample (TPS/MSPT) so the
+      // metrics page can stream it on the same socket as CPU/mem/network.
+      const live = liveCache.get(serverId);
+      ws.send(
+        JSON.stringify({
+          kind: 'stats',
+          ...sample,
+          perf: live.perf || null,
+          perfSupported: live.perfSupported !== false,
+        })
+      );
     },
     (err) => {
       if (ws.readyState === ws.OPEN) ws.send(JSON.stringify({ kind: 'error', message: err.message }));

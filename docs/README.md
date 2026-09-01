@@ -15,6 +15,7 @@ A complete, self-hosted control panel for [itzg/docker-minecraft-server](https:/
 - **[Console & chat commands](console-and-chat.md)** - the live console, and custom in-game chat commands that run as the player.
 - **[Modpacks](modpacks.md)** - install CurseForge, Modrinth, FTB, and GT New Horizons packs, always pinned to an exact version.
 - **[Worlds & files](worlds-and-files.md)** - swap worlds, manage mods, and edit files directly in the browser.
+- **[Shrinking a world](world-shrink.md)** - reclaim disk space by removing chunks nobody visits, on its own or as part of a backup.
 
 ## Data & automation
 

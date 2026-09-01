@@ -4,6 +4,7 @@ import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { openModal } from '../lib/modal.js';
 import { confirmDialog } from '../lib/confirm.js';
+import { runTask } from '../lib/progress.js';
 import { setBusy, withBusy } from '../lib/loading.js';
 import { escapeHtml } from '../lib/format.js';
 import {
@@ -85,6 +86,8 @@ function init(serverId, serverName, serverStatus) {
       copyToModal(world);
     } else if (e.target.closest('[data-world-rename]')) {
       renameModal(world);
+    } else if (e.target.closest('[data-world-shrink]')) {
+      shrinkModal(world);
     } else if (e.target.closest('[data-world-reset]')) {
       resetModal(world, size);
     } else if (e.target.closest('[data-world-delete]')) {
@@ -204,6 +207,72 @@ function init(serverId, serverName, serverStatus) {
       ],
     });
     modal.body.querySelector('[data-r-name]').focus();
+  }
+
+  // ---- Shrink (remove rarely-visited chunks) ----
+  function shrinkModal(world) {
+    const content = document.createElement('div');
+    content.innerHTML = `
+      <p class="text-sm">This removes parts of <b>${escapeHtml(world)}</b> that no player has spent
+        <b>30 seconds or more</b> in, so the world takes less space on disk. Minecraft rebuilds a
+        removed area from the seed the next time someone travels there.</p>
+      <p class="help mt-2">The server must be stopped. <b>Back up first</b> — anything a player built
+        but barely stood in would be removed too. The spawn area is always kept.</p>
+      ${isRunning ? '<p class="notice notice-warn mt-2">Stop the server before shrinking its world.</p>' : ''}
+      <div class="mt-3 hidden rounded-md border border-line bg-inset/40 px-3 py-2 text-sm" data-sh-result></div>`;
+    const resultEl = content.querySelector('[data-sh-result]');
+
+    openModal({
+      title: `Shrink "${world}"`,
+      content,
+      actions: [
+        { label: 'Cancel', kind: 'ghost' },
+        {
+          label: 'Preview',
+          kind: 'ghost',
+          busyLabel: 'Checking…',
+          onClick: async () => {
+            const res = await postJSON(`${base}/${encodeURIComponent(world)}/shrink`, { dryRun: true });
+            if (!res) return false;
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = res.chunksRemoved
+              ? `About ${res.chunksRemoved.toLocaleString()} chunks (~${fmtBytes(res.bytesFreed)}) would be removed, from ${res.regionsScanned} region file(s).`
+              : 'Nothing to remove — every chunk in this world has been visited for 30 seconds or more.';
+            return false; // keep the modal open
+          },
+        },
+        {
+          label: 'Shrink World',
+          kind: 'primary',
+          busyLabel: 'Shrinking…',
+          onClick: async () => {
+            if (isRunning) {
+              toast('Stop the server first, then shrink its world.', { kind: 'error' });
+              return false;
+            }
+            try {
+              const r = await runTask({
+                title: `Shrinking "${world}"…`,
+                start: () => postJSON(`${base}/${encodeURIComponent(world)}/shrink`, {}),
+              });
+              toast(
+                r && r.chunksRemoved
+                  ? `Removed ${r.chunksRemoved.toLocaleString()} chunks — freed ${fmtBytes(r.bytesFreed)}.`
+                  : 'No rarely-visited chunks to remove.'
+              );
+              reload();
+            } catch (err) {
+              if (err.dismissed) return true; // task tray took over
+              toast(err.message || 'The world could not be shrunk. Please try again.', {
+                kind: 'error',
+                timeout: 9000,
+              });
+              return false;
+            }
+          },
+        },
+      ],
+    });
   }
 
   // ---- Reset / re-roll (active world) ----

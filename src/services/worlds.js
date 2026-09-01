@@ -1169,6 +1169,7 @@ module.exports = {
   libraryWorlds,
   deleteLibraryWorld,
   activeLevelName,
+  serverWorldDims,
   compatWarnings,
   readLevelVersion,
 };

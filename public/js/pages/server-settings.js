@@ -249,7 +249,7 @@ function init(serverId) {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: 'Export blueprint',
+          label: 'Export Blueprint',
           kind: 'primary',
           busyLabel: 'Exporting…',
           onClick: async ({ body }) => {

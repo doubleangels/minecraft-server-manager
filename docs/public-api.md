@@ -10,14 +10,14 @@ until a token exists.
 
 ## Enabling it
 
-**Settings → Public API → New token** - give it a label, choose its scope (all
-servers, or a specific subset), and optionally an expiry date. The full token is
-shown **once**, in a dialog; copy it now - only a short prefix is kept afterwards,
-for identification in the list.
+**Settings → Public API → New Key** - give it a name, choose what it can see (all
+servers, or a specific subset), and optionally an expiry date. The full key (a
+Bearer token) is shown **once**, in a dialog; copy it now - only a short prefix
+is kept afterwards, for identification in the list.
 
-Creating the first token turns the API on automatically (the **Serve `/api/v1`**
-switch is a pause control - untick it to stop serving without revoking any
-tokens). Revoke a token from the same table at any time; clients using it lose
+Creating the first key turns the API on automatically (the **Let outside apps
+read status** switch is a pause control - turn it off to stop serving without
+cancelling any keys). Cancel a key from the same table at any time; clients using it lose
 access immediately.
 
 Tokens are stored as a SHA-256 hash (never in plaintext), survive a panel

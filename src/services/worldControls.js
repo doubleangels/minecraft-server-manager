@@ -169,7 +169,10 @@ const QUICK_ACTIONS = {
   'save-all': { cmd: ['save-all', 'flush'], label: 'World saved' },
 };
 
-const looksLikeError = (out) => /Incorrect argument|Unknown command|Can't find element|Expected|<--\[HERE\]/i.test(out);
+const looksLikeError = (out) =>
+  /Incorrect argument|Unknown command|Can't find element|Expected|<--\[HERE\]|No game ?rule called|No such game ?rule/i.test(
+    out
+  );
 
 async function rcon(serverId, args) {
   return cleanText(await execCapture(serverId, ['rcon-cli', ...args]));
@@ -289,7 +292,9 @@ function writePvp(serverId, on) {
   fs.renameSync(tmp, file);
 }
 
-async function getState(serverId) {
+// opts.rules: restrict the gamerule reads to this subset (the World Controls
+// page only asks for the rules whose chips are on screen). Omit for the lot.
+async function getState(serverId, opts = {}) {
   const state = {};
   const time = await queryTime(serverId);
   if (time) {
@@ -305,12 +310,13 @@ async function getState(serverId) {
   // ~40 gamerules would be ~80 sequential RCON round trips per poll if every one
   // tried both spellings. Probe the first rule with both, learn the server's era,
   // then fan the rest out concurrently (small pool - don't flood the daemon).
-  const rules = Object.keys(GAMERULES);
+  const wanted =
+    Array.isArray(opts.rules) && opts.rules.length ? opts.rules.filter((r) => Object.hasOwn(GAMERULES, r)) : null;
+  const rules = wanted && wanted.length ? wanted : Object.keys(GAMERULES);
   const first = rules[0];
   const firstSnake = await rcon(serverId, ['gamerule', GAMERULES[first]]);
   const spelling = looksLikeError(firstSnake) ? 'camel' : 'snake';
-  const firstVal =
-    spelling === 'snake' ? parseGameruleBool(firstSnake) : await queryGamerule(serverId, first, 'camel');
+  const firstVal = spelling === 'snake' ? parseGameruleBool(firstSnake) : await queryGamerule(serverId, first, 'camel');
   if (firstVal !== null) state[first] = firstVal;
   const rest = rules.slice(1);
   const values = await mapLimit(rest, 6, (rule) => queryGamerule(serverId, rule, spelling));
@@ -337,8 +343,24 @@ async function runQuick(serverId, action, { actor = 'system' } = {}) {
   else out = await rcon(serverId, quick.cmd);
   // A server.properties edit isn't an RCON command - skip the RCON error gate.
   if (!quick.prop && looksLikeError(out)) {
-    const err = new Error(`The server rejected the command: ${out.split('\n')[0]}`);
-    err.status = 502;
+    const reply = (out.split('\n')[0] || '').trim();
+    // Record the failure too - the History tab is where an operator looks, and
+    // "check the logs" was never useful (the log viewer shows the game's own
+    // output, not the panel's).
+    recordEvent({
+      serverId,
+      actor,
+      type: 'rcon',
+      summary: `Quick action failed: ${quick.label}`,
+      details: { action, reply: reply.slice(0, 300) },
+    });
+    // 4xx, not 5xx: the JSON error handler passes a sub-500 err.message straight
+    // through to the browser, so the user sees this sentence instead of the
+    // generic "unexpected server error - check the panel logs".
+    const err = new Error(
+      "Minecraft didn't accept that change. Your server's version may not have this option, or it may need a plugin."
+    );
+    err.status = 422;
     throw err;
   }
   recordEvent({
@@ -351,4 +373,4 @@ async function runQuick(serverId, action, { actor = 'system' } = {}) {
   return { label: quick.label, output: out.trim() };
 }
 
-module.exports = { getState, runQuick, QUICK_ACTIONS };
+module.exports = { getState, runQuick, QUICK_ACTIONS, looksLikeError };

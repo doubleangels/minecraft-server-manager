@@ -138,6 +138,7 @@ function createApp() {
           return 'bg-grass-500';
         },
         capitalize: (s) => (typeof s === 'string' && s ? s[0].toUpperCase() + s.slice(1) : s),
+        short: (s, n) => (typeof s === 'string' ? s.replace(/^sha256:/, '').slice(0, Number(n) || 12) : s),
         initial: (s) => (typeof s === 'string' && s ? s[0].toUpperCase() : '?'),
         default: (v, fallback) => (v === undefined || v === null || v === '' ? fallback : v),
         concat: (...args) => args.slice(0, -1).join(''),

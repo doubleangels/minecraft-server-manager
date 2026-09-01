@@ -82,7 +82,7 @@ const SUB_LABELS = {
   mods: 'Mods',
   map: 'Map',
   files: 'Files',
-  metrics: 'Metrics',
+  metrics: 'Live',
   history: 'History',
   settings: 'Configuration',
   discord: 'Discord',
@@ -381,6 +381,42 @@ router.get(
       // Real per-category sizes from the storage index (view contract:
       // [{label, size, pct, color}]; empty → "run a scan" state).
       const indexer = require('../../storage/indexer');
+
+      // --- Health & stability: values already collected elsewhere, never shown
+      // on a live view. All best-effort - a Docker hiccup must not 500 the tab.
+      const isLive = ['running', 'starting', 'unhealthy', 'stalled'].includes(row.status);
+      if (isLive) {
+        try {
+          context.health = await require('../../docker/containers').inspectStatus(row.id);
+        } catch {
+          /* leave undefined - the card just omits the Docker-sourced fields */
+        }
+      }
+      const countEvents = (type) =>
+        db.get('SELECT COUNT(*) AS n FROM events WHERE server_id = ? AND type = ?', row.id, type)?.n || 0;
+      context.stability = {
+        oomKills: countEvents('oom'),
+        autoRestarts: countEvents('auto-restarted'),
+        crashes: countEvents('crashed'),
+      };
+      context.lastCrash = db.get(
+        'SELECT id, summary, exception, file_mtime FROM crash_reports WHERE server_id = ? ORDER BY file_mtime DESC LIMIT 1',
+        row.id
+      );
+      context.recentEvents = eventsService.listEvents({ serverId: row.id, limit: 8 }).map(eventVM);
+
+      // --- Per-world / per-dimension sizes + host disk free.
+      try {
+        context.worldSizes = await require('../../services/worlds').listServerWorlds(row.id);
+      } catch {
+        context.worldSizes = [];
+      }
+      try {
+        context.diskFree = (await indexer.diskFree()).free;
+      } catch {
+        /* statfs failed - card omits the "free on disk" line */
+      }
+
       const total = indexer.sizeOf(`servers/${row.id}`);
       if (total > 0) {
         const cats = [

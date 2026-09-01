@@ -271,6 +271,8 @@ router.get('/servers/live', (req, res) => {
       memUsedMb: e.stats ? Math.round(e.stats.memUsedBytes / 1024 / 1024) : null,
       players: e.players ? { online: e.players.online, max: e.players.max, names: e.players.names } : null,
       startedAt: e.startedAt || null,
+      perf: e.perf || null,
+      perfSupported: e.perfSupported !== false,
       // Shared with the SSR statusDetail (viewModels.js) so the label the page
       // rendered on load and the one this poll hydrates in can never disagree.
       phase: liveCache.statusDetail(e),
@@ -1172,9 +1174,10 @@ router.post(
     const server = requireServer(req.params.id);
     const actor = req.user.username;
     const note = String(req.body?.note || '');
+    const shrinkAfter = Boolean(req.body?.shrink);
     const taskId = tasks.run(`Backing up ${server.display_name}`, { serverId: server.id, actor }, async (t) => {
       t.step('Snapshotting server directory (save-off → save-all → zip → save-on)');
-      const backup = await backups.createBackup(server.id, { reason: 'manual', actor, note });
+      const backup = await backups.createBackup(server.id, { reason: 'manual', actor, note, shrinkAfter });
       return { id: backup.id, filename: backup.filename, size: backup.size_bytes };
     });
     res.status(202).json({ ok: true, taskId });
@@ -1235,10 +1238,25 @@ router.get(
   '/servers/:id/world/state',
   asyncHandler(async (req, res, next) => {
     requireServer(req.params.id);
+    // ?rules=a,b,c limits the gamerule reads to what the page is showing;
+    // ?all=1 forces the full set.
+    const all = req.query.all === '1' || req.query.all === 'true';
+    const rules = all
+      ? undefined
+      : String(req.query.rules || '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
     try {
-      res.json({ ok: true, running: true, state: await worldControls.getState(req.params.id) });
+      const state = await worldControls.getState(req.params.id, { rules });
+      // Flag a partial read so the page can say "some settings couldn't be read"
+      // rather than showing stale chips as if they were current.
+      const asked = rules && rules.length ? rules : null;
+      const degraded = asked ? asked.some((r) => !Object.hasOwn(state, r)) : false;
+      res.json({ ok: true, running: true, degraded, state });
     } catch (err) {
-      logger.debug('Could not read world state; reporting the server as not running.', {
+      // info, not debug: "check the logs" is only honest if something is there.
+      logger.info('Could not read world state; reporting the server as not running.', {
         serverId: req.params.id,
         err: serializeError(err, { includeStack: false }),
       });
@@ -1254,6 +1272,43 @@ router.post(
     const { action } = z.object({ action: z.enum(Object.keys(worldControls.QUICK_ACTIONS)) }).parse(req.body);
     const result = await worldControls.runQuick(req.params.id, action, { actor: req.user.username });
     res.json({ ok: true, ...result });
+  })
+);
+
+// ---- Shrink world (remove rarely-visited chunks) ----
+// dryRun:true previews the numbers synchronously (the modal shows them before
+// the confirm); a real run is a task (it can touch thousands of region files).
+// Server must be stopped - worldShrink.shrinkWorld enforces that with a 409.
+const worldShrink = require('../../services/worldShrink');
+router.post(
+  '/servers/:id/worlds/:world/shrink',
+  requireRoleKeys('admin', 'operator'),
+  asyncHandler(async (req, res, next) => {
+    const server = requireServer(req.params.id);
+    const { world, dryRun } = z
+      .object({
+        world: z
+          .string()
+          .trim()
+          .regex(/^[A-Za-z0-9 _.-]{1,64}$/),
+        dryRun: z.coerce.boolean().default(false),
+      })
+      .parse({ world: req.params.world, dryRun: req.body?.dryRun ?? req.query.dryRun });
+    const actor = req.user.username;
+
+    if (dryRun) {
+      const result = await worldShrink.shrinkWorld(server.id, { worldName: world, dryRun: true, actor });
+      return res.json({ ok: true, ...result });
+    }
+    const taskId = tasks.run(
+      `Shrinking "${world}" on ${server.display_name}`,
+      { serverId: server.id, actor },
+      async (t) => {
+        t.step('Scanning region files for rarely-visited chunks');
+        return worldShrink.shrinkWorld(server.id, { worldName: world, actor });
+      }
+    );
+    res.status(202).json({ ok: true, taskId });
   })
 );
 
@@ -1446,39 +1501,35 @@ router.post(
   asyncHandler((req, res, next) => {
     const server = requireServer(req.params.id);
     const actor = req.user.username;
-    const taskId = tasks.run(
-      `Updating mods on ${server.display_name}`,
-      { serverId: server.id, actor },
-      async (t) => {
-        const rows = db.all(
-          `SELECT sc.id, sc.name
+    const taskId = tasks.run(`Updating mods on ${server.display_name}`, { serverId: server.id, actor }, async (t) => {
+      const rows = db.all(
+        `SELECT sc.id, sc.name
              FROM server_content sc
              JOIN library_files lf ON lf.id = sc.library_id
              JOIN update_checks uc ON uc.subject_type = 'content' AND uc.subject_id = sc.id
             WHERE sc.server_id = ? AND sc.managed_by = 'overlay' AND lf.project_id IS NOT NULL
               AND uc.latest_name IS NOT NULL AND uc.latest_name != sc.version
               AND (sc.ignored_update_version IS NULL OR sc.ignored_update_version != uc.latest_name)`,
-          server.id
-        );
-        const updated = [];
-        const failed = [];
-        for (const row of rows) {
-          t.step(`Updating ${row.name}`);
-          try {
-            const r = await mods.applyOverlayUpdate(server.id, { contentId: row.id }, { actor });
-            updated.push({ name: r.name, version: r.version });
-          } catch (err) {
-            failed.push({ name: row.name, error: err.message });
-          }
+        server.id
+      );
+      const updated = [];
+      const failed = [];
+      for (const row of rows) {
+        t.step(`Updating ${row.name}`);
+        try {
+          const r = await mods.applyOverlayUpdate(server.id, { contentId: row.id }, { actor });
+          updated.push({ name: r.name, version: r.version });
+        } catch (err) {
+          failed.push({ name: row.name, error: err.message });
         }
-        let restarted = false;
-        if (updated.length) {
-          t.step('Restarting server');
-          restarted = await restartAfterModUpdate(server.id, actor);
-        }
-        return { updated, failed, restarted };
       }
-    );
+      let restarted = false;
+      if (updated.length) {
+        t.step('Restarting server');
+        restarted = await restartAfterModUpdate(server.id, actor);
+      }
+      return { updated, failed, restarted };
+    });
     res.status(202).json({ ok: true, taskId });
   })
 );

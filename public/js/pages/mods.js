@@ -611,7 +611,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
     const ok = await confirmDialog({
       title: 'Update all mods?',
       message: `Applies ${pending} available update${pending === 1 ? '' : 's'}, then restarts the server once if it is running. Ignored updates are skipped.`,
-      confirmLabel: 'Update all',
+      confirmLabel: 'Update All',
     });
     if (!ok) return;
     let result;

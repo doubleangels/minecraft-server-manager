@@ -102,7 +102,11 @@ function init() {
     try {
       const res = await post('/api/settings/public-api', { enabled });
       if (res) {
-        toast(res.enabled ? 'Public API enabled.' : 'Public API disabled.');
+        toast(
+          res.enabled
+            ? 'Outside apps can now read your servers’ status.'
+            : 'Outside apps can no longer read your servers’ status.'
+        );
       } else {
         el.checked = !enabled; // revert - post() already toasted why
       }
@@ -121,19 +125,21 @@ function init() {
     const content = document.createElement('div');
     content.className = 'space-y-3';
     content.innerHTML = `
-      <div><label class="label" for="at-label">Label</label>
-        <input class="input" id="at-label" autocomplete="off" placeholder="e.g. status dashboard"></div>
-      <div><span class="label">Scope</span>
-        <label class="flex items-center gap-2 text-sm"><input type="radio" name="at-scope" value="all" checked> All servers</label>
-        <label class="flex items-center gap-2 text-sm"><input type="radio" name="at-scope" value="some"> Specific servers</label>
+      <div><label class="label" for="at-label">Name</label>
+        <input class="input" id="at-label" autocomplete="off" placeholder="e.g. Status page">
+        <p class="help">Just so you can recognise this key in the list later.</p></div>
+      <div><span class="label">What it can see</span>
+        <label class="flex items-center gap-2 text-sm"><input type="radio" name="at-scope" value="all" checked> Every server</label>
+        <label class="flex items-center gap-2 text-sm"><input type="radio" name="at-scope" value="some"> Only the ones I pick</label>
       </div>
       <div><label class="label" for="at-servers">Servers</label>
         <select class="input" id="at-servers" multiple size="6" disabled>
           ${servers.map((s) => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}
         </select>
       </div>
-      <div><label class="label" for="at-expires">Expires (optional)</label>
-        <input class="input" id="at-expires" type="datetime-local"></div>`;
+      <div><label class="label" for="at-expires">Stop working on (optional)</label>
+        <input class="input" id="at-expires" type="datetime-local">
+        <p class="help">Leave blank and the key works until you cancel it.</p></div>`;
     const scopeRadios = content.querySelectorAll('input[name="at-scope"]');
     const serverSel = content.querySelector('#at-servers');
     scopeRadios.forEach((r) =>
@@ -142,7 +148,7 @@ function init() {
       })
     );
     openModal({
-      title: 'New API token',
+      title: 'New Access Key',
       content,
       actions: [
         { label: 'Cancel', kind: 'ghost' },
@@ -188,7 +194,7 @@ function init() {
       try {
         await navigator.clipboard.writeText(token);
         copyBtn.textContent = 'Copied';
-        toast('Token copied to the clipboard.');
+        toast('Key copied to the clipboard.');
         setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
       } catch {
         field.focus();
@@ -200,10 +206,10 @@ function init() {
 
     content.insertAdjacentHTML(
       'beforeend',
-      '<p class="notice notice-danger">This is the only time the full token is shown. Copy it now.</p>'
+      '<p class="notice notice-danger">You’ll only see this key once — copy it somewhere safe now. For security, the panel doesn’t store a copy it can show you later.</p>'
     );
     openModal({
-      title: 'Copy your API token now',
+      title: 'Copy Your Access Key Now',
       size: 'sm',
       content,
       actions: [{ label: 'Done', kind: 'primary', onClick: () => setTimeout(() => location.reload(), 300) }],
@@ -259,9 +265,10 @@ function init() {
     if (tokenRevokeBtn) {
       const { tokenId, label } = tokenRevokeBtn.dataset;
       const ok = await confirmDialog({
-        title: `Revoke token "${label}"?`,
-        message: 'Any client using this token loses access immediately. This cannot be undone.',
-        confirmLabel: 'Revoke',
+        title: `Cancel the key "${label}"?`,
+        message:
+          'Any app still using this key stops working right away. You can’t bring the same key back — you’d need to make a new one.',
+        confirmLabel: 'Cancel Key',
         danger: true,
       });
       if (!ok) return;
@@ -269,10 +276,10 @@ function init() {
         const res = await fetch(`/api/api-tokens/${tokenId}`, { method: 'DELETE' });
         const data = await res.json().catch(() => ({}));
         if (data.ok) {
-          toast('Token revoked.');
+          toast('Key cancelled.');
           document.querySelector(`#api-tokens-table tr[data-token-id="${CSS.escape(tokenId)}"]`)?.remove();
         } else {
-          toast(data.error || friendlyError(res, { action: 'revoke that token' }), { kind: 'error' });
+          toast(data.error || friendlyError(res, { action: 'cancel that key' }), { kind: 'error' });
         }
       });
       return;
@@ -301,7 +308,7 @@ function init() {
       const ok = await confirmDialog({
         title: `Delete user ${username}?`,
         message: 'They will be signed out and lose all access.',
-        confirmLabel: 'Delete user',
+        confirmLabel: 'Delete User',
         danger: true,
       });
       if (!ok) return;
@@ -337,7 +344,7 @@ function init() {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: 'Create user',
+          label: 'Create User',
           kind: 'primary',
           busyLabel: 'Creating…',
           onClick: async () => {
@@ -374,7 +381,7 @@ function init() {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: 'Set password',
+          label: 'Set Password',
           kind: 'primary',
           busyLabel: 'Saving…',
           onClick: async () => {

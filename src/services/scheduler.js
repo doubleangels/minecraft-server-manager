@@ -43,7 +43,13 @@ async function runTask(schedule) {
       await servers.startServer(schedule.server_id, { actor });
       break;
     case 'backup':
-      await require('./backups').createBackup(schedule.server_id, { reason: 'scheduled', actor });
+      await require('./backups').createBackup(schedule.server_id, {
+        reason: 'scheduled',
+        actor,
+        // Opt-in per schedule: trim rarely-visited chunks after the archive is
+        // written. Only runs when the server is stopped (see createBackupImpl).
+        shrinkAfter: Boolean(payload.shrink),
+      });
       break;
     case 'rcon': {
       const { execCapture } = require('../docker/containers');

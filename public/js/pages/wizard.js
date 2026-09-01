@@ -1603,7 +1603,7 @@ function initSolver({ onApplied = () => {} } = {}) {
     applyRow.className = 'mt-3 flex items-center gap-2';
     applyRow.innerHTML = `
       <button type="button" data-apply class="btn btn-primary btn-sm">Apply</button>
-      <span class="text-xs text-ink-faint">Sets the loader + version; press "Create &amp; start" to build the server and install the mods.</span>`;
+      <span class="text-xs text-ink-faint">Sets the loader + version; press "Create &amp; Start" to build the server and install the mods.</span>`;
     resultEl.appendChild(applyRow);
   }
 

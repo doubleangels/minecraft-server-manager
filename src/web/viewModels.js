@@ -93,7 +93,7 @@ async function serverVM(s, { withLive = true } = {}) {
     status: s.status,
     ports: { game: s.port_game, rcon: s.port_rcon, bedrock: s.port_bedrock },
     resources: { heapMb: s.heap_mb, containerMemoryMb: s.container_memory_mb, cpus: s.cpus },
-    stats: { cpuPct: 0, memUsedMb: 0, uptime: null },
+    stats: { cpuPct: 0, memUsedMb: 0, uptime: null, perf: null, perfSupported: true },
     players: { online: 0, max: Number(s.env.MAX_PLAYERS) || 20, names: [] },
     disk: { used: diskUsed(s.id), quota: s.disk_quota_bytes || 25 * GB },
     pack: packVM(s.id),
@@ -121,7 +121,12 @@ async function serverVM(s, { withLive = true } = {}) {
       vm.stats.cpuPct = live.stats.cpuPct;
       vm.stats.memUsedMb = Math.round(live.stats.memUsedBytes / 1024 / 1024);
     }
-    if (live.startedAt) vm.stats.uptime = formatUptime(Date.now() - Date.parse(live.startedAt));
+    if (live.startedAt) {
+      vm.stats.uptime = formatUptime(Date.now() - Date.parse(live.startedAt));
+      vm.stats.startedAt = live.startedAt;
+    }
+    vm.stats.perf = live.perf || null;
+    vm.stats.perfSupported = live.perfSupported !== false;
     if (live.players) vm.players = { ...vm.players, ...live.players };
     // Boot-phase detail ("Downloading mods…", "Generating world") or the
     // latched "Player count unavailable" state - one shared derivation with

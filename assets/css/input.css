@@ -373,6 +373,14 @@
       min-height: 2.75rem;
       min-width: 2.75rem;
     }
+    /* Same 44px floor for the switch's clickable area and for inline selects
+       (Settings' role picker, time zone, etc.) that otherwise render ~32px. */
+    .msm-toggle {
+      min-height: 2.75rem;
+    }
+    select.input {
+      min-height: 2.75rem;
+    }
   }
 
   /* Segmented control - the ONE component for every pick-one-of-N group
@@ -587,6 +595,39 @@
   @media (hover: hover) {
     .table-base tbody tr:hover {
       @apply bg-inset/50;
+    }
+  }
+
+  /* Add .table-stack to a .table-base and, below sm, every row collapses into a
+     little card and every cell becomes a "Label: value" line. The label text
+     comes from each <td data-th="…">; give an actions cell data-th="" to drop
+     the label and let its buttons sit on their own line. Keep the usual
+     overflow-x-auto wrapper for the sm-and-up table. */
+  @media (width < 40rem) {
+    .table-stack thead {
+      @apply sr-only;
+    }
+    .table-stack tbody tr {
+      @apply block rounded-md border border-line bg-inset/30 p-3;
+    }
+    .table-stack tbody tr + tr {
+      @apply mt-2;
+    }
+    .table-stack td {
+      @apply flex items-baseline justify-between gap-4 border-0 px-0 py-1 text-sm;
+    }
+    .table-stack td::before {
+      content: attr(data-th);
+      @apply shrink-0 text-xs font-semibold uppercase tracking-wider text-ink-faint;
+    }
+    .table-stack td[data-th='']::before {
+      content: none;
+    }
+    .table-stack td[data-th=''] {
+      @apply justify-start pt-2;
+    }
+    .table-stack td:empty {
+      @apply hidden;
     }
   }
 

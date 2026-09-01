@@ -43,10 +43,27 @@ function init(serverId, running) {
     }
   }
 
+  // Only ask the server to read the gamerules whose chips are actually on
+  // screen - the "Show all world rules" section stays unqueried until it is
+  // opened. Each read is an RCON round trip, so this keeps the ~30s poll light.
+  function visibleRules() {
+    const seen = new Set();
+    root.querySelectorAll('[data-wc-toggle]').forEach((chip) => {
+      const rule = chip.dataset.rule;
+      if (!rule || rule === 'pvp') return;
+      const box = chip.closest('details');
+      if (box && !box.open) return;
+      seen.add(rule);
+    });
+    return [...seen];
+  }
+
   async function refreshState() {
     if (!running) return;
     try {
-      const res = await fetch(`/api/servers/${serverId}/world/state`);
+      const rules = visibleRules();
+      const qs = rules.length ? `?rules=${encodeURIComponent(rules.join(','))}` : '';
+      const res = await fetch(`/api/servers/${serverId}/world/state${qs}`);
       const data = await res.json();
       if (!data.ok || !data.running) {
         stateLine.textContent = 'The world state is not available yet. The server may still be starting.';
@@ -78,6 +95,12 @@ function init(serverId, running) {
         chip.setAttribute('aria-pressed', String(value === true));
         if (value !== undefined) chip.dataset.tip = value ? 'On. Click to turn off.' : 'Off. Click to turn on.';
       });
+      // Some rules could not be read this cycle - say so instead of leaving
+      // their chips looking authoritative. The clock line takes priority.
+      if (data.degraded && typeof s.timeTicks !== 'number') {
+        stateLine.classList.remove('hidden');
+        stateLine.textContent = 'Some world settings could not be read just now. They will refresh on the next check.';
+      }
     } catch {
       stateLine.classList.remove('hidden');
       stateLine.textContent = 'The world state is not available right now.';
@@ -121,9 +144,15 @@ function init(serverId, running) {
     }
   });
 
+  // Opening "Show all world rules" pulls in a batch of rules we haven't read
+  // yet - refresh right away so their chips aren't blank.
+  root.querySelector('[data-wc-all]')?.addEventListener('toggle', (e) => {
+    if (e.target.open) refreshState();
+  });
+
   refreshState();
   if (running) {
-    // Local tick: one real second ≈ 20 game ticks. Resync over RCON every 20s.
+    // Local tick: one real second ≈ 20 game ticks. Resync over RCON every 30s.
     setInterval(() => {
       if (frozen || ticks === null || document.hidden) return;
       ticks += 20;
@@ -135,6 +164,6 @@ function init(serverId, running) {
     }, 1000);
     setInterval(() => {
       if (!document.hidden) refreshState();
-    }, 20000);
+    }, 30000);
   }
 }

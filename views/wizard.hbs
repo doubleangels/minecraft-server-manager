@@ -4,12 +4,12 @@
   <div class="mb-4 flex flex-wrap items-center gap-2">
     <div class="seg" id="wz-source-tabs" role="tablist" aria-label="Server source">
       <button class="seg-btn" type="button" role="tab" aria-selected="true" data-source="vanilla">Vanilla</button>
-      <button class="seg-btn" type="button" role="tab" aria-selected="false" data-source="mods">From mods</button>
-      <button class="seg-btn" type="button" role="tab" aria-selected="false" data-source="modpack">From modpack</button>
-      <button class="seg-btn" type="button" role="tab" aria-selected="false" data-source="blueprint">From blueprint</button>
+      <button class="seg-btn" type="button" role="tab" aria-selected="false" data-source="mods">From Mods</button>
+      <button class="seg-btn" type="button" role="tab" aria-selected="false" data-source="modpack">From Modpack</button>
+      <button class="seg-btn" type="button" role="tab" aria-selected="false" data-source="blueprint">From Blueprint</button>
     </div>
     <label class="ml-auto flex cursor-pointer items-center gap-2.5 text-sm font-medium" id="wz-detail-toggle">
-      Advanced options
+      Advanced Options
       <span class="msm-toggle"><input type="checkbox" id="wz-advanced-switch"><span></span></span>
     </label>
   </div>
@@ -19,8 +19,8 @@
   <div class="mb-4 hidden space-y-3" id="wz-mods-panel">
     <div class="flex flex-wrap items-center gap-2">
       <div class="seg" id="wz-mods-mode" role="tablist" aria-label="Mod selection mode">
-        <button class="seg-btn" type="button" role="tab" aria-selected="true" data-mode="browse">Choose loader &amp; mods</button>
-        <button class="seg-btn" type="button" role="tab" aria-selected="false" data-mode="auto">Auto-detect from mods</button>
+        <button class="seg-btn" type="button" role="tab" aria-selected="true" data-mode="browse">Choose Loader &amp; Mods</button>
+        <button class="seg-btn" type="button" role="tab" aria-selected="false" data-mode="auto">Auto-Detect from Mods</button>
       </div>
     </div>
 
@@ -94,7 +94,7 @@
       <div class="mt-2 hidden max-h-72 overflow-y-auto rounded-md border border-line" id="wz-solver-results"></div>
       <div class="mt-3 hidden flex-wrap gap-1.5" id="wz-solver-chips"></div>
       <div class="mt-4 flex items-center gap-3">
-        <button class="btn btn-primary" id="wz-solver-run" type="button" disabled>{{{icon 'wand-sparkles' 'size-4'}}} Solve compatibility</button>
+        <button class="btn btn-primary" id="wz-solver-run" type="button" disabled>{{{icon 'wand-sparkles' 'size-4'}}} Solve Compatibility</button>
         <span class="text-xs text-ink-faint" id="wz-solver-hint">Add at least one mod first.</span>
       </div>
       <div class="mt-4 hidden" id="wz-solver-result"></div>
@@ -113,7 +113,7 @@
         <div class="text-xs text-ink-faint">A Minecraft 1.7.10 expert pack. Needs at least 6 GB of RAM and 20 GB of disk. Runs on modern
           Java.</div>
       </div>
-      <button type="button" class="btn shrink-0" id="wz-gtnh-pick">Set up</button>
+      <button type="button" class="btn shrink-0" id="wz-gtnh-pick">Set Up</button>
     </div>
     {{! Custom zip — CurseForge modpack export or a hand-assembled zip of jars }}
     <div class="mb-4 flex flex-wrap items-center gap-3 rounded-md border border-line p-3" id="wz-zip-card">
@@ -121,7 +121,7 @@
         <div class="font-semibold">Custom zip</div>
         <div class="text-xs text-ink-faint">A CurseForge modpack export (with manifest.json{{#unless curseforgeEnabled}} — needs the API key in Settings{{/unless}}) or any zip of mod jars you collected yourself. Every jar is identified and installed with provenance.</div>
       </div>
-      <button type="button" class="btn shrink-0" id="wz-zip-pick">Upload zip</button>
+      <button type="button" class="btn shrink-0" id="wz-zip-pick">Upload Zip</button>
     </div>
     <div class="mb-4 hidden" id="wz-zip-selected"></div>
     <div class="flex flex-wrap items-center gap-2">
@@ -144,7 +144,7 @@
             Include beta releases
           </label>
         </div>
-        <button type="button" class="btn mb-0.5" id="wz-pack-details-btn">{{{icon 'book-open' 'size-4'}}} View details</button>
+        <button type="button" class="btn mb-0.5" id="wz-pack-details-btn">{{{icon 'book-open' 'size-4'}}} View Details</button>
       </div>
     </div>
   </div>
@@ -347,7 +347,7 @@
         <div>
           <div class="mb-2 flex items-center justify-between">
             <span class="text-sm font-semibold">Extra port mappings</span>
-            <button type="button" class="btn btn-sm" id="wz-docker-port-add">{{{icon 'plus' 'size-3.5'}}} Add port</button>
+            <button type="button" class="btn btn-sm" id="wz-docker-port-add">{{{icon 'plus' 'size-3.5'}}} Add Port</button>
           </div>
           <div class="space-y-2" id="wz-docker-ports"></div>
           <p class="help">For example, UDP 19132 for Bedrock or Geyser, or TCP 8100 for BlueMap.</p>
@@ -356,7 +356,7 @@
         <div>
           <div class="mb-2 flex items-center justify-between">
             <span class="text-sm font-semibold">Extra volume binds</span>
-            <button type="button" class="btn btn-sm" id="wz-docker-bind-add">{{{icon 'plus' 'size-3.5'}}} Add bind</button>
+            <button type="button" class="btn btn-sm" id="wz-docker-bind-add">{{{icon 'plus' 'size-3.5'}}} Add Bind</button>
           </div>
           <div class="space-y-2" id="wz-docker-binds"></div>
           <p class="help">Free-form host paths. The panel already has root-equivalent access through the Docker socket, so double-check these before creating.</p>
@@ -372,7 +372,7 @@
 
   <div class="mt-6 flex items-center justify-between">
     <a href="/" class="btn btn-ghost">Cancel</a>
-    <button class="btn btn-primary" id="wz-create" type="button">{{{icon 'pickaxe' 'size-4'}}} Create &amp; start</button>
+    <button class="btn btn-primary" id="wz-create" type="button">{{{icon 'pickaxe' 'size-4'}}} Create &amp; Start</button>
   </div>
 </div>
 <script type="module" src="/js/pages/wizard.js"></script>

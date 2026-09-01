@@ -32,7 +32,10 @@ const KEEP_PRE_UPDATE = 10;
 const KEEP_MANUAL = 20;
 const KEEP_PRE_RESTORE = 5;
 
-async function createBackupImpl(serverId, { reason = 'manual', actor = 'system', note = '', task = null } = {}) {
+async function createBackupImpl(
+  serverId,
+  { reason = 'manual', actor = 'system', note = '', task = null, shrinkAfter = false, shrinkMinTicks } = {}
+) {
   const server = db.get('SELECT * FROM servers WHERE id = ? AND deleted_at IS NULL', serverId);
   if (!server) throw httpError(404, 'Server not found');
 
@@ -139,6 +142,29 @@ async function createBackupImpl(serverId, { reason = 'manual', actor = 'system',
     details: { id, filename, reason, inconsistent, empty, entryCount },
   });
   logger.info('Created a backup.', { serverId, backupId: id, reason, sizeBytes: size, inconsistent, empty });
+
+  // Optional: after the archive is safely written (it is the undo), trim
+  // rarely-visited chunks from the active world. Only ever on a stopped server -
+  // shrinking edits region files directly.
+  if (shrinkAfter) {
+    if (running) {
+      if (task) task.step('Shrink skipped - the server was running');
+      logger.info('Skipped the post-backup world shrink because the server was running.', { serverId });
+    } else {
+      try {
+        if (task) task.step('Removing rarely-visited chunks from the world');
+        const r = await require('./worldShrink').shrinkWorld(serverId, {
+          actor,
+          minInhabitedTicks: Number.isFinite(shrinkMinTicks) ? shrinkMinTicks : undefined,
+        });
+        logger.info('Post-backup world shrink finished.', { serverId, ...r });
+      } catch (err) {
+        // The backup succeeded - a shrink failure must not fail the whole op.
+        logger.error('The post-backup world shrink failed.', { serverId, err: serializeError(err) });
+      }
+    }
+  }
+
   // The backup above already succeeded and is already recorded - a retention
   // problem must never surface as this call failing.
   await pruneRetention(serverId, { actor }).catch((err) => {
