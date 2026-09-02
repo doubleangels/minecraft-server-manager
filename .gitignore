@@ -6,6 +6,9 @@ public/css/app.css
 public/dist/
 .env
 
+# CodeGraph index
+.codegraph/
+
 
 # Logs / editor / OS noise
 *.log
