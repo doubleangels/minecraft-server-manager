@@ -40,7 +40,7 @@
       <h3 class="mb-2 font-semibold">CPU <span class="text-xs font-normal text-ink-faint">share of allotted cores</span></h3>
       <div class="flex h-3 w-full overflow-hidden rounded-sm bg-inset" data-combined-bar="cpu" data-combined-cap="{{combined.cpuCapacity}}">
         {{#each combined.breakdown}}
-          <div data-combined-seg="cpu" data-seg-id="{{this.id}}" data-seg-cpu="{{this.cpuPct}}" data-seg-cap="{{this.mul this.cpus 100}}" style="width: {{pct this.cpuPct ../combined.cpuCapacity}}%; background: {{this.accent}};" title="{{this.name}}"></div>
+          <div data-combined-seg="cpu" data-seg-id="{{this.id}}" data-seg-cpu="{{this.cpuPct}}" data-seg-cap="{{mul this.cpus 100}}" style="width: {{pct this.cpuPct ../combined.cpuCapacity}}%; background: {{this.accent}};" title="{{this.name}}"></div>
         {{/each}}
       </div>
       <div class="mt-1 flex items-baseline justify-between text-xs text-ink-faint">

@@ -175,3 +175,15 @@ test('dashboard renders the combined resource overview', async () => {
   // A stopped server produces no live breakdown, so the fallback copy shows.
   assert.match(r.text, /No servers are running right now\./);
 });
+
+test('dashboard renders the per-server breakdown with a live server', async () => {
+  app.seedServer('srv_dashlive');
+  db.run("UPDATE servers SET status = 'running', cpus = 2 WHERE id = 'srv_dashlive'");
+  const r = await app.req('GET', '/', { cookie, headers: { Accept: 'text/html' } });
+  assert.equal(r.status, 200, 'a running server must not crash the dashboard');
+  // The running server's CPU segment computes cap = cpus * 100 via the `mul` helper.
+  assert.match(r.text, /data-seg-cap="200"/);
+  assert.match(r.text, /data-combined-row="srv_dashlive"/);
+  // The run-only fallback copy is NOT shown when a server is running.
+  assert.doesNotMatch(r.text, /No servers are running right now\./);
+});
