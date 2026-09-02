@@ -2,6 +2,7 @@
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { setBusy, withBusy } from '../lib/loading.js';
+import { fmtBytes, escapeHtml } from '../lib/format.js';
 
 const log = document.getElementById('console-log');
 const input = document.getElementById('console-input');
@@ -44,6 +45,33 @@ function init(serverId) {
       }
     })
   );
+
+  // ---- Rotated game-log files (logs/*.log.gz next to latest.log) ----
+  (async () => {
+    const box = document.querySelector('[data-console-logfiles]');
+    if (!box) return;
+    try {
+      const res = await fetch(`/api/servers/${serverId}/logs/game`);
+      const data = await res.json().catch(() => ({}));
+      // latest.log is already a menu item; list only the rotated history here.
+      const rotated = (data.files || []).filter((f) => f.file !== 'latest.log');
+      if (!res.ok || !rotated.length) return;
+      box.querySelector('[data-console-logfiles-count]').textContent = `(${rotated.length})`;
+      box.querySelector('[data-console-logfiles-list]').innerHTML = rotated
+        .map(
+          (f) => `
+        <a class="flex items-center justify-between gap-3 px-3 py-1.5 hover:bg-inset" download
+           href="/api/servers/${serverId}/logs/game/${encodeURIComponent(f.file)}">
+          <span class="min-w-0 truncate font-mono">${escapeHtml(f.file)}</span>
+          <span class="shrink-0 text-ink-faint">${fmtBytes(f.size)}</span>
+        </a>`
+        )
+        .join('');
+      box.hidden = false;
+    } catch {
+      /* offline / no logs dir yet - leave the section hidden */
+    }
+  })();
 
   const filters = { INFO: true, WARN: true, ERROR: true };
   const filterInput = document.getElementById('console-filter');

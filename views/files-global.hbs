@@ -19,6 +19,7 @@
         {{/if}}
       </nav>
       <div class="ml-auto flex gap-2">
+        <button class="btn btn-sm" id="files-search" data-tip="Search the text of files under this folder">{{{icon 'search' 'size-3.5'}}} Find in Files</button>
         <button class="btn btn-sm" id="files-upload">{{{icon 'upload' 'size-3.5'}}} Upload</button>
         <button class="btn btn-sm" id="files-mkdir">{{{icon 'folder-plus' 'size-3.5'}}} New Folder</button>
       </div>
@@ -53,7 +54,7 @@
               <td class="whitespace-nowrap text-right text-ink-faint" data-ts="{{mtime}}">{{mtime}}</td>
               <td class="text-right"><div class="inline-flex gap-1">
                 {{#unless dir}}
-                  <button class="btn btn-ghost btn-sm" data-file-edit data-tip="Edit as text (≤ 2 MB)">{{{icon 'file-code' 'size-3.5'}}}</button>
+                  <button class="btn btn-ghost btn-sm" data-file-edit data-tip="Edit as text (≤ 8 MB)">{{{icon 'file-code' 'size-3.5'}}}</button>
                   <button class="btn btn-ghost btn-sm" data-file-download data-tip="Download">{{{icon 'download' 'size-3.5'}}}</button>
                 {{/unless}}
                 <button class="btn btn-ghost btn-sm" data-menu="file-menu-{{@index}}" data-tip="Rename, move, copy…">{{{icon 'ellipsis' 'size-3.5'}}}</button>

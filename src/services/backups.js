@@ -21,16 +21,14 @@ const { guardOp } = require('./opLock');
 const logger = require('../logger')(path.basename(__filename));
 const { serializeError } = require('../utils/logSanitize');
 
-// Retention caps, per server, per reason. Every bucket is bounded now - the
-// old rule ("manual + pre-update are never auto-pruned") let a long-lived
-// server accumulate backups until the free-space preflight started failing
-// every new backup. Restore/world-reset safety snapshots get their OWN bucket
-// ('pre-restore') so they can't silently evict backups a user deliberately
-// created and kept (reason 'manual').
-const KEEP_SCHEDULED = 10;
-const KEEP_PRE_UPDATE = 10;
-const KEEP_MANUAL = 20;
-const KEEP_PRE_RESTORE = 5;
+// Retention caps live in services/backupRetention.js now (panel-wide defaults +
+// optional per-server overrides, plus age and total-size ceilings). Every bucket
+// is still bounded by default - the old rule ("manual + pre-update are never
+// auto-pruned") let a long-lived server accumulate backups until the free-space
+// preflight started failing every new backup. Restore/world-reset safety
+// snapshots get their OWN bucket ('pre-restore') so they can't silently evict
+// backups a user deliberately created and kept (reason 'manual').
+const backupRetention = require('./backupRetention');
 
 async function createBackupImpl(
   serverId,
@@ -345,37 +343,78 @@ async function deleteBackup(backupId, { actor = 'system' } = {}) {
  * the free-space preflight).
  */
 async function pruneRetention(serverId, { actor = 'system' } = {}) {
-  const buckets = [
-    ['scheduled', KEEP_SCHEDULED],
-    ['pre-update', KEEP_PRE_UPDATE],
-    ['manual', KEEP_MANUAL],
-    ['pre-restore', KEEP_PRE_RESTORE], // restore / world-reset safety snapshots
-  ];
+  const cfg = backupRetention.effective(serverId);
   let deleted = 0;
+
+  const drop = async (id) => {
+    try {
+      await deleteBackup(id, { actor });
+      deleted++;
+    } catch (err) {
+      logger.error('Retention could not delete an old backup.', { serverId, backupId: id, err: serializeError(err) });
+    }
+  };
+
+  // 1) Per-reason count caps. id DESC as a tiebreaker: created_at has 1-second
+  // resolution and a safety backup often lands in the same second as another, so
+  // "the Nth oldest" must not be left to insertion-order luck.
+  const buckets = [
+    ['scheduled', cfg.keepScheduled],
+    ['pre-update', cfg.keepPreUpdate],
+    ['manual', cfg.keepManual],
+    ['pre-restore', cfg.keepPreRestore], // restore / world-reset safety snapshots
+  ];
   for (const [reason, keep] of buckets) {
     const stale = db.all(
-      // id DESC as a tiebreaker: created_at has 1-second resolution and a safety
-      // backup often lands in the same second as another, so "the Nth oldest"
-      // must not be left to insertion-order luck.
       `SELECT id FROM backups WHERE server_id = ? AND reason = ?
        ORDER BY created_at DESC, id DESC LIMIT -1 OFFSET ?`,
       serverId,
       reason,
       keep
     );
-    for (const b of stale) {
-      try {
-        await deleteBackup(b.id, { actor });
-        deleted++;
-      } catch (err) {
-        logger.error('Retention could not delete an old backup.', {
-          serverId,
-          backupId: b.id,
-          err: serializeError(err),
-        });
-      }
+    for (const b of stale) await drop(b.id);
+  }
+
+  // The newest backup overall is never removed by the age or size passes below -
+  // a server must not be left with zero backups just because it went quiet or
+  // its worlds grew.
+  const newest = db.get('SELECT id FROM backups WHERE server_id = ? ORDER BY created_at DESC, id DESC LIMIT 1', serverId);
+  const keepId = newest?.id;
+
+  // 2) Age ceiling (opt-in; 0 = off).
+  if (cfg.maxAgeDays > 0) {
+    const old = db.all(
+      `SELECT id FROM backups
+       WHERE server_id = ? AND id <> ? AND created_at < datetime('now', ?)`,
+      serverId,
+      keepId ?? -1,
+      `-${cfg.maxAgeDays} days`
+    );
+    for (const b of old) await drop(b.id);
+  }
+
+  // 3) Total-size ceiling (opt-in; 0 = off). Delete oldest-first until under the
+  // cap, but sacrifice the automatic safety snapshots ('pre-restore') before any
+  // backup a person asked for.
+  if (cfg.maxTotalGb > 0) {
+    const capBytes = cfg.maxTotalGb * 1024 ** 3;
+    const rows = db.all(
+      `SELECT id, size_bytes, reason FROM backups WHERE server_id = ? ORDER BY created_at ASC, id ASC`,
+      serverId
+    );
+    let total = rows.reduce((sum, r) => sum + (r.size_bytes || 0), 0);
+    const order = [...rows].sort((a, b) => {
+      const rank = (r) => (r.reason === 'pre-restore' ? 0 : r.reason === 'scheduled' ? 1 : 2);
+      return rank(a) - rank(b); // stable: preserves the created_at ASC order within a rank
+    });
+    for (const r of order) {
+      if (total <= capBytes) break;
+      if (r.id === keepId) continue;
+      await drop(r.id);
+      total -= r.size_bytes || 0;
     }
   }
+
   return deleted;
 }
 

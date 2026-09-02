@@ -59,13 +59,20 @@ function init(serverId, running) {
   }
 
   async function refreshState() {
-    if (!running) return;
     try {
       const rules = visibleRules();
       const qs = rules.length ? `?rules=${encodeURIComponent(rules.join(','))}` : '';
       const res = await fetch(`/api/servers/${serverId}/world/state${qs}`);
       const data = await res.json();
+      // Offline: the server is stopped and these are the last-saved values read
+      // from level.dat. Show them (the fieldset is disabled, so read-only) with
+      // a clear note; a running server that just can't be reached lands here too.
+      if (data.ok && data.offline) {
+        renderOffline(data.state);
+        return;
+      }
       if (!data.ok || !data.running) {
+        stateLine.classList.remove('hidden');
         stateLine.textContent = 'The world state is not available yet. The server may still be starting.';
         return;
       }
@@ -87,14 +94,7 @@ function init(serverId, running) {
         // asserted a success the user can't see.
         stateLine.textContent = 'Connected. This server version does not report the world clock.';
       }
-      // Reflect gamerule states on the toggle chips: aria-pressed carries the
-      // state (the CSS chip[aria-pressed] rule styles it), data-tip explains it.
-      root.querySelectorAll('[data-wc-toggle]').forEach((chip) => {
-        const value = s[chip.dataset.rule];
-        chip.dataset.on = value ? '1' : '0';
-        chip.setAttribute('aria-pressed', String(value === true));
-        if (value !== undefined) chip.dataset.tip = value ? 'On. Click to turn off.' : 'Off. Click to turn on.';
-      });
+      applyChips(s);
       // Some rules could not be read this cycle - say so instead of leaving
       // their chips looking authoritative. The clock line takes priority.
       if (data.degraded && typeof s.timeTicks !== 'number') {
@@ -105,6 +105,40 @@ function init(serverId, running) {
       stateLine.classList.remove('hidden');
       stateLine.textContent = 'The world state is not available right now.';
     }
+  }
+
+  // Reflect gamerule states on the toggle chips: aria-pressed carries the state
+  // (the CSS chip[aria-pressed] rule styles it), data-tip explains it.
+  function applyChips(s, { readonly = false } = {}) {
+    root.querySelectorAll('[data-wc-toggle]').forEach((chip) => {
+      const value = s[chip.dataset.rule];
+      chip.dataset.on = value ? '1' : '0';
+      chip.setAttribute('aria-pressed', String(value === true));
+      if (value !== undefined) {
+        chip.dataset.tip = readonly
+          ? value
+            ? 'On (last saved). Start the server to change it.'
+            : 'Off (last saved). Start the server to change it.'
+          : value
+            ? 'On. Click to turn off.'
+            : 'Off. Click to turn on.';
+      }
+    });
+  }
+
+  // Stopped server: values came from level.dat. The clock is frozen at whatever
+  // was last saved, so don't start the local ticking.
+  function renderOffline(s) {
+    frozen = true;
+    if (typeof s.timeTicks === 'number') {
+      ticks = s.timeTicks;
+      if (s.day) day = s.day;
+      renderClock();
+      phaseEl.textContent = `${phaseOf(s.timeTicks)} · last saved`;
+    }
+    applyChips(s, { readonly: true });
+    stateLine.classList.remove('hidden');
+    stateLine.textContent = 'Server offline — showing the last saved world settings. Start the server to change them.';
   }
 
   async function quick(action, el) {
@@ -118,6 +152,11 @@ function init(serverId, running) {
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'That command could not be run. Please try again.');
       toast(data.label);
+      // PvP is a server.properties write, not a live command - flag that a
+      // restart is needed before it actually changes anything in-game.
+      if (action.startsWith('pvp-')) {
+        root.querySelector('[data-wc-pvp-pending]')?.classList.remove('hidden');
+      }
       // Interventions change the clock/pause state - resync right away and
       // reset freeze inference so the next sync doesn't misread a /time set.
       if (action === 'daycycle-on') frozen = false;

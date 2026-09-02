@@ -164,7 +164,7 @@ function checkLoginAllowed(username, ip) {
   }
 }
 
-function bump(map, key, lockMs) {
+function bump(map, key, lockMs, max) {
   const now = Date.now();
   const entry = map.get(key) || { count: 0, until: 0, windowStart: now };
   // Rolling window: once a lock has elapsed AND a full lock-period has passed
@@ -176,13 +176,20 @@ function bump(map, key, lockMs) {
     entry.count = 0;
     entry.windowStart = now;
   }
+  const wasLocked = entry.count >= max && now < entry.until;
   entry.count += 1;
   // Do NOT extend an already-active lock - otherwise repeated attempts keep a
   // valid account locked forever (targeted-lockout DoS).
   if (now >= entry.until) entry.until = now + lockMs;
   map.set(key, entry);
+  return !wasLocked && entry.count >= max && now < entry.until; // true = lock just tripped
 }
 
+/**
+ * Record one failed attempt. Returns { lockedNow, scope } - scope is 'ip' or
+ * 'account' when THIS failure is the one that crossed a threshold, so the caller
+ * can write a single audit event (locks themselves live only in memory).
+ */
 function recordLoginFailure(username, ip) {
   // Bound memory: evict the oldest quarter if the map grows past the cap.
   if (loginAttempts.size >= MAX_TRACKED) {
@@ -199,13 +206,56 @@ function recordLoginFailure(username, ip) {
       if (--toEvict <= 0) break;
     }
   }
-  bump(loginAttempts, attemptKey(username, ip), LOCK_MS);
-  bump(globalAttempts, globalKey(username), GLOBAL_LOCK_MS);
+  const ipTripped = bump(loginAttempts, attemptKey(username, ip), LOCK_MS, MAX_ATTEMPTS);
+  const acctTripped = bump(globalAttempts, globalKey(username), GLOBAL_LOCK_MS, GLOBAL_MAX_ATTEMPTS);
+  return { lockedNow: ipTripped || acctTripped, scope: acctTripped ? 'account' : ipTripped ? 'ip' : null };
 }
 
 function clearLoginFailures(username, ip) {
   loginAttempts.delete(attemptKey(username, ip));
   globalAttempts.delete(globalKey(username));
+}
+
+/** Every lock that is active right now, newest-expiring last. Admin view only. */
+function listActiveLockouts() {
+  const now = Date.now();
+  const out = [];
+  for (const [key, entry] of loginAttempts) {
+    if (!locked(entry, MAX_ATTEMPTS)) continue;
+    const [username, ip] = key.split('|');
+    out.push({ scope: 'ip', username, ip, count: entry.count, until: entry.until, minutesLeft: Math.ceil((entry.until - now) / 60000) });
+  }
+  for (const [username, entry] of globalAttempts) {
+    if (!locked(entry, GLOBAL_MAX_ATTEMPTS)) continue;
+    out.push({ scope: 'account', username, ip: null, count: entry.count, until: entry.until, minutesLeft: Math.ceil((entry.until - now) / 60000) });
+  }
+  return out.sort((a, b) => a.until - b.until);
+}
+
+/**
+ * Admin unlock. { all: true } wipes every counter; otherwise clears the given
+ * username's account-global lock plus its per-IP entry (all IPs when `ip` is
+ * omitted). Returns the number of entries removed.
+ * @param {{ username?: string, ip?: string, all?: boolean }} [opts]
+ */
+function clearLockouts({ username, ip, all = false } = {}) {
+  if (all) {
+    const n = loginAttempts.size + globalAttempts.size;
+    loginAttempts.clear();
+    globalAttempts.clear();
+    return n;
+  }
+  const uname = (username || '').toLowerCase();
+  let n = 0;
+  if (globalAttempts.delete(uname)) n++;
+  if (ip) {
+    if (loginAttempts.delete(attemptKey(uname, ip))) n++;
+  } else {
+    for (const k of [...loginAttempts.keys()]) {
+      if (k.startsWith(`${uname}|`) && loginAttempts.delete(k)) n++;
+    }
+  }
+  return n;
 }
 
 /**
@@ -237,4 +287,6 @@ module.exports = {
   checkLoginAllowed,
   recordLoginFailure,
   clearLoginFailures,
+  listActiveLockouts,
+  clearLockouts,
 };

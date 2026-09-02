@@ -1262,16 +1262,68 @@ router.delete(
   })
 );
 
+// ---- Backup retention policy (count caps + age / total-size ceilings) ----
+const backupRetention = require('../../services/backupRetention');
+const retentionPatchSchema = z
+  .object({
+    keepScheduled: z.coerce.number().int().min(1).max(500).optional(),
+    keepPreUpdate: z.coerce.number().int().min(1).max(500).optional(),
+    keepManual: z.coerce.number().int().min(1).max(500).optional(),
+    keepPreRestore: z.coerce.number().int().min(1).max(500).optional(),
+    maxAgeDays: z.coerce.number().int().min(0).max(3650).optional(),
+    maxTotalGb: z.coerce.number().int().min(0).max(100000).optional(),
+  })
+  .strict();
+
+router.get('/backups/retention', requireRoleKeys('admin'), (req, res) => {
+  res.json({ ok: true, defaults: backupRetention.DEFAULTS, global: backupRetention.globalConfig() });
+});
+
+router.post(
+  '/backups/retention',
+  requireRoleKeys('admin'),
+  asyncHandler((req, res, next) => {
+    const patch = retentionPatchSchema.parse(req.body || {});
+    res.json({ ok: true, global: backupRetention.setGlobal(patch) });
+  })
+);
+
+router.get('/servers/:id/backups/retention', requireRoleKeys('admin'), (req, res) => {
+  requireServer(req.params.id);
+  res.json({
+    ok: true,
+    defaults: backupRetention.DEFAULTS,
+    global: backupRetention.globalConfig(),
+    effective: backupRetention.effective(req.params.id),
+  });
+});
+
+router.post(
+  '/servers/:id/backups/retention',
+  requireRoleKeys('admin'),
+  asyncHandler((req, res, next) => {
+    requireServer(req.params.id);
+    // { reset: true } clears the per-server override; otherwise merge the patch.
+    const body = req.body || {};
+    const effective = body.reset
+      ? backupRetention.setServer(req.params.id, null)
+      : backupRetention.setServer(req.params.id, retentionPatchSchema.parse(body));
+    res.json({ ok: true, effective });
+  })
+);
+
 // ---- Blueprints ----
 router.use('/blueprints', require('./blueprints'));
 
 // ---- World quick controls (Overview tab) - version-tolerant service ----
 const worldControls = require('../../services/worldControls');
 
+const WORLD_STATE_LIVE_STATUSES = new Set(['running', 'unhealthy', 'stalled']);
+
 router.get(
   '/servers/:id/world/state',
   asyncHandler(async (req, res, next) => {
-    requireServer(req.params.id);
+    const server = requireServer(req.params.id);
     // ?rules=a,b,c limits the gamerule reads to what the page is showing;
     // ?all=1 forces the full set.
     const all = req.query.all === '1' || req.query.all === 'true';
@@ -1281,20 +1333,37 @@ router.get(
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean);
+    const asked = rules && rules.length ? rules : null;
+
+    // Stopped/crashed: read the last-saved values straight from level.dat so the
+    // rail still shows the world clock and gamerule states (read-only - the
+    // <fieldset> is disabled offline). starting/updating: the world may be mid
+    // (re)generation, so report "not available yet".
+    if (!WORLD_STATE_LIVE_STATUSES.has(server.status)) {
+      if (server.status === 'starting' || server.status === 'updating') {
+        return res.json({ ok: true, running: false, state: {} });
+      }
+      const state = await worldControls.getStateOffline(req.params.id, { rules });
+      const degraded = asked ? asked.some((r) => !Object.hasOwn(state, r)) : false;
+      return res.json({ ok: true, running: false, offline: true, degraded, state });
+    }
+
     try {
       const state = await worldControls.getState(req.params.id, { rules });
       // Flag a partial read so the page can say "some settings couldn't be read"
       // rather than showing stale chips as if they were current.
-      const asked = rules && rules.length ? rules : null;
       const degraded = asked ? asked.some((r) => !Object.hasOwn(state, r)) : false;
       res.json({ ok: true, running: true, degraded, state });
     } catch (err) {
-      // info, not debug: "check the logs" is only honest if something is there.
-      logger.info('Could not read world state; reporting the server as not running.', {
+      // The status says running but RCON isn't answering (just-booted, wedged).
+      // Fall back to the on-disk values rather than showing nothing.
+      logger.info('Could not read live world state; falling back to level.dat.', {
         serverId: req.params.id,
         err: serializeError(err, { includeStack: false }),
       });
-      res.json({ ok: true, running: false, state: {} });
+      const state = await worldControls.getStateOffline(req.params.id, { rules });
+      const degraded = asked ? asked.some((r) => !Object.hasOwn(state, r)) : false;
+      res.json({ ok: true, running: false, offline: true, degraded, state });
     }
   })
 );
@@ -1314,32 +1383,63 @@ router.post(
 // the confirm); a real run is a task (it can touch thousands of region files).
 // Server must be stopped - worldShrink.shrinkWorld enforces that with a 409.
 const worldShrink = require('../../services/worldShrink');
+const SHRINK_LIVE_STATUSES = new Set(['running', 'starting', 'unhealthy', 'stalled', 'updating']);
 router.post(
   '/servers/:id/worlds/:world/shrink',
   requireRoleKeys('admin', 'operator'),
   asyncHandler(async (req, res, next) => {
     const server = requireServer(req.params.id);
-    const { world, dryRun } = z
+    const src = { ...req.query, ...req.body };
+    const { world, dryRun, minInhabitedTicks, spawnKeepChunks, autoStopStart } = z
       .object({
         world: z
           .string()
           .trim()
           .regex(/^[A-Za-z0-9 _.-]{1,64}$/),
         dryRun: z.coerce.boolean().default(false),
+        // "rarely visited" threshold in ticks (20 = 1 s), 1 tick .. 1 game-hour.
+        minInhabitedTicks: z.coerce.number().int().min(1).max(20 * 60 * 60).optional(),
+        // keep overworld chunks within N of the origin; 0 disables spawn protection.
+        spawnKeepChunks: z.coerce.number().int().min(0).max(256).optional(),
+        // when the server is up: stop it, shrink, then start it again.
+        autoStopStart: z.coerce.boolean().default(false),
       })
-      .parse({ world: req.params.world, dryRun: req.body?.dryRun ?? req.query.dryRun });
+      .parse({ world: req.params.world, ...src });
     const actor = req.user.username;
+    const shrinkOpts = { worldName: world, actor, minInhabitedTicks, spawnKeepChunks };
 
     if (dryRun) {
-      const result = await worldShrink.shrinkWorld(server.id, { worldName: world, dryRun: true, actor });
+      const result = await worldShrink.shrinkWorld(server.id, { ...shrinkOpts, dryRun: true });
       return res.json({ ok: true, ...result });
     }
+
+    const isLive = SHRINK_LIVE_STATUSES.has(server.status);
+    if (isLive && !autoStopStart) {
+      // Same 409 the service would throw, but decided here so the client can
+      // offer the stop/start wrapper instead.
+      throw Object.assign(
+        new Error('Stop the server before shrinking its world, or choose the stop-and-restart option.'),
+        { status: 409 }
+      );
+    }
+
     const taskId = tasks.run(
       `Shrinking "${world}" on ${server.display_name}`,
       { serverId: server.id, actor },
       async (t) => {
+        let wasRunning = false;
+        if (isLive && autoStopStart) {
+          wasRunning = true;
+          t.step('Stopping the server');
+          await servers.stopServer(server.id, { actor });
+        }
         t.step('Scanning region files for rarely-visited chunks');
-        return worldShrink.shrinkWorld(server.id, { worldName: world, actor });
+        const result = await worldShrink.shrinkWorld(server.id, shrinkOpts);
+        if (wasRunning) {
+          t.step('Starting the server back up');
+          await servers.startServer(server.id, { actor });
+        }
+        return { ...result, restarted: wasRunning };
       }
     );
     res.status(202).json({ ok: true, taskId });
@@ -1796,6 +1896,77 @@ router.get(
   })
 );
 
+// ---- Full game logs (the server's own logs/ dir on the bind mount) ----
+// The /logs endpoint above is a small in-memory docker tail (capped 2000 lines);
+// these serve the complete files Minecraft itself rotates: logs/latest.log and
+// the gzipped history next to it.
+const gameLogFileSchema = z.string().regex(/^[\w.-]+\.log(\.gz)?$/, 'Invalid log file name');
+
+async function listGameLogs(serverId) {
+  const dir = dataPath('servers', serverId, 'logs');
+  const entries = await fsp.readdir(dir, { withFileTypes: true }).catch(() => []);
+  const out = [];
+  for (const e of entries) {
+    if (!e.isFile() || !/\.log(\.gz)?$/.test(e.name)) continue;
+    const st = await fsp.stat(path.join(dir, e.name)).catch(() => null);
+    if (st) out.push({ file: e.name, size: st.size, mtimeMs: st.mtimeMs });
+  }
+  // latest.log first, then newest-rotated first.
+  out.sort((a, b) => (a.file === 'latest.log' ? -1 : b.file === 'latest.log' ? 1 : b.mtimeMs - a.mtimeMs));
+  return out;
+}
+
+router.get(
+  '/servers/:id/logs/game',
+  asyncHandler(async (req, res, next) => {
+    requireServer(req.params.id);
+    res.json({ ok: true, files: await listGameLogs(req.params.id) });
+  })
+);
+
+router.get(
+  '/servers/:id/logs/game/:file',
+  asyncHandler((req, res, next) => {
+    requireServer(req.params.id);
+    const file = gameLogFileSchema.parse(req.params.file);
+    const abs = dataPath('servers', req.params.id, 'logs', file);
+    if (!fs.existsSync(abs)) throw Object.assign(new Error('Log file not found'), { status: 404 });
+    res.download(abs, file);
+  })
+);
+
+// Every log file for the server, zipped on the fly. Bounded so a pathological
+// logs/ dir can't stream forever.
+const LOG_BUNDLE_MAX_BYTES = 512 * 1024 * 1024;
+router.get(
+  '/servers/:id/logs/bundle.zip',
+  asyncHandler(async (req, res, next) => {
+    const server = requireServer(req.params.id);
+    const dir = dataPath('servers', req.params.id, 'logs');
+    const list = await listGameLogs(req.params.id);
+    if (!list.length) throw Object.assign(new Error('This server has no log files yet'), { status: 404 });
+    const total = list.reduce((n, f) => n + f.size, 0);
+    if (total > LOG_BUNDLE_MAX_BYTES) {
+      throw Object.assign(
+        new Error('Log folder is too large to bundle - download individual files instead'),
+        { status: 413 }
+      );
+    }
+    const archiver = require('archiver');
+    const safeName = String(server.display_name || req.params.id).replace(/[^\w.-]+/g, '_');
+    res.attachment(`${safeName}-logs.zip`);
+    const zip = archiver('zip', { zlib: { level: 6 } });
+    zip.on('error', (err) => {
+      logger.error('Log bundle stream failed.', { serverId: req.params.id, err: serializeError(err) });
+      if (!res.headersSent) res.status(500);
+      res.end();
+    });
+    zip.pipe(res);
+    for (const f of list) zip.file(path.join(dir, f.file), { name: f.file });
+    zip.finalize();
+  })
+);
+
 // ---- Custom server icon upload + serving ----
 
 const ICON_MAX_BYTES = 16 * 1024 * 1024;
@@ -1929,6 +2100,38 @@ const { requireRole } = require('../middleware/auth');
 router.get('/users', requireRole('admin'), (req, res) => {
   res.json({ ok: true, users: authService.listUsers() });
 });
+
+// ---- Sign-in lockouts (in-memory; admin visibility + manual unlock) ----
+const authMw = require('../middleware/auth');
+
+router.get('/auth/lockouts', requireRole('admin'), (req, res) => {
+  res.json({ ok: true, lockouts: authMw.listActiveLockouts() });
+});
+
+router.post(
+  '/auth/lockouts/clear',
+  requireRole('admin'),
+  asyncHandler((req, res, next) => {
+    const { username, ip, all } = z
+      .object({
+        username: z.string().trim().min(1).max(64).optional(),
+        ip: z.string().trim().max(64).optional(),
+        all: z.coerce.boolean().optional(),
+      })
+      .parse(req.body || {});
+    if (!all && !username) throw Object.assign(new Error('Pass a username, or all:true'), { status: 400 });
+    const removed = authMw.clearLockouts({ username, ip, all: Boolean(all) });
+    eventsService.recordEvent({
+      actor: req.user.username,
+      type: 'login-unlocked',
+      summary: all
+        ? `${req.user.username} cleared all sign-in lockouts`
+        : `${req.user.username} cleared the sign-in lockout for "${username}"`,
+      details: { username: username || null, ip: ip || null, all: Boolean(all), removed },
+    });
+    res.json({ ok: true, removed, lockouts: authMw.listActiveLockouts() });
+  })
+);
 
 router.post(
   '/users',

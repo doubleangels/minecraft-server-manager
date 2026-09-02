@@ -6,6 +6,7 @@
 // Every op tries the modern form first and falls back to legacy.
 
 const fs = require('node:fs');
+const nbt = require('prismarine-nbt');
 const { execCapture } = require('../docker/containers');
 const { cleanText } = require('../utils/ansi');
 const { recordEvent } = require('../events');
@@ -223,6 +224,17 @@ async function setGamerule(serverId, rule, value) {
   ]);
 }
 
+// Decide whether a gamerule write took, from the value read back afterwards
+// (`readBack`), the value we intended (`want`), and the set command's own reply
+// (`setOutput`). The read-back is authoritative and locale-independent - a
+// gamerule value is never translated. null = couldn't read it back; accept only
+// if the set itself didn't visibly error.
+function resolveRuleWrite(readBack, want, setOutput) {
+  if (readBack === want) return { ok: true };
+  if (readBack === null) return { ok: !looksLikeError(setOutput || '') };
+  return { ok: false };
+}
+
 /** 0–23999 daytime ticks → "1:04 PM" (0 ticks = 6:00 AM in Minecraft). */
 function clockFromTicks(ticks) {
   const h24 = Math.floor(ticks / 1000 + 6) % 24;
@@ -292,9 +304,37 @@ function writePvp(serverId, on) {
   fs.renameSync(tmp, file);
 }
 
+// A running getState() is ~1 + N sequential `docker exec rcon-cli` round trips
+// (N = number of gamerules asked for); opening "Show all world rules" makes that
+// ~40. Several browser tabs, plus the immediate post-action refresh, would each
+// pay that in full. Memoise the live read briefly so concurrent/rapid polls
+// share one sweep. runQuick() busts the entry for its server so a toggle is
+// never shown stale.
+const STATE_TTL_MS = 8000;
+const liveStateCache = new Map(); // serverId -> { at, key, state }
+
+function cacheKey(rules) {
+  return Array.isArray(rules) && rules.length ? [...rules].sort().join(',') : '*';
+}
+
+function invalidateState(serverId) {
+  liveStateCache.delete(serverId);
+}
+
 // opts.rules: restrict the gamerule reads to this subset (the World Controls
 // page only asks for the rules whose chips are on screen). Omit for the lot.
 async function getState(serverId, opts = {}) {
+  const key = cacheKey(opts.rules);
+  const hit = liveStateCache.get(serverId);
+  if (hit && hit.key === key && Date.now() - hit.at < STATE_TTL_MS) {
+    return { ...hit.state };
+  }
+  const state = await readStateLive(serverId, opts);
+  liveStateCache.set(serverId, { at: Date.now(), key, state: { ...state } });
+  return state;
+}
+
+async function readStateLive(serverId, opts = {}) {
   const state = {};
   const time = await queryTime(serverId);
   if (time) {
@@ -327,6 +367,69 @@ async function getState(serverId, opts = {}) {
   return state;
 }
 
+/** prismarine-nbt simplify() returns a Long as [high, low] (two int32) or a number. */
+function longToNum(v) {
+  if (v == null) return null;
+  if (Array.isArray(v)) return (v[0] >>> 0) * 4294967296 + (v[1] >>> 0);
+  return Number(v);
+}
+
+/** The `Data` compound of the active world's level.dat, or null. */
+async function readActiveLevelData(serverId) {
+  const server = require('./servers').getServer(serverId);
+  if (!server) return null;
+  const level = require('./worlds').activeLevelName(server);
+  const file = dataPath('servers', serverId, level, 'level.dat');
+  try {
+    const { parsed } = await nbt.parse(await fs.promises.readFile(file));
+    const s = nbt.simplify(parsed);
+    return s.Data || s;
+  } catch {
+    return null; // no world generated yet, or unreadable
+  }
+}
+
+// Pure: derive the getState() shape from a simplified level.dat `Data` compound.
+// Kept separate from the file IO so it is unit-testable without a DB/data dir.
+function offlineStateFromLevelData(data, opts = {}) {
+  const state = { offline: true };
+  if (!data || typeof data !== 'object') return state;
+
+  const dayTime = longToNum(data.DayTime);
+  if (Number.isFinite(dayTime)) {
+    const ticks = ((dayTime % 24000) + 24000) % 24000;
+    state.timeTicks = ticks;
+    state.timeLabel =
+      ticks < 6000 ? 'Morning' : ticks < 12000 ? 'Afternoon' : ticks < 13800 ? 'Sunset' : ticks < 22200 ? 'Night' : 'Sunrise';
+    state.clock = clockFromTicks(ticks);
+  }
+  const gameTime = longToNum(data.Time);
+  if (Number.isFinite(gameTime)) state.day = Math.floor(gameTime / 24000) + 1;
+
+  // level.dat GameRules keys are camelCase on <=1.21 and snake_case on 26.x -
+  // GAMERULES maps one to the other, so try both spellings per rule.
+  const gr = data.GameRules || {};
+  const asBool = (raw) => (raw === 'true' ? true : raw === 'false' ? false : null);
+  const wanted =
+    Array.isArray(opts.rules) && opts.rules.length
+      ? opts.rules.filter((r) => Object.hasOwn(GAMERULES, r))
+      : Object.keys(GAMERULES);
+  for (const rule of wanted) {
+    const v = asBool(gr[rule]) ?? asBool(gr[GAMERULES[rule]]);
+    if (v !== null) state[rule] = v;
+  }
+  return state;
+}
+
+// Same shape as getState(), read from level.dat instead of RCON, for a stopped
+// server. The clock is whatever was last saved; gamerule chips reflect the
+// on-disk values. The World Controls rail stays a read-only display offline
+// (the <fieldset> is disabled), so this never writes.
+async function getStateOffline(serverId, opts = {}) {
+  const data = await readActiveLevelData(serverId);
+  return { ...offlineStateFromLevelData(data, opts), pvp: readPvp(serverId) };
+}
+
 async function runQuick(serverId, action, { actor = 'system' } = {}) {
   const quick = QUICK_ACTIONS[action];
   if (!quick) {
@@ -334,16 +437,19 @@ async function runQuick(serverId, action, { actor = 'system' } = {}) {
     err.status = 400;
     throw err;
   }
-  let out;
-  if (quick.prop === 'pvp') {
-    writePvp(serverId, quick.value); // server.properties edit - takes effect on next restart
-    out = '';
-  } else if (quick.variants) out = await tryVariants(serverId, quick.variants);
-  else if (quick.rule) out = await setGamerule(serverId, quick.rule, quick.value);
-  else out = await rcon(serverId, quick.cmd);
-  // A server.properties edit isn't an RCON command - skip the RCON error gate.
-  if (!quick.prop && looksLikeError(out)) {
-    const reply = (out.split('\n')[0] || '').trim();
+
+  const ok = (out) => {
+    recordEvent({
+      serverId,
+      actor,
+      type: 'rcon',
+      summary: `Quick action: ${quick.label}`,
+      details: { action, output: (out || '').slice(0, 300) },
+    });
+    invalidateState(serverId); // the next /world/state read must see this change
+    return { label: quick.label, output: (out || '').trim() };
+  };
+  const fail = (detail) => {
     // Record the failure too - the History tab is where an operator looks, and
     // "check the logs" was never useful (the log viewer shows the game's own
     // output, not the panel's).
@@ -352,7 +458,7 @@ async function runQuick(serverId, action, { actor = 'system' } = {}) {
       actor,
       type: 'rcon',
       summary: `Quick action failed: ${quick.label}`,
-      details: { action, reply: reply.slice(0, 300) },
+      details: { action, reply: String(detail || '').slice(0, 300) },
     });
     // 4xx, not 5xx: the JSON error handler passes a sub-500 err.message straight
     // through to the browser, so the user sees this sentence instead of the
@@ -362,15 +468,43 @@ async function runQuick(serverId, action, { actor = 'system' } = {}) {
     );
     err.status = 422;
     throw err;
+  };
+
+  // server.properties edit - not an RCON command, nothing to verify.
+  if (quick.prop === 'pvp') {
+    writePvp(serverId, quick.value);
+    return ok('');
   }
-  recordEvent({
-    serverId,
-    actor,
-    type: 'rcon',
-    summary: `Quick action: ${quick.label}`,
-    details: { action, output: out.slice(0, 300) },
-  });
-  return { label: quick.label, output: out.trim() };
+
+  // Gamerule toggles (the bulk of the actions): don't trust the console reply.
+  // rcon-cli exits 0 even when Minecraft rejects a command, and the human-
+  // readable reply looksLikeError() inspects is translated on a non-English
+  // server - so a successful set there was misread as a rejection, and a real
+  // rejection there could slip through. Set it, then read it back: the value
+  // the server reports is the ground truth, regardless of locale.
+  if (quick.rule) {
+    const out = await setGamerule(serverId, quick.rule, quick.value);
+    const want = quick.value === 'true';
+    const readBack = await queryGamerule(serverId, quick.rule);
+    if (resolveRuleWrite(readBack, want, out).ok) return ok(out);
+    return fail(readBack === null ? out.split('\n')[0] : `read back ${readBack}, expected ${want}`);
+  }
+
+  // Remaining actions (time / weather / difficulty / save / daycycle variants)
+  // are vanilla commands present on every version; there is no single clean
+  // read-back, so fall back to the reply heuristic.
+  const out = quick.variants ? await tryVariants(serverId, quick.variants) : await rcon(serverId, quick.cmd);
+  if (looksLikeError(out)) return fail(out.split('\n')[0]);
+  return ok(out);
 }
 
-module.exports = { getState, runQuick, QUICK_ACTIONS, looksLikeError };
+module.exports = {
+  getState,
+  getStateOffline,
+  offlineStateFromLevelData,
+  runQuick,
+  resolveRuleWrite,
+  invalidateState,
+  QUICK_ACTIONS,
+  looksLikeError,
+};

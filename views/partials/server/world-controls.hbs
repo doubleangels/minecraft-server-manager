@@ -49,8 +49,14 @@
     </div>
     <div>
       <div class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-faint">Combat</div>
-      <div class="flex flex-wrap gap-1.5">
-        <button class="chip hover:border-grass-600" data-wc-toggle="pvp" data-rule="pvp">PvP</button>
+      <div class="flex flex-wrap items-center gap-1.5">
+        {{! Unlike every other chip here, PvP writes server.properties and only
+            takes effect on the next start - the "on restart" tag and the pending
+            badge keep it from reading as an instant toggle like its neighbours. }}
+        <button class="chip hover:border-grass-600" data-wc-toggle="pvp" data-rule="pvp">
+          PvP <span class="text-[10px] font-normal text-ink-faint">· on restart</span>
+        </button>
+        <span class="badge badge-warn hidden" data-wc-pvp-pending>Restart to apply</span>
       </div>
       <p class="mt-1 text-[11px] text-ink-faint">Changes the PvP setting for the whole server. It takes effect on the next restart.</p>
     </div>

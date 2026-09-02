@@ -414,4 +414,71 @@ function init() {
       return null;
     }
   }
+
+  // ---- Sign-in lockouts ----
+  const lockBody = document.getElementById('lockouts-body');
+  const clearAllBtn = document.getElementById('lockouts-clear-all');
+  if (lockBody) {
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    const renderLockouts = (list) => {
+      if (!list.length) {
+        lockBody.textContent = 'No accounts are locked out right now.';
+        clearAllBtn.classList.add('hidden');
+        return;
+      }
+      clearAllBtn.classList.remove('hidden');
+      lockBody.innerHTML = `
+        <div class="overflow-x-auto"><table class="table-base"><thead><tr>
+          <th>Account</th><th>Scope</th><th>Address</th><th>Fails</th><th>Clears in</th><th class="text-right"></th>
+        </tr></thead><tbody>${list
+          .map(
+            (l) => `<tr>
+              <td class="font-medium">${esc(l.username)}</td>
+              <td>${l.scope === 'account' ? 'Whole account' : 'This address'}</td>
+              <td class="font-mono text-xs">${esc(l.ip || '—')}</td>
+              <td class="tabular-nums">${l.count}</td>
+              <td class="tabular-nums">${l.minutesLeft} min</td>
+              <td class="text-right"><button class="btn btn-ghost btn-sm" data-unlock data-username="${esc(l.username)}" ${l.ip ? `data-ip="${esc(l.ip)}"` : ''}>Unlock</button></td>
+            </tr>`
+          )
+          .join('')}</tbody></table></div>`;
+    };
+    const load = async () => {
+      try {
+        const res = await fetch('/api/auth/lockouts', { headers: { Accept: 'application/json' } });
+        const data = await res.json();
+        if (res.ok && data.ok) renderLockouts(data.lockouts);
+        else lockBody.textContent = 'Could not load the lockout list.';
+      } catch {
+        lockBody.textContent = 'Could not load the lockout list.';
+      }
+    };
+    lockBody.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-unlock]');
+      if (!btn) return;
+      await withBusy(btn, 'Unlocking…', async () => {
+        const res = await post('/api/auth/lockouts/clear', { username: btn.dataset.username, ip: btn.dataset.ip });
+        if (res) {
+          toast(`Unlocked "${btn.dataset.username}".`);
+          renderLockouts(res.lockouts);
+        }
+      });
+    });
+    clearAllBtn?.addEventListener('click', async (e) => {
+      const ok = await confirmDialog({
+        title: 'Clear all sign-in locks?',
+        message: 'Every locked account and address will be able to try signing in again immediately.',
+        confirmLabel: 'Clear all',
+      });
+      if (!ok) return;
+      await withBusy(e.currentTarget, 'Clearing…', async () => {
+        const res = await post('/api/auth/lockouts/clear', { all: true });
+        if (res) {
+          toast(`Cleared ${res.removed} lock${res.removed === 1 ? '' : 's'}.`);
+          renderLockouts(res.lockouts);
+        }
+      });
+    });
+    load();
+  }
 }

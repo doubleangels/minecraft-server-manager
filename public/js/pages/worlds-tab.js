@@ -213,14 +213,39 @@ function init(serverId, serverName, serverStatus) {
   function shrinkModal(world) {
     const content = document.createElement('div');
     content.innerHTML = `
-      <p class="text-sm">This removes parts of <b>${escapeHtml(world)}</b> that no player has spent
-        <b>30 seconds or more</b> in, so the world takes less space on disk. Minecraft rebuilds a
-        removed area from the seed the next time someone travels there.</p>
-      <p class="help mt-2">The server must be stopped. <b>Back up first</b> — anything a player built
-        but barely stood in would be removed too. The spawn area is always kept.</p>
-      ${isRunning ? '<p class="notice notice-warn mt-2">Stop the server before shrinking its world.</p>' : ''}
+      <p class="text-sm">This removes parts of <b>${escapeHtml(world)}</b> that players have barely
+        spent time in, so the world takes less space on disk. Minecraft rebuilds a removed area from
+        the seed the next time someone travels there.</p>
+      <p class="help mt-2"><b>Back up first</b> — anything a player built but barely stood in would be
+        removed too.</p>
+      <div class="mt-3 grid grid-cols-2 gap-3">
+        <div>
+          <label class="label" for="sh-secs">Remove chunks visited under</label>
+          <div class="flex items-center gap-1.5">
+            <input class="input w-20" id="sh-secs" type="number" min="1" max="3600" value="30">
+            <span class="text-sm text-ink-faint">seconds</span>
+          </div>
+        </div>
+        <div>
+          <label class="label" for="sh-keep">Always keep spawn (chunks)</label>
+          <input class="input w-24" id="sh-keep" type="number" min="0" max="256" value="8">
+        </div>
+      </div>
+      ${
+        isRunning
+          ? `<label class="notice notice-warn mt-3 flex items-center gap-2 text-sm">
+               <input type="checkbox" class="msm-check" id="sh-wrap">
+               The server is running — stop it, shrink the world, then start it again.
+             </label>`
+          : '<p class="help mt-2">The server is stopped, so the shrink runs directly.</p>'
+      }
       <div class="mt-3 hidden rounded-md border border-line bg-inset/40 px-3 py-2 text-sm" data-sh-result></div>`;
     const resultEl = content.querySelector('[data-sh-result]');
+    const opts = () => {
+      const secs = Math.max(1, Math.min(3600, Number(content.querySelector('#sh-secs').value) || 30));
+      const keep = Math.max(0, Math.min(256, Number(content.querySelector('#sh-keep').value) || 0));
+      return { minInhabitedTicks: secs * 20, spawnKeepChunks: keep };
+    };
 
     openModal({
       title: `Shrink "${world}"`,
@@ -232,12 +257,13 @@ function init(serverId, serverName, serverStatus) {
           kind: 'ghost',
           busyLabel: 'Checking…',
           onClick: async () => {
-            const res = await postJSON(`${base}/${encodeURIComponent(world)}/shrink`, { dryRun: true });
+            // A dry run never touches the server, so it works while it's running too.
+            const res = await postJSON(`${base}/${encodeURIComponent(world)}/shrink`, { dryRun: true, ...opts() });
             if (!res) return false;
             resultEl.classList.remove('hidden');
             resultEl.textContent = res.chunksRemoved
               ? `About ${res.chunksRemoved.toLocaleString()} chunks (~${fmtBytes(res.bytesFreed)}) would be removed, from ${res.regionsScanned} region file(s).`
-              : 'Nothing to remove — every chunk in this world has been visited for 30 seconds or more.';
+              : 'Nothing to remove — every chunk in this world has been visited long enough.';
             return false; // keep the modal open
           },
         },
@@ -246,19 +272,21 @@ function init(serverId, serverName, serverStatus) {
           kind: 'primary',
           busyLabel: 'Shrinking…',
           onClick: async () => {
-            if (isRunning) {
-              toast('Stop the server first, then shrink its world.', { kind: 'error' });
+            const wrap = isRunning && content.querySelector('#sh-wrap')?.checked;
+            if (isRunning && !wrap) {
+              toast('Tick the stop-and-restart option, or stop the server first.', { kind: 'error' });
               return false;
             }
             try {
               const r = await runTask({
                 title: `Shrinking "${world}"…`,
-                start: () => postJSON(`${base}/${encodeURIComponent(world)}/shrink`, {}),
+                start: () =>
+                  postJSON(`${base}/${encodeURIComponent(world)}/shrink`, { ...opts(), autoStopStart: Boolean(wrap) }),
               });
               toast(
                 r && r.chunksRemoved
-                  ? `Removed ${r.chunksRemoved.toLocaleString()} chunks — freed ${fmtBytes(r.bytesFreed)}.`
-                  : 'No rarely-visited chunks to remove.'
+                  ? `Removed ${r.chunksRemoved.toLocaleString()} chunks — freed ${fmtBytes(r.bytesFreed)}.${r.restarted ? ' Server restarted.' : ''}`
+                  : `No rarely-visited chunks to remove.${r && r.restarted ? ' Server restarted.' : ''}`
               );
               reload();
             } catch (err) {

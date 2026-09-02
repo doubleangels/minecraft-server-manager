@@ -143,6 +143,11 @@
     <p class="help mt-2 max-w-prose">Roles: <b>Admin</b> can do everything. <b>Operator</b> can manage servers, but not storage, users, or update policies. <b>Viewer</b> is read-only.</p>
   {{/settings/card}}
 
+  {{#> settings/card heading="Sign-in Security" id="lockouts-card" wide=true desc="Accounts and addresses currently blocked from signing in after too many failed attempts. Locks clear on their own after the cooldown; unlock one here to end it early."}}
+    <div id="lockouts-body" class="text-sm text-ink-faint">Checking…</div>
+    <button class="btn btn-sm mt-4 hidden" id="lockouts-clear-all">{{{icon 'lock-open' 'size-3.5'}}} Clear All Locks</button>
+  {{/settings/card}}
+
   {{#> settings/card heading="Public API" id="api-tokens-card" wide=true desc="Let another app or website read your servers' status — a live status page, an uptime monitor, a Discord bot. It is read-only: nothing outside can start, stop, or change anything."}}
     {{> settings/toggle-row
         label="Let outside apps read status"

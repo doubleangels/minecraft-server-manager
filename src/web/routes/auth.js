@@ -190,7 +190,18 @@ router.post('/login', async (req, res) => {
     checkLoginAllowed(username, req.ip);
     const user = await authService.verifyCredentials(username, password);
     if (!user) {
-      recordLoginFailure(username, req.ip);
+      const lock = recordLoginFailure(username, req.ip);
+      if (lock.lockedNow) {
+        recordEvent({
+          actor: username,
+          type: 'login-locked',
+          summary:
+            lock.scope === 'account'
+              ? `Sign-in locked for "${username}" (too many failed attempts across addresses)`
+              : `Sign-in locked for "${username}" from ${req.ip} (too many failed attempts)`,
+          details: { username, ip: req.ip, scope: lock.scope },
+        });
+      }
       logger.warn('Rejected a login with a bad username or password.', { username, ip: req.ip });
       return res.status(401).render('login', {
         title: 'Sign In',
@@ -224,7 +235,12 @@ router.post('/login', async (req, res) => {
       }
       req.session.userId = user.id;
       applyRememberCookie(req, Boolean(remember));
-      recordEvent({ actor: user.username, type: 'login', summary: `${user.username} signed in` });
+      recordEvent({
+        actor: user.username,
+        type: 'login',
+        summary: `${user.username} signed in from ${req.ip}`,
+        details: { ip: req.ip, via: 'password' },
+      });
       logger.info('Signed a user in.', { userId: user.id, username: user.username, ip: req.ip, via: 'password' });
       res.redirect(safeNext(next) || '/');
     });
@@ -248,7 +264,18 @@ router.post('/login/2fa', async (req, res) => {
     checkLoginAllowed(pendingUsername, req.ip);
     const ok = await authService.verifyTotpLogin(pendingId, code);
     if (!ok) {
-      recordLoginFailure(pendingUsername, req.ip);
+      const lock = recordLoginFailure(pendingUsername, req.ip);
+      if (lock.lockedNow) {
+        recordEvent({
+          actor: pendingUsername,
+          type: 'login-locked',
+          summary:
+            lock.scope === 'account'
+              ? `Sign-in locked for "${pendingUsername}" (too many failed two-factor attempts)`
+              : `Sign-in locked for "${pendingUsername}" from ${req.ip} (too many failed two-factor attempts)`,
+          details: { username: pendingUsername, ip: req.ip, scope: lock.scope, step: '2fa' },
+        });
+      }
       logger.warn('Rejected a login with a bad two-factor code.', { username: pendingUsername, ip: req.ip });
       return res
         .status(401)
@@ -275,7 +302,12 @@ router.post('/login/2fa', async (req, res) => {
       }
       req.session.userId = pendingId;
       applyRememberCookie(req, Boolean(remember));
-      recordEvent({ actor: pendingUsername, type: 'login', summary: `${pendingUsername} signed in (2FA)` });
+      recordEvent({
+        actor: pendingUsername,
+        type: 'login',
+        summary: `${pendingUsername} signed in from ${req.ip} (2FA)`,
+        details: { ip: req.ip, via: '2fa' },
+      });
       logger.info('Signed a user in.', {
         userId: pendingId,
         username: pendingUsername,

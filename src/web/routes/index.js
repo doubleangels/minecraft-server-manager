@@ -392,12 +392,23 @@ router.get(
           /* leave undefined - the card just omits the Docker-sourced fields */
         }
       }
-      const countEvents = (type) =>
-        db.get('SELECT COUNT(*) AS n FROM events WHERE server_id = ? AND type = ?', row.id, type)?.n || 0;
+      // All-time totals plus a recent window, so the card shows whether trouble
+      // is current or ancient history. The events table is the persistence here
+      // (pruned at 90 days by the daily maintenance job), indexed on created_at.
+      const countEvents = (type, since) =>
+        db.get(
+          `SELECT COUNT(*) AS n FROM events WHERE server_id = ? AND type = ?` +
+            (since ? ` AND created_at >= datetime('now', ?)` : ''),
+          ...(since ? [row.id, type, since] : [row.id, type])
+        )?.n || 0;
       context.stability = {
         oomKills: countEvents('oom'),
+        oomKills24h: countEvents('oom', '-1 day'),
         autoRestarts: countEvents('auto-restarted'),
+        autoRestarts24h: countEvents('auto-restarted', '-1 day'),
         crashes: countEvents('crashed'),
+        crashes24h: countEvents('crashed', '-1 day'),
+        crashes7d: countEvents('crashed', '-7 days'),
       };
       context.lastCrash = db.get(
         'SELECT id, summary, exception, file_mtime FROM crash_reports WHERE server_id = ? ORDER BY file_mtime DESC LIMIT 1',
@@ -540,6 +551,15 @@ router.get(
       context.backups = db
         .all('SELECT * FROM backups WHERE server_id = ? ORDER BY created_at DESC', row.id)
         .map((b) => ({ id: b.id, file: b.filename, size: b.size_bytes, reason: b.reason, ts: b.created_at }));
+      const rc = require('../../services/backupRetention').effective(row.id);
+      context.retention = {
+        keepScheduled: rc.keepScheduled,
+        keepPreUpdate: rc.keepPreUpdate,
+        keepManual: rc.keepManual,
+        keepPreRestore: rc.keepPreRestore,
+        maxAgeDays: rc.maxAgeDays,
+        maxTotalGb: rc.maxTotalGb,
+      };
     }
 
     res.render('server-detail', context);

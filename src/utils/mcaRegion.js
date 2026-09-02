@@ -37,10 +37,13 @@ function readInhabitedTime(simplified) {
   const nested = simplified.Level && simplified.Level.InhabitedTime;
   const v = direct != null ? direct : nested;
   if (v == null) return null;
-  // prismarine-nbt simplify() returns a Long as [low, high] or a number.
+  // prismarine-nbt simplify() returns a Long as [high, low] (two int32 words),
+  // or a plain number. NOT [low, high] - a real InhabitedTime of 5000 comes back
+  // as [0, 5000], so the old [low, high] read reported 5000 * 2^32 and no
+  // visited chunk ever fell under the threshold.
   if (Array.isArray(v)) {
-    const [low, high] = v;
-    return high * 4294967296 + (low >>> 0);
+    const [high, low] = v;
+    return (high >>> 0) * 4294967296 + (low >>> 0);
   }
   return Number(v);
 }

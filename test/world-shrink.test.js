@@ -8,9 +8,9 @@ const nbt = require('prismarine-nbt');
 const { parseHeader, chunkInhabitedTime, repack, SECTOR } = require('../src/utils/mcaRegion');
 
 // Build a chunk payload block (4-byte length + 1-byte comp type + zlib NBT),
-// padded up to a whole number of 4 KiB sectors.
+// padded up to a whole number of 4 KiB sectors. Long value is [high, low].
 function chunkBlock(inhabitedTicks) {
-  const body = nbt.writeUncompressed(nbt.comp({ InhabitedTime: { type: 'long', value: [inhabitedTicks, 0] } }));
+  const body = nbt.writeUncompressed(nbt.comp({ InhabitedTime: { type: 'long', value: [0, inhabitedTicks] } }));
   const comp = zlib.deflateSync(body);
   const head = Buffer.alloc(5);
   head.writeUInt32BE(comp.length + 1, 0);
@@ -55,6 +55,13 @@ test('chunkInhabitedTime decodes the Long', async () => {
   const entries = parseHeader(buf);
   assert.equal(await chunkInhabitedTime(buf, entries[0]), 42);
   assert.equal(await chunkInhabitedTime(buf, entries[1]), 123456);
+});
+
+test('chunkInhabitedTime decodes a realistic InhabitedTime (regression: [high, low] word order)', async () => {
+  // A chunk a player stood in for ~5 minutes: 6000 ticks. The old [low, high]
+  // read returned 6000 * 2^32 here, so nothing ever counted as "rarely visited".
+  const buf = makeRegion({ 0: 6000 });
+  assert.equal(await chunkInhabitedTime(buf, parseHeader(buf)[0]), 6000);
 });
 
 test('repack drops the flagged slots and keeps the rest, shrinking the file', () => {

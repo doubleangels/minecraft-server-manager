@@ -25,7 +25,8 @@ const { parseHeader, chunkInhabitedTime, repack } = require('../utils/mcaRegion'
 const db = require('../db');
 
 const REGION_RE = /^r\.(-?\d+)\.(-?\d+)\.mca$/;
-const SPAWN_KEEP_CHUNKS = 8; // |chunkX|,|chunkZ| <= this in the overworld
+const SPAWN_KEEP_CHUNKS = 8; // default |chunkX|,|chunkZ| <= this in the overworld
+const DEFAULT_MIN_INHABITED_TICKS = 600; // 30 s at 20 tps
 
 function humanBytes(n) {
   if (!n) return '0 B';
@@ -59,15 +60,15 @@ async function assertStopped(serverId) {
   }
 }
 
-async function shrinkRegionFile(abs, { rx, rz, isOverworld, minInhabitedTicks, dryRun }) {
+async function shrinkRegionFile(abs, { rx, rz, isOverworld, minInhabitedTicks, spawnKeepChunks, dryRun }) {
   const buf = await fsp.readFile(abs);
   const entries = parseHeader(buf);
   const drop = new Set();
   for (const e of entries) {
-    if (isOverworld) {
+    if (isOverworld && spawnKeepChunks > 0) {
       const cx = rx * 32 + e.x;
       const cz = rz * 32 + e.z;
-      if (Math.abs(cx) <= SPAWN_KEEP_CHUNKS && Math.abs(cz) <= SPAWN_KEEP_CHUNKS) continue;
+      if (Math.abs(cx) <= spawnKeepChunks && Math.abs(cz) <= spawnKeepChunks) continue;
     }
     const ticks = await chunkInhabitedTime(buf, e);
     if (ticks != null && ticks < minInhabitedTicks) drop.add(e.index);
@@ -101,13 +102,20 @@ async function shrinkRegionFile(abs, { rx, rz, isOverworld, minInhabitedTicks, d
  * @param {object} [opts]
  * @param {string} [opts.worldName]        defaults to the active world
  * @param {number} [opts.minInhabitedTicks] keep chunks at or above this (default 600 = 30 s)
+ * @param {number} [opts.spawnKeepChunks]  always keep overworld chunks within this many of the origin (default 8; 0 = don't protect spawn)
  * @param {boolean} [opts.dryRun]          measure only, change nothing
  * @param {string} [opts.actor]
- * @returns {Promise<{worldName,regionsScanned,chunksScanned,chunksRemoved,bytesFreed,dryRun}>}
+ * @returns {Promise<{worldName,regionsScanned,chunksScanned,chunksRemoved,bytesFreed,dryRun,minInhabitedTicks,spawnKeepChunks}>}
  */
 async function shrinkWorld(serverId, opts = {}) {
   const server = mustServer(serverId);
-  const minInhabitedTicks = Number.isFinite(opts.minInhabitedTicks) ? opts.minInhabitedTicks : 600;
+  const minInhabitedTicks =
+    Number.isFinite(opts.minInhabitedTicks) && opts.minInhabitedTicks > 0
+      ? Math.min(Math.round(opts.minInhabitedTicks), 20 * 60 * 60) // cap at 1 game-hour
+      : DEFAULT_MIN_INHABITED_TICKS;
+  const spawnKeepChunks = Number.isFinite(opts.spawnKeepChunks)
+    ? Math.max(0, Math.min(Math.round(opts.spawnKeepChunks), 256))
+    : SPAWN_KEEP_CHUNKS;
   const dryRun = Boolean(opts.dryRun);
   const actor = opts.actor || 'system';
   const worldName = opts.worldName || activeLevelName(server);
@@ -140,6 +148,7 @@ async function shrinkWorld(serverId, opts = {}) {
           rz: Number(rzs),
           isOverworld,
           minInhabitedTicks,
+          spawnKeepChunks,
           dryRun,
         });
         chunksScanned += r.chunksScanned;
@@ -154,10 +163,19 @@ async function shrinkWorld(serverId, opts = {}) {
         actor,
         type: 'world-shrunk',
         summary: `Shrank "${worldName}": removed ${chunksRemoved} rarely-visited chunk(s), freed ${humanBytes(bytesFreed)}`,
-        details: { worldName, chunksRemoved, regionsScanned, chunksScanned, bytesFreed, minInhabitedTicks },
+        details: { worldName, chunksRemoved, regionsScanned, chunksScanned, bytesFreed, minInhabitedTicks, spawnKeepChunks },
       });
     }
-    return { worldName, regionsScanned, chunksScanned, chunksRemoved, bytesFreed, dryRun };
+    return {
+      worldName,
+      regionsScanned,
+      chunksScanned,
+      chunksRemoved,
+      bytesFreed,
+      dryRun,
+      minInhabitedTicks,
+      spawnKeepChunks,
+    };
   };
 
   // Serialize against backup / world export even though the server is stopped.
