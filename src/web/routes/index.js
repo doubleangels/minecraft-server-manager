@@ -147,6 +147,46 @@ const DASH_SORTS = {
   created: (a, b) => String(b.created).localeCompare(String(a.created)),
 };
 
+// Combined live totals across every running server for the dashboard's
+// "Resource overview" graphs. Fed entirely by the in-memory live cache each
+// serverVM already reads (serverVM.js:118), so nothing here touches Docker.
+// Only servers with actual live stats participate in the resource sums; a
+// server that is "running" in status but hasn't produced a sample yet is
+// listed but contributes zero rather than being falsely included.
+function buildCombinedOverview(servers) {
+  const running = [];
+  for (const s of servers) {
+    if (s.status !== 'running' && s.status !== 'starting' && s.status !== 'unhealthy' && s.status !== 'stalled') {
+      continue;
+    }
+    running.push({
+      id: s.id,
+      name: s.name,
+      accent: s.accent,
+      status: s.status,
+      cpuPct: s.stats.cpuPct || 0,
+      cpus: s.resources.cpus || 0,
+      memUsedMb: s.stats.memUsedMb || 0,
+      memLimitMb: s.resources.containerMemoryMb || 0,
+      playersOnline: s.players.online || 0,
+      playersMax: s.players.max || 0,
+    });
+  }
+  return {
+    hasLive: running.some((s) => s.cpuPct > 0 || s.memUsedMb > 0 || s.playersOnline > 0),
+    running: running.length,
+    playersOnline: running.reduce((n, s) => n + s.playersOnline, 0),
+    playersMax: running.reduce((n, s) => n + s.playersMax, 0),
+    memoryUsedMb: running.reduce((n, s) => n + s.memUsedMb, 0),
+    memoryLimitMb: running.reduce((n, s) => n + s.memLimitMb, 0),
+    cpuTotal: running.reduce((n, s) => n + s.cpuPct, 0),
+    // Each server's own CPU% is relative to its own core allowance, so the
+    // meaningful total is the sum of the used portions of those allowances.
+    cpuCapacity: running.reduce((n, s) => n + s.cpus * 100, 0),
+    breakdown: running,
+  };
+}
+
 async function renderServerList(req, res, next, { page }) {
   try {
     const rows = serversService.listServers();
@@ -167,6 +207,7 @@ async function renderServerList(req, res, next, { page }) {
         players: servers.reduce((n, s) => n + s.players.online, 0),
         updates: res.locals.updatesCount,
       },
+      combined: buildCombinedOverview(servers),
       activity: [],
     };
     if (page === 'dashboard') {

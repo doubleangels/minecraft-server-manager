@@ -164,3 +164,14 @@ test('the Mods tab marks icon <img>s and ships the puzzle fallback template', as
   assert.equal(templates.length, 1, 'exactly one fallback template');
   assert.match(r.text, /<template id="mod-icon-fallback">.*bg-inset.*<\/template>/s);
 });
+
+test('dashboard renders the combined resource overview', async () => {
+  app.seedServer('srv_dashcombined');
+  const r = await app.req('GET', '/', { cookie, headers: { Accept: 'text/html' } });
+  assert.equal(r.status, 200);
+  // Section wrapper and heading always render once servers exist.
+  assert.match(r.text, /Resource Overview/);
+  assert.match(r.text, /id="combined-overview"/);
+  // A stopped server produces no live breakdown, so the fallback copy shows.
+  assert.match(r.text, /No servers are running right now\./);
+});

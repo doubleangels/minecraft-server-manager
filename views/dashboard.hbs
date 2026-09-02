@@ -28,6 +28,17 @@
   </div>
 </div>
 
+{{#unless serversOnly}}
+<div class="mb-6 {{#if noServers}}hidden{{/if}}" id="combined-overview">
+  <div class="mb-3 flex items-center justify-between">
+    <h2 class="font-semibold">Resource Overview</h2>
+  </div>
+  <div data-combined-root>
+    {{> combined-graphs}}
+  </div>
+</div>
+{{/unless}}
+
 {{#unless noServers}}
 <div class="mb-4 flex flex-wrap items-center gap-2">
   <input class="input max-w-xs" placeholder="Search servers, tags…" id="server-filter">
@@ -70,7 +81,7 @@
 <div class="mt-8 {{#if serversOnly}}hidden{{/if}}">
   <div class="mb-3 flex items-center justify-between">
     <h2 class="font-semibold">Recent Activity</h2>
-    <a href="/activity" class="text-sm text-link hover:underline">View all →</a>
+    <a href="/activity" class="text-sm text-link hover:underline">View All →</a>
   </div>
   <div class="card divide-y divide-line">
     {{#each activity}}
