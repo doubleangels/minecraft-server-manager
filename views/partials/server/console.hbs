@@ -13,9 +13,9 @@
       </div>
       <button class="btn btn-sm" data-menu="console-dl-menu">{{{icon 'download' 'size-3.5'}}} Download {{{icon 'chevron-down' 'size-3.5'}}}</button>
       <template id="console-dl-menu">
-        <a href="/api/servers/{{server.id}}/logs?tail=2000" download="{{server.name}}-recent.log">{{{icon 'scroll-text' 'size-3.5'}}} Recent output (last 2000 lines)</a>
+        <a href="/api/servers/{{server.id}}/logs?tail=2000" download="{{server.name}}-recent.log">{{{icon 'scroll-text' 'size-3.5'}}} Recent Output (Last 2000 Lines)</a>
         <a href="/api/servers/{{server.id}}/logs/game/latest.log" download>{{{icon 'file-text' 'size-3.5'}}} Full latest.log</a>
-        <a href="/api/servers/{{server.id}}/logs/bundle.zip" download>{{{icon 'folder-archive' 'size-3.5'}}} All log files (.zip)</a>
+        <a href="/api/servers/{{server.id}}/logs/bundle.zip" download>{{{icon 'folder-archive' 'size-3.5'}}} All Log Files (.zip)</a>
       </template>
     </div>
   </div>

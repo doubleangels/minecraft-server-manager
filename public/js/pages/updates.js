@@ -80,7 +80,7 @@ document.getElementById('updates-table')?.addEventListener('click', async (e) =>
 async function toggleIgnore(row, btn, ignore) {
   const { serverId, subjectType, contentId, subject, latest } = row.dataset;
   try {
-    await withBusy(btn, ignore ? 'Ignoring…' : 'Restoring…', () =>
+    await withBusy(btn, ignore ? 'Ignoring…' : 'Un-ignoring…', () =>
       postJSON('/api/updates/ignore', {
         subjectType: subjectType || (contentId ? 'content' : ''),
         serverId,
@@ -90,7 +90,7 @@ async function toggleIgnore(row, btn, ignore) {
     );
     toast(
       ignore
-        ? `Ignoring ${latest} for ${subject}. It won't be offered until a newer build appears.`
+        ? `Now ignoring ${latest} for ${subject}. It won't be offered until a newer build appears.`
         : `${subject} updates are offered again.`,
       { kind: 'success' }
     );

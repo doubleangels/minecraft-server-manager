@@ -268,7 +268,7 @@ function initPage() {
         <p class="mt-2 line-clamp-2 flex-1 text-xs text-ink-faint">${escapeHtml(p.description || '')}</p>
         <div class="mt-3 flex gap-2 border-t border-line pt-3">
           <button type="button" class="btn btn-ghost btn-sm" data-details="${i}">Details</button>
-          <button type="button" class="btn btn-sm ml-auto" data-create="${i}">Create Server</button>
+          <button type="button" class="btn btn-sm ml-auto" data-create="${i}">Create a server</button>
         </div>
       </div>`
       )

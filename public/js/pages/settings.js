@@ -419,7 +419,8 @@ function init() {
   const lockBody = document.getElementById('lockouts-body');
   const clearAllBtn = document.getElementById('lockouts-clear-all');
   if (lockBody) {
-    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    const esc = (s) =>
+      String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
     const renderLockouts = (list) => {
       if (!list.length) {
         lockBody.textContent = 'No accounts are locked out right now.';
@@ -466,9 +467,9 @@ function init() {
     });
     clearAllBtn?.addEventListener('click', async (e) => {
       const ok = await confirmDialog({
-        title: 'Clear all sign-in locks?',
+        title: 'Clear All Locks?',
         message: 'Every locked account and address will be able to try signing in again immediately.',
-        confirmLabel: 'Clear all',
+        confirmLabel: 'Clear All Locks',
       });
       if (!ok) return;
       await withBusy(e.currentTarget, 'Clearing…', async () => {
