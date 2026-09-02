@@ -74,8 +74,28 @@ function playerdataDir(serverId) {
   return fs.existsSync(modern) ? modern : legacy;
 }
 
-/** usercache.json → Map(lowercased uuid → name) plus Map(lowercased name → uuid). */
+// usercache.json is re-read and re-parsed on every inventory read (the snapshot
+// watcher alone calls it once per event row, and every inventory API read too).
+// It only changes when a player logs in/out, so key the parse on the file's
+// mtime: any real change flips the mtime and invalidates instantly (strictly
+// correct, never stale). statSync on a known path is far cheaper than reading +
+// parsing a 1000-entry JSON file again. Bounded per-server LRU so a fleet of
+// servers can't grow it without bound.
+const usercacheCache = new Map();
+const USER_CACHE_MAX = 128;
 function usercacheMaps(serverId) {
+  let mtime = 0;
+  try {
+    mtime = fs.statSync(dataPath('servers', serverId, 'usercache.json')).mtimeMs;
+  } catch {
+    /* no usercache file yet */
+  }
+  const hit = usercacheCache.get(serverId);
+  if (hit && hit.mtime === mtime) {
+    usercacheCache.delete(serverId);
+    usercacheCache.set(serverId, hit); // move to most-recently-used
+    return hit.maps;
+  }
   const byUuid = new Map();
   const byName = new Map();
   try {
@@ -91,7 +111,10 @@ function usercacheMaps(serverId) {
   } catch {
     /* no usercache yet */
   }
-  return { byUuid, byName };
+  const maps = { byUuid, byName };
+  usercacheCache.set(serverId, { mtime, maps });
+  if (usercacheCache.size > USER_CACHE_MAX) usercacheCache.delete(usercacheCache.keys().next().value);
+  return maps;
 }
 
 /**
@@ -483,8 +506,15 @@ async function pollPlayerEventsInner() {
       if (!fs.existsSync(path.join(playerdataDir(row.server_id), `${uuid}.dat`))) continue; // no .dat yet
       await snapshot(row.server_id, uuid, row.type);
       await pruneSnapshots(row.server_id);
-    } catch {
-      // One failed snapshot (corrupt file, deleted server, …) must not stop the sweep.
+    } catch (err) {
+      // One failed snapshot (corrupt file, deleted server, …) must not stop the
+      // sweep - but a persistently-failing player has to be visible, throttled
+      // so a corrupt file can't spam.
+      watcherThrottle.fail(logger.warn, 'An inventory snapshot for a player failed and was skipped.', {
+        serverId: row.server_id,
+        player: row.player,
+        err: serializeError(err, { includeStack: false }),
+      });
     }
   }
 }

@@ -10,6 +10,7 @@ const { z } = require('zod');
 const servers = require('../../services/servers');
 const players = require('../../services/players');
 const playerNotes = require('../../services/playerNotes');
+const { resolveSkin, getSkinImage } = require('../../services/skins');
 const { inspectStatus } = require('../../docker/containers');
 const biomes = require('../../config/biomes');
 const { PLAYER_NAME_RE } = require('../../utils/playerName');
@@ -127,6 +128,59 @@ router.get(
       bannedIps: players.listBannedIps(server.id),
       whitelistEnforced: players.getWhitelistEnforced(server.id),
     });
+  })
+);
+
+// Skin lookup for the roster's head images. Returns { url, model } or null
+// when Mojang has no profile for that uuid. Best-effort: a failure here is the
+// signal for the UI to keep its placeholder head, never an error page.
+router.get(
+  '/skin/:uuid',
+  asyncHandler(async (req, res, next) => {
+    const uuid = z
+      .string()
+      .trim()
+      .regex(/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i)
+      .parse(req.params.uuid);
+    try {
+      res.json({ ok: true, skin: await resolveSkin(uuid) });
+    } catch (err) {
+      logger.debug('Could not resolve a skin; the UI will use a placeholder head.', {
+        uuid,
+        err: serializeError(err, { includeStack: false }),
+      });
+      res.json({ ok: true, skin: null });
+    }
+  })
+);
+
+// Streams a player's skin texture PNG same-origin (so the client canvas can
+// crop the face without the texture CDN tainting it). Long-lived + immutable
+// cache: texture URLs are content-addressed, so the bytes never change.
+router.get(
+  '/skin-image/:uuid',
+  asyncHandler(async (req, res, next) => {
+    const uuid = z
+      .string()
+      .trim()
+      .regex(/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i)
+      .parse(req.params.uuid);
+    let url;
+    try {
+      const skin = await resolveSkin(uuid);
+      url = skin && skin.url;
+      if (!url) return res.sendStatus(404);
+      const buffer = await getSkinImage(url);
+      res.set('Content-Type', 'image/png');
+      res.set('Cache-Control', 'public, max-age=31536000, immutable');
+      res.send(buffer);
+    } catch (err) {
+      logger.debug('Could not proxy a skin texture; the UI will use a placeholder head.', {
+        uuid,
+        err: serializeError(err, { includeStack: false }),
+      });
+      res.sendStatus(500);
+    }
   })
 );
 

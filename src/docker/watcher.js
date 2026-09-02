@@ -130,15 +130,24 @@ async function handleEvent(evt) {
     "SELECT 1 AS x FROM events WHERE server_id = ? AND type IN ('stop-requested','restart-requested','kill-requested') AND created_at > datetime('now', '-3 minutes')",
     serverId
   );
-  // Clean exits are judged by the exit code, not just the request window:
-  // 0 = normal, 143 = SIGTERM (docker stop), 130 = SIGINT - all intentional.
+  // 143 = SIGTERM (docker stop), 130 = SIGINT, 0 = normal. These are only
+  // "intentional" when the panel itself asked for the stop. Without a recent
+  // stop-requested event, a clean exit - especially 143/SIGTERM - is the classic
+  // signature of something stopping the container from OUTSIDE the panel (host
+  // reboot, an external `docker stop`, the itzg image's own auto-stop, an OOM
+  // delivered as a signal). The panel is the sole restart authority (containers
+  // run with RestartPolicy 'no'), so an unrequested clean exit on an auto_restart
+  // server must come back up instead of silently staying down.
   const cleanExit = exitCode === 0 || exitCode === 143 || exitCode === 130;
   // 137 = SIGKILL. A graceful `docker stop` escalates SIGTERM→SIGKILL after its
   // grace period, so a slow-saving world that misses the deadline exits 137 during
   // an intended stop. If a stop/restart was requested, treat it as intentional.
   const killedBySignal = exitCode === 137;
+  // A genuinely-intentioned stop is one the panel requested (any exit code), or
+  // an externally-SIGKILLed container (137) - neither should auto-restart.
+  const intentionalStop = Boolean(stopRequested) || killedBySignal;
 
-  if (cleanExit || (killedBySignal && stopRequested)) {
+  if (intentionalStop) {
     db.run("UPDATE servers SET status = 'stopped' WHERE id = ?", serverId);
     if (!stopRequested) {
       recordEvent({ serverId, type: 'stopped', summary: `Server stopped (exit code ${exitCode})` });
@@ -146,25 +155,29 @@ async function handleEvent(evt) {
     return;
   }
 
-  // Crash path - even inside a stop/restart window a non-zero, non-signal exit
-  // is a crash and must be recorded as one.
-  db.run("UPDATE servers SET status = 'crashed' WHERE id = ?", serverId);
+  // An exit that wasn't requested is unexpected whether its code looks "clean"
+  // or not - surface the real state but treat both as something to recover from.
+  const dbStatus = cleanExit ? 'stopped' : 'crashed';
+  db.run('UPDATE servers SET status = ? WHERE id = ?', dbStatus, serverId);
   const excerpt = await fetchLogs(serverId, { tail: 300 }).catch(() => '');
 
-  // Config errors never fix themselves - diagnose them so the crash event
-  // says WHAT to do, and skip auto-restarts that would just burn cycles.
+  // Config errors never fix themselves - diagnose them so the event says WHAT
+  // to do, and skip auto-restarts that would just burn cycles.
   const diagnosis = diagnoseFatal(excerpt);
-  // Only crashes that actually reach the auto-restart path count toward the
-  // crash-loop backoff. A config-error crash, a stop-window crash, or a SIGKILL
-  // is still recorded as 'crashed' but never armed a restart, so it must not
-  // inflate `recentCrashes` (or the exponential backoff) for a later real one.
-  const armedRestart = !diagnosis && !stopRequested && !killedBySignal && Boolean(server.auto_restart);
+  // Only unexpected exits that actually reach the auto-restart path count toward
+  // the crash-loop backoff. A stop-window exit or an external SIGKILL is still
+  // recorded but never armed a restart, so it must not inflate the count for a
+  // later real one.
+  const armedRestart = !diagnosis && !intentionalStop && Boolean(server.auto_restart);
+  const kind = cleanExit ? 'unexpected-stop' : 'crashed';
   recordEvent({
     serverId,
-    type: 'crashed',
-    summary: diagnosis
-      ? `Server crashed: ${diagnosis.summary}`
-      : `Server crashed (exit code ${exitCode})${stopRequested ? ' while a stop/restart was in progress' : ''}`,
+    type: kind,
+    summary: cleanExit
+      ? `Server stopped unexpectedly (exit code ${exitCode}) - not requested by the panel${server.auto_restart ? ', restarting' : ''}`
+      : diagnosis
+        ? `Server crashed: ${diagnosis.summary}`
+        : `Server crashed (exit code ${exitCode})`,
     details: {
       exitCode,
       duringStopWindow: Boolean(stopRequested),
@@ -173,12 +186,36 @@ async function handleEvent(evt) {
     },
     logExcerpt: excerpt || null,
   });
-  if (!armedRestart) return; // config error / stop-window / SIGKILL / no auto_restart
+  if (!armedRestart) return; // config error / stop window / SIGKILL / no auto_restart
 
-  // Count recent restart-arming crashes from the events table (this crash is
-  // already recorded above), not an in-memory map - so a panel restart in the
-  // middle of a crash loop doesn't wipe the backoff and let it hammer restarts
-  // all over again.
+  armRestart(serverId, { kind });
+}
+
+/** Count restart-arming unexpected exits (crash OR unrequested stop) for
+ *  `serverId` inside the crash-loop window. Both kinds arm the same guarded
+ *  auto-restart, so they must share the same backoff counter - otherwise an
+ *  `unexpected-stop` loop (e.g. something on the host SIGTERMing the container
+ *  over and over) could hammer restarts without ever tripping the backoff. */
+function countArmedCrashes(serverId) {
+  return (
+    db.get(
+      `SELECT COUNT(*) AS n FROM events
+         WHERE server_id = ? AND type IN ('crashed','unexpected-stop')
+           AND created_at > datetime('now', ?)
+           AND json_extract(details_json, '$.armedRestart') = 1`,
+      serverId,
+      `-${CRASH_WINDOW_MINUTES} minutes`
+    )?.n || 0
+  );
+}
+
+/**
+ * Arm the guarded auto-restart after an unexpected exit, with exponential
+ * backoff shared across crashes and unrequested stops (persisted to the events
+ * table so a panel restart mid-loop doesn't reset it, and the previous event
+ * is already recorded before this is called).
+ */
+function armRestart(serverId, { kind }) {
   const recentCrashes = countArmedCrashes(serverId) || 1;
   if (recentCrashes > MAX_RAPID_CRASHES) {
     const suspended = db.get(
@@ -191,7 +228,7 @@ async function handleEvent(evt) {
       recordEvent({
         serverId,
         type: 'crash-loop',
-        summary: `Auto-restart suspended: ${recentCrashes} crashes within ${CRASH_WINDOW_MINUTES} minutes`,
+        summary: `Auto-restart suspended: ${recentCrashes} unexpected exits within ${CRASH_WINDOW_MINUTES} minutes`,
       });
     }
     return;
@@ -200,7 +237,9 @@ async function handleEvent(evt) {
   setTimeout(async () => {
     try {
       const info = await inspectStatus(serverId);
-      if (info.exists && info.status === 'crashed') {
+      // Re-check it's still down (stopped or crashed) before restarting so this
+      // can't race a user start/stop/recreate/delete that happened in the delay.
+      if (info.exists && ['stopped', 'crashed'].includes(info.status)) {
         // Go through the guarded lifecycle (not startContainer directly) so this
         // can't race a user start/recreate/delete and so pending config changes
         // (pending_recreate) are honored rather than starting a stale container.
@@ -208,7 +247,7 @@ async function handleEvent(evt) {
         recordEvent({
           serverId,
           type: 'auto-restarted',
-          summary: `Auto-restart attempt ${recentCrashes}/${MAX_RAPID_CRASHES} after crash`,
+          summary: `Auto-restart attempt ${recentCrashes}/${MAX_RAPID_CRASHES} after ${kind === 'unexpected-stop' ? 'an unexpected stop' : 'a crash'}`,
         });
       }
     } catch (err) {
@@ -218,20 +257,6 @@ async function handleEvent(evt) {
       });
     }
   }, delayMs).unref();
-}
-
-/** Count restart-arming crashes for `serverId` inside the crash-loop window. */
-function countArmedCrashes(serverId) {
-  return (
-    db.get(
-      `SELECT COUNT(*) AS n FROM events
-         WHERE server_id = ? AND type = 'crashed'
-           AND created_at > datetime('now', ?)
-           AND json_extract(details_json, '$.armedRestart') = 1`,
-      serverId,
-      `-${CRASH_WINDOW_MINUTES} minutes`
-    )?.n || 0
-  );
 }
 
 /**

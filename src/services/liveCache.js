@@ -364,4 +364,4 @@ async function sampleOnce(serverId) {
   }
 }
 
-module.exports = { get, getAll, statusDetail, startLiveCache, sync, detach, sampleOnce };
+module.exports = { get, getAll, classifyPhase, statusDetail, startLiveCache, sync, detach, sampleOnce };

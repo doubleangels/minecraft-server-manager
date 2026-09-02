@@ -162,17 +162,26 @@ async function ingestStats(serverId) {
 
 /** Periodic stat ingestion for all running servers. Returns a stop function. */
 function startStatsIngest({ intervalMs = 5 * 60 * 1000 } = {}) {
+  let ingesting = false;
   const tick = async () => {
-    for (const server of serversService.listServers()) {
-      if (!RUNNING.has(server.status)) continue;
-      try {
-        await ingestStats(server.id);
-      } catch (err) {
-        logger.warn('Stat ingestion for a server failed.', {
-          serverId: server.id,
-          err: serializeError(err, { includeStack: false }),
-        });
+    // A sweep slower than one interval (many running servers / a slow disk)
+    // must not overlap itself - each pass awaits every player's stat file.
+    if (ingesting) return;
+    ingesting = true;
+    try {
+      for (const server of serversService.listServers()) {
+        if (!RUNNING.has(server.status)) continue;
+        try {
+          await ingestStats(server.id);
+        } catch (err) {
+          logger.warn('Stat ingestion for a server failed.', {
+            serverId: server.id,
+            err: serializeError(err, { includeStack: false }),
+          });
+        }
       }
+    } finally {
+      ingesting = false;
     }
   };
   tick();

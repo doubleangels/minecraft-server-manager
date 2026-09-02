@@ -120,7 +120,7 @@ function init(root) {
     // (delete, move) can spin the on-page cell while the request runs.
     if (at) cell.dataset.slotKey = `${at.container}:${at.slot}`;
     cell.className =
-      'relative grid size-9 sm:size-10 place-items-center rounded border text-[10px] font-semibold select-none ' +
+      'relative grid size-12 sm:size-14 place-items-center rounded border text-[11px] font-semibold select-none ' +
       (editable
         ? 'cursor-pointer transition hover:ring-2 hover:ring-diamond-400/60 focus-visible:ring-2 focus-visible:ring-diamond-400 '
         : '');
@@ -166,8 +166,7 @@ function init(root) {
         img.className = 'pointer-events-none absolute inset-0.5 object-contain [image-rendering:pixelated]';
         img.alt = '';
         img.loading = 'lazy';
-        img.src = `${iconBase}/${item.id.slice('minecraft:'.length)}.png`;
-        img.addEventListener('load', () => abbrevEl?.classList.add('hidden'));
+        img.src = `${iconBase}/${item.id.slice('minecraft:'.length)}.png`;        img.addEventListener('load', () => abbrevEl?.classList.add('hidden'));
         img.addEventListener('error', () => {
           // No local texture (bed/banner/chest/head/… - see itemGlyph.js) -
           // a purpose-built glyph beats the 2-3 letter text abbreviation.

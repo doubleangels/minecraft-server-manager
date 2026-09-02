@@ -7,6 +7,7 @@ import { openModal } from '../lib/modal.js';
 import { confirmDialog } from '../lib/confirm.js';
 import { withBusy } from '../lib/loading.js';
 import { PLAYER_NAME_RE } from '../lib/playerName.js';
+import { renderPlayerHead } from '../lib/playerHead.js';
 
 const root = document.querySelector('[data-players-root]');
 if (root) init(root);
@@ -14,6 +15,10 @@ if (root) init(root);
 function init(root) {
   const serverId = root.dataset.serverId;
   const running = root.dataset.running === '1';
+
+  for (const img of root.querySelectorAll('[data-skin-uuid]')) {
+    renderPlayerHead(img, img.dataset.skinUuid, { serverId });
+  }
   let players = [];
   try {
     players = JSON.parse(document.getElementById('players-data').textContent) || [];

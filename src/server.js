@@ -219,7 +219,11 @@ function startBackgroundServices(httpServer) {
     () =>
       require('./services/contentIcons')
         .backfillContentMeta()
-        .catch(() => {}),
+        .catch((err) => {
+          logger.error('The boot-time content-metadata backfill failed. The nightly schedule will retry.', {
+            err: serializeError(err, { includeStack: false }),
+          });
+        }),
     90_000
   ).unref();
 

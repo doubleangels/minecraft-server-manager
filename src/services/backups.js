@@ -84,12 +84,35 @@ async function createBackupImpl(
             return false;
           });
         inconsistent = !paused;
-        await execCapture(serverId, ['rcon-cli', 'save-all', 'flush']).catch(() => {});
+        await execCapture(serverId, ['rcon-cli', 'save-all', 'flush']).catch((err) => {
+          logger.warn('Flushing world saves before a backup failed; the archive may be slightly inconsistent.', {
+            serverId,
+            err: serializeError(err, { includeStack: false }),
+          });
+          inconsistent = true;
+        });
         await sleep(2000); // let region writes settle
         try {
           await archive();
         } finally {
-          await execCapture(serverId, ['rcon-cli', 'save-on']).catch(() => {});
+          // save-on MUST succeed - if it is swallowed here the server would be
+          // left with world saves disabled and nobody told. Surface it loudly.
+          try {
+            await execCapture(serverId, ['rcon-cli', 'save-on']);
+          } catch (err) {
+            logger.error('Re-enabling world saves after a backup failed: the server may still have saves paused.', {
+              serverId,
+              err: serializeError(err, { includeStack: false }),
+            });
+            recordEvent({
+              serverId,
+              actor,
+              type: 'backup-warning',
+              summary:
+                'World saves were not re-enabled after this backup - check the server console and re-run save-on.',
+            });
+            inconsistent = true;
+          }
         }
       });
     } else {
@@ -378,7 +401,10 @@ async function pruneRetention(serverId, { actor = 'system' } = {}) {
   // The newest backup overall is never removed by the age or size passes below -
   // a server must not be left with zero backups just because it went quiet or
   // its worlds grew.
-  const newest = db.get('SELECT id FROM backups WHERE server_id = ? ORDER BY created_at DESC, id DESC LIMIT 1', serverId);
+  const newest = db.get(
+    'SELECT id FROM backups WHERE server_id = ? ORDER BY created_at DESC, id DESC LIMIT 1',
+    serverId
+  );
   const keepId = newest?.id;
 
   // 2) Age ceiling (opt-in; 0 = off).
