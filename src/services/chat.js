@@ -68,7 +68,7 @@ function deliveryLines(text, separateLines = false) {
 async function sendChat(serverId, opts = {}) {
   const text = normalizeMessageText(opts.text, opts.preserveNewlines === true);
   if (!text) throw httpError(400, 'Message text is required');
-  if (text.length > 512) throw httpError(400, 'Message is too long (512 chars max)');
+  if (text.length > 512) throw httpError(400, 'Message is too long (512 characters max)');
   const mode = opts.mode === 'say' ? 'say' : 'tellraw';
   const actor = opts.actor || 'system';
   await assertRunning(serverId);

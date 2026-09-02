@@ -130,7 +130,7 @@
                   {{/if}}
                   {{! No self-delete affordance - deleting your own account mid-session is a trap, not a feature. }}
                   {{#unless (eq id ../user.id)}}
-                    <button class="text-danger" data-user-delete data-user-id="{{id}}" data-username="{{username}}">{{{icon 'trash-2' 'size-3.5'}}} Delete User</button>
+                    <button class="btn btn-ghost btn-sm text-danger" data-user-delete data-user-id="{{id}}" data-username="{{username}}">{{{icon 'trash-2' 'size-3.5'}}} Delete User</button>
                   {{/unless}}
                 </template>
               </td>
@@ -139,7 +139,7 @@
         </tbody>
       </table>
     </div>
-    <button class="btn btn-sm mt-4" id="user-add">{{{icon 'plus' 'size-3.5'}}} Add User</button>
+    <button class="btn btn-primary btn-sm mt-4" id="user-add">{{{icon 'plus' 'size-3.5'}}} Add User</button>
     <p class="help mt-2 max-w-prose">Roles: <b>Admin</b> can do everything. <b>Operator</b> can manage servers, but not storage, users, or update policies. <b>Viewer</b> is read-only.</p>
   {{/settings/card}}
 
@@ -182,7 +182,7 @@
           </tbody>
         </table>
       </div>
-      <button class="btn btn-sm mt-4" id="api-token-add">{{{icon 'plus' 'size-3.5'}}} New Key</button>
+      <button class="btn btn-primary btn-sm mt-4" id="api-token-add">{{{icon 'plus' 'size-3.5'}}} New Key</button>
       <script type="application/json" id="api-token-servers">{{json serverOptions}}</script>
     </div>
   {{/settings/card}}

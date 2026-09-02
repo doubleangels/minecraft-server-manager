@@ -119,7 +119,7 @@
     <div class="mb-4 flex flex-wrap items-center gap-3 rounded-md border border-line p-3" id="wz-zip-card">
       <div class="min-w-0 flex-1">
         <div class="font-semibold">Custom zip</div>
-        <div class="text-xs text-ink-faint">A CurseForge modpack export (with manifest.json{{#unless curseforgeEnabled}} — needs the API key in Settings{{/unless}}) or any zip of mod jars you collected yourself. Every jar is identified and installed with provenance.</div>
+        <div class="text-xs text-ink-faint">A CurseForge modpack export (from its Build/Export button{{#unless curseforgeEnabled}} — needs the API key in Settings{{/unless}}) or any zip of mod jars you collected yourself. Every jar is identified and installed with provenance.</div>
       </div>
       <button type="button" class="btn shrink-0" id="wz-zip-pick">Upload Zip</button>
     </div>
@@ -228,7 +228,7 @@
       <div>
         <label class="label" for="wz-port">Game port</label>
         <input class="input max-w-48 font-mono" id="wz-port" value="{{suggestedPort}}" inputmode="numeric">
-        <p class="help" id="wz-port-help">A free port, suggested automatically. RCON uses this port + 1000.</p>
+        <p class="help" id="wz-port-help">A free port, suggested automatically. The panel's remote console (RCON) is set 1000 above this port.</p>
       </div>
     </div>
   </div>

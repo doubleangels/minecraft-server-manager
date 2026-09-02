@@ -1398,7 +1398,12 @@ router.post(
           .regex(/^[A-Za-z0-9 _.-]{1,64}$/),
         dryRun: z.coerce.boolean().default(false),
         // "rarely visited" threshold in ticks (20 = 1 s), 1 tick .. 1 game-hour.
-        minInhabitedTicks: z.coerce.number().int().min(1).max(20 * 60 * 60).optional(),
+        minInhabitedTicks: z.coerce
+          .number()
+          .int()
+          .min(1)
+          .max(20 * 60 * 60)
+          .optional(),
         // keep overworld chunks within N of the origin; 0 disables spawn protection.
         spawnKeepChunks: z.coerce.number().int().min(0).max(256).optional(),
         // when the server is up: stop it, shrink, then start it again.
@@ -1853,9 +1858,12 @@ router.get(
   })
 );
 
-// Prune event history older than N days (excerpts included).
+// Prune event history older than N days (excerpts included). The prune is a
+// global delete (not server-scoped) so it needs the same admin-only gate as
+// the retention config that would normally trigger it.
 router.post(
   '/events/prune',
+  requireRoleKeys('admin'),
   asyncHandler((req, res, next) => {
     const { days } = z.object({ days: z.coerce.number().int().min(1).max(3650) }).parse(req.body);
     const { removed } = eventsService.pruneEvents(days, { actor: req.user.username });
@@ -1947,10 +1955,9 @@ router.get(
     if (!list.length) throw Object.assign(new Error('This server has no log files yet'), { status: 404 });
     const total = list.reduce((n, f) => n + f.size, 0);
     if (total > LOG_BUNDLE_MAX_BYTES) {
-      throw Object.assign(
-        new Error('Log folder is too large to bundle - download individual files instead'),
-        { status: 413 }
-      );
+      throw Object.assign(new Error('Log folder is too large to bundle - download individual files instead'), {
+        status: 413,
+      });
     }
     const archiver = require('archiver');
     const safeName = String(server.display_name || req.params.id).replace(/[^\w.-]+/g, '_');

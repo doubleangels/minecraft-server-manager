@@ -4,7 +4,7 @@
     <label class="chip cursor-pointer gap-1.5"><input type="checkbox" class="msm-check" data-level-filter="INFO" checked> INFO</label>
     <label class="chip cursor-pointer gap-1.5"><input type="checkbox" class="msm-check" data-level-filter="WARN" checked> WARN</label>
     <label class="chip cursor-pointer gap-1.5"><input type="checkbox" class="msm-check" data-level-filter="ERROR" checked> ERROR</label>
-    <label class="chip cursor-pointer gap-1.5" data-tip="Hides the repeating connection lines the panel adds every few seconds while it checks on your server (player count, time and world settings). Turn this off to see the raw log exactly as the server writes it."><input type="checkbox" class="msm-check" id="console-hide-rcon" checked> Hide RCON Noise</label>
+    <label class="chip cursor-pointer gap-1.5" data-tip="Hides the repeating connection lines the panel adds every few seconds while it checks on your server over its remote console (RCON): player count, time and world settings. Turn this off to see the raw log exactly as the server writes it."><input type="checkbox" class="msm-check" id="console-hide-rcon" checked> Hide console noise</label>
     <div class="ml-auto flex flex-wrap items-center gap-2">
       <div class="flex items-center gap-1.5" data-tip="Announce your console commands in the game chat under this name, for example Server Admin. Leave blank to stay silent. This is separate from the game's own [Rcon] line.">
         {{{icon 'megaphone' 'size-3.5 text-ink-faint'}}}
@@ -29,7 +29,7 @@
     <div class="divide-y divide-line border-t border-line" data-console-logfiles-list></div>
   </details>
 
-  <div class="console h-96 overflow-y-auto" id="console-log">
+  <div class="console h-96 overflow-y-auto overflow-x-auto break-words" id="console-log">
     {{#if consoleLines}}
       {{#each consoleLines}}
         <div data-level="{{level}}"{{#if (eq level 'WARN')}} class="text-gold-300"{{/if}}{{#if (eq level 'ERROR')}} class="text-redstone-400"{{/if}}>{{text}}</div>
