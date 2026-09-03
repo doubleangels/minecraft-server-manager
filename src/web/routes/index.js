@@ -187,6 +187,57 @@ function buildCombinedOverview(servers) {
   };
 }
 
+// Dashboard "At a glance" panel: everything below is aggregated from the
+// server VMs already built above (memory, disk, status counts) plus cheap
+// event/SQLite lookups (24h health, update breakdown). No extra Docker calls.
+function buildDashboardOverview(servers) {
+  const countEvents = (types, since) =>
+    db.get(
+      `SELECT COUNT(*) AS n FROM events WHERE type IN (${types.map(() => '?').join(',')})` +
+        (since ? ` AND created_at >= datetime('now', ?)` : ''),
+      ...(since ? [...types, since] : types)
+    )?.n || 0;
+
+  const byStatus = { running: 0, starting: 0, stopped: 0, unhealthy: 0, stalled: 0, updating: 0, crashed: 0 };
+  let memAllottedMb = 0;
+  let memUsedMb = 0;
+  let diskUsedBytes = 0;
+  let playersOnline = 0;
+  let playersMax = 0;
+  for (const s of servers) {
+    byStatus[s.status] = (byStatus[s.status] || 0) + 1;
+    memAllottedMb += s.resources.containerMemoryMb || 0;
+    memUsedMb += s.stats.memUsedMb || 0;
+    diskUsedBytes += s.disk.used || 0;
+    playersOnline += s.players.online || 0;
+    playersMax += s.players.max || 0;
+  }
+
+  const health = {
+    oom: countEvents(['oom'], '-1 day'),
+    autoRestarted: countEvents(['auto-restarted'], '-1 day'),
+    crashes: countEvents(['crashed'], '-1 day'),
+  };
+  const healthTotal = health.oom + health.autoRestarted + health.crashes;
+
+  let updates = { all: 0, mods: 0, server: 0 };
+  try {
+    updates = require('../../updates/checker').countOutdatedByKind();
+  } catch {
+    /* check store unavailable - show zeroes */
+  }
+
+  return {
+    byStatus,
+    mem: { allottedMb: Math.round(memAllottedMb), usedMb: Math.round(memUsedMb) },
+    disk: { usedBytes: diskUsedBytes },
+    players: { online: playersOnline, max: playersMax },
+    health,
+    healthTotal,
+    updates,
+  };
+}
+
 async function renderServerList(req, res, next, { page }) {
   try {
     const rows = serversService.listServers();
@@ -213,6 +264,7 @@ async function renderServerList(req, res, next, { page }) {
     if (page === 'dashboard') {
       const events = eventsService.listEvents({ limit: 6 }).filter((e) => !e.type.endsWith('-requested'));
       context.activity = events.map(eventVM);
+      context.overview = buildDashboardOverview(servers);
     }
     res.render('dashboard', context);
   } catch (err) {

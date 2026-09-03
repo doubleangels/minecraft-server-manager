@@ -474,7 +474,7 @@ function listOutdated() {
  * full per-row join-and-materialize listOutdated() does is pure waste when
  * only a number is needed.
  */
-function countOutdated() {
+function countOutdatedByKind() {
   const row = db.get(`
     SELECT
       (SELECT COUNT(*) FROM update_checks c
@@ -483,31 +483,46 @@ function countOutdated() {
          WHERE c.subject_type = 'pack' AND c.latest_version IS NOT NULL
            AND p.pinned_version_id != c.latest_version
            AND (c.ignored_version IS NULL OR c.ignored_version != c.latest_version))
-      +
+      AS packs,
       (SELECT COUNT(*) FROM update_checks c
          JOIN server_content sc ON sc.id = c.subject_id
          JOIN servers s ON s.id = sc.server_id AND s.deleted_at IS NULL
          WHERE c.subject_type = 'content' AND c.latest_version IS NOT NULL
            AND c.latest_name IS NOT NULL AND c.latest_name != sc.version
            AND (sc.ignored_update_version IS NULL OR sc.ignored_update_version != c.latest_name))
-      +
+      AS content,
       (SELECT COUNT(*) FROM update_checks c
          JOIN servers s ON s.id = c.subject_id AND s.deleted_at IS NULL
          WHERE c.subject_type = 'image' AND c.latest_version IS NOT NULL AND s.container_id IS NOT NULL
            AND (c.ignored_version IS NULL OR c.ignored_version != c.latest_version))
-      +
+      AS images,
       (SELECT COUNT(*) FROM update_checks c
          JOIN servers s ON s.id = c.subject_id AND s.deleted_at IS NULL
          WHERE c.subject_type = 'mc_version' AND c.latest_version IS NOT NULL AND s.mc_version = c.current_version
            AND (c.ignored_version IS NULL OR c.ignored_version != c.latest_version))
-      +
+      AS mc,
       (SELECT COUNT(*) FROM update_checks c
          JOIN servers s ON s.id = c.subject_id AND s.deleted_at IS NULL
          WHERE c.subject_type = 'loader_build' AND c.latest_version IS NOT NULL
            AND (c.ignored_version IS NULL OR c.ignored_version != c.latest_version))
-      AS total
+      AS loader
   `);
-  return row ? row.total : 0;
+  const packs = row?.packs || 0;
+  const content = row?.content || 0;
+  const images = row?.images || 0;
+  const mc = row?.mc || 0;
+  const loader = row?.loader || 0;
+  return {
+    all: packs + content + images + mc + loader,
+    // Mods/plugins/datapacks/resource packs the user installed as content.
+    mods: packs + content,
+    // Server-level rebuilds: the container image or the Minecraft/loader version.
+    server: images + mc + loader,
+  };
+}
+
+function countOutdated() {
+  return countOutdatedByKind().all;
 }
 
 function lastCheckedAt() {
@@ -515,4 +530,4 @@ function lastCheckedAt() {
   return row ? row.fetched_at : null;
 }
 
-module.exports = { checkAll, listOutdated, countOutdated, lastCheckedAt, setUpdateIgnored };
+module.exports = { checkAll, listOutdated, countOutdated, countOutdatedByKind, lastCheckedAt, setUpdateIgnored };
