@@ -164,7 +164,7 @@ function buildCombinedOverview(servers) {
       name: s.name,
       accent: s.accent,
       status: s.status,
-      cpuPct: s.stats.cpuPct || 0,
+      cpuPct: Math.round((s.stats.cpuPct || 0) * 10) / 10,
       cpus: s.resources.cpus || 0,
       memUsedMb: s.stats.memUsedMb || 0,
       memLimitMb: s.resources.containerMemoryMb || 0,
@@ -179,7 +179,7 @@ function buildCombinedOverview(servers) {
     playersMax: running.reduce((n, s) => n + s.playersMax, 0),
     memoryUsedMb: running.reduce((n, s) => n + s.memUsedMb, 0),
     memoryLimitMb: running.reduce((n, s) => n + s.memLimitMb, 0),
-    cpuTotal: running.reduce((n, s) => n + s.cpuPct, 0),
+    cpuTotal: Math.round(running.reduce((n, s) => n + s.cpuPct, 0)),
     // Each server's own CPU% is relative to its own core allowance, so the
     // meaningful total is the sum of the used portions of those allowances.
     cpuCapacity: running.reduce((n, s) => n + s.cpus * 100, 0),
