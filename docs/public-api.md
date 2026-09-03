@@ -53,6 +53,8 @@ Every server the token is scoped to.
 ```json
 {
   "ok": true,
+  "total": 1,
+  "online": 1,
   "servers": [
     {
       "id": "srv_ab12cd34",
@@ -79,6 +81,8 @@ for a malformed id.
 
 | Field           | Meaning                                                                                           |
 | --------------- | ------------------------------------------------------------------------------------------------- |
+| `total`         | How many servers are visible to this token (after its scope filter).                              |
+| `online`        | How many of those are in state: `running`.                                                        |
 | `id`            | Stable server id (`srv_...`).                                                                     |
 | `name`          | Display name.                                                                                     |
 | `type`          | itzg server type (`PAPER`, `FABRIC`, `AUTO_CURSEFORGE`, ...).                                     |

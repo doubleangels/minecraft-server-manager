@@ -61,6 +61,8 @@ test('auth matrix on GET /api/v1/servers', async () => {
   const good = await app.req('GET', '/api/v1/servers', auth(tokAll));
   assert.equal(good.status, 200);
   assert.equal(good.json.ok, true);
+  assert.equal(good.json.total, 2);
+  assert.equal(good.json.online, 0); // seeded, never started
   assert.equal(good.json.servers.length, 2);
 });
 
@@ -94,9 +96,30 @@ test('server view is the lean shape only - no ports/env/rcon leak', async () => 
   assert.equal(/rcon|env_json|port_game|password/i.test(flat), false);
 });
 
+test('online counts running servers and tracks live state', async () => {
+  const list = async (t) => (await app.req('GET', '/api/v1/servers', auth(t))).json;
+
+  db.run("UPDATE servers SET status = 'stopped' WHERE id IN ('srv_v1a','srv_v1b')");
+  assert.equal((await list(tokAll)).online, 0);
+  assert.equal((await list(tokAll)).total, 2);
+
+  db.run("UPDATE servers SET status = 'running' WHERE id = 'srv_v1a'");
+  assert.equal((await list(tokAll)).online, 1);
+
+  db.run("UPDATE servers SET status = 'running' WHERE id = 'srv_v1b'");
+  assert.equal((await list(tokAll)).online, 2);
+
+  // A scoped token only ever sees srv_v1a - its online is capped by scope too.
+  assert.equal((await list(tokScoped)).total, 1);
+  assert.equal((await list(tokScoped)).online, 1);
+
+  db.run("UPDATE servers SET status = 'stopped' WHERE id IN ('srv_v1a','srv_v1b')");
+});
+
 test('scope filtering: a scoped token sees only its server', async () => {
   const list = await app.req('GET', '/api/v1/servers', auth(tokScoped));
   assert.equal(list.status, 200);
+  assert.equal(list.json.total, 1);
   assert.deepEqual(
     list.json.servers.map((s) => s.id),
     ['srv_v1a']

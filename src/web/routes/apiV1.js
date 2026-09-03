@@ -67,7 +67,13 @@ function inScope(req, id) {
 
 router.get('/servers', (req, res) => {
   const rows = servers.listServers().filter((s) => inScope(req, s.id));
-  res.json({ ok: true, servers: rows.map(serverStatusView) });
+  const views = rows.map(serverStatusView);
+  res.json({
+    ok: true,
+    total: views.length,
+    online: views.filter((v) => v.state === 'running').length,
+    servers: views,
+  });
 });
 
 const idParam = z.object({
