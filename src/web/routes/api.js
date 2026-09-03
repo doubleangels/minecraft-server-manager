@@ -220,7 +220,8 @@ router.delete(
   asyncHandler(async (req, res, next) => {
     const { freedBytes } = await servers.deleteServer(req.params.id, {
       actor: req.user.username,
-      keepWorld: req.query.keepWorld === 'true',
+      keepWorld: req.query.keepWorld === 'true' || req.query.keepFiles === 'true',
+      keepBackups: req.query.keepBackups === 'true',
     });
     res.json({ ok: true, freedBytes });
   })

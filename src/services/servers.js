@@ -714,8 +714,13 @@ function updateServer(id, changes, { actor = 'system' } = {}) {
   return { server: getServer(id), needsRecreate };
 }
 
-/** Delete server: container, DB rows, and (optionally) its data directory. */
-async function deleteServerImpl(id, { actor = 'system', keepWorld = false } = {}) {
+/**
+ * Delete server: container, DB rows, and (optionally) its data directory and
+ * backups. `keepWorld` leaves the whole data directory (world, mods, config)
+ * on disk; `keepBackups` leaves the backup rows + archive files untouched
+ * (otherwise they are removed too). Both default to false.
+ */
+async function deleteServerImpl(id, { actor = 'system', keepWorld = false, keepBackups = false } = {}) {
   const server = mustGet(id);
   await containers.stopContainer(id).catch(() => {});
   await containers.removeContainer(id);
@@ -760,12 +765,14 @@ async function deleteServerImpl(id, { actor = 'system', keepWorld = false } = {}
     }
   }
 
-  // Backups: DB rows + the files directory.
-  const backupRows = db.all('SELECT size_bytes FROM backups WHERE server_id = ?', id);
-  freedBytes += backupRows.reduce((n, b) => n + (b.size_bytes || 0), 0);
-  db.run('DELETE FROM backups WHERE server_id = ?', id);
-  // force: true already no-ops on a missing path - no need for an existsSync guard.
-  await fsp.rm(dataPath('backups', id), { recursive: true, force: true });
+  // Backups: DB rows + the files directory (optional - keep them for reuse).
+  if (!keepBackups) {
+    const backupRows = db.all('SELECT size_bytes FROM backups WHERE server_id = ?', id);
+    freedBytes += backupRows.reduce((n, b) => n + (b.size_bytes || 0), 0);
+    db.run('DELETE FROM backups WHERE server_id = ?', id);
+    // force: true already no-ops on a missing path - no need for an existsSync guard.
+    await fsp.rm(dataPath('backups', id), { recursive: true, force: true });
+  }
 
   // Archived logs / event excerpts.
   await fsp.rm(dataPath('logs', id), { recursive: true, force: true });
@@ -797,10 +804,18 @@ async function deleteServerImpl(id, { actor = 'system', keepWorld = false } = {}
     serverId: id,
     actor,
     type: 'deleted',
-    summary: `Server deleted: ${server.display_name}${keepWorld ? ' (world kept on disk)' : ''}`,
-    details: { keepWorld, freedBytes },
+    summary: `Server deleted: ${server.display_name}${
+      keepWorld
+        ? keepBackups
+          ? ' (files and backups kept on disk)'
+          : ' (files kept on disk)'
+        : keepBackups
+          ? ' (backups kept)'
+          : ''
+    }`,
+    details: { keepWorld, keepBackups, freedBytes },
   });
-  logger.info('Deleted a server.', { serverId: id, actor, keepWorld, freedBytes });
+  logger.info('Deleted a server.', { serverId: id, actor, keepWorld, keepBackups, freedBytes });
   return { freedBytes };
 }
 

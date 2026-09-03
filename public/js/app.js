@@ -8,6 +8,7 @@ import { confirmDialog } from './lib/confirm.js';
 import { enhanceAll } from './lib/select.js';
 import { setBusy, withBusy } from './lib/loading.js';
 import { formatDateTime, timeAgo } from './lib/datetime.js';
+import { escapeHtml } from './lib/format.js';
 import './lib/tooltip.js';
 import './lib/dropdown.js';
 import './lib/taskTray.js';
@@ -167,16 +168,10 @@ document.addEventListener('click', async (e) => {
   const name = btn.dataset.serverName || 'server';
 
   if (action === 'delete') {
-    const ok = await confirmDialog({
-      title: `Delete ${name}?`,
-      message: 'This permanently deletes the container, its world, mods, and config. Backups are kept.',
-      confirmLabel: 'Delete Forever',
-      danger: true,
-      requireText: name,
-    });
+    const ok = await confirmDelete({ name, id });
     if (!ok) return;
     const restore = setBusy(btn, 'Deleting…');
-    const res = await api(`/api/servers/${id}`, 'DELETE');
+    const res = await api(`/api/servers/${id}${ok.keep ? '?keepFiles=true&keepBackups=true' : ''}`, 'DELETE');
     if (res.ok) {
       toast('Server deleted.');
       location.href = '/';
@@ -251,6 +246,94 @@ async function api(url, method = 'GET', body) {
   }
 }
 window.CD.api = api;
+
+// ---- Delete confirmation: requires typing the server name, with an optional
+// "keep the server files and backups on disk" checkbox. Resolves to falsy when
+// cancelled, or { keep: boolean } once confirmed. ----
+function confirmDelete({ name }) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const settle = (v) => {
+      if (settled) return;
+      settled = true;
+      resolve(v);
+    };
+
+    const content = document.createElement('div');
+    content.className = 'space-y-3 text-sm';
+
+    const p = document.createElement('p');
+    p.textContent =
+      'This permanently removes the server from the panel. Leave the box unchecked to also delete its files and backups from disk.';
+    content.appendChild(p);
+
+    const keepWrap = document.createElement('label');
+    keepWrap.className = 'flex cursor-pointer items-start gap-2 rounded-md border border-line bg-raised p-2.5';
+    const keepInput = document.createElement('input');
+    keepInput.type = 'checkbox';
+    keepInput.className = 'msm-check mt-0.5 shrink-0';
+    keepInput.checked = false;
+    const keepText = document.createElement('span');
+    keepText.textContent = 'Keep the server files and backups on disk';
+    keepWrap.append(keepInput, keepText);
+    content.appendChild(keepWrap);
+
+    const wrap = document.createElement('div');
+    const label = document.createElement('label');
+    label.className = 'label';
+    label.innerHTML = `Type <b class="font-mono">${escapeHtml(name)}</b> to confirm`;
+    const input = document.createElement('input');
+    input.className = 'input font-mono';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    const mismatch = document.createElement('p');
+    mismatch.className = 'mt-1 hidden text-xs text-danger';
+    mismatch.textContent = "That name doesn't match.";
+    wrap.append(label, input, mismatch);
+    content.appendChild(wrap);
+
+    const modal = openModal({
+      title: `Delete ${name}?`,
+      content,
+      size: 'sm',
+      onClose: () => settle(null),
+      actions: [
+        { label: 'Cancel', kind: 'ghost', onClick: () => settle(null) },
+        {
+          label: 'Delete Forever',
+          kind: 'danger',
+          onClick: () => {
+            if (input.value !== name) {
+              input.classList.add('border-danger');
+              mismatch.classList.remove('hidden');
+              input.focus();
+              return false;
+            }
+            settle({ keep: keepInput.checked });
+          },
+        },
+      ],
+    });
+
+    const confirmBtn = modal.el.querySelector('.btn-danger');
+    confirmBtn.disabled = true;
+    input.addEventListener('input', () => {
+      confirmBtn.disabled = input.value !== name;
+      input.classList.remove('border-danger');
+      mismatch.classList.add('hidden');
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (confirmBtn.disabled) {
+        input.classList.add('border-danger');
+        mismatch.classList.remove('hidden');
+        return;
+      }
+      confirmBtn.click();
+    });
+  });
+}
 
 // ---- Copy-to-clipboard: [data-copy="text"] or [data-copy-from="#selector"] ----
 // Robust across contexts: the async Clipboard API only works on HTTPS/localhost,
