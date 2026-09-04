@@ -28,28 +28,30 @@ function seedBackup(id, serverId, sizeBytes = 1234) {
   );
 }
 
-test('deleteServer keeps backup rows and their bytes when keepBackups is true', async (t) => {
+test('deleteServer keeps files and backups by default (no action needed to preserve them)', async (t) => {
   t.mock.method(containers, 'stopContainer', async () => {});
   t.mock.method(containers, 'removeContainer', async () => {});
   const id = seedServer('srv_delkeep');
   seedBackup('bk_keep', id, 777);
 
-  const { freedBytes } = await servers.deleteServer(id, { keepBackups: true });
-  assert.ok(db.get('SELECT id FROM backups WHERE id = ?', 'bk_keep'), 'backup row survives a keep-backups delete');
-  // Soft-deleted server row retains history context.
+  const { freedBytes } = await servers.deleteServer(id);
+  assert.ok(db.get('SELECT id FROM backups WHERE id = ?', 'bk_keep'), 'backup row survives a default delete');
   const kept = db.get('SELECT id FROM servers WHERE id = ? AND deleted_at IS NOT NULL', id);
   assert.ok(kept, 'server row is soft-deleted, not removed');
-  // Backups are not counted as freed when they are kept.
   assert.equal(freedBytes, 0);
 });
 
-test('deleteServer removes backup rows and counts their bytes by default', async (t) => {
+test('deleteServer removes files and backups when explicitly requested', async (t) => {
   t.mock.method(containers, 'stopContainer', async () => {});
   t.mock.method(containers, 'removeContainer', async () => {});
   const id = seedServer('srv_deldrop');
   seedBackup('bk_drop', id, 5000);
 
-  const { freedBytes } = await servers.deleteServer(id);
-  assert.equal(db.get('SELECT id FROM backups WHERE id = ?', 'bk_drop'), undefined, 'backup row removed by default');
+  const { freedBytes } = await servers.deleteServer(id, { keepWorld: false, keepBackups: false });
+  assert.equal(
+    db.get('SELECT id FROM backups WHERE id = ?', 'bk_drop'),
+    undefined,
+    'backup row removed when explicitly deleted'
+  );
   assert.equal(freedBytes, 5000);
 });

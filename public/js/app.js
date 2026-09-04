@@ -171,7 +171,7 @@ document.addEventListener('click', async (e) => {
     const ok = await confirmDelete({ name, id });
     if (!ok) return;
     const restore = setBusy(btn, 'Deleting…');
-    const res = await api(`/api/servers/${id}${ok.keep ? '?keepFiles=true&keepBackups=true' : ''}`, 'DELETE');
+    const res = await api(`/api/servers/${id}${ok.deleteData ? '?deleteFiles=true&deleteBackups=true' : ''}`, 'DELETE');
     if (res.ok) {
       toast('Server deleted.');
       location.href = '/';
@@ -247,9 +247,9 @@ async function api(url, method = 'GET', body) {
 }
 window.CD.api = api;
 
-// ---- Delete confirmation: requires typing the server name, with an optional
-// "keep the server files and backups on disk" checkbox. Resolves to falsy when
-// cancelled, or { keep: boolean } once confirmed. ----
+// ---- Delete confirmation: requires typing the server name. Files and backups
+// are KEPT on disk by default; a danger checkbox opts in to permanently
+// deleting them. Resolves to falsy when cancelled, or { deleteData: boolean }. ----
 function confirmDelete({ name }) {
   return new Promise((resolve) => {
     let settled = false;
@@ -264,19 +264,19 @@ function confirmDelete({ name }) {
 
     const p = document.createElement('p');
     p.textContent =
-      'This permanently removes the server from the panel. Leave the box unchecked to also delete its files and backups from disk.';
+      'This removes the server from the panel but keeps its files and backups on disk. Tick the box below only if you want to permanently delete those files and backups too.';
     content.appendChild(p);
 
-    const keepWrap = document.createElement('label');
-    keepWrap.className = 'flex cursor-pointer items-start gap-2 rounded-md border border-line bg-raised p-2.5';
-    const keepInput = document.createElement('input');
-    keepInput.type = 'checkbox';
-    keepInput.className = 'msm-check mt-0.5 shrink-0';
-    keepInput.checked = false;
-    const keepText = document.createElement('span');
-    keepText.textContent = 'Keep the server files and backups on disk';
-    keepWrap.append(keepInput, keepText);
-    content.appendChild(keepWrap);
+    const delWrap = document.createElement('label');
+    delWrap.className = 'flex cursor-pointer items-start gap-2 rounded-md border border-danger/40 bg-red-500/10 p-2.5';
+    const delInput = document.createElement('input');
+    delInput.type = 'checkbox';
+    delInput.className = 'msm-check mt-0.5 shrink-0';
+    delInput.checked = false;
+    const delText = document.createElement('span');
+    delText.textContent = 'Also permanently delete the server files and backups from disk';
+    delWrap.append(delInput, delText);
+    content.appendChild(delWrap);
 
     const wrap = document.createElement('div');
     const label = document.createElement('label');
@@ -309,7 +309,7 @@ function confirmDelete({ name }) {
               input.focus();
               return false;
             }
-            settle({ keep: keepInput.checked });
+            settle({ deleteData: delInput.checked });
           },
         },
       ],

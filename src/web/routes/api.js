@@ -218,10 +218,12 @@ router.get(
 router.delete(
   '/servers/:id',
   asyncHandler(async (req, res, next) => {
+    // Deletion is opt-in: files + backups are KEPT by default, and only
+    // removed when the caller explicitly asks via deleteFiles/deleteBackups.
     const { freedBytes } = await servers.deleteServer(req.params.id, {
       actor: req.user.username,
-      keepWorld: req.query.keepWorld === 'true' || req.query.keepFiles === 'true',
-      keepBackups: req.query.keepBackups === 'true',
+      keepWorld: req.query.deleteFiles !== 'true' && req.query.keepFiles !== 'false',
+      keepBackups: req.query.deleteBackups !== 'true' && req.query.keepBackups !== 'false',
     });
     res.json({ ok: true, freedBytes });
   })

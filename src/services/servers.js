@@ -716,11 +716,12 @@ function updateServer(id, changes, { actor = 'system' } = {}) {
 
 /**
  * Delete server: container, DB rows, and (optionally) its data directory and
- * backups. `keepWorld` leaves the whole data directory (world, mods, config)
- * on disk; `keepBackups` leaves the backup rows + archive files untouched
- * (otherwise they are removed too). Both default to false.
+ * backups. By DEFAULT the whole data directory (world, mods, config) and the
+ * backup rows + archive files are LEFT ON DISK — so a deleted server's data is
+ * never silently destroyed. Pass `keepWorld: false` and/or `keepBackups: false`
+ * to explicitly remove them (the UI makes this an opt-in checkbox).
  */
-async function deleteServerImpl(id, { actor = 'system', keepWorld = false, keepBackups = false } = {}) {
+async function deleteServerImpl(id, { actor = 'system', keepWorld = true, keepBackups = true } = {}) {
   const server = mustGet(id);
   await containers.stopContainer(id).catch(() => {});
   await containers.removeContainer(id);
