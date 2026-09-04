@@ -206,7 +206,7 @@ function init() {
 
     content.insertAdjacentHTML(
       'beforeend',
-      '<p class="notice notice-danger">You’ll only see this key once — copy it somewhere safe now. For security, the panel doesn’t store a copy it can show you later.</p>'
+      '<p class="notice notice-danger">You’ll only see this key once, so copy it somewhere safe now. For security, the panel doesn’t store a copy it can show you later.</p>'
     );
     openModal({
       title: 'Copy Your Access Key Now',
@@ -267,7 +267,7 @@ function init() {
       const ok = await confirmDialog({
         title: `Cancel the key "${label}"?`,
         message:
-          'Any app still using this key stops working right away. You can’t bring the same key back — you’d need to make a new one.',
+          'Any app still using this key stops working right away. You can’t bring the same key back, so you’d need to make a new one.',
         confirmLabel: 'Cancel Key',
         danger: true,
       });
@@ -436,7 +436,7 @@ function init() {
             (l) => `<tr>
               <td class="font-medium">${esc(l.username)}</td>
               <td>${l.scope === 'account' ? 'Whole account' : 'This address'}</td>
-              <td class="font-mono text-xs">${esc(l.ip || '—')}</td>
+              <td class="font-mono text-xs">${esc(l.ip || '-')}</td>
               <td class="tabular-nums">${l.count}</td>
               <td class="tabular-nums">${l.minutesLeft} min</td>
               <td class="text-right"><button class="btn btn-ghost btn-sm" data-unlock data-username="${esc(l.username)}" ${l.ip ? `data-ip="${esc(l.ip)}"` : ''}>Unlock</button></td>

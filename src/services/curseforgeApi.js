@@ -23,7 +23,8 @@ async function cfFetch(pathname, { search, ttlMs = 10 * 60 * 1000, method = 'GET
   const cacheKey = `curseforge:${method}:${url.pathname}${url.search}:${body ? JSON.stringify(body) : ''}`;
   const cached =
     method === 'GET' ? db.get('SELECT value_json, fetched_at FROM api_cache WHERE key = ?', cacheKey) : null;
-  if (cached && Date.now() - Date.parse(cached.fetched_at + 'Z') < ttlMs) return JSON.parse(cached.value_json);
+  if (cached && Date.now() - Date.parse(cached.fetched_at.replace(' ', 'T') + 'Z') < ttlMs)
+    return JSON.parse(cached.value_json);
   const res = await fetch(url, {
     method,
     headers: { 'x-api-key': key, Accept: 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}) },

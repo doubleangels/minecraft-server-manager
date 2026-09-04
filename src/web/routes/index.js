@@ -8,7 +8,7 @@ const asyncHandler = require('../middleware/asyncHandler');
 const express = require('express');
 const serversService = require('../../services/servers');
 const eventsService = require('../../events');
-const { serverVM, sidebarServerVMs, packServerVMs, eventVM, crashVM, safeJsonParse } = require('../viewModels');
+const { serverVM, buildServerContext, sidebarServerVMs, packServerVMs, eventsVM, crashVM, safeJsonParse } = require('../viewModels');
 const { fetchLogs } = require('../../docker/logs');
 const db = require('../../db');
 const { requireRole } = require('../middleware/auth');
@@ -198,7 +198,7 @@ function buildDashboardOverview(servers) {
       ...(since ? [...types, since] : types)
     )?.n || 0;
 
-  const byStatus = { running: 0, starting: 0, stopped: 0, unhealthy: 0, stalled: 0, updating: 0, crashed: 0 };
+  const byStatus = { running: 0, starting: 0, stopped: 0, unhealthy: 0, stalled: 0, updating: 0, crashed: 0, 'over-quota': 0 };
   let memAllottedMb = 0;
   let memUsedMb = 0;
   let diskUsedBytes = 0;
@@ -241,7 +241,42 @@ function buildDashboardOverview(servers) {
 async function renderServerList(req, res, next, { page }) {
   try {
     const rows = serversService.listServers();
-    const servers = await Promise.all(rows.map((s) => serverVM(s)));
+    const ctx = buildServerContext(rows); // one batched DB pass for all servers
+    const results = await Promise.allSettled(rows.map((s) => serverVM(s, { ctx })));
+    const servers = results
+      .map((r, i) => {
+        if (r.status === 'fulfilled') return r.value;
+        logger.error('Failed to load server VM', { serverId: rows[i].id, err: serializeError(r.reason) });
+        return {
+          id: rows[i].id,
+          name: rows[i].display_name,
+          description: rows[i].description || '',
+          icon: rows[i].icon,
+          accent: rows[i].accent,
+          type: rows[i].type,
+          flavor: '',
+          mcVersion: rows[i].mc_version || '',
+          status: 'unknown',
+          ports: { game: rows[i].port_game, rcon: rows[i].port_rcon, bedrock: rows[i].port_bedrock },
+          resources: { heapMb: rows[i].heap_mb, containerMemoryMb: rows[i].container_memory_mb, cpus: rows[i].cpus },
+          stats: { cpuPct: 0, memUsedMb: 0, uptime: null, perf: null, perfSupported: true },
+          players: { online: 0, max: Number((rows[i].env && rows[i].env.MAX_PLAYERS) || 20), names: [] },
+          disk: { used: 0, quota: rows[i].disk_quota_bytes || 0 },
+          pack: null,
+          updateAvailable: false,
+          crashesUnread: 0,
+          autoStart: Boolean(rows[i].auto_start),
+          autoRestart: Boolean(rows[i].auto_restart),
+          notes: rows[i].notes || '',
+          updatePolicy: rows[i].update_policy,
+          pendingRecreate: false,
+          lastStarted: rows[i].last_started_at || '-',
+          created: rows[i].created_at,
+          consoleLabel: rows[i].console_label || '',
+          loadError: r.reason ? serializeError(r.reason, { includeStack: false }) : undefined,
+        };
+      })
+      .filter(Boolean);
     const sort = DASH_SORTS[req.query.sort] ? String(req.query.sort) : 'status';
     servers.sort(DASH_SORTS[sort]);
     const context = {
@@ -262,8 +297,11 @@ async function renderServerList(req, res, next, { page }) {
       activity: [],
     };
     if (page === 'dashboard') {
-      const events = eventsService.listEvents({ limit: 6 }).filter((e) => !e.type.endsWith('-requested'));
-      context.activity = events.map(eventVM);
+      const events = eventsService
+        .listEvents({ limit: 20 })
+        .filter((e) => !e.type.endsWith('-requested'))
+        .slice(0, 6);
+      context.activity = eventsVM(events);
       context.overview = buildDashboardOverview(servers);
     }
     res.render('dashboard', context);
@@ -379,11 +417,14 @@ router.get(
     const server = await serverVM(row);
     // Docker settings (container name, network, extra ports/binds - including
     // host filesystem paths) are added ONLY here, never in serverVM, since
-    // that view model is shared with the public /status/:slug page.
-    server.containerName = row.containerName;
-    server.networkName = row.networkName;
-    server.extraPorts = row.extraPorts;
-    server.extraBinds = row.extraBinds;
+    // that view model is shared with the public /status/:slug page. They are
+    // admin-only: host paths and container internals must not leak to viewers.
+    if (req.user.role === 'admin') {
+      server.containerName = row.containerName;
+      server.networkName = row.networkName;
+      server.extraPorts = row.extraPorts;
+      server.extraBinds = row.extraBinds;
+    }
     const context = {
       title: server.name,
       active: 'servers',
@@ -507,7 +548,7 @@ router.get(
         'SELECT id, summary, exception, file_mtime FROM crash_reports WHERE server_id = ? ORDER BY file_mtime DESC LIMIT 1',
         row.id
       );
-      context.recentEvents = eventsService.listEvents({ serverId: row.id, limit: 8 }).map(eventVM);
+      context.recentEvents = eventsVM(eventsService.listEvents({ serverId: row.id, limit: 8 }));
 
       // --- Per-world / per-dimension sizes + host disk free.
       try {
@@ -591,10 +632,10 @@ router.get(
         context.integrations.invite = await require('../../integrations/invites')
           .inviteInfo(row.id)
           .catch(() => null);
-      } else if (tab === 'chatbot' && req.user.role === 'admin') {
-        // Chatbot endpoint/model/prompt and transcript controls are admin-only.
-        // Do not even hydrate them into a non-admin render context.
-        context.integrations.wizard = require('../../services/wizard').getConfig(row.id);
+    } else if (tab === 'chatbot') {
+      if (req.user.role !== 'admin') return next();
+      // Chatbot endpoint/model/prompt and transcript controls are admin-only.
+      context.integrations.wizard = require('../../services/wizard').getConfig(row.id);
       }
     } else if (tab === 'players') {
       const playersService = require('../../services/players');
@@ -636,7 +677,7 @@ router.get(
         });
       context.wsConsole = true;
     } else if (tab === 'history') {
-      context.events = eventsService.listEvents({ serverId: row.id, limit: 100 }).map(eventVM);
+      context.events = eventsVM(eventsService.listEvents({ serverId: row.id, limit: 100 }));
       context.crashReports = db
         .all('SELECT * FROM crash_reports WHERE server_id = ? ORDER BY file_mtime DESC', row.id)
         .map(crashVM);
@@ -856,17 +897,19 @@ router.get('/activity', (req, res) => {
   }
   const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
 
-  const total = db.get(`SELECT COUNT(*) AS n FROM events ${whereSql}`, ...params).n;
+  const total = db.get(`SELECT COUNT(*) AS n FROM events ${whereSql}`, ...params)?.n || 0;
   const pages = Math.max(1, Math.ceil(total / ACTIVITY_PER_PAGE));
   const page = Math.min(pages, Math.max(1, parseInt(req.query.page, 10) || 1));
-  const events = db
-    .all(
-      `SELECT * FROM events ${whereSql} ORDER BY id DESC LIMIT ? OFFSET ?`,
-      ...params,
-      ACTIVITY_PER_PAGE,
-      (page - 1) * ACTIVITY_PER_PAGE
-    )
-    .map((r) => eventVM({ ...r, details: safeJsonParse(r.details_json) }));
+  const events = eventsVM(
+    db
+      .all(
+        `SELECT * FROM events ${whereSql} ORDER BY id DESC LIMIT ? OFFSET ?`,
+        ...params,
+        ACTIVITY_PER_PAGE,
+        (page - 1) * ACTIVITY_PER_PAGE
+      )
+      .map((r) => ({ ...r, details: safeJsonParse(r.details_json) }))
+  );
 
   const filterParams = new URLSearchParams();
   if (q) filterParams.set('q', q);

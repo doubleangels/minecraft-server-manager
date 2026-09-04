@@ -125,9 +125,9 @@ async function ingestStats(serverId) {
   if (!(await pathExists(statsDir))) return { players: 0, snapshots: 0 };
 
   const names = await readUsercache(serverId);
-  let players = 0;
-  let snapshots = 0;
   const files = await fsp.readdir(statsDir);
+  // First pass: read + curate every stat file (still async, yielding per file).
+  const rows = [];
   for (const file of files) {
     if (!file.endsWith('.json')) continue;
     const uuid = uuidToDashed(path.basename(file, '.json'));
@@ -138,26 +138,50 @@ async function ingestStats(serverId) {
     } catch {
       continue; // partial write / malformed file - retry next cycle
     }
-    players++;
-    const json = JSON.stringify(curated);
-    const latest = db.get(
-      'SELECT stats_json FROM player_stat_snapshots WHERE server_id = ? AND uuid = ? ORDER BY id DESC LIMIT 1',
-      serverId,
-      uuid
-    );
-    if (latest && latest.stats_json === json) continue;
-    db.run(
-      `INSERT INTO player_stat_snapshots (server_id, uuid, name, ts, stats_json)
-       VALUES (?, ?, ?, ?, ?)`,
-      serverId,
-      uuid,
-      names.get(uuid) || '',
-      new Date().toISOString(),
-      json
-    );
-    snapshots++;
+    rows.push({ uuid, name: names.get(uuid) || '', json: JSON.stringify(curated) });
   }
-  return { players, snapshots };
+  if (!rows.length) return { players: 0, snapshots: 0 };
+
+  // One lookup for the existing latest snapshot per uuid instead of one SELECT
+  // per player (the N+1 that made a 200-player sweep issue ~200 serial queries
+  // on the event loop).
+  const existing = new Map();
+  const IN_CHUNK = 900; // stay under SQLite's variable-count limit for huge packs
+  for (let i = 0; i < rows.length; i += IN_CHUNK) {
+    const uuids = rows.slice(i, i + IN_CHUNK).map((r) => r.uuid);
+    const placeholders = uuids.map(() => '?').join(',');
+    const sql = `SELECT s.uuid, s.stats_json
+                   FROM player_stat_snapshots s
+                   JOIN (SELECT uuid, MAX(id) AS mid FROM player_stat_snapshots
+                          WHERE server_id = ? AND uuid IN (${placeholders}) GROUP BY uuid) m
+                     ON s.id = m.mid`;
+    for (const r of db.all(sql, serverId, ...uuids)) existing.set(r.uuid, r.stats_json);
+  }
+
+  // Insert only genuinely-changed snapshots, batched in a single transaction.
+  const inserts = [];
+  for (const row of rows) {
+    const prev = existing.get(row.uuid);
+    if (prev === row.json) continue;
+    inserts.push([
+      serverId,
+      row.uuid,
+      row.name,
+      new Date().toISOString(),
+      row.json,
+    ]);
+  }
+  if (inserts.length) {
+    db.transaction(() => {
+      for (const p of inserts) {
+        db.run(
+          `INSERT INTO player_stat_snapshots (server_id, uuid, name, ts, stats_json) VALUES (?, ?, ?, ?, ?)`,
+          ...p
+        );
+      }
+    });
+  }
+  return { players: rows.length, snapshots: inserts.length };
 }
 
 /** Periodic stat ingestion for all running servers. Returns a stop function. */
@@ -227,6 +251,53 @@ function baselineSnapshot(serverId, uuid, cutoffIso) {
 function windowCutoff(window) {
   const hours = window === '24h' ? 24 : window === '7d' ? 24 * 7 : null;
   return hours ? new Date(Date.now() - hours * 3_600_000).toISOString() : null;
+}
+
+// Aggregate the "latest snapshot per uuid" for a set of uuids in ONE query per
+// chunk, instead of a per-uuid SELECT (the N+1 behind scoreboard/xray on a cold
+// memo cache). Returns a Map<uuid, row>.
+function latestSnapshotsBulk(serverId, uuids) {
+  const out = new Map();
+  const CHUNK = 900;
+  for (let i = 0; i < uuids.length; i += CHUNK) {
+    const chunk = uuids.slice(i, i + CHUNK);
+    const ph = chunk.map(() => '?').join(',');
+    const sql = `SELECT s.* FROM player_stat_snapshots s
+                 JOIN (SELECT uuid, MAX(id) AS mid FROM player_stat_snapshots
+                        WHERE server_id = ? AND uuid IN (${ph}) GROUP BY uuid) m
+                   ON s.id = m.mid`;
+    for (const r of db.all(sql, serverId, ...chunk)) out.set(r.uuid, r);
+  }
+  return out;
+}
+
+// Aggregate the "newest snapshot with ts <= cutoff" per uuid in one pass, then
+// fill the fallback (oldest snapshot) for uuids with nothing before the cutoff -
+// matching baselineSnapshot()'s semantics without per-uuid queries.
+function baselineSnapshotsBulk(serverId, uuids, cutoffIso) {
+  const out = new Map();
+  const CHUNK = 900;
+  const remaining = [];
+  for (let i = 0; i < uuids.length; i += CHUNK) {
+    const chunk = uuids.slice(i, i + CHUNK);
+    const ph = chunk.map(() => '?').join(',');
+    const sql = `SELECT s.* FROM player_stat_snapshots s
+                 JOIN (SELECT uuid, MAX(ts) AS mts FROM player_stat_snapshots
+                        WHERE server_id = ? AND uuid IN (${ph}) AND ts <= ? GROUP BY uuid) m
+                   ON s.uuid = m.uuid AND s.ts = m.mts`;
+    for (const r of db.all(sql, serverId, ...chunk, cutoffIso)) out.set(r.uuid, r);
+  }
+  const missing = uuids.filter((uuid) => !out.has(uuid));
+  for (let i = 0; i < missing.length; i += CHUNK) {
+    const chunk = missing.slice(i, i + CHUNK);
+    const ph = chunk.map(() => '?').join(',');
+    const sql = `SELECT s.* FROM player_stat_snapshots s
+                 JOIN (SELECT uuid, MIN(ts) AS mts FROM player_stat_snapshots
+                        WHERE server_id = ? AND uuid IN (${ph}) GROUP BY uuid) m
+                   ON s.uuid = m.uuid AND s.ts = m.mts`;
+    for (const r of db.all(sql, serverId, ...chunk)) out.set(r.uuid, r);
+  }
+  return out;
 }
 
 function deltaBetween(latest, base) {
@@ -362,14 +433,17 @@ function scoreboard(serverId, { metric = 'playtimeTicks', window = 'all' } = {})
 
 function computeScoreboard(serverId, metric, window) {
   const cutoff = windowCutoff(window);
-  const uuids = db.all('SELECT DISTINCT uuid FROM player_stat_snapshots WHERE server_id = ?', serverId);
+  const uuids = db.all('SELECT DISTINCT uuid FROM player_stat_snapshots WHERE server_id = ?', serverId).map((r) => r.uuid);
+  const latestMap = latestSnapshotsBulk(serverId, uuids);
+  const baseMap = cutoff ? baselineSnapshotsBulk(serverId, uuids, cutoff) : null;
   const rows = [];
-  for (const { uuid } of uuids) {
-    const latest = latestSnapshot(serverId, uuid);
+  for (const uuid of uuids) {
+    const latest = latestMap.get(uuid);
+    if (!latest) continue;
     const stats = JSON.parse(latest.stats_json);
     let value = num(stats[metric]);
     if (cutoff) {
-      const base = baselineSnapshot(serverId, uuid, cutoff);
+      const base = baseMap.get(uuid);
       value = Math.max(0, value - num(base ? JSON.parse(base.stats_json)[metric] : 0));
     }
     rows.push({ uuid, name: latest.name || uuid.slice(0, 8), value });
@@ -395,20 +469,23 @@ function xrayReport(serverId) {
 }
 
 function computeXrayReport(serverId) {
-  const uuids = db.all('SELECT DISTINCT uuid FROM player_stat_snapshots WHERE server_id = ?', serverId);
-  const players = uuids.map(({ uuid }) => {
-    const latest = latestSnapshot(serverId, uuid);
-    const s = JSON.parse(latest.stats_json);
-    return {
-      uuid,
-      name: latest.name || uuid.slice(0, 8),
-      stoneMined: s.stoneMined,
-      diamondsMined: s.diamondsMined,
-      ancientDebrisMined: s.ancientDebrisMined,
-      diamondRatio: s.diamondsMined / (s.stoneMined + 1),
-      debrisRatio: s.ancientDebrisMined / (s.stoneMined + 1),
-    };
-  });
+  const uuids = db.all('SELECT DISTINCT uuid FROM player_stat_snapshots WHERE server_id = ?', serverId).map((r) => r.uuid);
+  const latestMap = latestSnapshotsBulk(serverId, uuids);
+  const players = uuids
+    .map((uuid) => latestMap.get(uuid))
+    .filter(Boolean)
+    .map((latest) => {
+      const s = JSON.parse(latest.stats_json);
+      return {
+        uuid: latest.uuid,
+        name: latest.name || latest.uuid.slice(0, 8),
+        stoneMined: s.stoneMined,
+        diamondsMined: s.diamondsMined,
+        ancientDebrisMined: s.ancientDebrisMined,
+        diamondRatio: s.diamondsMined / (s.stoneMined + 1),
+        debrisRatio: s.ancientDebrisMined / (s.stoneMined + 1),
+      };
+    });
 
   const eligible = players.filter((p) => p.stoneMined >= 64);
   const medDiamond = median(eligible.map((p) => p.diamondRatio));

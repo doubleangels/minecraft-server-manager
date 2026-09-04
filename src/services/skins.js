@@ -45,7 +45,7 @@ function decodeTextures(encoded) {
 async function resolveSkin(uuid) {
   const key = CACHE_PREFIX + String(uuid).replace(/-/g, '').toLowerCase();
   const cached = db.get('SELECT value_json, fetched_at FROM api_cache WHERE key = ?', key);
-  if (cached && Date.now() - Date.parse(cached.fetched_at + 'Z') < TTL_MS) {
+  if (cached && Date.now() - Date.parse(cached.fetched_at.replace(' ', 'T') + 'Z') < TTL_MS) {
     return JSON.parse(cached.value_json);
   }
 
@@ -100,10 +100,19 @@ async function getSkinImage(url) {
   const buffer = Buffer.from(await res.arrayBuffer());
 
   // Cap the in-memory cache: a heavily populated server shouldn't hold every
-  // skin forever. Evict a stale entry, then stop adding once we pass ~200.
+  // skin forever. Evict the STALEST entry (oldest fetchedAt), not the oldest
+  // inserted, and prune expired entries when over the cap.
   if (imageCache.size >= 200) {
-    const oldestKey = imageCache.keys().next().value;
-    if (oldestKey) imageCache.delete(oldestKey);
+    let oldestKey = null;
+    let oldestAt = Infinity;
+    for (const [key, entry] of imageCache) {
+      if (entry.fetchedAt < oldestAt) {
+        oldestAt = entry.fetchedAt;
+        oldestKey = key;
+      }
+      if (Date.now() - entry.fetchedAt >= IMAGE_CACHE_TTL_MS) imageCache.delete(key);
+    }
+    if (oldestKey && imageCache.size >= 200 && imageCache.has(oldestKey)) imageCache.delete(oldestKey);
   }
   imageCache.set(url, { buffer, fetchedAt: Date.now() });
   return buffer;

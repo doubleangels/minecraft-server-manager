@@ -232,6 +232,7 @@ router.delete(
 router.get(
   '/servers/:id/logs',
   asyncHandler(async (req, res, next) => {
+    requireServer(req.params.id);
     // fetchLogs buffers the whole tail (Buffer + demuxed string) in memory, so
     // cap it at 2000 lines here - the live WS console covers anything ongoing,
     // and this endpoint is just the "recent output" snapshot.
@@ -373,13 +374,9 @@ router.get(
   })
 );
 
-router.get('/docker/status', async (req, res, next) => {
-  try {
-    res.json({ ok: true, docker: await checkDocker() });
-  } catch (err) {
-    next(err); // a rejected checkDocker() must not hang the request (Express 4)
-  }
-});
+router.get('/docker/status', asyncHandler(async (req, res) => {
+  res.json({ ok: true, docker: await checkDocker() });
+}));
 
 // ---- API keys (Settings page) - admin only ----
 const apiKeys = require('../../services/apiKeys');
@@ -1792,7 +1789,7 @@ router.post(
     const input = zipImportBodySchema.parse(req.body);
     const zipPath = dataPath('tmp', input.uploadToken);
     if (!fs.existsSync(zipPath)) {
-      return res.status(404).json({ ok: false, error: 'Uploaded zip expired — upload it again' });
+      return res.status(404).json({ ok: false, error: 'Uploaded zip expired, upload it again' });
     }
     const actor = req.user.username;
     const taskId = tasks.run(
@@ -1852,10 +1849,10 @@ router.get(
 // Captured log excerpt for one event (text/plain; 404 when none was captured).
 router.get(
   '/events/:id/excerpt',
-  asyncHandler((req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const event = eventsService.getEvent(Number(req.params.id));
     if (!event) throw Object.assign(new Error('Event not found'), { status: 404 });
-    const text = eventsService.readExcerpt(event);
+    const text = await eventsService.readExcerpt(event);
     if (text == null) throw Object.assign(new Error('No captured log for this event'), { status: 404 });
     res.type('text/plain').send(text);
   })
@@ -1867,16 +1864,21 @@ router.get(
 router.post(
   '/events/prune',
   requireRoleKeys('admin'),
-  asyncHandler((req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { days } = z.object({ days: z.coerce.number().int().min(1).max(3650) }).parse(req.body);
-    const { removed } = eventsService.pruneEvents(days, { actor: req.user.username });
+    const { removed } = await eventsService.pruneEvents(days, { actor: req.user.username });
     res.json({ ok: true, removed });
   })
 );
 
 // ---- Archived per-server logs (data/logs/<id>/events) ----
 
-const archivedFileSchema = z.string().regex(/^[\w.,()[\] -]+$/, 'Invalid file name');
+// Archived per-event log excerpts, written only by the panel (events/index.js)
+// as `${Date.now()}-${type}-${nanoid(4)}.log`. The regex is defense-in-depth on
+// top of safeJoin's containment check - require the .log suffix the panel uses
+// and keep the character class tight (word chars, dots, parens/brackets, dashes)
+// while excluding whitespace and anything a path separator could hide behind.
+const archivedFileSchema = z.string().regex(/^[\w.,()[\]-]+\.log$/, 'Invalid archived log name');
 
 router.get(
   '/servers/:id/logs/archived',
@@ -1968,8 +1970,8 @@ router.get(
     const zip = archiver('zip', { zlib: { level: 6 } });
     zip.on('error', (err) => {
       logger.error('Log bundle stream failed.', { serverId: req.params.id, err: serializeError(err) });
-      if (!res.headersSent) res.status(500);
-      res.end();
+      if (res.headersSent) return res.destroy();
+      res.status(500).end();
     });
     zip.pipe(res);
     for (const f of list) zip.file(path.join(dir, f.file), { name: f.file });
@@ -2480,7 +2482,7 @@ router.post(
     requireAdminForOverrides(req, input);
     const zipPath = dataPath('tmp', input.uploadToken);
     if (!fs.existsSync(zipPath)) {
-      return res.status(404).json({ ok: false, error: 'Uploaded zip expired — upload it again' });
+      return res.status(404).json({ ok: false, error: 'Uploaded zip expired, upload it again' });
     }
     const actor = req.user.username;
     const type = input.loader.toUpperCase();
@@ -2530,7 +2532,7 @@ router.post(
 
 function publicServer(s) {
   if (!s) return null;
-  const { rcon_password_cipher, env_json, notes, ...rest } = s;
+  const { rcon_password_cipher, env_json, notes, env, ...rest } = s;
   return rest;
 }
 

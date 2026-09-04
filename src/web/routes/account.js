@@ -34,6 +34,14 @@ function throttle(bucket, userId, max, windowMs, nowMs = Date.now()) {
   const recent = (hits.get(key) || []).filter((t) => nowMs - t < windowMs);
   recent.push(nowMs);
   hits.set(key, recent);
+  // Opportunistic cleanup: drop buckets whose every entry has aged out, so a
+  // long-lived session pounding distinct bucket/user keys can't grow the map
+  // without bound. Bounded by the number of distinct (bucket,user) pairs.
+  if (recent.length === 1 && hits.size > 10_000) {
+    for (const [k, ts] of hits) {
+      if (!ts.some((t) => nowMs - t < windowMs)) hits.delete(k);
+    }
+  }
   return recent.length <= max;
 }
 

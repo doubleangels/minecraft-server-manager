@@ -6,7 +6,7 @@
 // with library.ensureContentMeta(), which does the per-row work and is also
 // called lazily from the Mods tab render.
 
-const fs = require('node:fs');
+const fsp = require('node:fs/promises');
 const path = require('node:path');
 const db = require('../db');
 const { dataPath } = require('../storage/pathGuard');
@@ -24,26 +24,48 @@ function looksLikeFilename(name, filename) {
   return n === f || n === f.replace(/\.(jar|zip)$/, '');
 }
 
-function needsRepair(r) {
-  const registry = (r.platform === 'modrinth' || r.platform === 'curseforge') && r.project_id;
-  // Nothing to repair from if there's neither a remote icon URL nor a registry
-  // project to look one up against.
-  if (!r.icon_url && !registry) return false;
-  const iconMissing = !r.icon_rel_path || !fs.existsSync(dataPath(r.icon_rel_path));
-  const metaMissing =
-    registry && (!r.version || looksLikeFilename(r.name, r.filename) || (r.mc_versions_json || '[]') === '[]');
-  return iconMissing || metaMissing;
-}
-
-/** @returns {Promise<{scanned:number, repaired:number}>} */
+/**
+ * @returns {Promise<{scanned:number, repaired:number}>}
+ */
 async function backfillContentMeta({ limit = 500 } = {}) {
-  const rows = db
-    .all(
-      `SELECT * FROM library_files
-       WHERE category IN ('mod','plugin','datapack','resourcepack')`
-    )
-    .filter(needsRepair)
-    .slice(0, limit);
+  // Push the cheap, DB-only part of needsRepair() into SQL so we never materialize
+  // every library row just to discard it: a row is only a repair candidate if it
+  // has a remote icon URL or a registry project to look metadata up against. The
+  // rest (existence of the local icon file) needs an fs check, applied below.
+  const candidates = db.all(
+    `SELECT * FROM library_files
+     WHERE category IN ('mod','plugin','datapack','resourcepack')
+       AND (icon_url IS NOT NULL AND icon_url != ''
+            OR (platform IN ('modrinth', 'curseforge') AND project_id IS NOT NULL AND project_id != ''))
+     ORDER BY id
+     LIMIT ?`,
+    Math.round(limit * 8)
+  );
+  // Run the fs-dependent half of needsRepair() asynchronously (no sync existsSync
+  // on the event loop) and collect at most `limit` repair-worthy rows.
+  const needsRepairAsync = async (r) => {
+    const registry =
+      (r.platform === 'modrinth' || r.platform === 'curseforge') && r.project_id;
+    if (!r.icon_url && !registry) return false;
+    let iconMissing = !r.icon_rel_path;
+    if (!iconMissing) {
+      try {
+        await fsp.access(dataPath(r.icon_rel_path));
+      } catch {
+        iconMissing = true;
+      }
+    }
+    const metaMissing =
+      registry &&
+      (!r.version || looksLikeFilename(r.name, r.filename) || (r.mc_versions_json || '[]') === '[]');
+    return iconMissing || metaMissing;
+  };
+
+  const rows = [];
+  for (const row of candidates) {
+    if (rows.length >= limit) break;
+    if (await needsRepairAsync(row)) rows.push(row);
+  }
 
   if (!rows.length) return { scanned: 0, repaired: 0 };
 

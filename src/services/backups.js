@@ -339,8 +339,8 @@ const createBackup = guardOp('backup', createBackupImpl);
 async function deleteBackup(backupId, { actor = 'system' } = {}) {
   const backup = db.get('SELECT * FROM backups WHERE id = ?', backupId);
   if (!backup) return { freedBytes: 0 };
-  await fsp.rm(dataPath(backup.rel_path), { force: true });
   db.run('DELETE FROM backups WHERE id = ?', backupId);
+  await fsp.rm(dataPath(backup.rel_path), { force: true });
   recordEvent({
     serverId: backup.server_id,
     actor,

@@ -216,7 +216,7 @@ function init(serverId, serverName, serverStatus) {
       <p class="text-sm">This removes parts of <b>${escapeHtml(world)}</b> that players have barely
         spent time in, so the world takes less space on disk. Minecraft rebuilds a removed area from
         the seed the next time someone travels there.</p>
-      <p class="help mt-2"><b>Back up first</b> — anything a player built but barely stood in would be
+      <p class="help mt-2"><b>Back up first</b>. Anything a player built but barely stood in would be
         removed too.</p>
       <div class="mt-3 grid grid-cols-2 gap-3">
         <div>
@@ -235,7 +235,7 @@ function init(serverId, serverName, serverStatus) {
         isRunning
           ? `<label class="notice notice-warn mt-3 flex items-center gap-2 text-sm">
                <input type="checkbox" class="msm-check" id="sh-wrap">
-               The server is running — stop it, shrink the world, then start it again.
+               The server is running, so stop it, shrink the world, then start it again.
              </label>`
           : '<p class="help mt-2">The server is stopped, so the shrink runs directly.</p>'
       }
@@ -263,7 +263,7 @@ function init(serverId, serverName, serverStatus) {
             resultEl.classList.remove('hidden');
             resultEl.textContent = res.chunksRemoved
               ? `About ${res.chunksRemoved.toLocaleString()} chunks (~${fmtBytes(res.bytesFreed)}) would be removed, from ${res.regionsScanned} region file(s).`
-              : 'Nothing to remove — every chunk in this world has been visited long enough.';
+              : 'Nothing to remove: every chunk in this world has been visited long enough.';
             return false; // keep the modal open
           },
         },
@@ -285,7 +285,7 @@ function init(serverId, serverName, serverStatus) {
               });
               toast(
                 r && r.chunksRemoved
-                  ? `Removed ${r.chunksRemoved.toLocaleString()} chunks — freed ${fmtBytes(r.bytesFreed)}.${r.restarted ? ' Server restarted.' : ''}`
+                  ? `Removed ${r.chunksRemoved.toLocaleString()} chunks, freeing ${fmtBytes(r.bytesFreed)}.${r.restarted ? ' Server restarted.' : ''}`
                   : `No rarely-visited chunks to remove.${r && r.restarted ? ' Server restarted.' : ''}`
               );
               reload();

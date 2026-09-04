@@ -345,6 +345,7 @@ function sessionUser(req) {
     const cookies = Object.fromEntries(
       (req.headers.cookie || '').split(';').map((c) => {
         const idx = c.indexOf('=');
+        if (idx === -1) return [c.trim(), ''];
         return [c.slice(0, idx).trim(), decodeURIComponent(c.slice(idx + 1))];
       })
     );

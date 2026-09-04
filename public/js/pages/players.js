@@ -16,7 +16,21 @@ function init(root) {
   const serverId = root.dataset.serverId;
   const running = root.dataset.running === '1';
 
-  for (const img of root.querySelectorAll('[data-skin-uuid]')) {
+  const skinImgs = Array.from(root.querySelectorAll('[data-skin-uuid]'));
+  if (skinImgs.length) {
+    // Prefetch skins server-side in parallel (Mojang session + texture), so
+    // the individual head <img> requests hit the warm cache instead of each
+    // serializing an upstream round trip. Fire-and-forget; heads render from
+    // the same-origin proxy either way.
+    const base = `/api/servers/${serverId}/players/skin-prefetch`;
+    const uuids = [...new Set(skinImgs.map((img) => img.dataset.skinUuid))];
+    fetch(base, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uuids }),
+    }).catch(() => {});
+  }
+  for (const img of skinImgs) {
     renderPlayerHead(img, img.dataset.skinUuid, { serverId });
   }
   let players = [];

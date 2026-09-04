@@ -1077,7 +1077,9 @@ async function withDatFile(serverId, ctx, mutate) {
     }
     const result = mutate(parsed.value);
     await backupDat(file);
-    const out = zlib.gzipSync(nbt.writeUncompressed(parsed, 'big')); // playerdata is always gzip'd big-endian
+    // gzip off the event loop: serializing a full inventory NBT can spend
+    // 50-200ms in zlib - awaited (async) instead of the blocking gzipSync.
+    const out = await zlib.gzip(nbt.writeUncompressed(parsed, 'big')); // playerdata is always gzip'd big-endian
     const tmp = `${file}.msm-tmp-${process.pid}-${require('node:crypto').randomUUID()}`;
     await fsp.writeFile(tmp, out);
     await fsp.rename(tmp, file);

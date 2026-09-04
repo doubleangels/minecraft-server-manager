@@ -18,15 +18,29 @@
 // top-level Long on 1.18+ worlds and Level.InhabitedTime on older ones.
 
 const zlib = require('node:zlib');
+const { promisify } = require('node:util');
 const nbt = require('prismarine-nbt');
 
 const SECTOR = 4096;
 const ENTRIES = 1024;
 
-function inflateChunk(payload, compressionType) {
+// Cap the decompressed size of a single chunk. A real Minecraft chunk NBT never
+// approaches this (a max-height full chunk serializes to well under a few MB),
+// but a crafted region file could declare a tiny payload that inflates to a huge
+// buffer (a decompression bomb) and exhaust memory while shrinking a world. This
+// is the node:zlib output ceiling, honored by gunzip/inflate before allocating.
+const MAX_CHUNK_OUTPUT_BYTES = 64 * 1024 * 1024;
+
+// Async zlib (callback API runs on the libuv threadpool) so decompressing one
+// chunk never stalls the event loop; world-shrink walks many regions in a row,
+// and chunkInhabitedTime already awaits nbt.parse.
+const inflateAsync = promisify(zlib.inflate);
+const gunzipAsync = promisify(zlib.gunzip);
+
+async function inflateChunk(payload, compressionType) {
   const type = compressionType & 0x7f;
-  if (type === 1) return zlib.gunzipSync(payload);
-  if (type === 2) return zlib.inflateSync(payload);
+  if (type === 1) return gunzipAsync(payload, { maxOutputLength: MAX_CHUNK_OUTPUT_BYTES });
+  if (type === 2) return inflateAsync(payload, { maxOutputLength: MAX_CHUNK_OUTPUT_BYTES });
   if (type === 3) return payload;
   throw new Error(`unknown chunk compression type ${compressionType}`);
 }
@@ -91,7 +105,7 @@ async function chunkInhabitedTime(buf, entry) {
   const compType = buf.readUInt8(start + 4);
   const payload = buf.subarray(start + 5, start + 4 + length);
   try {
-    const raw = inflateChunk(payload, compType);
+    const raw = await inflateChunk(payload, compType);
     const { parsed } = await nbt.parse(raw);
     return readInhabitedTime(nbt.simplify(parsed));
   } catch {

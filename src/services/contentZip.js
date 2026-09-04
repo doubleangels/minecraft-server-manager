@@ -19,9 +19,11 @@
 
 const fs = require('node:fs');
 const fsp = require('node:fs/promises');
+const crypto = require('node:crypto');
 const path = require('node:path');
 const httpError = require('../utils/httpError');
-const { readZipIndex, readEntryBuffers, extractZipSafe, safeEntryName } = require('../utils/zip');
+const { readZipIndex, forEachEntryBuffer, extractZipSafe, safeEntryName } = require('../utils/zip');
+const { curseforgeFingerprint } = require('../utils/murmur2');
 const { recordEvent } = require('../events');
 const { dataPath } = require('../storage/pathGuard');
 const curseforge = require('./curseforgeApi');
@@ -34,6 +36,41 @@ const MAX_MANIFEST_FILES = 1000; // a pack pinning more than this is malformed
 const MAX_JARS = 500;
 const MAX_OVERRIDE_ENTRIES = 20000;
 const MAX_OVERRIDE_BYTES = 8 * 1024 ** 3; // decompression-bomb ceiling (headers can lie; sizes re-checked on extract)
+
+// Identify every jar in a zip with bounded memory: each jar is buffered, parsed
+// and hashed one at a time (metadata extracted while the buffer is in hand),
+// then its compact hash/meta record is kept and the buffer is freed before the
+// next jar. Peak memory is ~one jar instead of every jar at once (previews of
+// big packs would otherwise hold the whole pack in RAM). Falls back to the
+// same identifyJars pipeline, so identities are byte-for-byte unchanged.
+//
+// When {tmpDir} is provided, each jar buffer is also written to a temp file in
+// that directory during the pass. The returned jarPaths Map<entryName, tmpPath>
+// lets the install loop reference those pre-extracted files without retaining
+// any buffers in memory.
+async function identifyJarsBounded(zipPath, { tmpDir } = {}) {
+  const jars = [];
+  const jarPaths = new Map();
+  let idx = 0;
+  await forEachEntryBuffer(zipPath, isJarEntry, async ({ name, buffer }) => {
+    const meta = await modIdentify.parseJarMeta(buffer);
+    jars.push({
+      name,
+      size: buffer.length,
+      sha1: crypto.createHash('sha1').update(buffer).digest('hex'),
+      sha256: crypto.createHash('sha256').update(buffer).digest('hex'),
+      fingerprint: curseforgeFingerprint(buffer),
+      meta,
+    });
+    if (tmpDir) {
+      const file = path.join(tmpDir, `zipjar-${Date.now()}-${idx++}-${path.basename(name).replace(/[^\w.-]/g, '_')}`);
+      await fsp.writeFile(file, buffer);
+      jarPaths.set(name, file);
+    }
+  });
+  const identified = await modIdentify.identifyJars(jars);
+  return { identified, jarPaths };
+}
 
 // ---- Detection & manifest parsing ------------------------------------------
 
@@ -49,7 +86,7 @@ function parsePackManifest(text) {
     throw httpError(400, 'manifest.json is not a CurseForge modpack manifest');
   }
   if (raw.files.length > MAX_MANIFEST_FILES) {
-    throw httpError(400, `Manifest pins ${raw.files.length} files — the ${MAX_MANIFEST_FILES} limit blocks it`);
+    throw httpError(400, `Manifest pins ${raw.files.length} files, but the ${MAX_MANIFEST_FILES} limit blocks it`);
   }
   const files = raw.files
     .map((f) => ({
@@ -97,7 +134,7 @@ function parseMrpackIndex(text) {
     throw httpError(400, 'modrinth.index.json is not a Modrinth modpack index');
   }
   if (raw.files.length > MAX_MANIFEST_FILES) {
-    throw httpError(400, `Pack pins ${raw.files.length} files — the ${MAX_MANIFEST_FILES} limit blocks it`);
+    throw httpError(400, `Pack pins ${raw.files.length} files, but the ${MAX_MANIFEST_FILES} limit blocks it`);
   }
   const deps = raw.dependencies || {};
   const loaderKey = Object.keys(MRPACK_LOADER_KEYS).find((k) => deps[k]);
@@ -235,7 +272,7 @@ async function inspect(zipPath) {
     );
   }
   if (jarEntries.length > MAX_JARS) {
-    throw httpError(400, `Zip contains ${jarEntries.length} jars — the ${MAX_JARS} limit blocks it`);
+    throw httpError(400, `Zip contains ${jarEntries.length} jars, but the ${MAX_JARS} limit blocks it`);
   }
   return { type: 'jars', manifest: null, jarEntries, overridesEntries: [] };
 }
@@ -387,8 +424,7 @@ async function previewForServer(serverId, zipPath) {
   }
 
   // jars
-  const buffers = await readEntryBuffers(zipPath, isJarEntry);
-  const identified = await modIdentify.identifyJars([...buffers.entries()].map(([name, buffer]) => ({ name, buffer })));
+  const { identified } = await identifyJarsBounded(zipPath);
   const items = identified.map((j) => ({
     entry: j.filename,
     filename: path.basename(j.filename),
@@ -449,8 +485,7 @@ async function previewStandalone(zipPath) {
       inferred: { loader: info.manifest.loader, mcVersion: info.manifest.mcVersion, kind: 'mod' },
     };
   }
-  const buffers = await readEntryBuffers(zipPath, isJarEntry);
-  const identified = await modIdentify.identifyJars([...buffers.entries()].map(([name, buffer]) => ({ name, buffer })));
+  const { identified } = await identifyJarsBounded(zipPath);
   const items = identified.map((j) => ({
     entry: j.filename,
     filename: path.basename(j.filename),
@@ -688,10 +723,9 @@ async function importForServer(
     }
   } else {
     onStep(`Reading ${info.jarEntries.length} jars`);
-    const buffers = await readEntryBuffers(zipPath, isJarEntry);
-    const identified = await modIdentify.identifyJars(
-      [...buffers.entries()].map(([name, buffer]) => ({ name, buffer }))
-    );
+    const tmpDir = dataPath('tmp');
+    await fsp.mkdir(tmpDir, { recursive: true });
+    const { identified, jarPaths } = await identifyJarsBounded(zipPath, { tmpDir });
     const identityByEntry = new Map(identified.map((j) => [j.filename, j.identity]));
     // Documented default (no selections): install every jar whose verdict isn't
     // wrong-* — unidentified jars stay in, but a jar known to be the wrong
@@ -704,7 +738,7 @@ async function importForServer(
       });
     const wanted = selections ? new Set(selections) : null;
     const names = [];
-    for (const entry of buffers.keys()) {
+    for (const entry of identified.map((j) => j.filename)) {
       const verdict = wanted ? null : judge(entry);
       if (wanted && !wanted.has(entry)) {
         report.skipped.push({ name: path.basename(entry), reason: 'deselected' });
@@ -714,15 +748,12 @@ async function importForServer(
         names.push(entry);
       }
     }
-    const tmpDir = dataPath('tmp');
-    await fsp.mkdir(tmpDir, { recursive: true });
     for (let i = 0; i < names.length; i += 1) {
       const entry = names[i];
       const base = path.basename(entry);
       onStep(`Installing ${i + 1}/${names.length}: ${base}`);
-      const tmpFile = path.join(tmpDir, `zipjar-${Date.now()}-${i}-${base.replace(/[^\w.-]/g, '_')}`);
+      const tmpFile = jarPaths.get(entry) || path.join(tmpDir, `zipjar-${Date.now()}-${i}-${base.replace(/[^\w.-]/g, '_')}`);
       try {
-        await fsp.writeFile(tmpFile, buffers.get(entry));
         const res = await modsService.installLocalContent(serverId, tmpFile, base, {
           identity: identityByEntry.get(entry) || null,
           actor,

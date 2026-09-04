@@ -167,7 +167,7 @@ function startBackgroundServices(httpServer) {
   // then every 24h.
   const ANALYTICS_RETENTION_DAYS = 90;
   const PANEL_DB_BACKUPS_KEEP = 14;
-  function runMaintenance() {
+  async function runMaintenance() {
     try {
       const r = require('./analytics/ingest').pruneOlderThan(ANALYTICS_RETENTION_DAYS);
       const wizard = require('./services/wizard');
@@ -193,9 +193,9 @@ function startBackgroundServices(httpServer) {
       const dir = dataPath('backups', '_panel');
       fs.mkdirSync(dir, { recursive: true });
       const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
-      // VACUUM INTO is synchronous and blocks the event loop while it runs - log
-      // the pause so a long one is visible rather than mysterious.
-      const blockedMs = require('./db').backupTo(nodePath.join(dir, `panel-${stamp}.db`));
+      // VACUUM INTO runs in a worker thread now, so it can't block the event
+      // loop; log how long the copy took.
+      const blockedMs = await require('./db').backupTo(nodePath.join(dir, `panel-${stamp}.db`));
       logger.info('Snapshotted the panel database.', { blockedMs, dir: 'data/backups/_panel' });
       const snaps = fs
         .readdirSync(dir)

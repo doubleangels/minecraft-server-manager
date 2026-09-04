@@ -1053,14 +1053,14 @@ function initZipUpload() {
         <div class="mt-3 hidden gap-4 sm:grid-cols-2" data-role="pickers"></div>
         <label class="mt-3 hidden cursor-pointer items-start gap-2 text-xs text-ink-soft" data-role="overrides-row">
           <input type="checkbox" class="msm-check mt-0.5 shrink-0" data-role="overrides">
-          <span>Also apply the pack's <b data-role="ovr-count"></b> override files (configs/scripts) after install — overwritten files are backed up inside the server folder.</span>
+          <span>Also apply the pack's <b data-role="ovr-count"></b> override files (configs/scripts) after install. Overwritten files are backed up inside the server folder.</span>
         </label>
       </div>`;
     selectedEl.querySelector('[data-role="title"]').textContent = isPack
       ? `${p.pack.name}${p.pack.version ? ` ${p.pack.version}` : ''}`
       : filename;
     selectedEl.querySelector('[data-role="meta"]').textContent = isPack
-      ? `${isMrpack ? 'Modrinth modpack (.mrpack)' : 'CurseForge export'} — Minecraft ${p.pack.mcVersion || '?'}, ${p.pack.loader || 'unknown loader'} · ${bits.join(' · ')}`
+      ? `${isMrpack ? 'Modrinth modpack (.mrpack)' : 'CurseForge export'}, Minecraft ${p.pack.mcVersion || '?'}, ${p.pack.loader || 'unknown loader'} · ${bits.join(' · ')}`
       : `Custom jar zip · ${bits.join(' · ')}`;
     selectedEl.querySelector('[data-role="remove"]').addEventListener('click', clear);
 

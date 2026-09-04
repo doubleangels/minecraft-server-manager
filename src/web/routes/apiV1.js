@@ -53,9 +53,13 @@ function serverStatusView(row) {
     type: row.type,
     state: STATE_MAP[row.status] || 'stopped',
     cpuPct: live.stats ? live.stats.cpuPct : null,
-    memoryMb: live.stats ? Math.round(live.stats.memUsedBytes / 1024 / 1024) : null,
+    memoryMb: live.stats ? Math.round((live.stats.memUsedBytes || 0) / 1024 / 1024) : null,
     memoryLimitMb: row.container_memory_mb ?? null,
-    uptimeSeconds: live.startedAt ? Math.max(0, Math.floor((Date.now() - Date.parse(live.startedAt)) / 1000)) : null,
+    uptimeSeconds: live.startedAt
+      ? Number.isFinite(Date.parse(live.startedAt))
+        ? Math.max(0, Math.floor((Date.now() - Date.parse(live.startedAt)) / 1000))
+        : null
+      : null,
     players: live.players ? { online: live.players.online, max: live.players.max } : null,
   };
 }

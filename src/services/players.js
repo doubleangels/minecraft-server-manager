@@ -84,7 +84,7 @@ function readJson(serverId, file) {
 function writeJson(serverId, file, data) {
   if (!FILES.has(file)) throw httpError(400, `Unsupported player file: ${file}`);
   const target = dataPath('servers', serverId, file);
-  const tmp = dataPath('servers', serverId, `${file}.tmp`);
+  const tmp = dataPath('servers', serverId, `${file}.${process.pid}-${Date.now()}.tmp`);
   fs.mkdirSync(dataPath('servers', serverId), { recursive: true });
   fs.writeFileSync(tmp, JSON.stringify(data, null, 2) + '\n');
   fs.renameSync(tmp, target);

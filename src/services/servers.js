@@ -966,18 +966,37 @@ async function refreshStatusesInner({ boot }) {
   }
 }
 
+// Parallel, bounded-concurrency directory size walker. Server world dirs hold a
+// great many small files; serializing one fsp.stat at a time is needlessly slow.
+// A small concurrency pool overlaps the directory reads without exhausting file
+// descriptors on huge trees.
+const DIR_SIZE_CONCURRENCY = 32;
 async function dirSize(dir) {
-  let total = 0;
+  const jobs = [];
   for (const entry of await fsp.readdir(dir, { withFileTypes: true })) {
-    const p = path.join(dir, entry.name);
-    try {
-      if (entry.isDirectory()) total += await dirSize(p);
-      else if (entry.isFile()) total += (await fsp.stat(p)).size;
-    } catch {
-      /* transient file */
-    }
+    jobs.push(path.join(dir, entry.name));
   }
-  return total;
+  let i = 0;
+  const push = async (p) => {
+    try {
+      const st = await fsp.stat(p);
+      if (st.isDirectory()) return dirSize(p);
+      return st.size;
+    } catch {
+      return 0; // transient file
+    }
+  };
+  const workers = Array.from({ length: Math.min(DIR_SIZE_CONCURRENCY, jobs.length) }, async () => {
+    let sub = 0; // worker-local accumulator avoids lost updates on a shared total
+    while (i < jobs.length) {
+      const p = jobs[i];
+      i += 1; // sync claim, safe across the pool
+      sub += await push(p);
+    }
+    return sub;
+  });
+  const results = await Promise.all(workers);
+  return results.reduce((a, b) => a + b, 0);
 }
 
 function mustGet(id) {

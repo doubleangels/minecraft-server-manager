@@ -138,7 +138,7 @@ function init(serverId, running) {
     }
     applyChips(s, { readonly: true });
     stateLine.classList.remove('hidden');
-    stateLine.textContent = 'Server offline — showing the last saved world settings. Start the server to change them.';
+    stateLine.textContent = 'Server offline, showing the last saved world settings. Start the server to change them.';
   }
 
   async function quick(action, el) {

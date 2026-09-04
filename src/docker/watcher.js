@@ -277,8 +277,14 @@ function inCrashLoopBackoff(serverId) {
 }
 
 /** Match known unrecoverable startup errors → actionable message. */
+const DIAG_MAX_CHARS = 128 * 1024; // fatal errors are in the recent log; never regex a huge blob
 function diagnoseFatal(logText) {
   if (!logText) return null;
+  // Bound the scanned text to the newest tail - these are startup-fatal errors,
+  // so scanning the whole (potentially large) excerpt up to 6 times is wasted
+  // work that only grows with uptime.
+  const scan =
+    logText.length > DIAG_MAX_CHARS ? logText.slice(-DIAG_MAX_CHARS) : logText;
   const KNOWN = [
     {
       key: 'cf-api-key',
@@ -314,7 +320,7 @@ function diagnoseFatal(logText) {
       summary: 'Java ran out of heap - raise RAM in Settings → Resources (packs usually need 4–8 GB) and Recreate.',
     },
   ];
-  for (const k of KNOWN) if (k.re.test(logText)) return k;
+  for (const k of KNOWN) if (k.re.test(scan)) return k;
   return null;
 }
 

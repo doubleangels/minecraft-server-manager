@@ -285,14 +285,15 @@ function getCrash(crashId) {
 }
 
 /** Read a report's full text. The filename MUST be one indexed for this server. */
-function getCrashText(serverId, filename) {
+async function getCrashText(serverId, filename) {
   const row = db.get('SELECT id FROM crash_reports WHERE server_id = ? AND filename = ?', serverId, filename);
   if (!row) {
     const err = new Error('Crash report not found');
     err.status = 404;
     throw err;
   }
-  return fs.readFileSync(absPathFor(serverId, filename), 'utf8');
+  // Reports are 100KB+ - read async so a view never blocks the event loop.
+  return fsp.readFile(absPathFor(serverId, filename), 'utf8');
 }
 
 function markViewed(crashId) {
@@ -312,7 +313,7 @@ async function shareCrash(crashId, { actor = 'system' } = {}) {
     throw err;
   }
   if (row.mclogs_url) return { id: row.mclogs_id, url: row.mclogs_url, alreadyShared: true };
-  const text = fs.readFileSync(absPathFor(row.server_id, row.filename), 'utf8');
+  const text = await fsp.readFile(absPathFor(row.server_id, row.filename), 'utf8');
   const paste = await require('../integrations/mclogs').uploadLog(text);
   db.run('UPDATE crash_reports SET mclogs_id = ?, mclogs_url = ? WHERE id = ?', paste.id, paste.url, crashId);
   recordEvent({

@@ -114,7 +114,7 @@ function showPreview(preview, importBody) {
     actions: [
       { label: 'Cancel', kind: 'ghost' },
       {
-        label: 'Create a server',
+        label: 'Create a Server',
         kind: 'primary',
         onClick: () => {
           // Kick off after this modal closes so the progress modal is on top.

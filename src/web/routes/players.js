@@ -154,6 +154,38 @@ router.get(
   })
 );
 
+// Prefetch skins for a batch of uuids so later /skin-image/:uuid requests are
+// served from the SQLite/memory caches instead of each waiting on the Mojang
+// session API. Runs the upstream lookups in parallel (bounded), then returns
+// quickly - the client fires the individual head requests right after.
+router.post(
+  '/skin-prefetch',
+  asyncHandler(async (req, res, next) => {
+    const { uuids } = z
+      .object({ uuids: z.array(z.string().trim().min(1).max(64)).max(128) })
+      .parse(req.body || {});
+    const unique = [...new Set(uuids)];
+    const LIMIT = 8;
+    let cursor = 0;
+    const worker = async () => {
+      for (;;) {
+        const uuid = unique[cursor++];
+        if (uuid === undefined) return;
+        try {
+          const skin = await resolveSkin(uuid);
+          if (skin && skin.url) {
+            await getSkinImage(skin.url).catch(() => null);
+          }
+        } catch {
+          /* best-effort; individual requests handle the fallback */
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(LIMIT, unique.length) }, worker));
+    res.json({ ok: true, prefetched: unique.length });
+  })
+);
+
 // Streams a player's skin texture PNG same-origin (so the client canvas can
 // crop the face without the texture CDN tainting it). Long-lived + immutable
 // cache: texture URLs are content-addressed, so the bytes never change.

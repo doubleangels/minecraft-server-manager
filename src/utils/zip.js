@@ -230,10 +230,67 @@ function extractZipSafe(
   });
 }
 
+/**
+ * Walk a zip and hand each selected entry to `fn({name, buffer})` one at a time,
+ * freeing each buffer before the next is read. Bounds peak memory for archives
+ * of many entries (e.g. modpack jar previews) at a single entry's size instead
+ * of all matched entries at once. Each entry buffer is size-capped.
+ * @param {string} zipPath
+ * @param {(name: string) => boolean} select
+ * @param {(file: {name: string, buffer: Buffer}) => Promise<void>|void} fn
+ * @param {{maxEntryBytes?: number}} opts
+ * @returns {Promise<void>}
+ */
+function forEachEntryBuffer(zipPath, select, fn, { maxEntryBytes = 512 * 1024 * 1024 } = {}) {
+  return new Promise((resolve, reject) => {
+    yauzl.open(zipPath, { lazyEntries: true }, (err, zip) => {
+      if (err) return reject(httpError(400, 'Not a valid zip archive'));
+      let done = false;
+      const fail = (e) => {
+        if (done) return;
+        done = true;
+        try { zip.close(); } catch {}
+        reject(e);
+      };
+      zip.on('error', fail);
+      const readEntry = (entry) => {
+        if (done) return;
+        if (/\/$/.test(entry.fileName) || !select(entry.fileName)) return zip.readEntry();
+        zip.openReadStream(entry, (streamErr, readStream) => {
+          if (streamErr) return fail(streamErr);
+          const chunks = [];
+          let size = 0;
+          readStream.on('data', (c) => {
+            size += c.length;
+            if (size > maxEntryBytes) return fail(httpError(413, 'Zip entry exceeds the allowed size'));
+            chunks.push(c);
+          });
+          readStream.on('error', fail);
+          readStream.on('end', async () => {
+            const buffer = Buffer.concat(chunks);
+            try {
+              await fn({ name: entry.fileName, buffer });
+            } catch (e) {
+              return fail(e);
+            }
+            if (!done) zip.readEntry();
+          });
+        });
+      };
+      zip.on('entry', readEntry);
+      zip.on('end', () => {
+        if (!done) { done = true; resolve(); }
+      });
+      zip.readEntry();
+    });
+  });
+}
+
 module.exports = {
   safeEntryName,
   readZipIndex,
   readEntryBuffers,
+  forEachEntryBuffer,
   extractZipSafe,
   // Compatibility name for callers of the former utils/safeExtract module.
   extractZip: extractZipSafe,

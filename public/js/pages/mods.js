@@ -96,7 +96,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
         toast(
           res.applied === 'instant'
             ? `${file} ${enable ? 'enabled' : 'disabled'}.`
-            : `${file} ${enable ? 're-included' : 'excluded'} — applies on next restart.`,
+            : `${file} ${enable ? 're-included' : 'excluded'}: applies on next restart.`,
           { kind: 'success' }
         );
         setTimeout(() => location.reload(), 600);
@@ -238,10 +238,10 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
       head.querySelector('[data-role="packname"]').textContent =
         `${preview.pack.name}${preview.pack.version ? ` ${preview.pack.version}` : ''}`;
       head.querySelector('[data-role="packmeta"]').textContent =
-        `${isMrpack ? 'Modrinth modpack (.mrpack)' : 'CurseForge modpack export'} — Minecraft ${preview.pack.mcVersion || '?'}, ${preview.pack.loader || 'unknown loader'}`;
+        `${isMrpack ? 'Modrinth modpack (.mrpack)' : 'CurseForge modpack export'}, Minecraft ${preview.pack.mcVersion || '?'}, ${preview.pack.loader || 'unknown loader'}`;
     } else {
       head.className = 'mb-3 text-sm text-ink-soft';
-      head.textContent = `${preview.items.length} jar${preview.items.length === 1 ? '' : 's'} found — each was identified via Modrinth, CurseForge, or its own metadata and checked against this server.`;
+      head.textContent = `${preview.items.length} jar${preview.items.length === 1 ? '' : 's'} found; each was identified via Modrinth, CurseForge, or its own metadata and checked against this server.`;
     }
     content.appendChild(head);
 
@@ -278,14 +278,14 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
         idn.name || item.filename || item.entry || `Project ${item.projectId}`;
       row.querySelector('[data-role="sub"]').textContent = isPack
         ? item.fileName || (missing ? 'file no longer exists on CurseForge' : '')
-        : `${item.filename}${idn.version ? ` — ${idn.version}` : ''}${idn.source ? ` · via ${idn.source}` : ''}`;
+        : `${item.filename}${idn.version ? `, ${idn.version}` : ''}${idn.source ? ` · via ${idn.source}` : ''}`;
       const badges = row.querySelector('[data-role="badges"]');
       if (item.installed) badges.insertAdjacentHTML('beforeend', '<span class="badge badge-ok">Installed</span>');
       if (missing) badges.insertAdjacentHTML('beforeend', '<span class="badge badge-danger">missing</span>');
       else if (isBlocked)
         badges.insertAdjacentHTML(
           'beforeend',
-          '<span class="badge badge-warn" data-tip="The author disallows automated downloads — resolve after import">manual download</span>'
+          '<span class="badge badge-warn" data-tip="The author disallows automated downloads, so resolve it after import">manual download</span>'
         );
       else badges.insertAdjacentHTML('beforeend', verdictBadge(item.verdict));
       rows.push({ item, row, isBlocked, missing });
@@ -481,7 +481,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
         data = await res.json();
       } catch {
         // a network error used to strand "Searching…" on screen forever
-        data = { ok: false, error: 'Search failed — check the connection and try again.' };
+        data = { ok: false, error: 'Search failed. Check the connection and try again.' };
       }
       if (seq !== searchSeq) return;
       if (!data.ok) {
@@ -548,7 +548,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
       box.classList.remove('hidden');
       box.innerHTML = `
         <div class="notice notice-warn flex-wrap items-center gap-2 text-xs">
-          <span class="text-warn">This resource is hosted outside SpigotMC — download it in a browser, then upload the jar here.</span>
+          <span class="text-warn">This resource is hosted outside SpigotMC, so download it in a browser, then upload the jar here.</span>
           <a class="btn btn-sm" target="_blank" rel="noopener" href="https://www.spigotmc.org/resources/${encodeURIComponent(hit.ref)}">Open SpigotMC</a>
           <button class="btn btn-sm" data-role="upload">Upload Jar</button>
           <input type="file" accept=".jar,.zip" class="hidden" data-role="file">
@@ -597,7 +597,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
       box.classList.remove('hidden');
       box.innerHTML = `
         <div class="notice notice-warn flex-wrap items-center gap-2 text-xs">
-          <span class="text-warn">The author disallows automated downloads — grab <b data-role="build"></b> in a browser, then upload the jar here.</span>
+          <span class="text-warn">The author disallows automated downloads, so grab <b data-role="build"></b> in a browser, then upload the jar here.</span>
           <a class="btn btn-sm" target="_blank" rel="noopener" href="https://www.curseforge.com/minecraft/${cfSection}/${encodeURIComponent(hit.ref)}/files">Open CurseForge</a>
           <button class="btn btn-sm" data-role="upload">Upload Jar</button>
           <input type="file" accept=".jar,.zip" class="hidden" data-role="file">
@@ -672,7 +672,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
     toast(
       `Updated ${updated.length} mod${updated.length === 1 ? '' : 's'}` +
         (failed.length ? `, ${failed.length} failed` : '') +
-        (result && result.restarted ? ' — server restarting.' : '.'),
+        (result && result.restarted ? ', server restarting.' : '.'),
       { kind: failed.length ? 'warn' : 'success', timeout: failed.length ? 9000 : 5000 }
     );
     setTimeout(() => location.reload(), 900);
@@ -699,7 +699,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
     pendingBox.classList.remove('hidden');
     pendingBox.innerHTML = `
       <div class="notice notice-warn flex-wrap gap-3">
-        <span class="text-warn">${list.length} ${list.length === 1 ? 'mod' : 'mods'} in this modpack couldn't be auto-downloaded — the pack won't finish installing until each is resolved.</span>
+        <span class="text-warn">${list.length} ${list.length === 1 ? 'mod' : 'mods'} in this modpack couldn't be auto-downloaded, so the pack won't finish installing until each is resolved.</span>
         <button class="btn btn-sm ml-auto" id="mods-pending-open">Resolve Now</button>
       </div>`;
     pendingBox.querySelector('#mods-pending-open').addEventListener('click', () => openPendingModal(list));
@@ -719,7 +719,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
 
     function render(mods) {
       if (!mods.length) {
-        listEl.innerHTML = '<p class="notice notice-ok text-ok">All resolved — recreate the server to apply.</p>';
+        listEl.innerHTML = '<p class="notice notice-ok text-ok">All resolved. Recreate the server to apply.</p>';
         return;
       }
       listEl.innerHTML = '';

@@ -148,7 +148,7 @@
     <button class="btn btn-sm mt-4 hidden" id="lockouts-clear-all">{{{icon 'lock-open' 'size-3.5'}}} Clear All Locks</button>
   {{/settings/card}}
 
-  {{#> settings/card heading="Public API" id="api-tokens-card" wide=true desc="Let another app or website read your servers' status — a live status page, an uptime monitor, a Discord bot. It is read-only: nothing outside can start, stop, or change anything."}}
+  {{#> settings/card heading="Public API" id="api-tokens-card" wide=true desc="Let another app or website read your servers' status, like a live status page, an uptime monitor, or a Discord bot. It is read-only: nothing outside can start, stop, or change anything."}}
     {{> settings/toggle-row
         label="Let outside apps read status"
         help="Switches on by itself when you make your first key below. Turn it off any time to pause outside access without losing your keys."

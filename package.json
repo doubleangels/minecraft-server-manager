@@ -73,6 +73,7 @@
     "esbuild": "^0.28.2",
     "eslint": "^10.9.1",
     "globals": "^17.7.0",
+    "pngjs": "^7.0.0",
     "prettier": "^3.4.2",
     "tailwindcss": "^4.1.4",
     "typescript": "^7.0.2"

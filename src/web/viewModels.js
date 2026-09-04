@@ -77,7 +77,14 @@ function packServerVMs() {
   }));
 }
 
-async function serverVM(s, { withLive = true } = {}) {
+async function serverVM(s, { withLive = true, ctx = null } = {}) {
+  // ctx (optional) carries pre-fetched per-server DB reads batched across the
+  // whole list (see serverVMs) so a dashboard with N servers issues ~O(N)
+  // queries instead of ~6N. When absent, fall back to per-call lookups.
+  const diskUsedFor = ctx ? ctx.disk : diskUsed;
+  const packFor = ctx ? ctx.packVM : packVM;
+  const updateFor = ctx ? ctx.update : hasPackUpdate;
+  const crashesFor = ctx ? ctx.crashes : (id) => db.get('SELECT COUNT(*) AS n FROM crash_reports WHERE server_id = ? AND viewed = 0', id)?.n || 0;
   const vm = {
     id: s.id,
     name: s.display_name,
@@ -95,10 +102,10 @@ async function serverVM(s, { withLive = true } = {}) {
     resources: { heapMb: s.heap_mb, containerMemoryMb: s.container_memory_mb, cpus: s.cpus },
     stats: { cpuPct: 0, memUsedMb: 0, uptime: null, perf: null, perfSupported: true },
     players: { online: 0, max: Number(s.env.MAX_PLAYERS) || 20, names: [] },
-    disk: { used: diskUsed(s.id), quota: s.disk_quota_bytes || 25 * GB },
-    pack: packVM(s.id),
-    updateAvailable: hasPackUpdate(s.id),
-    crashesUnread: db.get('SELECT COUNT(*) AS n FROM crash_reports WHERE server_id = ? AND viewed = 0', s.id)?.n || 0,
+    disk: { used: diskUsedFor(s.id), quota: s.disk_quota_bytes || 25 * GB },
+    pack: packFor(s.id),
+    updateAvailable: updateFor(s.id),
+    crashesUnread: crashesFor(s.id),
     autoStart: Boolean(s.auto_start),
     autoRestart: Boolean(s.auto_restart),
     notes: s.notes,
@@ -119,7 +126,7 @@ async function serverVM(s, { withLive = true } = {}) {
     const live = liveCache.get(s.id);
     if (live.stats) {
       vm.stats.cpuPct = live.stats.cpuPct;
-      vm.stats.memUsedMb = Math.round(live.stats.memUsedBytes / 1024 / 1024);
+      vm.stats.memUsedMb = Math.round((live.stats.memUsedBytes || 0) / 1024 / 1024);
     }
     if (live.startedAt) {
       vm.stats.uptime = formatUptime(Date.now() - Date.parse(live.startedAt));
@@ -135,6 +142,84 @@ async function serverVM(s, { withLive = true } = {}) {
     if (detail) vm.statusDetail = detail;
   }
   return vm;
+}
+
+// Pre-fetch every server's disk size, pack, update-check and crash-unread count
+// in a handful of batched queries and return them as lookup maps (keyed by
+// server id) for serverVM()'s ctx. Collapses the ~6N per-call SELECTs behind a
+// dashboard render into ~N/900 + 3 queries (the N+1 round-trip collapse).
+function buildServerContext(rows) {
+  const ids = rows.map((s) => s.id);
+  const chunked = (list) => {
+    const CH = 900;
+    const out = [];
+    for (let i = 0; i < list.length; i += CH) out.push(list.slice(i, i + CH));
+    return out.length ? out : [[]];
+  };
+
+  // packs (server_id -> pack row) + their update checks.
+  const packs = new Map();
+  const checks = new Map();
+  for (const chunk of chunked(ids)) {
+    const ph = chunk.map(() => '?').join(',');
+    for (const p of db.all(`SELECT * FROM server_packs WHERE server_id IN (${ph})`, ...chunk)) packs.set(p.server_id, p);
+  }
+  if (packs.size) {
+    const packIds = [...packs.values()].map((p) => p.server_id);
+    for (const chunk of chunked(packIds)) {
+      const ph = chunk.map(() => '?').join(',');
+      for (const c of db.all(`SELECT * FROM update_checks WHERE subject_type = 'pack' AND subject_id IN (${ph})`, ...chunk))
+        checks.set(c.subject_id, c);
+    }
+  }
+
+  // storage sizes.
+  const disk = new Map();
+  for (const chunk of chunked(ids)) {
+    const ph = chunk.map(() => '?').join(',');
+    for (const r of db.all(`SELECT rel_path, size_bytes FROM storage_index WHERE rel_path IN (${ph})`, ...chunk.map((id) => `servers/${id}`)))
+      disk.set(r.rel_path.slice('servers/'.length), r.size_bytes);
+  }
+
+  // crash-unread counts.
+  const crashes = new Map();
+  for (const chunk of chunked(ids)) {
+    const ph = chunk.map(() => '?').join(',');
+    for (const r of db.all(`SELECT server_id, COUNT(*) AS n FROM crash_reports WHERE server_id IN (${ph}) AND viewed = 0 GROUP BY server_id`, ...chunk))
+      crashes.set(r.server_id, r.n);
+  }
+
+  return {
+    disk: (id) => disk.get(id) || 0,
+    packVM: (id) => packFromRow(packs.get(id) || null, checks.get(id) || null),
+    update: (id) => {
+      const p = packs.get(id);
+      if (!p) return false;
+      const c = checks.get(id);
+      return Boolean(c && c.latest_version && c.latest_version !== p.pinned_version_id);
+    },
+    crashes: (id) => crashes.get(id) || 0,
+  };
+}
+
+// Build every server VM on a shared batched ctx (see buildServerContext). Kept
+// as a convenience for callers that don't need per-VM rejection isolation.
+async function serverVMs(rows, opts = {}) {
+  const ctx = buildServerContext(rows);
+  return Promise.all(rows.map((s) => serverVM(s, { ...opts, ctx })));
+}
+
+// Build the pack summary from already-loaded rows (batch path).
+function packFromRow(pack, check) {
+  if (!pack) return null;
+  return {
+    platform: { curseforge: 'CurseForge', modrinth: 'Modrinth', ftb: 'FTB' }[pack.platform] || pack.platform,
+    name: pack.project_name,
+    version: pack.pinned_version_name,
+    versionId: pack.pinned_version_id,
+    latest: check && check.latest_name ? check.latest_name : pack.pinned_version_name,
+    latestVersionId: check && check.latest_version ? check.latest_version : null,
+  };
 }
 
 function packVM(serverId) {
@@ -196,6 +281,7 @@ function flavorLabel(type) {
 }
 
 function formatUptime(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return '-';
   const mins = Math.floor(ms / 60000);
   if (mins < 60) return `${mins}m`;
   const hours = Math.floor(mins / 60);
@@ -213,6 +299,24 @@ function safeJsonParse(json) {
 
 function eventVM(e) {
   const server = e.server_id ? db.get('SELECT display_name, deleted_at FROM servers WHERE id = ?', e.server_id) : null;
+  return eventVMWithServer(e, server);
+}
+
+// Batched eventVM: fetch the server display_name/deleted_at for every event's
+// server_id in one query instead of N per-event SELECTs (the N+1 in the
+// dashboard activity feed).
+function eventsVM(events) {
+  const ids = [...new Set(events.map((e) => e.server_id).filter((id) => id != null))];
+  const byId = new Map();
+  if (ids.length) {
+    const ph = ids.map(() => '?').join(',');
+    for (const r of db.all(`SELECT id, display_name, deleted_at FROM servers WHERE id IN (${ph})`, ...ids))
+      byId.set(r.id, r);
+  }
+  return events.map((e) => eventVMWithServer(e, e.server_id != null ? byId.get(e.server_id) : null));
+}
+
+function eventVMWithServer(e, server) {
   return {
     id: e.id,
     // Deleted servers keep their name in history but must not be linked (404).
@@ -234,7 +338,7 @@ function crashVM(c) {
     ts: c.file_mtime,
     size: c.size_bytes,
     summary: c.summary || c.exception,
-    suspected: JSON.parse(c.suspected_json || '[]'),
+    suspected: (() => { try { return JSON.parse(c.suspected_json || '[]'); } catch { return []; } })(),
     viewed: Boolean(c.viewed),
     mclogsUrl: c.mclogs_url || null,
   };
@@ -242,11 +346,14 @@ function crashVM(c) {
 
 module.exports = {
   serverVM,
+  serverVMs,
+  buildServerContext,
   sidebarServerVMs,
   packServerVMs,
   flavorLabel,
   displayVersion,
   eventVM,
+  eventsVM,
   crashVM,
   safeJsonParse,
 };

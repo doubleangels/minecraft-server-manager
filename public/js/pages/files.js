@@ -132,7 +132,7 @@ function init(rootEl) {
           )
           .join('') +
         (data.truncated
-          ? '<div class="px-3 py-1.5 text-xs text-ink-faint">Showing the first results only — narrow the search to see the rest.</div>'
+          ? '<div class="px-3 py-1.5 text-xs text-ink-faint">Showing the first results only. Narrow the search to see the rest.</div>'
           : '');
       return false; // keep the modal open
     };

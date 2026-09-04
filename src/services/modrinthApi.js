@@ -17,7 +17,7 @@ async function mrFetch(pathname, { ttlMs = 10 * 60 * 1000, search, method = 'GET
   const cacheKey = `modrinth:${url.pathname}${url.search}`;
   const cached =
     method === 'GET' ? db.get('SELECT value_json, fetched_at FROM api_cache WHERE key = ?', cacheKey) : null;
-  if (cached && Date.now() - Date.parse(cached.fetched_at + 'Z') < ttlMs) {
+  if (cached && Date.now() - Date.parse(cached.fetched_at.replace(' ', 'T') + 'Z') < ttlMs) {
     return JSON.parse(cached.value_json);
   }
   const doFetch = () =>

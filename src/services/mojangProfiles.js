@@ -29,7 +29,7 @@ function uuidToDashed(uuid) {
 async function resolveProfile(name) {
   const key = CACHE_PREFIX + String(name).toLowerCase();
   const cached = db.get('SELECT value_json, fetched_at FROM api_cache WHERE key = ?', key);
-  if (cached && Date.now() - Date.parse(cached.fetched_at + 'Z') < TTL_MS) {
+  if (cached && Date.now() - Date.parse(cached.fetched_at.replace(' ', 'T') + 'Z') < TTL_MS) {
     return JSON.parse(cached.value_json);
   }
 

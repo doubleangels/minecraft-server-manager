@@ -37,7 +37,7 @@
         </div>
         <div>
           <label class="label" for="ig-wz-key">API key <span class="font-normal text-ink-faint">(optional)</span></label>
-          <input class="input font-mono text-xs" type="password" id="ig-wz-key" autocomplete="new-password" placeholder="{{#if integrations.wizard.hasApiKey}}Stored securely — leave blank to keep{{else}}Not required by default Ollama installs{{/if}}">
+          <input class="input font-mono text-xs" type="password" id="ig-wz-key" autocomplete="new-password" placeholder="{{#if integrations.wizard.hasApiKey}}Stored securely, leave blank to keep{{else}}Not required by default Ollama installs{{/if}}">
           {{#if integrations.wizard.hasApiKey}}
             <label class="mt-2 flex items-center gap-2 text-xs"><input type="checkbox" class="msm-check" id="ig-wz-key-clear"> Remove stored key on save</label>
           {{/if}}
@@ -55,7 +55,7 @@
       <div>
         <label class="label" for="ig-wz-prompt">Chatbot persona and system prompt</label>
         <textarea class="input min-h-72 font-mono text-xs leading-5" id="ig-wz-prompt" maxlength="12000">{{integrations.wizard.systemPrompt}}</textarea>
-        <p class="help">This is sent as the system message for this server. Powers are exposed as fixed, validated tools—never raw console commands.</p>
+        <p class="help">This is sent as the system message for this server. Powers are exposed as fixed, validated tools, never raw console commands.</p>
       </div>
     </div>
 
