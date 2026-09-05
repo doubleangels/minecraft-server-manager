@@ -92,15 +92,22 @@ async function handleEvent(evt) {
   const server = db.get('SELECT * FROM servers WHERE id = ?', serverId);
   if (!server) return;
 
-  if (evt.status === 'start') {
+  // Docker emits the event kind as both `status` and `Action` (daemons have
+  // historically sent `status`, newer releases also/only `Action`). Reading
+  // only `status` means a crash reported as Action:"die" - exactly what a
+  // SIGSEGV'd Java process produces - is ignored entirely: the server is never
+  // marked crashed, let alone auto-restarted.
+  const eventStatus = evt.status || evt.Action || evt.action || '';
+
+  if (eventStatus === 'start') {
     db.run("UPDATE servers SET status = 'starting', last_started_at = datetime('now') WHERE id = ?", serverId);
     return;
   }
-  if (evt.status === 'health_status: healthy') {
+  if (eventStatus === 'health_status: healthy') {
     db.run("UPDATE servers SET status = 'running' WHERE id = ?", serverId);
     return;
   }
-  if (evt.status === 'health_status: unhealthy') {
+  if (eventStatus === 'health_status: unhealthy') {
     // The process is alive but the server stopped answering `mc-health` -
     // a "running but dead" state the die/oom events never cover. Only act on
     // it for a server the panel currently thinks is up (not one mid-stop).
@@ -133,7 +140,7 @@ async function handleEvent(evt) {
     }
     return;
   }
-  if (evt.status === 'oom') {
+  if (eventStatus === 'oom') {
     recordEvent({
       serverId,
       type: 'oom',
@@ -141,7 +148,7 @@ async function handleEvent(evt) {
     });
     return;
   }
-  if (evt.status !== 'die') return;
+  if (eventStatus !== 'die') return;
 
   const exitCode = Number(evt.Actor.Attributes.exitCode ?? -1);
   const stopRequested = db.get(
@@ -342,4 +349,4 @@ function diagnoseFatal(logText) {
   return null;
 }
 
-module.exports = { startWatcher, diagnoseFatal, inCrashLoopBackoff };
+module.exports = { startWatcher, handleEvent, diagnoseFatal, inCrashLoopBackoff };
