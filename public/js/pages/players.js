@@ -69,6 +69,57 @@ function init(root) {
     ban: ['border-danger/40', 'bg-redstone-500/15', 'text-danger'],
   };
   const rowFor = (name) => root.querySelector(`[data-player-row][data-name="${CSS.escape(name)}"]`);
+  const enforcedNow = () => document.getElementById('players-wl-enforce')?.checked === true;
+
+  /** Rebuild a row's Status cell from its data attrs: online / banned / whitelisted / joined. */
+  function renderStatus(row) {
+    const cell = row.querySelector('[data-player-status]');
+    if (!cell) return;
+    const d = row.dataset;
+    cell.innerHTML = '';
+    const append = (node) => cell.appendChild(node);
+
+    const label = (text, cls, dot, pulse = false) => {
+      const span = document.createElement('span');
+      span.className = `flex items-center gap-1.5 text-xs font-medium ${cls}`;
+      const dotEl = document.createElement('span');
+      dotEl.className = `status-dot ${dot}${pulse ? ' relative pulse' : ''}`;
+      span.append(dotEl, document.createTextNode(text));
+      return span;
+    };
+
+    if (d.online === '1') {
+      append(label('Online', 'text-ok', 'bg-grass-500', true));
+    } else if (d.banned === '1') {
+      append(label('Banned', 'text-danger', 'bg-redstone-500'));
+    } else if (d.whitelisted === '1') {
+      append(label('Whitelisted', 'text-ok', 'bg-grass-700'));
+    } else {
+      append(label('Joined', 'text-ink-soft', 'bg-stone-500'));
+      const hint = document.createElement('div');
+      hint.className = 'mt-0.5 text-[11px] leading-tight ' + (enforcedNow() ? 'text-warn' : 'text-ink-faint');
+      if (enforcedNow()) {
+        hint.dataset.tip =
+          'Whitelist enforcement is on - this player has never been whitelisted, so they will be turned away when they try to join.';
+        hint.textContent = 'Not whitelisted - join blocked';
+      } else {
+        hint.textContent = 'Not whitelisted';
+      }
+      append(hint);
+    }
+    if (d.lastSeen) {
+      const seen = document.createElement('div');
+      seen.className = 'mt-0.5 text-[11px] leading-tight text-ink-faint';
+      seen.dataset.tip = "The last time this name was seen in the server's cache";
+      seen.textContent = `seen ~${d.lastSeen}`;
+      append(seen);
+    }
+  }
+
+  /** Resync every row's status after whitelist enforcement flips. */
+  function refreshStatuses() {
+    for (const row of root.querySelectorAll('[data-player-row]')) renderStatus(row);
+  }
 
   function setChip(row, role, on, { label, tip } = {}) {
     const chip = row.querySelector(`[data-role-toggle="${role}"]`);
@@ -125,14 +176,10 @@ function init(root) {
       }
     }
     if ('online' in changes && !changes.online) {
-      const status = row.querySelector('[data-player-status]');
-      if (status) {
-        row.dataset.online = '0';
-        status.innerHTML =
-          '<span class="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><span class="status-dot bg-stone-500"></span> Offline</span>';
-      }
+      row.dataset.online = '0';
       row.querySelector('[data-act="kick"]')?.remove();
     }
+    renderStatus(row); // online / banned / whitelisted / joined (join-blocked when enforced)
     applyFilter(); // the row may enter/leave the active filter
     if (message) toast(message);
   }
@@ -171,6 +218,7 @@ function init(root) {
         toast(
           `Whitelist enforcement turned ${enforce.checked ? 'on' : 'off'}.${running ? '' : ' Applies on the next start.'}`
         );
+        refreshStatuses(); // joined-but-not-whitelisted rows pick up the join-blocked hint
       } catch (err) {
         enforce.checked = !enforce.checked;
         fail(err);
