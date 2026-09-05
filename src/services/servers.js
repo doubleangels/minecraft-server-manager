@@ -874,10 +874,17 @@ async function refreshStatuses({ boot = false } = {}) {
   }
 }
 
+// Bounded concurrency for the per-server status refresh (each server pays a
+// Docker inspect - and for a boot-cross-check a docker logs read). Running them
+// one-at-a-time makes the 60s poll N×(daemon latency); overloading with an
+// unbounded fan-out could hammer the daemon. A modest pool overlaps the
+// round-trips without exhausting sockets.
+const STATUS_REFRESH_CONCURRENCY = 8;
+
 async function refreshStatusesInner({ boot }) {
-  let failed = 0;
   const all = listServers();
-  for (const server of all) {
+  let failed = 0;
+  const refreshOne = async (server) => {
     try {
       const info = await containers.inspectStatus(server.id);
       let status = info.exists ? info.status : 'stopped';
@@ -957,7 +964,16 @@ async function refreshStatusesInner({ boot }) {
         err: serializeError(err, { includeStack: false }),
       });
     }
-  }
+  };
+  let i = 0;
+  const workers = Array.from({ length: Math.min(STATUS_REFRESH_CONCURRENCY, all.length) }, async () => {
+    while (i < all.length) {
+      const server = all[i];
+      i += 1; // sync claim, safe across the pool
+      await refreshOne(server);
+    }
+  });
+  await Promise.all(workers);
   if (failed > 0) {
     logger.warn('Some servers could not be refreshed; the Docker daemon may be offline.', {
       failed,

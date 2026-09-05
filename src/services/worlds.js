@@ -1028,33 +1028,48 @@ async function isRunning(serverId) {
   return info.exists && ['running', 'starting', 'unhealthy'].includes(info.status);
 }
 
+// Parallel, bounded-concurrency directory size walker. World trees hold a great
+// many small files; serializing one fsp.stat at a time is needlessly slow (the
+// same pattern servers.js uses for backup size estimates).
+const DIR_SIZE_CONCURRENCY = 32;
 async function dirsSize(absDirs) {
-  let total = 0;
-  for (const dir of absDirs) total += await dirSize(dir);
-  return total;
+  const totals = await Promise.all(absDirs.map((dir) => dirSize(dir)));
+  return totals.reduce((a, b) => a + b, 0);
 }
 
 async function dirSize(abs) {
-  let total = 0;
   let entries;
   try {
     entries = await fsp.readdir(abs, { withFileTypes: true });
   } catch {
     return 0;
   }
+  const jobs = [];
   for (const e of entries) {
-    const child = path.join(abs, e.name);
     if (e.isSymbolicLink()) continue;
-    if (e.isDirectory()) total += await dirSize(child);
-    else if (e.isFile()) {
-      try {
-        total += (await fsp.stat(child)).size;
-      } catch {
-        /* transient */
-      }
-    }
+    jobs.push(path.join(abs, e.name));
   }
-  return total;
+  let i = 0;
+  const push = async (p) => {
+    try {
+      const st = await fsp.stat(p);
+      if (st.isDirectory()) return dirSize(p);
+      return st.size;
+    } catch {
+      return 0; // transient
+    }
+  };
+  const workers = Array.from({ length: Math.min(DIR_SIZE_CONCURRENCY, jobs.length) }, async () => {
+    let sub = 0; // worker-local accumulator avoids lost updates on a shared total
+    while (i < jobs.length) {
+      const p = jobs[i];
+      i += 1; // sync claim, safe across the pool
+      sub += await push(p);
+    }
+    return sub;
+  });
+  const results = await Promise.all(workers);
+  return results.reduce((a, b) => a + b, 0);
 }
 
 function sha256File(abs) {

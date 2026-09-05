@@ -22,8 +22,10 @@ const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 // textureUrl -> { buffer, fetchedAt } held in-process for the proxy. Content-
 // addressed URLs never change, so this is effectively a permanent cache that
-// only re-fetches after a process restart.
+// only re-fetches after a process restart. Eviction is amortized O(1): we only
+// scan when we're already over the cap (insertions), never on the hot read path.
 const imageCache = new Map();
+const IMAGE_CACHE_CAP = 200;
 const IMAGE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 /** Decode a base64 textures blob into { SKIN: {url, model?} } (or null). */
@@ -93,26 +95,30 @@ module.exports = { resolveSkin, getSkinImage };
  */
 async function getSkinImage(url) {
   const hit = imageCache.get(url);
-  if (hit && Date.now() - hit.fetchedAt < IMAGE_CACHE_TTL_MS) return hit.buffer;
+  if (hit) {
+    if (Date.now() - hit.fetchedAt < IMAGE_CACHE_TTL_MS) {
+      // Refresh recency so frequently-requested skins stay in the LRU golden
+      // path without digging through the eviction scan.
+      imageCache.delete(url);
+      imageCache.set(url, hit);
+      return hit.buffer;
+    }
+    imageCache.delete(url); // expired; fall through to re-fetch
+  }
 
   const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`Mojang texture HTTP ${res.status}`);
   const buffer = Buffer.from(await res.arrayBuffer());
 
-  // Cap the in-memory cache: a heavily populated server shouldn't hold every
-  // skin forever. Evict the STALEST entry (oldest fetchedAt), not the oldest
-  // inserted, and prune expired entries when over the cap.
-  if (imageCache.size >= 200) {
-    let oldestKey = null;
-    let oldestAt = Infinity;
+  // Drop expired entries and trim back to the cap when over it. Runs only on a
+  // miss (which is already paying a network fetch), so it stays amortized.
+  if (imageCache.size >= IMAGE_CACHE_CAP) {
+    const now = Date.now();
     for (const [key, entry] of imageCache) {
-      if (entry.fetchedAt < oldestAt) {
-        oldestAt = entry.fetchedAt;
-        oldestKey = key;
-      }
-      if (Date.now() - entry.fetchedAt >= IMAGE_CACHE_TTL_MS) imageCache.delete(key);
+      if (now - entry.fetchedAt >= IMAGE_CACHE_TTL_MS) imageCache.delete(key);
+      if (imageCache.size < IMAGE_CACHE_CAP) break;
     }
-    if (oldestKey && imageCache.size >= 200 && imageCache.has(oldestKey)) imageCache.delete(oldestKey);
+    while (imageCache.size >= IMAGE_CACHE_CAP) imageCache.delete(imageCache.keys().next().value);
   }
   imageCache.set(url, { buffer, fetchedAt: Date.now() });
   return buffer;

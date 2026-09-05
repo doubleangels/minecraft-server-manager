@@ -80,7 +80,10 @@ router.post(
     checkLoginAllowed(req.user.username, req.ip);
     let result;
     try {
-      result = await authService.confirmTotp(req.user.id, secret, code, password, { actor: req.user.username });
+      result = await authService.confirmTotp(req.user.id, secret, code, password, {
+        actor: req.user.username,
+        exceptSid: req.sessionID,
+      });
     } catch (err) {
       if (err.status === 401) {
         recordLoginFailure(req.user.username, req.ip);

@@ -7,6 +7,7 @@
 // servers.
 
 const asyncHandler = require('../middleware/asyncHandler');
+const { rejectCrossSiteGet } = require('../middleware/auth');
 const { makeJsonErrorHandler } = require('../middleware/jsonErrorHandler');
 const express = require('express');
 const { z } = require('zod');
@@ -113,12 +114,22 @@ router.get(
 
 router.get(
   '/player/:uuid',
+  rejectCrossSiteGet,
   asyncHandler(async (req, res, next) => {
     const uuid = uuidSchema.parse(req.params.uuid);
     const { server, running } = await loadContext(req);
     // ?fresh=1 -> flush live player data to disk first, so the grid shows the
     // CURRENT online state (used by the Reload button and after live edits).
-    if (running && req.query.fresh === '1') await inventory.flushPlayerData(server.id);
+    // The flush writes files, so it honors the read-only contract the same way
+    // `requireWrite` does for non-GET methods: viewers can't trigger it. The
+    // cross-site guard above stops a third-party site from aiming a plain-GET
+    // navigation at this side-effecting URL.
+    if (running && req.query.fresh === '1') {
+      if (req.user.role === 'viewer') {
+        return res.status(403).json({ ok: false, error: 'This action requires write access.' });
+      }
+      await inventory.flushPlayerData(server.id);
+    }
     const player = await inventory.readPlayerData(server.id, uuid);
     // Edit metadata: which mechanism a slot edit would use right now.
     const ctx = await inventory.editContext(server.id, uuid);
@@ -195,8 +206,8 @@ router.get(
   '/snapshot',
   asyncHandler(async (req, res, next) => {
     const file = snapshotFileSchema.parse(req.query.file);
-    await loadContext(req); // 404 on unknown server; the service re-validates the path shape
-    res.json({ ok: true, snapshot: inventory.getSnapshot(file) });
+    const { server } = await loadContext(req); // 404 on unknown server; the service re-validates the path shape
+    res.json({ ok: true, snapshot: inventory.getSnapshot(server.id, file) });
   })
 );
 
@@ -205,8 +216,8 @@ router.get(
   asyncHandler(async (req, res, next) => {
     const a = snapshotFileSchema.parse(req.query.a);
     const b = snapshotFileSchema.parse(req.query.b);
-    await loadContext(req);
-    res.json({ ok: true, diff: inventory.diffSnapshots(a, b) });
+    const { server } = await loadContext(req);
+    res.json({ ok: true, diff: inventory.diffSnapshots(server.id, a, b) });
   })
 );
 

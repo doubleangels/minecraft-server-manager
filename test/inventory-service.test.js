@@ -278,26 +278,34 @@ function snapData(items) {
 
 test('getSnapshot rejects invalid paths and missing files', () => {
   assert.throws(
-    () => inventory.getSnapshot('../escape.json'),
+    () => inventory.getSnapshot('srv_snap01', '../escape.json'),
     (e) => e.status === 400
   );
   assert.throws(
-    () => inventory.getSnapshot('logs/a/b/inventories/notauuid/1-x.json'),
+    () => inventory.getSnapshot('srv_snap01', 'logs/a/b/inventories/notauuid/1-x.json'),
     (e) => e.status === 400
   );
   assert.throws(
-    () => inventory.getSnapshot('logs/srv_snap01/inventories/00000000-0000-0000-0000-0000000000aa/1-x.json'),
+    () => inventory.getSnapshot('srv_snap01', 'logs/srv_snap01/inventories/00000000-0000-0000-0000-0000000000aa/1-x.json'),
     (e) => e.status === 400
   );
   assert.throws(
-    () => inventory.getSnapshot('logs/srv_snap01/inventories/00000000-0000-0000-0000-0000000000aa/1234567890-x.json'),
+    () => inventory.getSnapshot('srv_snap01', 'logs/srv_snap01/inventories/00000000-0000-0000-0000-0000000000aa/1234567890-x.json'),
     (e) => e.status === 404
+  );
+});
+
+test('getSnapshot rejects a snapshot belonging to another server', () => {
+  const rel = writeSnapshot(1234567890, 'manual', snapData([{ id: 'minecraft:stick', count: 2 }]));
+  assert.throws(
+    () => inventory.getSnapshot('srv_other', rel),
+    (e) => e.status === 400
   );
 });
 
 test('getSnapshot parses a written snapshot', () => {
   const rel = writeSnapshot(1234567890, 'manual', snapData([{ id: 'minecraft:stick', count: 2 }]));
-  const snap = inventory.getSnapshot(rel);
+  const snap = inventory.getSnapshot('srv_snap01', rel);
   assert.equal(snap.ts, 1234567890);
   assert.equal(snap.reason, 'manual');
   assert.equal(snap.uuid, SNAP_UUID);
@@ -317,7 +325,7 @@ test('diffSnapshots reports added, removed and changed items', () => {
       { id: 'minecraft:diamond', displayName: null, count: 1 },
     ]),
   });
-  const diff = inventory.diffSnapshots(a, b);
+  const diff = inventory.diffSnapshots('srv_snap01', a, b);
   assert.equal(diff.b.ts, 1700000000001);
   const added = diff.added.map((i) => i.id);
   const removed = diff.removed.map((i) => i.id);

@@ -468,6 +468,20 @@ function xrayReport(serverId) {
   return memoizeBySnapshots(serverId, 'xray', () => computeXrayReport(serverId));
 }
 
+// Count of elements <= v in an ascending-sorted array. The per-player percentile
+// used to be a ratios.filter(...) inside the players.map - O(N²) on the whole
+// field once player counts grow. Binary search makes the report O(N log N).
+function countLE(sorted, v) {
+  let lo = 0;
+  let hi = sorted.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (sorted[mid] <= v) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
 function computeXrayReport(serverId) {
   const uuids = db.all('SELECT DISTINCT uuid FROM player_stat_snapshots WHERE server_id = ?', serverId).map((r) => r.uuid);
   const latestMap = latestSnapshotsBulk(serverId, uuids);
@@ -504,9 +518,7 @@ function computeXrayReport(serverId) {
         diamondRatio: Number(p.diamondRatio.toFixed(5)),
         debrisRatio: Number(p.debrisRatio.toFixed(5)),
         percentile:
-          ratios.length > 1
-            ? Math.round((ratios.filter((r) => r <= p.diamondRatio).length / ratios.length) * 100)
-            : 100,
+          ratios.length > 1 ? Math.round((countLE(ratios, p.diamondRatio) / ratios.length) * 100) : 100,
         flagged: flaggedDiamond || flaggedDebris,
         reasons: [
           ...(flaggedDiamond ? [`diamond ratio ${(p.diamondRatio / effDiamond).toFixed(1)}x server median`] : []),

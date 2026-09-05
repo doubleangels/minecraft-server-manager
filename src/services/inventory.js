@@ -362,10 +362,13 @@ async function listSnapshots(serverId, uuid) {
   return snapshots;
 }
 
-/** Load one snapshot by its rel path (strict shape check + path guard). */
-function getSnapshot(relFile) {
+/** Load one snapshot by its rel path (strict shape check + path guard). The
+ *  file's embedded server id is checked against `serverId` so a caller passing
+ *  an arbitrary `?file=` can't read or diff another server's inventory. */
+function getSnapshot(serverId, relFile) {
   const m = SNAPSHOT_FILE_RE.exec(String(relFile || ''));
   if (!m) throw httpError(400, 'Invalid snapshot file reference');
+  if (m[1] !== serverId) throw httpError(400, 'Snapshot does not belong to this server');
   let raw;
   try {
     raw = fs.readFileSync(dataPath(relFile), 'utf8'); // dataPath re-guards containment
@@ -397,9 +400,9 @@ function tallyItems(data) {
  * renamed item counts as its own line.
  * @returns {{a, b, added:[], removed:[], changed:[{id,displayName,from,to}]}}
  */
-function diffSnapshots(aFile, bFile) {
-  const a = getSnapshot(aFile);
-  const b = getSnapshot(bFile);
+function diffSnapshots(serverId, aFile, bFile) {
+  const a = getSnapshot(serverId, aFile);
+  const b = getSnapshot(serverId, bFile);
   const before = tallyItems(a.data);
   const after = tallyItems(b.data);
 

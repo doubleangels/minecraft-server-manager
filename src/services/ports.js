@@ -10,14 +10,28 @@ const net = require('node:net');
 const db = require('../db');
 const config = require('../config');
 
-function probe(port, host = '0.0.0.0') {
+/** OS availability probe. Bounded by a timeout so a wedged bind/close can't
+ *  leave the caller (and a server create) hanging forever. */
+function probe(port, host = '0.0.0.0', timeoutMs = 2000) {
   return new Promise((resolve) => {
     const srv = net.createServer();
     srv.unref();
-    srv.once('error', () => resolve(false));
-    srv.listen({ port, host, exclusive: true }, () => {
-      srv.close(() => resolve(true));
-    });
+    let settled = false;
+    const finish = (ok) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      try {
+        srv.close();
+      } catch {
+        /* not listening */
+      }
+      resolve(ok);
+    };
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    timer.unref();
+    srv.once('error', () => finish(false)); // EADDRINUSE or any bind failure = not free
+    srv.listen({ port, host, exclusive: true }, () => finish(true));
   });
 }
 
@@ -80,4 +94,4 @@ async function suggestPorts({ withBedrock = false } = {}) {
   return result;
 }
 
-module.exports = { isPortFree, suggestPorts };
+module.exports = { isPortFree, suggestPorts, probe, dbPortsInUse };

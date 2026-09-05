@@ -16,8 +16,15 @@ const { serializeError } = require('../utils/logSanitize');
 const MAX_RAPID_CRASHES = 3;
 const CRASH_WINDOW_MINUTES = 10;
 
+// Docker streams one event per line and lines are complete frames, but a whole
+// line must still be buffered before it can be parsed. Defense-in-depth cap: a
+// stream that never delivers a newline (e.g. a daemon wedged mid-write) must
+// not grow the buffer without bound - drop the oldest bytes once past the cap.
+const MAX_EVENT_BUFFER_BYTES = 64 * 1024;
+
 let stream = null;
 let retryTimer = null;
+let retryDelayMs = 5000;
 
 async function startWatcher() {
   if (stream) return;
@@ -29,6 +36,7 @@ async function startWatcher() {
   let buffer = '';
   s.on('data', (chunk) => {
     buffer += chunk.toString('utf8');
+    if (buffer.length > MAX_EVENT_BUFFER_BYTES) buffer = buffer.slice(buffer.length - MAX_EVENT_BUFFER_BYTES);
     let idx;
     while ((idx = buffer.indexOf('\n')) !== -1) {
       const line = buffer.slice(0, idx).trim();
@@ -39,7 +47,8 @@ async function startWatcher() {
           logger.error('Handling a Docker event failed.', { err: serializeError(err) })
         );
       } catch {
-        // intentional: partial JSON frame - wait for the rest of the line
+        // intentional: a full line that isn't JSON (e.g. a status line from the
+        // daemon) - there's no partial frame to wait for, so drop it.
       }
     }
   });
@@ -53,18 +62,27 @@ async function startWatcher() {
   logger.info('Connected to the Docker events stream.');
 }
 
-/** Schedule a reconnect. Keeps retrying forever; never dies after one failure. */
+/** Schedule a reconnect. Keeps retrying forever; never dies after one failure.
+ *  Backs off exponentially so a long daemon outage doesn't hammer the socket. */
 function retryLater() {
   if (retryTimer) return; // a retry is already scheduled
+  // grow the delay on each successive failure, capped at 60s
   retryTimer = setTimeout(() => {
     retryTimer = null;
-    startWatcher().catch((err) => {
-      logger.warn('Reconnecting to the Docker events stream failed; retrying in 5 seconds.', {
-        err: serializeError(err, { includeStack: false }),
+    startWatcher()
+      .then(() => {
+        retryDelayMs = 5000; // connected again - reset the backoff
+      })
+      .catch((err) => {
+        logger.warn('Reconnecting to the Docker events stream failed; retrying.', {
+          err: serializeError(err, { includeStack: false }),
+          retryInSeconds: retryDelayMs / 1000,
+        });
+        const next = retryDelayMs * 2;
+        retryDelayMs = Math.min(next || retryDelayMs, 60_000);
+        retryLater();
       });
-      retryLater();
-    });
-  }, 5000);
+  }, retryDelayMs);
   retryTimer.unref();
 }
 

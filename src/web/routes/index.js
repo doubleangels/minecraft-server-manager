@@ -489,22 +489,32 @@ router.get(
         status: s.status,
       }));
     } else if (tab === 'files') {
+      // File browsing exposes raw server files (names/sizes/types/downloads),
+      // so only accounts that can read them via the files API (admin/operator)
+      // get a listing here - the API route sets this same contract explicitly.
       const filesService = require('../../services/files');
       const rel = String(req.query.path || '');
-      try {
-        const listing = await filesService.list(row.id, rel);
-        context.files = listing.entries;
-        context.filePath = listing.path;
-        context.crumbs = listing.path
-          ? listing.path.split('/').map((seg, i, a) => ({ name: seg, path: a.slice(0, i + 1).join('/') }))
-          : [];
-        context.parentPath = context.crumbs.length > 1 ? context.crumbs[context.crumbs.length - 2].path : '';
-      } catch (err) {
-        pageDegraded('server-files-tab', err);
+      if (!['admin', 'operator'].includes(req.user.role)) {
         context.files = [];
-        context.filePath = '';
-        context.crumbs = [];
+        context.filePath = rel;
+        context.crumbs = rel ? rel.split('/').map((seg, i, a) => ({ name: seg, path: a.slice(0, i + 1).join('/') })) : [];
         context.parentPath = '';
+      } else {
+        try {
+          const listing = await filesService.list(row.id, rel);
+          context.files = listing.entries;
+          context.filePath = listing.path;
+          context.crumbs = listing.path
+            ? listing.path.split('/').map((seg, i, a) => ({ name: seg, path: a.slice(0, i + 1).join('/') }))
+            : [];
+          context.parentPath = context.crumbs.length > 1 ? context.crumbs[context.crumbs.length - 2].path : '';
+        } catch (err) {
+          pageDegraded('server-files-tab', err);
+          context.files = [];
+          context.filePath = '';
+          context.crumbs = [];
+          context.parentPath = '';
+        }
       }
     } else if (tab === 'map') {
       const mapService = require('../../services/map');
@@ -593,7 +603,13 @@ router.get(
     } else if (tab === 'settings') {
       // MOTD editing: expose the env for a client-side merge-and-PATCH; the
       // stored §-codes become &-codes for friendly editing.
-      context.settingsEnv = JSON.stringify(row.env);
+      // The raw env goes only to accounts that can write it back (the client
+      // merges-and-PATCHes against the API, which `requireWrite` blocks for
+      // viewers, and env_json can carry secrets like RCON_PASSWORD) - same
+      // privilege split as the admin-only Docker fields above.
+      if (req.user.role === 'admin' || req.user.role === 'operator') {
+        context.settingsEnv = JSON.stringify(row.env);
+      }
       context.motd = String(row.env.MOTD || '').replace(/§([0-9a-fk-orA-FK-OR])/g, '&$1');
 
       // Every catalog field configurable at creation, minus what's covered

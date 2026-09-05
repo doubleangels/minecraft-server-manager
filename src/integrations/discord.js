@@ -300,19 +300,36 @@ async function pollOnce() {
   const rows = db.all('SELECT * FROM events WHERE id > ? ORDER BY id LIMIT 100', lastSeenId);
   if (!rows.length) return;
 
+  // Batch-load per-server configs and display names once per poll instead of
+  // re-querying the DB for every row (up to 100 events can fan out to a single
+  // server, and config row lookups dominate the poll's DB cost).
+  const integRows = db.all('SELECT * FROM integrations WHERE kind = ?', KIND);
+  const integById = new Map(integRows.map((r) => [r.server_id, r]));
+  const nameRows = db.all('SELECT id, display_name FROM servers WHERE deleted_at IS NULL');
+  const nameById = new Map(nameRows.map((r) => [r.id, r.display_name]));
+  const cfgFor = (serverId) => {
+    const r = integById.get(serverId);
+    const cfg = r ? JSON.parse(r.config_json || '{}') : {};
+    return {
+      enabled: Boolean(r && r.enabled),
+      hasWebhook: Boolean(r && r.config_cipher),
+      events: { ...DEFAULT_EVENTS, ...(cfg.events || {}) },
+    };
+  };
+
   for (const evt of rows) {
     const mapped = EVENT_MAP[evt.type];
-    const cfg = mapped && evt.server_id ? getConfig(evt.server_id) : null;
+    const cfg = mapped && evt.server_id ? cfgFor(evt.server_id) : null;
     const deliverable = Boolean(cfg && cfg.enabled && cfg.hasWebhook && cfg.events[mapped[1]]);
 
     if (deliverable) {
       const [kind] = mapped;
-      const server = db.get('SELECT display_name FROM servers WHERE id = ?', evt.server_id);
+      const serverName = nameById.get(evt.server_id) || evt.server_id;
       const ok = await notify(evt.server_id, kind, {
         title: titleFor(evt.type),
         description: evt.summary,
         fields: [
-          { name: 'Server', value: server ? server.display_name : evt.server_id },
+          { name: 'Server', value: serverName },
           { name: 'By', value: evt.actor || 'system' },
         ],
       });

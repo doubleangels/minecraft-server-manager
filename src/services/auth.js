@@ -170,7 +170,7 @@ function beginTotpEnrollment(id) {
 }
 
 /** Verify the account password + the first live code, then persist the secret + backup codes. */
-async function confirmTotp(id, secret, code, password, { actor = 'system' } = {}) {
+async function confirmTotp(id, secret, code, password, { actor = 'system', exceptSid = null } = {}) {
   const user = db.get('SELECT * FROM users WHERE id = ?', id);
   if (!user) throw httpError(404, 'User not found');
   if (user.totp_enabled) {
@@ -199,6 +199,10 @@ async function confirmTotp(id, secret, code, password, { actor = 'system' } = {}
     JSON.stringify(hashed),
     id
   );
+  // Enabling 2FA is a credential mutation like every other one (setPassword,
+  // disableTotp, regenerateBackupCodes all revoke too): any session that was
+  // trusted on the weaker password-only path must re-authenticate with 2FA.
+  revokeOtherSessions(id, exceptSid);
   recordEvent({ actor, type: 'user-2fa-enabled', summary: `Two-factor authentication enabled for ${user.username}` });
   return { backupCodes };
 }
@@ -276,7 +280,14 @@ async function verifyTotpLogin(id, code) {
   } catch {
     codes = [];
   }
+  // Format gate BEFORE any bcrypt work. Backup codes are 10 hex chars split as
+  // xxxxx-xxxxx; a random/garbage guess here would otherwise pay a full
+  // bcrypt compare against every stored hash (~1s CPU) on each wrong attempt.
+  // The route already lockouts repeated failures, so this turns a blind spray
+  // into a zero-cost rejection while valid-looking guesses stay brute-force
+  // bounded by that lockout.
   const cleanCode = String(code || '').trim();
+  if (!codes.length || !/^[0-9a-f]{5}-[0-9a-f]{5}$/i.test(cleanCode)) return false;
   const matches = await Promise.all(codes.map((hash) => bcrypt.compare(cleanCode, hash)));
   const idx = matches.findIndex(Boolean);
   if (idx === -1) return false;

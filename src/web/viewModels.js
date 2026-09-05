@@ -37,11 +37,20 @@ function sidebarServerVMs() {
   const rows = db.all(
     'SELECT id, display_name, icon, accent, status, type, disk_quota_bytes FROM servers WHERE deleted_at IS NULL ORDER BY created_at'
   );
-  const sizes = new Map(
-    db
-      .all("SELECT rel_path, size_bytes FROM storage_index WHERE rel_path LIKE 'servers/%'")
-      .map((r) => [r.rel_path, r.size_bytes])
-  );
+  // Fetch only the exact per-server size rows (servers/<id>). A bare
+  // `LIKE 'servers/%'` sweep would also return every depth-≤3 nested path the
+  // indexer caches (servers/<id>/worlds, /backups, …), which the sidebar never
+  // reads - unnecessary rows across the whole fleet on every page load.
+  const ids = rows.map((s) => s.id);
+  const sizes = new Map();
+  if (ids.length) {
+    const ph = ids.map(() => '?').join(',');
+    for (const r of db.all(
+      `SELECT rel_path, size_bytes FROM storage_index WHERE rel_path IN (${ph})`,
+      ...ids.map((id) => `servers/${id}`)
+    ))
+      sizes.set(r.rel_path, r.size_bytes);
+  }
   return rows.map((s) => ({
     id: s.id,
     name: s.display_name,
