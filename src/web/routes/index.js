@@ -352,6 +352,7 @@ router.get('/servers/new', async (req, res) => {
     suggestedPort,
     advancedSections,
     curseforgeEnabled,
+    defaults: require('../../services/settings').getDefaults(),
   });
 });
 
@@ -995,7 +996,8 @@ router.get('/settings', requireRole('admin'), (req, res) => {
     cookieSecureWarning: Boolean(publicHost) && config.cookieSecure === false,
     users: require('../../services/auth').listUsers(),
     panel: { host: config.host, port: config.port },
-    defaults: config.defaults,
+    defaults: settings.getDefaults(),
+    defaultsBase: config.defaults,
     publicApiEnabled: settings.isPublicApiEnabled(),
     apiTokens: require('../../services/apiTokens').listTokens(),
     serverOptions: require('../../services/servers')

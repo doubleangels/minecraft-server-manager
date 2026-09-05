@@ -276,16 +276,16 @@
     <div>
       <label class="label">RAM (Java heap)</label>
       <div class="flex items-center gap-3">
-        <input type="range" min="1024" max="16384" step="512" value="4096" class="msm-range flex-1" id="wz-ram" data-out="wz-ram-out" data-unit=" MB">
-        <span class="w-24 text-right font-mono text-sm" id="wz-ram-out">4096 MB</span>
+        <input type="range" min="1024" max="16384" step="512" value="{{defaults.heapMb}}" class="msm-range flex-1" id="wz-ram" data-out="wz-ram-out" data-unit=" MB">
+        <span class="w-24 text-right font-mono text-sm" id="wz-ram-out">{{defaults.heapMb}} MB</span>
       </div>
       <p class="help">The container's memory limit is set automatically, 50% above the heap.</p>
     </div>
     <div class="mt-4">
       <label class="label">Disk quota</label>
       <div class="flex items-center gap-3">
-        <input type="range" min="0" max="200" step="5" value="25" class="msm-range flex-1" id="wz-quota" data-out="wz-quota-out" data-unit=" GB" data-zero="off">
-        <span class="w-24 text-right font-mono text-sm" id="wz-quota-out">25 GB</span>
+        <input type="range" min="0" max="200" step="5" value="{{defaults.diskQuotaGb}}" class="msm-range flex-1" id="wz-quota" data-out="wz-quota-out" data-unit=" GB" data-zero="off">
+        <span class="w-24 text-right font-mono text-sm" id="wz-quota-out">{{defaults.diskQuotaGb}} GB</span>
       </div>
     </div>
   </div>

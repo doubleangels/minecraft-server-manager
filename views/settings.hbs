@@ -72,12 +72,41 @@
 
       <div class="border-t border-line pt-4">
         <span class="label">Defaults for new servers</span>
-        <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-          <div><dt class="text-xs text-ink-faint">Java heap</dt><dd class="font-medium">{{defaults.heapMb}} MB</dd></div>
-          <div><dt class="text-xs text-ink-faint">Container limit</dt><dd class="font-medium">{{defaults.containerMemoryMb}} MB</dd></div>
-          <div><dt class="text-xs text-ink-faint">Disk quota</dt><dd class="font-medium">{{defaults.diskQuotaGb}} GB</dd></div>
-          <div><dt class="text-xs text-ink-faint">Quota warnings</dt><dd class="font-medium">{{defaults.quotaWarnPct}}% / {{defaults.quotaCriticalPct}}%</dd></div>
-        </dl>
+        <div class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+          <div>
+            <label class="label" for="dflt-heap">Java heap (MB)</label>
+            <input class="input" id="dflt-heap" type="number" inputmode="numeric" value="{{defaults.heapMb}}" data-default="{{defaultsBase.heapMb}}">
+          </div>
+          <div>
+            <label class="label" for="dflt-container">Container limit (MB)</label>
+            <input class="input" id="dflt-container" type="number" inputmode="numeric" value="{{defaults.containerMemoryMb}}" data-default="{{defaultsBase.containerMemoryMb}}">
+            <p class="help">Usually 50% above the heap. Ignored when the wizard sets its own.</p>
+          </div>
+          <div>
+            <label class="label" for="dflt-cpus">CPU cores</label>
+            <input class="input" id="dflt-cpus" type="number" inputmode="decimal" step="0.5" min="0" value="{{defaults.cpus}}" data-default="{{defaultsBase.cpus}}">
+            <p class="help">0 = no limit on CPU usage.</p>
+          </div>
+          <div>
+            <label class="label" for="dflt-quota">Disk quota (GB)</label>
+            <input class="input" id="dflt-quota" type="number" inputmode="numeric" value="{{defaults.diskQuotaGb}}" data-default="{{defaultsBase.diskQuotaGb}}">
+            <p class="help">0 = storage use is not limited.</p>
+          </div>
+          <div>
+            <label class="label" for="dflt-warnpct">Quota warn (%)</label>
+            <input class="input" id="dflt-warnpct" type="number" inputmode="numeric" min="0" max="99" value="{{defaults.quotaWarnPct}}" data-default="{{defaultsBase.quotaWarnPct}}">
+          </div>
+          <div>
+            <label class="label" for="dflt-critpct">Quota critical (%)</label>
+            <input class="input" id="dflt-critpct" type="number" inputmode="numeric" min="1" max="100" value="{{defaults.quotaCriticalPct}}" data-default="{{defaultsBase.quotaCriticalPct}}">
+          </div>
+        </div>
+        <div class="mt-2 flex flex-wrap items-center gap-2">
+          <button class="btn" id="dflt-save">Save Defaults</button>
+          <button class="btn btn-ghost" id="dflt-restore">Restore Built-ins</button>
+          <span class="help mt-0" id="dflt-note"></span>
+        </div>
+        <p class="help">These pre-fill the create-wizard, apply when a server is created via the API or a blueprint, and drive the quota-bar colors on the dashboard.</p>
       </div>
     </div>
   {{/settings/card}}

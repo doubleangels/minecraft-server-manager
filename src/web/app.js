@@ -6,6 +6,7 @@ const express = require('express');
 const { engine } = require('express-handlebars');
 
 const config = require('../config');
+const settings = require('../services/settings');
 const routes = require('./routes');
 const { icon } = require('./icons');
 const { avatarSrc } = require('../config/avatars');
@@ -132,9 +133,10 @@ function createApp() {
         // Quota bar color by usage percentage against the configured thresholds.
         meterColor: (used, total) => {
           if (!total) return 'bg-diamond-400';
+          const d = settings.getDefaults();
           const p = (used / total) * 100;
-          if (p >= config.defaults.quotaCriticalPct) return 'bg-redstone-500';
-          if (p >= config.defaults.quotaWarnPct) return 'bg-gold-400';
+          if (p >= d.quotaCriticalPct) return 'bg-redstone-500';
+          if (p >= d.quotaWarnPct) return 'bg-gold-400';
           return 'bg-grass-500';
         },
         capitalize: (s) => (typeof s === 'string' && s ? s[0].toUpperCase() + s.slice(1) : s),

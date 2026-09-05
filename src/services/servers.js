@@ -180,7 +180,7 @@ function mergeExtraPorts(server) {
 function previewCreateSpec(input) {
   const javaTag = input.javaTag || pickJavaTag(input.mcVersion || 'LATEST', input.type || 'VANILLA');
   const image = images.imageRef(javaTag);
-  const defaults = config.defaults;
+  const defaults = settings.getDefaults();
   const env = { ...(input.env || {}) };
   env.EULA = 'TRUE';
   env.TYPE = input.type || 'VANILLA';
@@ -302,7 +302,7 @@ async function createServerImpl(input, { actor = 'system', start = false, onProg
   });
 
   const rconPassword = secrets.generatePassword();
-  const defaults = config.defaults;
+  const defaults = settings.getDefaults();
 
   db.run(
     `INSERT INTO servers (id, display_name, description, icon, accent, tags_json, type, mc_version,

@@ -429,6 +429,46 @@ router.get('/settings', (req, res) => {
   });
 });
 
+// ---- Defaults for new servers (admin-configured wizard/blueprint pre-fills) ----
+router.get('/settings/defaults', (req, res) => {
+  res.json({ ok: true, defaults: settingsService.getDefaults(), base: panelConfig.defaults });
+});
+
+router.post(
+  '/settings/defaults',
+  requireRoleKeys('admin'),
+  asyncHandler((req, res, next) => {
+    const num = () =>
+      z
+        .union([z.string(), z.number()])
+        // A cleared input means "leave this field untouched", not "force it to 0".
+        .transform((v) => (v === '' || v === null ? undefined : Number(v)))
+        .optional();
+    const { reset, heapMb, containerMemoryMb, cpus, diskQuotaGb, quotaWarnPct, quotaCriticalPct } = z
+      .object({
+        reset: z.boolean().optional(),
+        heapMb: num(),
+        containerMemoryMb: num(),
+        cpus: num(),
+        diskQuotaGb: num(),
+        quotaWarnPct: num(),
+        quotaCriticalPct: num(),
+      })
+      .parse(req.body);
+    const defaults = reset
+      ? settingsService.resetDefaults()
+      : settingsService.setDefaults({
+          heapMb,
+          containerMemoryMb,
+          cpus,
+          diskQuotaGb,
+          quotaWarnPct,
+          quotaCriticalPct,
+        });
+    res.json({ ok: true, defaults, base: panelConfig.defaults });
+  })
+);
+
 router.post(
   '/settings',
   requireRoleKeys('admin'),

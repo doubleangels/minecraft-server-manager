@@ -17,13 +17,12 @@ const { extractZip, readZipIndex } = require('../utils/zip');
 const { nanoid } = require('nanoid');
 const { z } = require('zod');
 const db = require('../db');
-const config = require('../config');
 const { dataPath, safeJoin } = require('../storage/pathGuard');
 
 // Starter blueprints inherit the panel's host-aware resource defaults so they
 // import cleanly on a small VPS as well as a big workstation.
 function starterResources() {
-  const d = config.defaults;
+  const d = require('../services/settings').getDefaults();
   return {
     heapMb: d.heapMb,
     containerMemoryMb: d.containerMemoryMb,

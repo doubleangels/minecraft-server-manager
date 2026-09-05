@@ -415,6 +415,59 @@ function init() {
     }
   }
 
+  // ---- Defaults for new servers ----
+  const dfltSave = document.getElementById('dflt-save');
+  if (dfltSave) {
+    const note = document.getElementById('dflt-note');
+    const FIELDS = [
+      ['dflt-heap', 'heapMb'],
+      ['dflt-container', 'containerMemoryMb'],
+      ['dflt-cpus', 'cpus'],
+      ['dflt-quota', 'diskQuotaGb'],
+      ['dflt-warnpct', 'quotaWarnPct'],
+      ['dflt-critpct', 'quotaCriticalPct'],
+    ];
+    const inputs = Object.fromEntries(FIELDS.map(([id, key]) => [key, document.getElementById(id)]));
+    const apply = (res) => {
+      if (!res) return;
+      for (const [key, el] of Object.entries(inputs)) el.value = res.defaults[key];
+      const customized = FIELDS.some(
+        ([, key]) => Number(inputs[key].value) !== Number(inputs[key].dataset.default)
+      );
+      note.textContent = customized
+        ? 'Custom defaults are set. The wizard and new servers use these.'
+        : 'Using the built-in defaults from .env and this machine.';
+    };
+    dfltSave.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      await withBusy(btn, 'Saving…', async () => {
+        const body = Object.fromEntries(FIELDS.map(([, key]) => [key, inputs[key].value]));
+        const res = await post('/api/settings/defaults', body);
+        if (res) {
+          apply(res);
+          toast('Defaults for new servers saved.');
+        }
+      });
+    });
+    document.getElementById('dflt-restore').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const ok = await confirmDialog({
+        title: 'Restore built-in defaults?',
+        message: 'Your custom values are discarded. Every field goes back to the .env / machine-detected default.',
+        confirmLabel: 'Restore',
+        danger: true,
+      });
+      if (!ok) return;
+      await withBusy(btn, 'Restoring…', async () => {
+        const res = await post('/api/settings/defaults', { reset: true });
+        if (res) {
+          apply(res);
+          toast('Defaults reset to the built-in values.');
+        }
+      });
+    });
+  }
+
   // ---- Sign-in lockouts ----
   const lockBody = document.getElementById('lockouts-body');
   const clearAllBtn = document.getElementById('lockouts-clear-all');

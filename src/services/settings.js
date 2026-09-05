@@ -208,6 +208,57 @@ function clientLocalization() {
   return { timezone: getTimezone(), locale: resolveLocale() };
 }
 
+// ---------------------------------------------------------------------------
+// Defaults for new servers. The env/built-in base lives in config.defaults
+// (see src/config resolveDefaults). An operator can override those per-field
+// here so blueprints, API creates, and the create wizard pre-fill their values
+// without editing .env. "Restore" drops the overrides back to the built-ins.
+
+const config = require('../config');
+const DEFAULTS_KEY = 'panel_defaults';
+
+const DEFAULT_FIELDS = ['heapMb', 'containerMemoryMb', 'cpus', 'diskQuotaGb', 'quotaWarnPct', 'quotaCriticalPct'];
+const CLAMPS = {
+  heapMb: [512, 262144],
+  containerMemoryMb: [1024, 524288],
+  cpus: [0, 128],
+  diskQuotaGb: [0, 16384],
+  quotaWarnPct: [0, 99],
+  quotaCriticalPct: [1, 100],
+};
+
+/** Sanitise an incoming patch to known default fields within sane bounds. */
+function sanitizeDefaults(patch = {}) {
+  const out = {};
+  for (const k of DEFAULT_FIELDS) {
+    const raw = patch[k];
+    if (raw === undefined || raw === null || raw === '') continue;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) continue;
+    const [min, max] = CLAMPS[k];
+    out[k] = Math.min(max, Math.max(min, k === 'cpus' ? n : Math.round(n)));
+  }
+  return out;
+}
+
+/** The effective per-instance defaults: built-in/env base layered with saved overrides. */
+function getDefaults() {
+  return { ...config.defaults, ...sanitizeDefaults(get(DEFAULTS_KEY, {})) };
+}
+
+/** Persist operator-set overrides for some/all default fields. Returns the new effective defaults. */
+function setDefaults(patch) {
+  const saved = get(DEFAULTS_KEY, {});
+  set(DEFAULTS_KEY, { ...saved, ...sanitizeDefaults(patch) });
+  return getDefaults();
+}
+
+/** Clear operator overrides - back to the built-in/.env defaults. Returns the new effective defaults. */
+function resetDefaults() {
+  remove(DEFAULTS_KEY);
+  return getDefaults();
+}
+
 module.exports = {
   get,
   set,
@@ -229,4 +280,9 @@ module.exports = {
   isValidCountry,
   localization,
   clientLocalization,
+  getDefaults,
+  setDefaults,
+  resetDefaults,
+  sanitizeDefaults,
+  DEFAULT_FIELDS,
 };
