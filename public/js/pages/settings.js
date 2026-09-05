@@ -415,6 +415,53 @@ function init() {
     }
   }
 
+  // ---- Panel self-update check ("Update MSM") ----
+  const msmUpdateBtn = document.getElementById('msm-update-btn');
+  const msmUpdateOut = document.getElementById('msm-update-out');
+  if (msmUpdateBtn) {
+    msmUpdateBtn.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      if (msmUpdateOut) msmUpdateOut.textContent = '';
+      await withBusy(btn, 'Checking…', async () => {
+        let data;
+        try {
+          const res = await fetch('/api/settings/panel-update?refresh=1', { headers: { Accept: 'application/json' } });
+          data = await res.json().catch(() => ({}));
+          if (!res.ok || data.ok === false) {
+            toast(data.error || friendlyError(res, { action: 'check for a panel update' }), {
+              kind: 'error',
+              timeout: 8000,
+            });
+            return;
+          }
+        } catch {
+          toast(friendlyError(null, { action: 'check for a panel update' }), { kind: 'error', timeout: 8000 });
+          return;
+        }
+        const u = data.update || {};
+        if (!msmUpdateOut) return;
+        const esc = (s) =>
+          String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+        if (u.error && !u.latest) {
+          msmUpdateOut.innerHTML = `<p class="help mt-2 text-danger">Could not check GitHub right now: ${esc(u.error)}</p>`;
+          return;
+        }
+        if (u.isNewer && u.latest && u.latest.htmlUrl) {
+          msmUpdateOut.innerHTML = `
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <span class="chip">Update available: v${esc(u.latest.version)}</span>
+              <a class="btn" href="${esc(u.latest.htmlUrl)}" target="_blank" rel="noopener noreferrer">Update MSM</a>
+            </div>
+            <p class="help mt-1">You are running v${esc(u.current)}. Download the release and follow its install instructions.</p>`;
+        } else if (u.latest) {
+          msmUpdateOut.textContent = `You are on the latest release (v${u.current}).`;
+        } else {
+          msmUpdateOut.textContent = `Running v${u.current}.`;
+        }
+      });
+    });
+  }
+
   // ---- Defaults for new servers ----
   const dfltSave = document.getElementById('dflt-save');
   if (dfltSave) {

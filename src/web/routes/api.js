@@ -429,6 +429,16 @@ router.get('/settings', (req, res) => {
   });
 });
 
+// ---- Panel self-update check ("Update MSM"). Admin-only, on-demand: the
+// Settings page never hits GitHub at render - the button triggers this GET.
+router.get(
+  '/settings/panel-update',
+  requireRoleKeys('admin'),
+  asyncHandler(async (req, res, next) => {
+    res.json({ ok: true, update: await panelUpdate.checkLatest({ refresh: req.query.refresh === '1' }) });
+  })
+);
+
 // ---- Defaults for new servers (admin-configured wizard/blueprint pre-fills) ----
 router.get('/settings/defaults', (req, res) => {
   res.json({ ok: true, defaults: settingsService.getDefaults(), base: panelConfig.defaults });
@@ -602,6 +612,7 @@ const packs = require('../../services/packs');
 const upgrade = require('../../updates/upgrade');
 const checker = require('../../updates/checker');
 const backups = require('../../services/backups');
+const panelUpdate = require('../../services/panelUpdate');
 
 router.post(
   '/packs/resolve',

@@ -995,7 +995,11 @@ router.get('/settings', requireRole('admin'), (req, res) => {
     publicHost,
     cookieSecureWarning: Boolean(publicHost) && config.cookieSecure === false,
     users: require('../../services/auth').listUsers(),
-    panel: { host: config.host, port: config.port },
+    panel: {
+      host: config.host,
+      port: config.port,
+      version: req.app.locals.appVersion,
+    },
     defaults: settings.getDefaults(),
     defaultsBase: config.defaults,
     publicApiEnabled: settings.isPublicApiEnabled(),
