@@ -1302,6 +1302,26 @@ router.delete(
   })
 );
 
+// Rename a backup archive (display + on-disk filename). Admin/operator only.
+router.patch(
+  '/backups/:backupId',
+  requireRoleKeys('admin', 'operator'),
+  asyncHandler(async (req, res, next) => {
+    const { filename } = z.object({ filename: z.string().trim().max(120) }).parse(req.body);
+    const updated = await backups.renameBackup(req.params.backupId, filename, { actor: req.user.username });
+    res.json({
+      ok: true,
+      backup: {
+        id: updated.id,
+        filename: updated.filename,
+        size_bytes: updated.size_bytes,
+        reason: updated.reason,
+        created_at: updated.created_at,
+      },
+    });
+  })
+);
+
 // ---- Backup retention policy (count caps + age / total-size ceilings) ----
 const backupRetention = require('../../services/backupRetention');
 const retentionPatchSchema = z

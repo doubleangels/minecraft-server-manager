@@ -11,6 +11,7 @@
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { confirmDialog } from '../lib/confirm.js';
+import { openModal } from '../lib/modal.js';
 import { fmtBytes } from '../lib/format.js';
 import { runTask } from '../lib/progress.js';
 import { setBusy } from '../lib/loading.js';
@@ -32,6 +33,56 @@ document.addEventListener('click', async (e) => {
 
   if (action === 'download') {
     location.href = `/api/backups/${backupId}/download`;
+    return;
+  }
+
+  if (action === 'rename') {
+    const content = document.createElement('div');
+    const label = document.createElement('label');
+    label.className = 'label';
+    label.setAttribute('for', 'bk-rename-name');
+    label.textContent = 'Archive name';
+    const input = document.createElement('input');
+    input.className = 'input font-mono';
+    input.id = 'bk-rename-name';
+    input.maxLength = 120;
+    input.value = file;
+    const help = document.createElement('p');
+    help.className = 'help';
+    help.textContent = 'Changes the displayed name and the file you download. Restore and retention are unaffected.';
+    content.append(label, input, help);
+    openModal({
+      title: 'Rename backup',
+      content,
+      actions: [
+        { label: 'Cancel', kind: 'ghost' },
+        {
+          label: 'Rename',
+          kind: 'primary',
+          busyLabel: 'Renaming…',
+          onClick: async () => {
+            const name = input.value.trim();
+            if (!name) {
+              toast('Enter a name first.', { kind: 'error' });
+              return false;
+            }
+            try {
+              const res = await talk(`/api/backups/${encodeURIComponent(backupId)}`, 'PATCH', { filename: name });
+              row.dataset.file = res.backup.filename;
+              const text = row.querySelector('.truncate.font-mono');
+              if (text) {
+                text.textContent = res.backup.filename;
+                text.title = res.backup.filename;
+              }
+              toast('Backup renamed.');
+            } catch (err) {
+              toast(err.message || 'That backup could not be renamed.', { kind: 'error', timeout: 8000 });
+              return false;
+            }
+          },
+        },
+      ],
+    });
     return;
   }
 
@@ -138,8 +189,13 @@ function refreshTotal() {
 }
 
 async function postJSON(url, body) {
+  return talk(url, 'POST', body);
+}
+
+/** fetch helper: returns the parsed JSON or throws with the server's error. */
+async function talk(url, method, body) {
   const res = await fetch(url, {
-    method: 'POST',
+    method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body || {}),
   });

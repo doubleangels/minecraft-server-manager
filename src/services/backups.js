@@ -6,6 +6,7 @@
 // retention pruning, and restore.
 
 const httpError = require('../utils/httpError');
+const fs = require('node:fs');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
 const { Worker } = require('node:worker_threads');
@@ -350,6 +351,49 @@ async function deleteBackup(backupId, { actor = 'system' } = {}) {
   return { freedBytes: backup.size_bytes };
 }
 
+/** Accept a friendly display name - flat filename only, no path tricks. */
+function cleanBackupName(raw) {
+  const name = String(raw || '').trim();
+  if (!name || name.length > 120) {
+    throw httpError(400, 'Use a name between 1 and 120 characters.');
+  }
+  if (/[\\/]/.test(name)) throw httpError(400, 'Backup names cannot contain path separators.');
+  if (name === '.' || name === '..' || /[\u0000-\u001f\u007f]/.test(name)) {
+    throw httpError(400, 'That backup name is not allowed.');
+  }
+  return name;
+}
+
+/**
+ * Rename a backup's archive: the on-disk file AND its filename/rel_path DB
+ * row move together, so restore/download/retention keep working untouched.
+ * Returns the updated row (id, filename, size_bytes, reason, created_at, …).
+ */
+async function renameBackup(backupId, newName, { actor = 'system' } = {}) {
+  const backup = db.get('SELECT * FROM backups WHERE id = ?', backupId);
+  if (!backup) throw httpError(404, 'Backup not found');
+  const name = cleanBackupName(newName);
+  if (name === backup.filename) return backup;
+
+  const abs = dataPath(backup.rel_path);
+  if (!fs.existsSync(abs)) throw httpError(404, 'Backup archive is missing on disk');
+  const targetRel = `backups/${backup.server_id}/${name}`;
+  const target = dataPath(targetRel);
+  if (fs.existsSync(target)) throw httpError(409, `A backup named "${name}" already exists here`);
+
+  await fsp.rename(abs, target);
+  db.run('UPDATE backups SET filename = ?, rel_path = ? WHERE id = ?', name, targetRel, backupId);
+  const updated = db.get('SELECT * FROM backups WHERE id = ?', backupId);
+  recordEvent({
+    serverId: backup.server_id,
+    actor,
+    type: 'backup-renamed',
+    summary: `Backup renamed: ${backup.filename} → ${name}`,
+    details: { from: backup.filename, to: name },
+  });
+  return updated;
+}
+
 /**
  * Keep the newest KEEP_* per reason (see the constants at the top); older ones
  * in each bucket are pruned. 'pre-restore' (restore/world-reset safety
@@ -540,6 +584,7 @@ module.exports = {
   createBackupUnguarded: createBackupImpl,
   restoreBackup,
   deleteBackup,
+  renameBackup,
   pruneRetention,
   extractZip,
   zipDirectory,
