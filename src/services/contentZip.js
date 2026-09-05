@@ -37,6 +37,71 @@ const MAX_JARS = 500;
 const MAX_OVERRIDE_ENTRIES = 20000;
 const MAX_OVERRIDE_BYTES = 8 * 1024 ** 3; // decompression-bomb ceiling (headers can lie; sizes re-checked on extract)
 
+// ---- Pre-installed-server detection -----------------------------------------
+//
+// "Custom zip" uploads are usually loose mod/plugin jars, but they can also be
+// a FULLY PREPARED server directory (someone ran an FTB pack's installer
+// locally and zipped the result). Such a zip already contains the loader's
+// installed libraries, so the container should be pinned to that SAME loader
+// build - itzg's start script then reconciles instead of installing/replacing
+// a fresh loader, and the user never has to type NEOFORGE_VERSION etc. These
+// patterns recognize the launcher-args file each loader drops into `libraries/`
+// when it installs itself.
+
+const NATIVE_LOADER_PROBES = [
+  // neoforge: libraries/net/neoforged/neoforge/<build>/unix_args.txt
+  { loader: 'neoforge', re: /^libraries\/net\/neoforged\/neoforge\/([^/]+)\// },
+  // forge: libraries/net/minecraftforge/forge/<mc>-<build>/unix_args.txt
+  { loader: 'forge', re: /^libraries\/net\/minecraftforge\/forge\/([\d.]+)-([^/]+)\// },
+  // fabric: libraries/net/fabricmc/fabric-loader/<build>/
+  { loader: 'fabric', re: /^libraries\/net\/fabricmc\/fabric-loader\/([^/]+)\// },
+  // quilt: libraries/org/quiltmc/quilt-loader/<build>/
+  { loader: 'quilt', re: /^libraries\/org\/quiltmc\/quilt-loader\/([^/]+)\// },
+];
+
+/**
+ * Best-effort scan of a zip for a pre-installed loader install. Returns what
+ * it finds (never throws on a partial/invalid layout):
+ *   { isPreparedServer, loader, loaderVersion, mcVersion }
+ * A zip is treated as a pre-installed server when it contains a `libraries/`
+ * loader tree AND a server marker (`versions/`, `server.properties`, …) —
+ * loose mod jars alone never qualify.
+ */
+async function detectNativeLoader(zipPath) {
+  const { entries } = await readZipIndex(zipPath);
+  const names = entries.map((e) => e.name);
+  const hasLibraries = names.some((n) => n.startsWith('libraries/'));
+  const hasServerMarker = names.some((n) => /^(server\.jar|server\.properties|eula\.txt|versions\/)/.test(n));
+  if (!hasLibraries || !hasServerMarker) {
+    return { isPreparedServer: false, loader: null, loaderVersion: null, mcVersion: null };
+  }
+  let loader = null;
+  let loaderVersion = null;
+  let mcVersion = null;
+  for (const n of names) {
+    for (const probe of NATIVE_LOADER_PROBES) {
+      const m = probe.re.exec(n);
+      if (!m || !m[1]) continue;
+      loader = probe.loader;
+      if (probe.loader === 'forge') {
+        mcVersion = m[1];
+        loaderVersion = m[2];
+      } else {
+        loaderVersion = m[1];
+      }
+      break;
+    }
+    if (loader) break;
+  }
+  // versions/<mc>/... — present in loader-installed server dirs (vanilla and
+  // loader launchers both read it). Forge's version already rode on its path.
+  if (!mcVersion) {
+    const v = names.find((n) => /^versions\/[^/]+\//.test(n));
+    if (v) mcVersion = v.split('/')[1] || null;
+  }
+  return { isPreparedServer: true, loader, loaderVersion, mcVersion };
+}
+
 // Identify every jar in a zip with bounded memory: each jar is buffered, parsed
 // and hashed one at a time (metadata extracted while the buffer is in hand),
 // then its compact hash/meta record is kept and the buffer is freed before the
@@ -506,10 +571,15 @@ async function previewStandalone(zipPath) {
   const kind = (kindVotes[0] && kindVotes[0][0]) || 'mod';
   const modLoaderVotes = loaderVotes.filter(([l]) => ['fabric', 'forge', 'neoforge', 'quilt'].includes(l));
   const mcVotes = tally(items.flatMap((i) => (i.identity && i.identity.mcVersions) || []));
+  // A zip that embedded its own loader install (e.g. a locally-prepared FTB
+  // server) can be created WITHOUT MSM re-supplying loader versions - the
+  // already-installed build is what the container should pin to.
+  const native = await detectNativeLoader(zipPath);
   return {
     type: 'jars',
     items,
     overrides: { count: 0 },
+    native,
     inferred: {
       kind,
       loader: kind === 'plugin' ? 'paper' : (modLoaderVotes[0] && modLoaderVotes[0][0]) || null,
@@ -784,6 +854,7 @@ async function importForServer(
 
 module.exports = {
   inspect,
+  detectNativeLoader,
   parsePackManifest,
   parseMrpackIndex,
   resolveMrpackEntries,

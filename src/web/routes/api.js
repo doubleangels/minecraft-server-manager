@@ -2454,6 +2454,10 @@ const fromZipSchema = z
     loader: z.enum([...MOD_LOADERS, 'paper']),
     mcVersion: z.string().trim().min(1).max(32),
     loaderVersion: z.string().trim().max(40).optional(),
+    // Native-loader mode: the zip already contains a complete, installed
+    // loader (a locally-prepared server pack) - the detected loader build is
+    // used to pin the container instead of asking the user to type one.
+    nativeLoader: z.coerce.boolean().optional(),
     uploadToken: zipTokenSchema,
     selections: z
       .array(z.union([z.coerce.number(), z.string().max(300)]))
@@ -2485,12 +2489,28 @@ router.post(
       return res.status(404).json({ ok: false, error: 'Uploaded zip expired, upload it again' });
     }
     const actor = req.user.username;
-    const type = input.loader.toUpperCase();
+    const env = { ...(input.env || {}) };
+    // Native-loader mode: reconcile the container to the loader that's already
+    // installed inside the zip (detected server-side - the client's numbers are
+    // never trusted for this) rather than requiring an explicit loader version.
+    // itzg's start script then reuses the installed build instead of laying
+    // down a fresh loader over the pack's files.
+    let loader = input.loader;
+    let mcVersion = input.mcVersion;
+    let loaderVersion = input.loaderVersion;
+    if (input.nativeLoader) {
+      const native = await contentZip.detectNativeLoader(zipPath).catch(() => null);
+      if (native) {
+        if (native.loader) loader = native.loader;
+        if (native.mcVersion) mcVersion = native.mcVersion;
+        if (native.loaderVersion) loaderVersion = native.loaderVersion;
+      }
+    }
+    const type = loader.toUpperCase();
     const taskId = tasks.run(`Creating ${input.name} from zip`, { actor }, async (t) => {
       try {
-        const env = { ...(input.env || {}) };
-        const envKey = input.loader !== 'paper' ? loaderVersions.envKeyFor(input.loader) : null;
-        if (input.loaderVersion && envKey) env[envKey] = input.loaderVersion;
+        const envKey = loader !== 'paper' ? loaderVersions.envKeyFor(loader) : null;
+        if (loaderVersion && envKey) env[envKey] = loaderVersion;
         t.step('Creating server');
         const server = await servers.createServer(
           {
@@ -2499,7 +2519,7 @@ router.post(
             icon: input.icon,
             accent: input.accent,
             type,
-            mcVersion: input.mcVersion,
+            mcVersion,
             env,
             heapMb: input.heapMb,
             containerMemoryMb: input.containerMemoryMb,

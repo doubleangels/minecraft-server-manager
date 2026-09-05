@@ -407,6 +407,7 @@ function init() {
       loader,
       mcVersion,
       ...(zipState.loaderVersion ? { loaderVersion: zipState.loaderVersion } : {}),
+      ...(zipState.nativeLoader ? { nativeLoader: true } : {}),
       uploadToken: zipState.uploadToken,
       ...(selections ? { selections } : {}),
       applyOverrides: Boolean(zipState.applyOverrides),
@@ -1012,6 +1013,7 @@ function initZipUpload() {
             ? data.preview.pack.loaderVersion || ''
             : '',
         applyOverrides: false,
+        nativeLoader: false,
       };
       document.getElementById('wz-pack-selected')?.classList.add('hidden'); // zip replaces any picked pack
       render(file.name);
@@ -1061,8 +1063,50 @@ function initZipUpload() {
       : filename;
     selectedEl.querySelector('[data-role="meta"]').textContent = isPack
       ? `${isMrpack ? 'Modrinth modpack (.mrpack)' : 'CurseForge export'}, Minecraft ${p.pack.mcVersion || '?'}, ${p.pack.loader || 'unknown loader'} · ${bits.join(' · ')}`
-      : `Custom jar zip · ${bits.join(' · ')}`;
+      : `Custom jar zip · ${bits.join(' · ')}${p.native && p.native.isPreparedServer ? ' · pre-installed server' : ''}`;
     selectedEl.querySelector('[data-role="remove"]').addEventListener('click', clear);
+
+    // Jar zips that carry a complete, pre-installed loader (a locally-prepared
+    // server pack) can be created without MSM re-supplying loader versions: pin
+    // the container to the build that's already inside the archive.
+    if (!isPack && p.native && p.native.isPreparedServer) {
+      const nativeRow = document.createElement('label');
+      nativeRow.className = 'mt-3 flex cursor-pointer items-start gap-2 text-xs text-ink-soft';
+      nativeRow.innerHTML = `
+        <input type="checkbox" class="msm-check mt-0.5 shrink-0" data-role="native" ${state.nativeLoader ? 'checked' : ''}>
+        <span><b>Use the loader already in this zip</b> — this is a pre-installed server directory, so MSM pins the container to the included
+          ${escapeHtml(p.native.loader || 'loader')} build ${escapeHtml(p.native.loaderVersion || '')} instead of reinstalling one.
+          ${p.native.mcVersion ? `Detected Minecraft ${escapeHtml(p.native.mcVersion)}.` : 'Minecraft version is detected from the archive.'}</span>`;
+      selectedEl.appendChild(nativeRow);
+      nativeRow.querySelector('[data-role="native"]').addEventListener('change', (e) => {
+        state.nativeLoader = e.target.checked;
+        if (e.target.checked) {
+          if (p.native.loader) state.loader = p.native.loader;
+          if (p.native.mcVersion) state.mcVersion = p.native.mcVersion;
+          if (p.native.loaderVersion) state.loaderVersion = p.native.loaderVersion;
+        } else {
+          state.loaderVersion = '';
+        }
+        // Reflect the choice in the manual pickers (when they're rendered): in
+        // native mode the detected values win and aren't hand-editable.
+        const loaderSel = selectedEl.querySelector('[data-role="loader"]');
+        const mcEl = selectedEl.querySelector('[data-role="mc"]');
+        if (loaderSel) {
+          loaderSel.disabled = e.target.checked;
+          loaderSel.value = state.loader || loaderSel.value;
+        }
+        if (mcEl) {
+          mcEl.disabled = e.target.checked;
+          if (state.mcVersion) {
+            if (mcEl.tagName === 'INPUT') mcEl.value = state.mcVersion;
+            else if (![...mcEl.options].some((o) => o.value === state.mcVersion)) {
+              mcEl.add(new Option(state.mcVersion, state.mcVersion));
+            }
+            mcEl.value = state.mcVersion;
+          }
+        }
+      });
+    }
 
     if (isPack && p.overrides && p.overrides.count > 0) {
       const row = selectedEl.querySelector('[data-role="overrides-row"]');
