@@ -1,5 +1,5 @@
 {{#if (or (eq server.status 'stopped') (eq server.status 'crashed'))}}
-  <div class="notice mb-4">Live numbers update while the server is running. Start the server to watch it work.</div>
+  <div class="notice mb-4">Live numbers update while the server is running. The saved history views (1h / 24h / 7d) below still work while it is stopped.</div>
 {{else if (or (eq server.status 'starting') (eq server.status 'updating'))}}
   <div class="notice mb-4">The server is still coming up. The charts and numbers start moving as soon as it is running.</div>
 {{/if}}
@@ -55,7 +55,16 @@
   </div>
 
   {{! ---- Charts ---- }}
-  <div class="mt-4 grid gap-4 lg:grid-cols-2">
+  <div class="mt-4 mb-3 flex flex-wrap items-center justify-between gap-2">
+    <h3 class="font-semibold">Charts</h3>
+    <div class="seg" role="group" aria-label="Chart range">
+      <button class="seg-btn" data-range="live" aria-pressed="true">Live</button>
+      <button class="seg-btn" data-range="1h">1h</button>
+      <button class="seg-btn" data-range="24h">24h</button>
+      <button class="seg-btn" data-range="7d">7d</button>
+    </div>
+  </div>
+  <div class="grid gap-4 lg:grid-cols-2">
     <div class="card p-4">
       <h3 class="mb-2 font-semibold">CPU <span class="text-xs font-normal text-ink-faint">vs limit</span></h3>
       <canvas data-chart="cpu" height="140"></canvas>
@@ -165,7 +174,7 @@
     </div>
   </div>
 
-  <p class="help mt-3">The charts and top numbers update live while the server runs. Everything else refreshes when you reload.</p>
+  <p class="help mt-3">The top numbers and Live charts update while the server runs. The 1h / 24h / 7d views read the saved history, so they keep working after the server stops. Everything else refreshes when you reload.</p>
 </div>
 <script src="/vendor/chart.umd.js"></script>
 <script type="module" src="/js/pages/metrics.js"></script>

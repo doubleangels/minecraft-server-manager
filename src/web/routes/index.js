@@ -90,7 +90,7 @@ const SUB_LABELS = {
   mods: 'Mods',
   map: 'Map',
   files: 'Files',
-  metrics: 'Live',
+  metrics: 'Metrics',
   history: 'History',
   settings: 'Configuration',
   discord: 'Discord',

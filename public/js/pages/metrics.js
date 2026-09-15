@@ -58,7 +58,7 @@ function init(serverId, memLimitMb, cpuLimit) {
   function makeChart(canvas, datasets, { max, unit, y1 } = {}) {
     if (!canvas) return null;
     const scales = {
-      x: { display: false },
+      x: { display: false, grid: { display: false }, ticks: { color: colors.tick, maxTicksLimit: 6 } },
       y: {
         beginAtZero: true,
         suggestedMax: max,
@@ -94,6 +94,7 @@ function init(serverId, memLimitMb, cpuLimit) {
     for (const chart of charts) {
       chart.options.scales.y.grid.color = colors.grid;
       chart.options.scales.y.ticks.color = colors.tick;
+      if (chart.options.scales.x.ticks) chart.options.scales.x.ticks.color = colors.tick;
       if (chart.options.scales.y1) chart.options.scales.y1.ticks.color = colors.tick;
       if (chart.options.plugins.legend.labels) chart.options.plugins.legend.labels.color = colors.tick;
       chart.update('none');
@@ -127,11 +128,102 @@ function init(serverId, memLimitMb, cpuLimit) {
     { max: 20, unit: '', y1: ' ms' }
   );
 
+  // ---- Live vs. saved history ----
+  // The WS feed owns the "Live" charts; the 1h / 24h / 7d buttons swap them for
+  // the persisted series served by /api/servers/:id/metrics. While a history
+  // view is showing, incoming WS ticks stop touching the charts (the top stat
+  // strip keeps updating), and the old live buffers are snapshotted so switching
+  // back resumes seamlessly.
+  const chartByName = { cpu: cpuChart, memory: memChart, network: netChart, tps: tpsChart };
+  let liveMode = true;
+  let liveSnapshots = null;
   let lastNet = null;
   let lastTs = 0;
 
-  function push(chart, values) {
+  function updateCharts() {
+    for (const chart of Object.values(chartByName)) chart?.update('none');
+  }
+
+  function fmtTime(iso) {
+    const d = new Date(iso);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  }
+  function fmtDayTime(iso) {
+    const d = new Date(iso);
+    return `${d.getMonth() + 1}/${d.getDate()} ${fmtTime(iso)}`;
+  }
+
+  function snapshotLive() {
+    liveSnapshots = {};
+    for (const [name, chart] of Object.entries(chartByName)) {
+      if (!chart) continue;
+      liveSnapshots[name] = {
+        labels: [...chart.data.labels],
+        data: chart.data.datasets.map((d) => [...d.data]),
+      };
+    }
+  }
+
+  function restoreLive() {
+    if (!liveSnapshots) return;
+    for (const [name, chart] of Object.entries(chartByName)) {
+      if (!chart || !liveSnapshots[name]) continue;
+      chart.data.labels = liveSnapshots[name].labels;
+      chart.data.datasets.forEach((d, i) => {
+        d.data = liveSnapshots[name].data[i] ?? [];
+      });
+      chart.options.scales.x.display = false;
+    }
+    lastNet = null;
+    lastTs = 0;
+    updateCharts();
+  }
+
+  function setSeries(chart, labels, series) {
     if (!chart) return;
+    chart.data.labels = labels;
+    chart.data.datasets.forEach((d, i) => {
+      d.data = series[i] ?? [];
+    });
+    chart.options.scales.x.display = true;
+  }
+
+  async function applyHistory(range) {
+    let res;
+    try {
+      res = await fetch(`/api/servers/${serverId}/metrics?range=${range}&points=120`);
+    } catch {
+      return;
+    }
+    const data = await res.json();
+    if (!res.ok || !data.ok || !Array.isArray(data.points)) return;
+    const fmt = range === '7d' ? fmtDayTime : fmtTime;
+    const labels = data.points.map((p) => fmt(p.at));
+    setSeries(cpuChart, labels, [data.points.map((p) => p.cpuPct)]);
+    setSeries(memChart, labels, [data.points.map((p) => p.memUsedMb)]);
+    setSeries(netChart, labels, [data.points.map((p) => p.netRxKbs), data.points.map((p) => p.netTxKbs)]);
+    setSeries(tpsChart, labels, [data.points.map((p) => p.tps), data.points.map((p) => p.mspt)]);
+    updateCharts();
+  }
+
+  const rangeBtns = root.querySelectorAll('[data-range]');
+  for (const btn of rangeBtns) {
+    btn.addEventListener('click', () => {
+      const range = btn.dataset.range;
+      const wasLive = liveMode;
+      liveMode = range === 'live';
+      for (const b of rangeBtns) b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      if (liveMode) {
+        restoreLive();
+      } else {
+        if (wasLive) snapshotLive();
+        applyHistory(range);
+      }
+    });
+  }
+
+  function push(chart, values) {
+    if (!chart || !liveMode) return;
     chart.data.labels.push('');
     values.forEach((v, i) => chart.data.datasets[i].data.push(v));
     if (chart.data.labels.length > MAX_POINTS) {
