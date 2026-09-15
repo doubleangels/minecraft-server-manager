@@ -50,7 +50,7 @@ The **World Controls** rail rides along on every tab: the in-game clock, weather
 
 ![World controls](images/world-controls.png)
 
-**Monitoring → Live** shows TPS and milliseconds per tick, a health and stability card with the last 24 h / 7 d of crashes and restarts, and per-world sizes.
+**Monitoring → Metrics** shows the live CPU, memory, network, and TPS charts with a selector between the real-time view and the saved 1h / 24h / 7d history, plus a health and stability card with the last 24 h / 7 d of crashes and restarts, and per-world sizes.
 
 ![Live monitoring](images/monitoring-live.png)
 

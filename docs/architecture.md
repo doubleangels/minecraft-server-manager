@@ -52,6 +52,10 @@ Dependencies flow in one direction:
   from `services/apiTokens.js`, off unless enabled in Settings; see `docs/public-api.md`).
 - **`services/`** - the heart of the app. Each service owns one domain and may depend on
   infrastructure and on other services.
+- **`metrics/`** - the persisted metrics history. `sampler.js` snapshots the in-memory live cache to
+  SQLite once a minute (one row per running server); `aggregate.js` buckets those rows into
+  fixed-width time series that `web/routes/api.js` serves read-only. Used by the dashboard's
+  "Usage Trends" chart and the Metrics tab's 1h / 24h / 7d history views.
 - **`docker/`** - dockerode wrappers: `connect` (endpoint detection + daemon health), `containers`
   (create/start/stop/recreate with bind mounts, memory/CPU limits, and labels), `logs`, `stats`,
   `images`, and a `watcher` that turns Docker events into history + crash detection.
@@ -99,6 +103,11 @@ Cross-cutting:
   the DB.
 - **Disk quotas** are enforced by the panel because Docker can't cap bind-mount usage: the indexer
   caches per-directory sizes and disk-growing operations are gated on them.
+- **Metric history** - a background sampler writes one row per running server per minute from the
+  live cache: CPU %, memory used/limit, net RX/TX (derived from Docker's cumulative counters so the
+  stored values are bytes-per-second), TPS/MSPT when the server reports them, and players. Rows are
+  kept 30 days and pruned by daily maintenance. The dashboard trend chart and the Metrics tab's
+  history views read these rows; no user-facing chart blocks on Docker.
 - **Secrets** (RCON passwords, API keys, TOTP secrets, the Discord webhook URL) are encrypted at
   rest with AES-256-GCM using a dedicated random key at `$DATA_DIR/.secret-key` (mode `0600`,
   auto-generated). It's independent of `SESSION_SECRET`; a `SESSION_SECRET`-derived key is kept as a
@@ -110,7 +119,9 @@ Cross-cutting:
 ## Data & wire formats
 
 - **`data/panel.db`** - the SQLite database. Snapshotted daily via `VACUUM INTO` to
-  `data/backups/_panel/` (newest 14 kept); `PRAGMA integrity_check` runs on boot.
+  `data/backups/_panel/` (newest 14 kept); `PRAGMA integrity_check` runs on boot. The
+  `metrics_samples` table holds the per-server minute samples (TEXT `server_id`, ISO-8601 UTC `ts`,
+  no FK) with server+time and time-only indexes; daily maintenance prunes rows older than 30 days.
 - **`data/.session-secret`** - the auto-generated cookie-signing secret, created on first run if
   `SESSION_SECRET` is unset. Deleting it rotates the secret (which invalidates sessions).
 - **`data/.secret-key`** - the dedicated 32-byte at-rest encryption key (mode `0600`), auto-created
@@ -143,7 +154,8 @@ Cross-cutting:
     reconciles cached statuses, emits a one-time `offline-after-restart` event for a server that was
     up before the panel restarted and won't be brought back, and the boot loop starts
     `auto_start` servers plus recovers `auto_restart` servers found crashed during the outage
-    (respecting crash-loop backoff).
+    (respecting crash-loop backoff). The Docker-ready block also starts the live cache and the
+    **metrics sampler** (first sample written immediately, then once a minute).
 
 > The instrument-before-preflight order is a deliberate trade-off: it lets a future Sentry wiring
 > patch the runtime first, at the cost of a slightly less friendly message on a truly ancient Node.

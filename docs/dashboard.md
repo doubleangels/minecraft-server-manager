@@ -23,6 +23,10 @@ Click a card to open that server. The empty **Create a server** card and the top
 
 You can search and sort your servers, and switch between grid and list layouts with the toggle on the right.
 
+## Usage trends
+
+Below the resource overview, the **Usage Trends** chart plots the combined CPU share, memory in use, and player count across your running servers over time. It reads the panel's saved metric history (one sample per server per minute, kept for 30 days), so it keeps working after servers stop. Use the tabs above the chart to switch between the last 1 hour, the last 24 hours, or the last 7 days. The per-server view of the same history lives on a server's **Metrics** tab (renamed from "Live").
+
 ## Recent activity
 
 The feed at the bottom is a live, human-readable audit trail: logins, backups, blueprint exports, update checks, chat-command changes, server starts and stops, and more. Every entry is tagged with the server it belongs to (or the panel itself) and how long ago it happened. The full history lives on the [Activity](activity.md) page.
