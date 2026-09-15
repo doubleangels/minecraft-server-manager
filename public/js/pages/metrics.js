@@ -82,7 +82,7 @@ function init(serverId, memLimitMb, cpuLimit) {
         interaction: { intersect: false, mode: 'index' },
         plugins: { legend: { display: datasets.length > 1, labels: { boxWidth: 10, color: colors.tick } } },
         scales,
-        elements: { point: { radius: 0 }, line: { borderWidth: 2, tension: 0.35 } },
+        elements: { point: { radius: 0 }, line: { borderWidth: 2, tension: 0.35, spanGaps: true } },
       },
     });
     charts.push(chart);

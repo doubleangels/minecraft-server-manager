@@ -362,7 +362,7 @@ function initTrendChart() {
         x: { display: false },
         y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.tick } },
       },
-      elements: { point: { radius: 0 }, line: { borderWidth: 2, tension: 0.35 } },
+      elements: { point: { radius: 0 }, line: { borderWidth: 2, tension: 0.35, spanGaps: true } },
     },
   });
 
