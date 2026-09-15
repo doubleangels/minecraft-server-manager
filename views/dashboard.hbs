@@ -84,6 +84,23 @@
 </div>
 {{/unless}}
 
+{{#unless serversOnly}}
+<div class="mb-6 {{#if noServers}}hidden{{/if}}" id="dashboard-trends">
+  <div class="mb-3 flex items-center justify-between gap-2">
+    <h2 class="font-semibold">Usage Trends <span class="text-sm font-normal text-ink-faint" data-trend-label>· last 24h</span></h2>
+    <div class="seg" role="group" aria-label="Trend range">
+      <button class="seg-btn" data-trend-range="1h">1h</button>
+      <button class="seg-btn" data-trend-range="24h" aria-pressed="true">24h</button>
+      <button class="seg-btn" data-trend-range="7d">7d</button>
+    </div>
+  </div>
+  <div class="card p-4">
+    <canvas id="fleet-trend" height="130"></canvas>
+    <p class="help mt-2">Combined CPU share, memory in use, and players online across running servers, sampled every minute. History is kept for 30 days.</p>
+  </div>
+</div>
+{{/unless}}
+
 {{#unless noServers}}
 <div class="mb-4 flex flex-wrap items-center gap-2">
   <input class="input max-w-xs" placeholder="Search servers, tags…" id="server-filter">
@@ -144,4 +161,5 @@
     </ol>
   </div>
 </div>
+<script src="/vendor/chart.umd.js"></script>
 <script type="module" src="/js/pages/dashboard.js"></script>

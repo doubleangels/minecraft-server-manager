@@ -188,6 +188,10 @@ function startBackgroundServices(httpServer) {
   // table; long-lived keys like the Mojang manifest keep a fresh fetched_at so
   // they always survive.
   const API_CACHE_RETENTION_DAYS = 30;
+  // Metrics history: a minute of sampling per running server is ~1.4k rows/day.
+  // 30 days bounds the table while keeping useful trend history; the sample
+  // interval is an implementation detail, not a promise.
+  const METRICS_RETENTION_DAYS = 30;
   async function runMaintenance() {
     try {
       const r = require('./analytics/ingest').pruneOlderThan(ANALYTICS_RETENTION_DAYS);
@@ -227,6 +231,18 @@ function startBackgroundServices(httpServer) {
       }
     } catch (err) {
       logger.error('Pruning event history or API cache failed.', { err: serializeError(err) });
+    }
+    // Metrics history retention (see the METRICS_RETENTION_DAYS constant above).
+    // ts is ISO-8601 UTC so a straight string compare against an ISO cutoff is
+    // order-correct and index-friendly.
+    try {
+      const cutoff = new Date(Date.now() - METRICS_RETENTION_DAYS * 24 * 3600 * 1000).toISOString();
+      const removed = require('./db').run('DELETE FROM metrics_samples WHERE ts < ?', cutoff).changes;
+      if (removed) {
+        logger.info('Pruned old metrics samples.', { removed, olderThanDays: METRICS_RETENTION_DAYS });
+      }
+    } catch (err) {
+      logger.error('Pruning old metrics samples failed.', { err: serializeError(err) });
     }
     // Snapshot the panel DB itself - the server backups only cover per-server
     // world dirs, so without this the users/schedules/pins/history/2FA store has
@@ -307,6 +323,10 @@ function startBackgroundServices(httpServer) {
       .catch((err) => logger.error('Starting analytics ingest failed.', { err: serializeError(err) }));
     require('./analytics/stats').startStatsIngest({});
     require('./services/liveCache').startLiveCache({});
+    // Metrics history: downsampled once a minute into SQLite so the dashboard
+    // trend chart and per-server history can render past load. Docker-only - no
+    // samples are written while the daemon is down (the live cache is empty).
+    require('./metrics/sampler').startMetricsSampler({});
     // Honor "start on panel boot", and recover servers that crashed while the
     // panel was down: the live docker-events watcher never saw that 'die', so
     // nothing scheduled the auto-restart for them. guardOp de-dupes a server

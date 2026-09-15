@@ -313,3 +313,97 @@ function fmtUptime(ms) {
   if (hours < 48) return `${hours}h ${mins % 60}m`;
   return `${Math.floor(hours / 24)}d ${hours % 24}h`;
 }
+
+// ---- Fleet usage trend (persisted history, /api/fleet/metrics) ----
+initTrendChart();
+
+function themeColors() {
+  const css = getComputedStyle(document.documentElement);
+  const line = css.getPropertyValue('--color-line').trim();
+  return {
+    grass: css.getPropertyValue('--color-grass-400').trim() || '#59c53e',
+    diamond: css.getPropertyValue('--color-diamond-400').trim() || '#3cc5c7',
+    gold: css.getPropertyValue('--color-gold-400').trim() || '#f0b42f',
+    grid: line ? `${line}66` : 'rgba(128,128,128,.12)',
+    tick: css.getPropertyValue('--color-ink-faint').trim() || '#87919b',
+  };
+}
+
+function initTrendChart() {
+  if (!window.Chart) return;
+  const root = document.getElementById('dashboard-trends');
+  const canvas = document.getElementById('fleet-trend');
+  if (!root || !canvas) return;
+  // Hidden block = no servers yet; skip the chart (same contract as the
+  // combined overview - the page reloads when servers appear).
+  if (!root.offsetParent) return;
+
+  const rangeBtns = root.querySelectorAll('[data-trend-range]');
+  const labels = { '1h': 'last 1h', '24h': 'last 24h', '7d': 'last 7d' };
+  let active = '24h';
+  let colors = themeColors();
+  const datasets = [
+    { label: 'CPU %', data: [], borderColor: colors.diamond, backgroundColor: 'transparent' },
+    { label: 'Memory MB', data: [], borderColor: colors.grass, backgroundColor: 'transparent' },
+    { label: 'Players', data: [], borderColor: colors.gold, backgroundColor: 'transparent' },
+  ];
+  const chart = new window.Chart(canvas, {
+    type: 'line',
+    data: { labels: [], datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      animation: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: true, labels: { boxWidth: 10, color: colors.tick } },
+      },
+      scales: {
+        x: { display: false },
+        y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.tick } },
+      },
+      elements: { point: { radius: 0 }, line: { borderWidth: 2, tension: 0.35 } },
+    },
+  });
+
+  async function load() {
+    try {
+      const res = await fetch(`/api/fleet/metrics?range=${active}&points=120`);
+      const data = await res.json();
+      if (!res.ok || !data.ok) return;
+      chart.data.labels = data.points.map(() => '');
+      data.points.forEach((p, i) => {
+        datasets[0].data[i] = p.cpuPct;
+        datasets[1].data[i] = p.memUsedMb;
+        datasets[2].data[i] = p.playersOnline;
+      });
+      for (const d of datasets) d.data.length = data.points.length;
+      chart.update('none');
+      const h = root.querySelector('[data-trend-label]');
+      if (h) h.textContent = labels[active] || active;
+    } catch {
+      /* request hiccup; the chart keeps its last data */
+    }
+  }
+
+  for (const btn of rangeBtns) {
+    btn.addEventListener('click', () => {
+      active = btn.dataset.trendRange;
+      for (const b of rangeBtns) b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      load();
+    });
+  }
+
+  new MutationObserver(() => {
+    colors = themeColors();
+    chart.options.scales.y.grid.color = colors.grid;
+    chart.options.scales.y.ticks.color = colors.tick;
+    if (chart.options.plugins.legend.labels) chart.options.plugins.legend.labels.color = colors.tick;
+    datasets[0].borderColor = colors.diamond;
+    datasets[1].borderColor = colors.grass;
+    datasets[2].borderColor = colors.gold;
+    chart.update('none');
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  load();
+}

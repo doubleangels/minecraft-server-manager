@@ -277,6 +277,38 @@ router.get(
   })
 );
 
+// Historical metrics for one server: a bucketed time series read from the
+// metrics_samples table the background sampler writes, never Docker. Ranges are
+// the same three the dashboard trend chart offers; this route is what a future
+// per-server history view will consume.
+const METRICS_RANGES = ['1h', '24h', '7d'];
+const metricsQuery = z.object({
+  range: z.enum(METRICS_RANGES).default('24h'),
+  points: z.coerce.number().int().min(10).max(240).default(120),
+});
+router.get(
+  '/servers/:id/metrics',
+  asyncHandler(async (req, res, next) => {
+    requireServer(req.params.id);
+    const { range, points } = metricsQuery.parse(req.query);
+    res.json({
+      ok: true,
+      range,
+      points: require('../../metrics/aggregate').serverSeries(req.params.id, range, points),
+    });
+  })
+);
+
+// Fleet-wide historical metrics: the same bucket shape as /servers/:id/metrics
+// but summed across every server. Drives the dashboard "Usage Trends" chart.
+router.get(
+  '/fleet/metrics',
+  asyncHandler(async (req, res, next) => {
+    const { range, points } = metricsQuery.parse(req.query);
+    res.json({ ok: true, range, points: require('../../metrics/aggregate').fleetSeries(range, points) });
+  })
+);
+
 // Batched live data for client-side hydration (dashboard cards, headers).
 // Includes the DB status for EVERY server so the dashboard can move the
 // status dot when a server crashes or stops - hydration used to update only
