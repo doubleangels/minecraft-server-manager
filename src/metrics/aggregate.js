@@ -218,6 +218,18 @@ function fleetSeries(range, buckets = DEFAULT_BUCKETS, nowMs = Date.now()) {
   return aggregateFleet(rows.map(normalize), { rangeMs, buckets, nowMs });
 }
 
+/**
+ * Delete samples older than `days`. ts is ISO-8601 UTC, so the string compare
+ * against an ISO cutoff is order-correct and uses idx_metrics_ts.
+ * @param {number} days
+ * @returns {{ removed: number }}
+ */
+function pruneOlderThan(days) {
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const removed = db.run('DELETE FROM metrics_samples WHERE ts < ?', cutoff).changes;
+  return { removed };
+}
+
 module.exports = {
   RANGES,
   DEFAULT_BUCKETS,
@@ -227,4 +239,5 @@ module.exports = {
   aggregateFleet,
   serverSeries,
   fleetSeries,
+  pruneOlderThan,
 };

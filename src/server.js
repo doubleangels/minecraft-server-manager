@@ -233,11 +233,9 @@ function startBackgroundServices(httpServer) {
       logger.error('Pruning event history or API cache failed.', { err: serializeError(err) });
     }
     // Metrics history retention (see the METRICS_RETENTION_DAYS constant above).
-    // ts is ISO-8601 UTC so a straight string compare against an ISO cutoff is
-    // order-correct and index-friendly.
     try {
-      const cutoff = new Date(Date.now() - METRICS_RETENTION_DAYS * 24 * 3600 * 1000).toISOString();
-      const removed = require('./db').run('DELETE FROM metrics_samples WHERE ts < ?', cutoff).changes;
+      const r = require('./metrics/aggregate');
+      const { removed } = r.pruneOlderThan(METRICS_RETENTION_DAYS);
       if (removed) {
         logger.info('Pruned old metrics samples.', { removed, olderThanDays: METRICS_RETENTION_DAYS });
       }

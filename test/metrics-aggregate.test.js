@@ -107,3 +107,33 @@ test('aggregateFleet treats a server with a missing metric as present for runnin
   assert.equal(points[1].memUsedMb, 0); // a contributed 0 (avg null), b none
   assert.equal(points[1].playersOnline, 1);
 });
+
+test('pruneOlderThan deletes only samples past the retention cutoff', () => {
+  const db = require('../src/db');
+  const DAY = 24 * HOUR;
+  const REAL_NOW = Date.now(); // pruneOlderThan compares against the real clock
+  const insert = (ts) =>
+    db.run(
+      'INSERT INTO metrics_samples (server_id, ts, cpu_pct) VALUES (?, ?, ?)',
+      `prune_${ts % 1000}`,
+      new Date(ts).toISOString(),
+      50
+    );
+  insert(REAL_NOW - 40 * DAY); // 40 days old - must go
+  insert(REAL_NOW - 6 * DAY); // inside 30-day window - stays
+  insert(REAL_NOW - 3_600_000); // one hour old - stays
+  insert(REAL_NOW + 1_000); // future (sampler clock skew) - stays
+  const { removed } = agg.pruneOlderThan(30);
+  assert.equal(removed, 1);
+  const left = db.get('SELECT COUNT(*) AS n FROM metrics_samples').n;
+  assert.equal(left, 3);
+  const rows = db.all('SELECT ts FROM metrics_samples ORDER BY ts');
+  assert.deepEqual(
+    rows.map((r) => r.ts),
+    [
+      new Date(REAL_NOW - 6 * DAY).toISOString(),
+      new Date(REAL_NOW - 3_600_000).toISOString(),
+      new Date(REAL_NOW + 1_000).toISOString(),
+    ]
+  );
+});

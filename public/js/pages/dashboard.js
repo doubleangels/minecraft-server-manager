@@ -371,6 +371,10 @@ function initTrendChart() {
       const res = await fetch(`/api/fleet/metrics?range=${active}&points=120`);
       const data = await res.json();
       if (!res.ok || !data.ok) return;
+      const empty = root.querySelector('#fleet-trend-empty');
+      const anyData = data.points.some((p) => p.running > 0);
+      canvas.hidden = !anyData;
+      if (empty) empty.classList.toggle('hidden', anyData);
       chart.data.labels = data.points.map(() => '');
       data.points.forEach((p, i) => {
         datasets[0].data[i] = p.cpuPct;
