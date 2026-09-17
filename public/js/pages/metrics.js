@@ -127,6 +127,9 @@ function init(serverId, memLimitMb, cpuLimit) {
   let liveSnapshots = null;
   let lastNet = null;
   let lastTs = 0;
+  // The range a history fetch is for, null while live. Guards against a
+  // slower request resolving after a newer click changed the selection.
+  let pendingRange = null;
 
   function updateCharts() {
     for (const chart of Object.values(chartByName)) chart?.update('none');
@@ -185,6 +188,10 @@ function init(serverId, memLimitMb, cpuLimit) {
     } catch {
       return;
     }
+    // A later click moved on to a different range or back to Live while this
+    // was in flight; applying it now would clobber the current view with
+    // stale data.
+    if (range !== pendingRange) return;
     if (!Array.isArray(data.points)) return;
     const fmt = range === '7d' ? fmtDayTime : fmtTime;
     const labels = data.points.map((p) => fmt(p.at));
@@ -201,6 +208,7 @@ function init(serverId, memLimitMb, cpuLimit) {
       const range = btn.dataset.range;
       const wasLive = liveMode;
       liveMode = range === 'live';
+      pendingRange = liveMode ? null : range;
       for (const b of rangeBtns) b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
       if (liveMode) {
         restoreLive();

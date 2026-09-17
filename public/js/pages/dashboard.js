@@ -357,10 +357,15 @@ function initTrendChart() {
   });
 
   async function load() {
+    const range = active;
     try {
-      const res = await fetch(`/api/fleet/metrics?range=${active}&points=120`);
+      const res = await fetch(`/api/fleet/metrics?range=${range}&points=120`);
       const data = await res.json();
       if (!res.ok || !data.ok) return;
+      // A later click moved on to a different range while this was in
+      // flight; applying it now would show data that doesn't match the
+      // range the buttons and label say is selected.
+      if (range !== active) return;
       const empty = root.querySelector('#fleet-trend-empty');
       const anyData = data.points.some((p) => p.running > 0);
       canvas.hidden = !anyData;
@@ -374,7 +379,7 @@ function initTrendChart() {
       for (const d of datasets) d.data.length = data.points.length;
       chart.update('none');
       const h = root.querySelector('[data-trend-label]');
-      if (h) h.textContent = labels[active] || active;
+      if (h) h.textContent = labels[range] || range;
     } catch {
       /* request hiccup; the chart keeps its last data */
     }
