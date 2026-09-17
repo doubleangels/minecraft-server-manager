@@ -279,8 +279,8 @@ router.get(
 
 // Historical metrics for one server: a bucketed time series read from the
 // metrics_samples table the background sampler writes, never Docker. Ranges are
-// the same three the dashboard trend chart offers; this route is what a future
-// per-server history view will consume.
+// the same three the dashboard trend chart offers; this route feeds the
+// history range buttons on the server Metrics tab.
 const METRICS_RANGES = ['1h', '24h', '7d'];
 const metricsQuery = z.object({
   range: z.enum(METRICS_RANGES).default('24h'),

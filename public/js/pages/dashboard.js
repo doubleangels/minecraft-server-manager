@@ -2,6 +2,8 @@
 // (server-side via ?sort=), grid/list view toggle, and the create-tile fix for
 // the text filter.
 
+import { themeColors } from '../lib/chartTheme.js';
+
 const grid = document.getElementById('server-grid');
 const sortSel = document.getElementById('server-sort');
 
@@ -316,18 +318,6 @@ function fmtUptime(ms) {
 
 // ---- Fleet usage trend (persisted history, /api/fleet/metrics) ----
 initTrendChart();
-
-function themeColors() {
-  const css = getComputedStyle(document.documentElement);
-  const line = css.getPropertyValue('--color-line').trim();
-  return {
-    grass: css.getPropertyValue('--color-grass-400').trim() || '#59c53e',
-    diamond: css.getPropertyValue('--color-diamond-400').trim() || '#3cc5c7',
-    gold: css.getPropertyValue('--color-gold-400').trim() || '#f0b42f',
-    grid: line ? `${line}66` : 'rgba(128,128,128,.12)',
-    tick: css.getPropertyValue('--color-ink-faint').trim() || '#87919b',
-  };
-}
 
 function initTrendChart() {
   if (!window.Chart) return;

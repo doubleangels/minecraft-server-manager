@@ -128,10 +128,11 @@ function aggregateFleet(samples, { rangeMs, buckets = DEFAULT_BUCKETS, nowMs = D
       new Map()
   );
   for (const s of samples) {
-    let perServer = byBucket[bucketIndex(s.at, windowStart, step, buckets)].get(s.serverId);
+    const bucket = byBucket[bucketIndex(s.at, windowStart, step, buckets)];
+    let perServer = bucket.get(s.serverId);
     if (!perServer) {
       perServer = { cpu: [], mem: [], rx: [], tx: [], players: [] };
-      byBucket[bucketIndex(s.at, windowStart, step, buckets)].set(s.serverId, perServer);
+      bucket.set(s.serverId, perServer);
     }
     if (s.cpu != null) perServer.cpu.push(s.cpu);
     if (s.mem != null) perServer.mem.push(s.mem);

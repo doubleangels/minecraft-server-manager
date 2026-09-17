@@ -2,6 +2,8 @@
 // tick-rate charts, all fed by the stats WebSocket. Chart.js is loaded globally
 // from /vendor/chart.umd.js by the partial.
 
+import { themeColors } from '../lib/chartTheme.js';
+
 const root = document.querySelector('[data-metrics-server]');
 if (root && window.Chart)
   init(
@@ -38,20 +40,6 @@ function init(serverId, memLimitMb, cpuLimit) {
     }, 30000);
   }
 
-  // Theme tokens, re-read on toggle: Chart.js paints on canvas, so it can't
-  // follow CSS variables by itself.
-  function themeColors() {
-    const css = getComputedStyle(document.documentElement);
-    const line = css.getPropertyValue('--color-line').trim();
-    return {
-      grass: css.getPropertyValue('--color-grass-400').trim() || '#59c53e',
-      diamond: css.getPropertyValue('--color-diamond-400').trim() || '#3cc5c7',
-      gold: css.getPropertyValue('--color-gold-400').trim() || '#f0b42f',
-      redstone: css.getPropertyValue('--color-redstone-400').trim() || '#e5484d',
-      grid: line ? `${line}66` : 'rgba(128,128,128,.12)',
-      tick: css.getPropertyValue('--color-ink-faint').trim() || '#87919b',
-    };
-  }
   let colors = themeColors();
   const charts = [];
 
@@ -189,14 +177,15 @@ function init(serverId, memLimitMb, cpuLimit) {
   }
 
   async function applyHistory(range) {
-    let res;
+    let data;
     try {
-      res = await fetch(`/api/servers/${serverId}/metrics?range=${range}&points=120`);
+      const res = await fetch(`/api/servers/${serverId}/metrics?range=${range}&points=120`);
+      data = await res.json();
+      if (!res.ok || !data.ok) return;
     } catch {
       return;
     }
-    const data = await res.json();
-    if (!res.ok || !data.ok || !Array.isArray(data.points)) return;
+    if (!Array.isArray(data.points)) return;
     const fmt = range === '7d' ? fmtDayTime : fmtTime;
     const labels = data.points.map((p) => fmt(p.at));
     setSeries(cpuChart, labels, [data.points.map((p) => p.cpuPct)]);
