@@ -127,9 +127,11 @@ function init(serverId, memLimitMb, cpuLimit) {
   let liveSnapshots = null;
   let lastNet = null;
   let lastTs = 0;
-  // The range a history fetch is for, null while live. Guards against a
-  // slower request resolving after a newer click changed the selection.
-  let pendingRange = null;
+  // Monotonic id for the history fetch. Every range click and every switch
+  // back to Live bumps it, so a request that resolves out of order is dropped
+  // no matter which range it was for. A value compare alone wouldn't catch an
+  // earlier request for the same range beating a later one on reorder.
+  let historySeq = 0;
 
   function updateCharts() {
     for (const chart of Object.values(chartByName)) chart?.update('none');
@@ -180,6 +182,7 @@ function init(serverId, memLimitMb, cpuLimit) {
   }
 
   async function applyHistory(range) {
+    const seq = historySeq;
     let data;
     try {
       const res = await fetch(`/api/servers/${serverId}/metrics?range=${range}&points=120`);
@@ -188,10 +191,9 @@ function init(serverId, memLimitMb, cpuLimit) {
     } catch {
       return;
     }
-    // A later click moved on to a different range or back to Live while this
-    // was in flight; applying it now would clobber the current view with
-    // stale data.
-    if (range !== pendingRange) return;
+    // A newer click replaced this one while the request was in flight;
+    // applying it now would clobber the current view with stale data.
+    if (seq !== historySeq) return;
     if (!Array.isArray(data.points)) return;
     const fmt = range === '7d' ? fmtDayTime : fmtTime;
     const labels = data.points.map((p) => fmt(p.at));
@@ -208,7 +210,9 @@ function init(serverId, memLimitMb, cpuLimit) {
       const range = btn.dataset.range;
       const wasLive = liveMode;
       liveMode = range === 'live';
-      pendingRange = liveMode ? null : range;
+      // Retire any fetch already in flight: a switch back to Live or to a new
+      // range must make the previous request stale, even one for this range.
+      ++historySeq;
       for (const b of rangeBtns) b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
       if (liveMode) {
         restoreLive();

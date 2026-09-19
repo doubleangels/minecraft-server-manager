@@ -10,7 +10,7 @@ export function themeColors() {
     grass: css.getPropertyValue('--color-grass-400').trim() || '#59c53e',
     diamond: css.getPropertyValue('--color-diamond-400').trim() || '#3cc5c7',
     gold: css.getPropertyValue('--color-gold-400').trim() || '#f0b42f',
-    redstone: css.getPropertyValue('--color-redstone-400').trim() || '#e5484d',
+    redstone: css.getPropertyValue('--color-redstone-400').trim() || '#f87171',
     grid: line ? `${line}66` : 'rgba(128,128,128,.12)',
     tick: css.getPropertyValue('--color-ink-faint').trim() || '#87919b',
   };
