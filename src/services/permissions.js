@@ -208,6 +208,7 @@ const CAPABILITY_INFO = {
       'Advanced Docker overrides and the chatbot, which stay admin-only. Rebuilding the container after a change (Power).',
     reach: [
       'PATCH /api/servers/:id',
+      'POST /api/servers/:id/changes-preview',
       'PUT /api/servers/:id/console-label',
       'POST /api/servers/:id/icon',
       'POST /api/servers/:id/image/upgrade',
