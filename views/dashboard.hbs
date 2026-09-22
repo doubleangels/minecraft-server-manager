@@ -2,20 +2,20 @@
 
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 {{#if serversOnly}}hidden{{/if}}">
   <div class="card p-4">
-    <div class="text-xs text-ink-faint">Servers online</div>
+    <div class="eyebrow">Servers online</div>
     {{! Green only when something IS online - 0/3 in success green lied. }}
     <div class="mt-1 text-2xl font-bold tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-faint"> / {{totals.total}}</span></div>
   </div>
   <div class="card p-4">
-    <div class="text-xs text-ink-faint">Players connected</div>
+    <div class="eyebrow">Players connected</div>
     <div class="mt-1 text-2xl font-bold tabular-nums">{{totals.players}}</div>
   </div>
   <div class="card p-4">
-    <div class="text-xs text-ink-faint">Updates available</div>
+    <div class="eyebrow">Updates available</div>
     <div class="mt-1 text-2xl font-bold tabular-nums {{#if totals.updates}}text-warn{{/if}}">{{totals.updates}}</div>
   </div>
   <div class="card p-4">
-    <div class="text-xs text-ink-faint">Docker</div>
+    <div class="eyebrow">Docker</div>
     <div class="mt-1 flex items-center gap-2 text-sm font-semibold text-ink-faint" id="docker-status">
       <span class="status-dot relative bg-stone-500"></span> Checking…
     </div>
@@ -25,25 +25,25 @@
 {{#unless serversOnly}}
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 {{#if noServers}}hidden{{/if}}">
   <div class="card min-w-0 p-4">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'memory-stick' 'size-3.5'}}} Memory allotted</div>
+    <div class="eyebrow flex items-center gap-1">{{{icon 'memory-stick' 'size-3.5'}}} Memory allotted</div>
     <div class="mt-1 break-words text-2xl font-bold tabular-nums">{{overview.mem.allottedMb}}<span class="text-base font-medium text-ink-faint"> MB</span></div>
     <div class="text-xs text-ink-faint"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
   </div>
 
   <div class="card min-w-0 p-4">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'hard-drive' 'size-3.5'}}} Storage used</div>
+    <div class="eyebrow flex items-center gap-1">{{{icon 'hard-drive' 'size-3.5'}}} Storage used</div>
     <div class="mt-1 break-words text-2xl font-bold tabular-nums">{{bytes overview.disk.usedBytes}}</div>
     <div class="text-xs text-ink-faint">across all server data folders</div>
   </div>
 
   <div class="card min-w-0 p-4">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'activity' 'size-3.5'}}} Health · 24h</div>
+    <div class="eyebrow flex items-center gap-1">{{{icon 'activity' 'size-3.5'}}} Health · 24h</div>
     <div class="mt-1 break-words text-2xl font-bold tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="text-base font-medium text-ink-faint"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
     <div class="text-xs text-ink-faint">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
   </div>
 
   <div class="card min-w-0 p-4">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'circle-arrow-up' 'size-3.5'}}} Updates</div>
+    <div class="eyebrow flex items-center gap-1">{{{icon 'circle-arrow-up' 'size-3.5'}}} Updates</div>
     <div class="mt-1 break-words text-2xl font-bold tabular-nums {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
     <div class="text-xs text-ink-faint">{{overview.updates.mods}} mod{{#unless (eq overview.updates.mods 1)}}s{{/unless}} / {{overview.updates.server}} server-level</div>
   </div>
@@ -54,13 +54,13 @@
 <div class="mb-6 {{#if noServers}}hidden{{/if}}">
   <h2 class="mb-3 font-semibold">Servers by Status</h2>
   <div class="card flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm">
-    {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot bg-grass-500"></span>{{overview.byStatus.running}} Running</span>{{/if}}
-    {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
-    {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
-    {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
-    {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot bg-diamond-500"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
-    {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
-    {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot bg-stone-500"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
+    {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "running"}}"></span>{{overview.byStatus.running}} Running</span>{{/if}}
+    {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "starting"}}"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
+    {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "unhealthy"}}"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
+    {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "stalled"}}"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
+    {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "updating"}}"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
+    {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "crashed"}}"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
+    {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "stopped"}}"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
   </div>
 </div>
 {{/unless}}
@@ -113,7 +113,7 @@
     {{> server-card}}
   {{/each}}
 
-  <a href="/servers/new" class="grid min-h-44 place-items-center rounded-lg border-2 border-dashed border-line text-ink-faint transition hover:border-grass-600 hover:text-ok">
+  <a href="/servers/new" class="grid min-h-44 place-items-center rounded-lg border-2 border-dashed border-line text-ink-faint transition hover:border-ok hover:text-ok">
     <div class="grid place-items-center text-center">
       {{{icon 'plus' 'size-8'}}}
       <div class="mt-2 text-sm font-medium">Create a Server</div>
