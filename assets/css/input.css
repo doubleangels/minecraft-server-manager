@@ -512,10 +512,32 @@
   .badge-info {
     @apply bg-diamond-400/15 text-link;
   }
+  /* Sentence-case badge for note/caution chips in the settings catalog - the
+     badge base uppercases; this is the only sanctioned way to keep it lowercase. */
+  .badge-note {
+    @apply normal-case tracking-normal font-normal;
+  }
 
   .chip {
     /* rounded-sm, not a pill - the whole product sits in the blocky register. */
     @apply inline-flex items-center gap-1 rounded-sm border border-line bg-inset px-2 py-0.5 text-xs text-ink-soft;
+  }
+
+  /* Semantic chip colorways - state-shaped chips (roles, compatibility, status).
+     Same construction as the notice/badge variants: never raw palette at call
+     sites. These express a persistent state color; button.chip[aria-pressed]
+     still expresses selection. */
+  .chip-ok {
+    @apply border-ok/40 bg-grass-500/10 text-ok;
+  }
+  .chip-warn {
+    @apply border-warn/40 bg-gold-500/10 text-warn;
+  }
+  .chip-danger {
+    @apply border-danger/40 bg-redstone-500/10 text-danger;
+  }
+  .chip-info {
+    @apply border-link/40 bg-diamond-500/10 text-link;
   }
 
   /* Notices: the ONE inline callout. Border and tint pairs are fixed per

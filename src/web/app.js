@@ -54,6 +54,25 @@ const STATUS_DOT = {
   stone: 'bg-stone-500',
 };
 
+// Presentation-only: semantic badge variant for an event/activity type in the
+// history log. Unmapped types fall back to the neutral .badge (''). Mirror the
+// client map in public/js/pages/analytics.js (BADGE) - keep the two in lockstep.
+/** @type {Record<string, string>} */
+const EVENT_BADGE = {
+  chat: 'badge-info',
+  join: 'badge-ok',
+  death: 'badge-danger',
+  pvp: 'badge-danger',
+  advancement: 'badge-warn',
+  started: 'badge-ok',
+  restarted: 'badge-ok',
+  'backup-created': 'badge-ok',
+  'backup-restored': 'badge-ok',
+  crashed: 'badge-danger',
+  killed: 'badge-danger',
+  stopped: 'badge-warn',
+};
+
 // The 8 icons bundled in public/icons/servers - original pixel-art SVGs drawn
 // specifically for server identity (block/world motifs), deliberately distinct
 // artwork from the profile-picture presets (config/avatars.js) even where the
@@ -154,6 +173,7 @@ function createApp() {
         // Status *text* goes through the theme-aware semantic tokens (the raw
         // 400-step palette classes fail contrast on the light canvas).
         statusText: (s) => STATUS_TEXT[(STATUS_META[s] || STATUS_META.stopped).color],
+        eventBadge: (t) => EVENT_BADGE[t] || '',
         // Quota bar color by usage percentage against the configured thresholds.
         meterColor: (used, total) => {
           if (!total) return 'bg-diamond-400';
