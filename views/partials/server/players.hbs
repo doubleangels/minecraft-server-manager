@@ -78,17 +78,17 @@
                 and genuinely disabled composers already use opacity for that. }}
             <td data-th="Roles">
               <div class="flex flex-wrap gap-1.5">
-                <button class="chip {{#if whitelisted}}border-grass-700 bg-grass-500/15 text-ok{{/if}}"
+                <button class="chip {{#if whitelisted}}chip-ok{{/if}}"
                         data-role-toggle="whitelist" data-name="{{name}}" data-on="{{#if whitelisted}}1{{else}}0{{/if}}"
                         data-tip="{{#if whitelisted}}Remove from whitelist{{else}}Add to whitelist{{/if}}">
                   {{{icon 'shield-check' 'size-3.5'}}} <span data-chip-label>Whitelist</span>
                 </button>
-                <button class="chip {{#if op}}border-diamond-700 bg-diamond-400/15 text-link{{/if}}"
+                <button class="chip {{#if op}}chip-info{{/if}}"
                         data-role-toggle="op" data-name="{{name}}" data-on="{{#if op}}1{{else}}0{{/if}}"
                         data-tip="{{#if op}}Remove operator status{{else}}Make operator (level 4){{/if}}">
                   {{{icon 'shield' 'size-3.5'}}} <span data-chip-label>Op{{#if op}} L{{opLevel}}{{/if}}</span>
                 </button>
-                <button class="chip {{#if banned}}border-danger/40 bg-redstone-500/15 text-danger{{/if}}"
+                <button class="chip {{#if banned}}chip-danger{{/if}}"
                         data-role-toggle="ban" data-name="{{name}}" data-on="{{#if banned}}1{{else}}0{{/if}}"
                         data-tip="{{#if banned}}Pardon this player{{else}}Ban this player{{/if}}">
                   {{{icon 'ban' 'size-3.5'}}} <span data-chip-label>{{#if banned}}Banned{{else}}Ban{{/if}}</span>

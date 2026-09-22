@@ -55,17 +55,13 @@ function init(root) {
 
   // ---- in-place chip/banner patching (mirrors the roster page - same
   // action, same UI, no page flash and no silent success) ----
-  const CHIP_ON = {
-    whitelist: ['border-grass-700', 'bg-grass-500/15', 'text-ok'],
-    op: ['border-diamond-700', 'bg-diamond-400/15', 'text-link'],
-    ban: ['border-danger/40', 'bg-redstone-500/15', 'text-danger'],
-  };
+  const CHIP_ON = { whitelist: 'chip-ok', op: 'chip-info', ban: 'chip-danger' };
   function setChip(role, on, label) {
     const chip = root.querySelector(`[data-role-toggle="${role}"]`);
     if (!chip) return;
     chip.dataset.on = on ? '1' : '0';
-    chip.classList.remove(...Object.values(CHIP_ON).flat());
-    if (on) chip.classList.add(...CHIP_ON[role]);
+    chip.classList.remove('chip-ok', 'chip-info', 'chip-danger');
+    if (on) chip.classList.add(CHIP_ON[role]);
     if (label) chip.querySelector('[data-chip-label]').textContent = label;
     const tips = {
       whitelist: on ? 'Remove from whitelist' : 'Add to whitelist',
