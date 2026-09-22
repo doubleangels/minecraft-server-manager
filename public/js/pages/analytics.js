@@ -11,6 +11,9 @@ if (root) init(root.dataset.analyticsServer);
 
 const CROWN_SVG = `<svg class="icon size-3.5 shrink-0 text-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg>`;
 
+// Client twin of the server EVENT_BADGE map (src/web/app.js) - keep the two in
+// lockstep. Full literals on purpose: the Tailwind scanner only emits classes it
+// sees verbatim in source, so never assemble these strings.
 const BADGE = {
   chat: 'badge-info',
   join: 'badge-ok',
@@ -18,7 +21,7 @@ const BADGE = {
   death: 'badge-danger',
   pvp: 'badge-danger',
   advancement: 'badge-warn',
-  command: 'bg-inset text-ink-soft',
+  command: '',
 };
 
 function fmtDuration(seconds) {
@@ -155,7 +158,7 @@ function init(serverId) {
     const li = document.createElement('li');
     li.className = 'flex flex-wrap items-baseline gap-2 p-2.5 text-sm';
     const badge = document.createElement('span');
-    badge.className = `badge shrink-0 ${BADGE[evt.type] || 'bg-inset text-ink-soft'}`;
+    badge.className = `badge shrink-0 ${BADGE[evt.type] || ''}`;
     badge.textContent = evt.type;
     const player = document.createElement('span');
     player.className = 'shrink-0 font-medium';
@@ -168,7 +171,7 @@ function init(serverId) {
       message.textContent = evt.message;
       if (evt.target) {
         const pvp = document.createElement('span');
-        pvp.className = 'badge badge-danger ml-1.5';
+        pvp.className = `badge ml-1.5 ${BADGE.pvp || ''}`;
         pvp.textContent = 'PvP';
         message.appendChild(pvp);
       }
