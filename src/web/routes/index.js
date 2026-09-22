@@ -146,7 +146,7 @@ router.use(
   asyncHandler(async (req, res, next) => {
     // Only the servers this user may view - the same filter every fleet-wide page applies.
     res.locals.visibleServerIds = permissions.visibleServerIds(req.user);
-    res.locals.servers = permissions.filterVisible(req.user, sidebarServerVMs());
+    res.locals.servers = permissions.filterVisible(req.user, sidebarServerVMs(), res.locals.visibleServerIds);
     // The badge counts only visible servers, with the same aggregate query for
     // everyone; the scope clause is added only for a user with a hidden server.
     const checker = require('../../updates/checker');
@@ -279,7 +279,7 @@ function buildDashboardOverview(servers) {
 
 async function renderServerList(req, res, next, { page }) {
   try {
-    const rows = permissions.filterVisible(req.user, serversService.listServers());
+    const rows = permissions.filterVisible(req.user, serversService.listServers(), res.locals.visibleServerIds);
     const ctx = buildServerContext(rows); // one batched DB pass for all servers
     const results = await Promise.allSettled(rows.map((s) => serverVM(s, { ctx })));
     const servers = results
@@ -826,7 +826,7 @@ router.get('/modpacks', async (req, res) => {
   res.render('modpacks', {
     title: 'Modpacks',
     active: 'modpacks',
-    packServers: permissions.filterVisible(req.user, packServerVMs()),
+    packServers: permissions.filterVisible(req.user, packServerVMs(), res.locals.visibleServerIds),
   });
 });
 
