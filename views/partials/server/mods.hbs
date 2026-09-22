@@ -67,17 +67,17 @@
             <td data-th="Version">
               {{default version '-'}}
               {{#if updateAvailable}}<span class="badge badge-warn ml-1" data-tip="Update available">→ {{updateAvailable}}</span>{{/if}}
-              {{#if updateIgnored}}<span class="badge ml-1 text-ink-faint" data-tip="This update is ignored and won't be applied">ignored → {{updateIgnored}}</span>{{/if}}
+              {{#if updateIgnored}}<span class="badge ml-1" data-tip="This update is ignored and won't be applied">ignored → {{updateIgnored}}</span>{{/if}}
               {{#if revertTo}}<div class="mt-1 text-[11px] text-ink-faint">updated from {{revertTo}}</div>{{/if}}
             </td>
             <td data-th="Size" class="text-right text-ink-faint">{{bytes size}}</td>
             <td data-th="Status">
               {{#if missing}}
-                <span class="text-xs font-medium text-danger" data-tip="File missing on disk. Reinstall it from the library.">Missing</span>
+                <span class="badge badge-danger" data-tip="File missing on disk. Reinstall it from the library.">Missing</span>
               {{else if enabled}}
-                <span class="text-xs font-medium text-ok">Enabled</span>
+                <span class="badge badge-ok">Enabled</span>
               {{else}}
-                <span class="text-xs font-medium text-ink-faint">Disabled</span>
+                <span class="badge">Disabled</span>
               {{/if}}
             </td>
             <td data-th="" class="text-right">

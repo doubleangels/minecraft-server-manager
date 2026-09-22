@@ -3,7 +3,7 @@
      data-running="{{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}1{{else}}0{{/if}}">
 
   <div class="mb-4 flex flex-wrap items-end gap-3">
-    <div class="w-72 max-w-full{{#if fixedPlayer}} hidden{{/if}}">
+    <div class="w-full sm:w-72 sm:max-w-xs{{#if fixedPlayer}} hidden{{/if}}">
       <label class="label" for="inv-player">Player</label>
       <select class="input" id="inv-player" data-label="Player">
         <option value="">Loading players…</option>

@@ -276,6 +276,8 @@ function init(serverId) {
 
     const style = document.createElement('div');
     style.innerHTML = '<h4 class="mb-2 text-sm font-semibold">Playstyle</h4>';
+    // Full literals on purpose: the Tailwind scanner only emits classes it sees
+    // verbatim in source, so never assemble these strings.
     const styleColors = {
       miner: 'bg-diamond-400',
       fighter: 'bg-redstone-500',

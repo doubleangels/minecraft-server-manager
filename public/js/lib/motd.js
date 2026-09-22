@@ -206,7 +206,7 @@ export function attachMotdEditor(input, { preview, getName = () => 'My Server' }
       const filled = preset.replaceAll('{server}', getName() || 'My Server');
       const row = document.createElement('button');
       row.type = 'button';
-      row.className = 'console block w-full cursor-pointer py-2 text-left text-sm transition hover:border-grass-600';
+      row.className = 'console block w-full cursor-pointer py-2 text-left text-sm transition hover:border-line-strong';
       renderMotdInto(row, filled);
       row.addEventListener('click', () => {
         input.value = filled;

@@ -14,6 +14,9 @@ import { PLAYER_NAME_RE } from '../lib/playerName.js';
 import { glyphFor } from '../lib/itemGlyph.js';
 import { escapeHtml as esc } from '../lib/format.js';
 
+// Shared info-card surface used under several headers/drawers.
+const INFO_CARD = 'rounded-md border border-line bg-inset/50 p-3';
+
 const root = document.querySelector('[data-inventory-root]');
 if (root) init(root);
 
@@ -138,9 +141,9 @@ function init(root) {
       const named = Boolean(item.displayName);
       const enchanted = Boolean(item.enchants && item.enchants.length);
       cell.className += named
-        ? 'border-gold-500 bg-gold-400/10 text-warn'
+        ? 'border-warn/40 bg-warn/10 text-warn'
         : enchanted
-          ? 'border-diamond-700 bg-diamond-400/10 text-link'
+          ? 'border-link/40 bg-link/10 text-link'
           : 'border-line-strong bg-inset text-ink';
       const where = label
         ? `${label} slot`
@@ -157,7 +160,7 @@ function init(root) {
         <span data-slot-abbrev>${esc(abbrev(item.id))}</span>
         ${item.count > 1 ? `<span class="absolute bottom-0 right-0.5 text-[9px] font-bold">${esc(item.count)}</span>` : ''}
         ${enchanted ? '<span class="absolute left-0.5 top-0 text-[9px]">*</span>' : ''}
-        ${hasNested ? '<span class="absolute left-0.5 bottom-0.5 size-1.5 rounded-full bg-grass-400" aria-hidden="true"></span>' : ''}`;
+        ${hasNested ? '<span class="absolute left-0.5 bottom-0.5 size-1.5 rounded-full bg-ok" aria-hidden="true"></span>' : ''}`;
       // The bundled icon set only covers vanilla - modded items (and the rare
       // vanilla id it's missing) just keep the text abbreviation as-is.
       if (iconBase && item.id.startsWith('minecraft:')) {
@@ -268,7 +271,7 @@ function init(root) {
 
   function itemHeader(item, where) {
     return `
-      <div class="rounded-md border border-line bg-inset/50 p-3">
+      <div class="${INFO_CARD}">
         <div class="font-semibold ${item.displayName ? 'text-warn' : ''}">${esc(item.displayName || prettyId(item.id))}</div>
         <div class="font-mono text-xs text-ink-faint">${esc(item.id)} · ×${esc(item.count)} · ${esc(where)}</div>
         ${item.enchants && item.enchants.length ? `<div class="mt-1 text-xs text-link">${esc(item.enchants.map(prettyEnchant).join(', '))}</div>` : ''}
@@ -382,7 +385,7 @@ function init(root) {
     const ask = (picked) => {
       const id = picked ? picked.id : null;
       const header = picked
-        ? `<div class="rounded-md border border-line bg-inset/50 p-3">
+        ? `<div class="${INFO_CARD}">
              <div class="font-semibold">${esc(picked.name)}</div>
              <div class="font-mono text-xs text-ink-faint">${esc(picked.id)} → ${esc(slotName(at.container, at.slot))}</div>
            </div>`
@@ -515,7 +518,7 @@ function init(root) {
     if (!editable) {
       content.insertAdjacentHTML(
         'beforeend',
-        '<p class="rounded-md border border-gold-500/40 bg-gold-400/5 p-2.5 text-xs text-warn">Read-only while the player is online. Stop the server or kick the player to edit backpack contents.</p>'
+        '<p class="notice notice-warn text-xs">Read-only while the player is online. Stop the server or kick the player to edit backpack contents.</p>'
       );
     }
     const grid = document.createElement('div');
@@ -840,7 +843,7 @@ function init(root) {
   /** Offline give: add to the first free slot via the .dat (backup kept). */
   function openAddModal(item) {
     const header = item
-      ? `<div class="rounded-md border border-line bg-inset/50 p-3">
+      ? `<div class="${INFO_CARD}">
            <div class="font-semibold">${esc(item.name)}</div>
            <div class="font-mono text-xs text-ink-faint">${esc(item.id)} → first free slot of ${esc(currentPlayerName() || currentUuid)}</div>
          </div>`
@@ -881,7 +884,7 @@ function init(root) {
       ${
         item
           ? `
-        <div class="rounded-md border border-line bg-inset/50 p-3">
+        <div class="${INFO_CARD}">
           <div class="font-semibold">${esc(item.name)}</div>
           <div class="font-mono text-xs text-ink-faint">${esc(item.id)}</div>
         </div>`

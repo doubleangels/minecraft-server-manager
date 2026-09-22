@@ -10,8 +10,8 @@
       <span class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm font-medium text-ink">
         {{label}}
         <span class="font-mono text-[11px] font-normal text-ink-faint">{{key}}</span>
-        {{#if note}}<span class="badge badge-warn font-normal normal-case tracking-normal">{{note}}</span>{{/if}}
-        {{#if danger}}<span class="badge badge-danger font-normal normal-case tracking-normal">Caution</span>{{/if}}
+        {{#if note}}<span class="badge badge-note badge-warn">{{note}}</span>{{/if}}
+        {{#if danger}}<span class="badge badge-note badge-danger">Caution</span>{{/if}}
       </span>
       {{#if help}}<p class="mt-1 max-w-prose text-xs leading-relaxed text-ink-faint">{{help}}</p>{{/if}}
     </div>
@@ -26,8 +26,8 @@
       {{label}}
       <span class="font-mono text-[11px] font-normal text-ink-faint">{{key}}</span>
       {{#if unit}}<span class="text-xs font-normal text-ink-faint">({{unit}})</span>{{/if}}
-      {{#if note}}<span class="badge badge-warn font-normal normal-case tracking-normal">{{note}}</span>{{/if}}
-      {{#if danger}}<span class="badge badge-danger font-normal normal-case tracking-normal">Caution</span>{{/if}}
+      {{#if note}}<span class="badge badge-note badge-warn">{{note}}</span>{{/if}}
+      {{#if danger}}<span class="badge badge-note badge-danger">Caution</span>{{/if}}
     </label>
 
     {{#if (eq type 'enum')}}

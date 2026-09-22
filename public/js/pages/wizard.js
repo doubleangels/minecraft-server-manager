@@ -665,17 +665,12 @@ function initModBrowser() {
     mcSel.dispatchEvent(new Event('change', { bubbles: true }));
   })();
 
-  pickGroup(
-    'wz-loaders',
-    'loader',
-    (v) => {
-      loader = v;
-      clearSelection(true);
-      refreshLoaderBuilds();
-      if (q.value.trim()) search();
-    },
-    ['border-grass-500', 'text-ok']
-  );
+  pickGroup('wz-loaders', 'loader', (v) => {
+    loader = v;
+    clearSelection(true);
+    refreshLoaderBuilds();
+    if (q.value.trim()) search();
+  });
 
   function syncPlatformChips() {
     platformsEl?.querySelectorAll('[data-platform]').forEach((b) => {
@@ -1066,7 +1061,7 @@ function initZipUpload() {
 
     selectedEl.classList.remove('hidden');
     selectedEl.innerHTML = `
-      <div class="rounded-md border border-grass-700 bg-grass-600/10 p-3">
+      <div class="notice notice-ok">
         <div class="flex flex-wrap items-center gap-3">
           <div class="min-w-0 flex-1">
             <div class="truncate font-semibold" data-role="title"></div>
@@ -1555,8 +1550,7 @@ function initSolver({ onApplied = () => {} } = {}) {
     chipsEl.classList.toggle('flex', !!picked.size);
     for (const mod of picked.values()) {
       const chip = document.createElement('span');
-      chip.className =
-        'inline-flex items-center gap-1.5 rounded-md border border-line bg-inset py-1 pl-1.5 pr-1 text-xs';
+      chip.className = 'chip';
       chip.innerHTML = `
         ${mod.iconUrl ? `<img src="${escapeHtml(mod.iconUrl)}" alt="" class="size-4 rounded-sm">` : ''}
         <span class="max-w-40 truncate">${escapeHtml(mod.title)}</span>

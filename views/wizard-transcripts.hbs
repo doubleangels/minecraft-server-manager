@@ -8,7 +8,7 @@
           <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-faint">
             <span class="font-medium text-ink-soft">{{server_name}}</span>
             <span class="font-mono">{{server_id}}</span>
-            <span>·</span><span>{{speaker}}</span>
+            <span>{{#if speaker}}<span class="chip">{{speaker}}</span>{{/if}}</span>
             <span class="ml-auto" data-ts="{{created_at}}">{{created_at}}</span>
           </div>
           <p class="mt-2 whitespace-pre-wrap break-words text-sm {{#if (eq role 'error')}}text-danger{{else}}text-ink{{/if}}">{{content}}</p>
@@ -16,6 +16,6 @@
       {{/each}}
     </div>
   {{else}}
-    <div class="p-10 text-center text-sm text-ink-faint">No chatbot transcripts are being kept right now.</div>
+    {{> empty-state iconName='bot' title='No Transcripts Being Kept' message="Set a retention policy on a server's Chatbot tab to start recording conversations."}}
   {{/if}}
 </div>

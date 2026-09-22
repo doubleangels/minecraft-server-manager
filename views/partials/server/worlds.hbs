@@ -18,7 +18,7 @@
               <div class="truncate font-medium" title="{{name}}">{{name}}</div>
               {{#if seed}}<div class="text-xs text-ink-faint">seed {{seed}}</div>{{/if}}
             </td>
-            <td data-th="Dimensions" class="text-xs text-ink-faint">{{#each dims}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}</td>
+            <td data-th="Dimensions"><div class="flex flex-wrap gap-1.5">{{#each dims}}<span class="chip">{{this}}</span>{{/each}}</div></td>
             <td data-th="Size" class="whitespace-nowrap text-right text-ink-faint">{{bytes sizeBytes}}</td>
             {{! Status shows STATE only (both branches same height); the
                 Activate control lives with the other actions - mixed badge
@@ -64,7 +64,7 @@
           {{{icon 'earth' 'size-5 text-link'}}}
           <div class="min-w-0 flex-1">
             <div class="font-medium">{{name}}</div>
-            <div class="text-xs text-ink-faint">{{source}}{{#if flavor}} · {{flavor}}{{/if}}{{#if mcVersion}} {{mcVersion}}{{/if}} · <span data-ts="{{created}}">{{created}}</span></div>
+            <div class="flex flex-wrap items-center gap-1.5 text-xs"><span class="chip">{{source}}</span>{{#if flavor}}{{#if mcVersion}}<span class="chip">{{flavor}} {{mcVersion}}</span>{{/if}}{{/if}}<span class="text-ink-faint">· <span data-ts="{{created}}">{{created}}</span></span></div>
           </div>
           <span class="text-xs text-ink-faint">{{bytes size}}</span>
           <button class="btn btn-sm" data-lib-install data-tip="Install into this server, replacing the current world or alongside it">{{{icon 'import' 'size-3.5'}}} Install Here</button>

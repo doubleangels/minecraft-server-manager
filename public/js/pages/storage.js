@@ -29,13 +29,13 @@ if (largestBody) {
       largestBody.textContent = '';
       for (const f of files) {
         const tr = document.createElement('tr');
-        const cell = td(tr);
+        const cell = td(tr, '', 'Path');
         const mono = document.createElement('span');
         mono.className = 'break-all font-mono text-xs';
         mono.textContent = f.path;
         cell.append(mono);
-        td(tr, 'text-ink-faint sm:w-24 sm:text-right').textContent = fmtBytes(f.size);
-        const linkCell = td(tr, 'sm:w-10 sm:text-right');
+        td(tr, 'text-ink-faint sm:w-24 sm:text-right', 'Size').textContent = fmtBytes(f.size);
+        const linkCell = td(tr, 'sm:w-10 sm:text-right', 'Open');
         const a = document.createElement('a');
         a.className = 'btn btn-ghost btn-sm';
         a.href = f.link;
@@ -50,9 +50,9 @@ if (largestBody) {
     });
 }
 
-function td(tr, cls = '') {
+function td(tr, cls = '', th = '') {
   const cell = document.createElement('td');
-  cell.dataset.th = '';
+  cell.dataset.th = th;
   if (cls) cell.className = cls;
   tr.append(cell);
   return cell;

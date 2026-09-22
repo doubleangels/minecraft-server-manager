@@ -222,6 +222,8 @@ async function hydrateDocker() {
 
 // Client-side mirror of the server's STATUS_META (src/web/app.js) so live
 // hydration can move the dot when a server crashes/stops between reloads.
+// Full literals on purpose: the Tailwind scanner only emits classes it sees
+// verbatim in source, so never assemble these strings.
 const STATUS_META = {
   running: { label: 'Running', dot: 'bg-grass-500', text: 'text-ok', pulse: true },
   starting: { label: 'Starting', dot: 'bg-gold-500', text: 'text-warn', pulse: true },

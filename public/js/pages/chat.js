@@ -32,10 +32,9 @@ const STYLES = [
   ['obfuscated', '▓', 'Obfuscated (scrambles in-game)', ''],
 ];
 
-const STYLE_BTN_CLASS =
-  'grid size-7 place-items-center rounded-sm border border-line bg-inset text-xs transition ' +
-  'hover:border-line-strong aria-pressed:border-grass-500 aria-pressed:bg-grass-600/15 aria-pressed:text-ok ' +
-  'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-diamond-400 disabled:opacity-50';
+// chip base + a square 28px cell; pressed/selection lives in aria-pressed
+// (button.chip[aria-pressed='true'] in input.css owns the grass state).
+const STYLE_BTN_CLASS = 'chip size-7 justify-center rounded-sm px-0 text-xs transition';
 
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const OBF_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789#$%&?';

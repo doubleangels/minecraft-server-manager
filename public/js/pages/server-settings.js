@@ -178,20 +178,24 @@ function init(serverId) {
   const heapEl = document.getElementById('st-heap');
   const cmemEl = document.getElementById('st-cmem');
   const headroomBox = document.getElementById('st-headroom');
+  const HEADROOM = {
+    danger: 'notice notice-danger',
+    warn: 'notice notice-warn',
+    ok: 'notice notice-ok',
+  };
   function updateHeadroom() {
     if (!heapEl || !cmemEl || !headroomBox) return;
     const heap = Number(heapEl.value);
     const cmem = Number(cmemEl.value);
     const pctAbove = heap ? Math.round(((cmem - heap) / heap) * 100) : 0;
-    const base = 'rounded-md border p-2.5 text-xs ';
     if (cmem <= heap) {
-      headroomBox.className = base + 'border-danger/40 bg-redstone-500/10 text-danger';
+      headroomBox.className = HEADROOM.danger;
       headroomBox.textContent = `The container limit (${cmem} MB) is at or below the Java heap (${heap} MB). The server will be killed for running out of memory on start. Raise the limit or lower the heap.`;
     } else if (cmem < heap * 1.25) {
-      headroomBox.className = base + 'border-warn/40 bg-gold-500/10 text-warn';
+      headroomBox.className = HEADROOM.warn;
       headroomBox.textContent = `Tight headroom: the container limit is only ${pctAbove}% above the Java heap. Java needs extra room beyond the heap, so aim for 25% or more.`;
     } else {
-      headroomBox.className = base + 'border-ok/40 bg-grass-500/10 text-ok';
+      headroomBox.className = HEADROOM.ok;
       headroomBox.textContent = `Healthy headroom: the container limit is ${pctAbove}% above the Java heap.`;
     }
   }

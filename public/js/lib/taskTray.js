@@ -58,9 +58,9 @@ function init() {
 
     mount.classList.toggle('hidden', tasks.length === 0);
     badge.textContent = String(running.length || tasks.length);
-    // Swap the background explicitly - stacking bg-grass-600 onto the baked-in
+    // Swap the background explicitly - stacking bg-ok onto the baked-in
     // bg-inset leaves the winner to stylesheet order, not intent.
-    badge.classList.toggle('bg-grass-600', running.length > 0);
+    badge.classList.toggle('bg-ok', running.length > 0);
     badge.classList.toggle('text-white', running.length > 0);
     badge.classList.toggle('bg-inset', running.length === 0);
     btn.querySelector('svg')?.classList.toggle('animate-spin', running.length > 0);
