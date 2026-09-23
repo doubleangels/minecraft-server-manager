@@ -22,9 +22,9 @@ If [two-factor authentication](two-factor-authentication.md) is enabled on your 
 
 Everything hangs off the left sidebar:
 
-- **Dashboard** - every server at a glance ([details](dashboard.md)).
-- **Servers**, **Modpacks**, **Worlds**, **Blueprints** - create and manage servers and their content.
-- **Updates**, **Backups**, **Schedules**, **Storage**, **Activity** - the operational side: what's out of date, your snapshots, automation, disk usage, and the audit log.
+- **Dashboard**: every server at a glance ([details](dashboard.md)).
+- **Servers**, **Modpacks**, **Worlds**, **Blueprints**: create and manage servers and their content.
+- **Updates**, **Backups**, **Schedules**, **Storage**, **Activity**: the operational side: what's out of date, your snapshots, automation, disk usage, and the audit log.
 - **Settings** (bottom): users, API keys, and panel configuration.
 
 The top bar has the **Create a Server** button, a **theme toggle** (dark/light), and your **account menu**, where you can manage [two-factor authentication](two-factor-authentication.md) or sign out.

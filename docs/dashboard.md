@@ -10,10 +10,10 @@ The dashboard is your home base: every server, its live status, and a running fe
 
 Across the top:
 
-- **Servers online** - how many of your servers are currently running.
-- **Players connected** - the total player count across all running servers.
-- **Updates available** - how many servers, packs, or mods have a newer version ([see Updates](updates.md)).
-- **Docker** - whether the panel can reach the Docker daemon, and its version.
+- **Servers online**: how many of your servers are currently running.
+- **Players connected**: the total player count across all running servers.
+- **Updates available**: how many servers, packs, or mods have a newer version ([see Updates](updates.md)).
+- **Docker**: whether the panel can reach the Docker daemon, and its version.
 
 ## Server cards
 
