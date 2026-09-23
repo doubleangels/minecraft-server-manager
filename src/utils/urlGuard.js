@@ -133,20 +133,20 @@ async function assertPublicUrl(rawUrl, { allowPrivate = false } = {}) {
     throw httpError(400, 'Invalid URL');
   }
   if (u.protocol !== 'http:' && u.protocol !== 'https:') {
-    throw httpError(400, `Only http(s) URLs are allowed (got ${u.protocol})`);
+    throw httpError(400, `Only http(s) URLs are allowed (got ${u.protocol}).`);
   }
   const host = u.hostname.replace(/^\[|\]$/g, ''); // strip IPv6 brackets
   let addrs;
   if (net.isIP(host)) {
     addrs = [host];
   } else if (isAmbiguousNumericHost(host)) {
-    throw httpError(400, `Refusing to resolve an ambiguous numeric host (${host})`);
+    throw httpError(400, `Refusing to resolve an ambiguous numeric host (${host}).`);
   } else {
     let results;
     try {
       results = await dns.lookup(host, { all: true });
     } catch {
-      throw httpError(502, `Could not resolve host ${host}`);
+      throw httpError(502, `Could not resolve host ${host}.`);
     }
     addrs = results.map((r) => r.address);
   }
@@ -175,7 +175,7 @@ async function safeFetch(rawUrl, options = {}) {
     if (!location) return res;
     current = new URL(location, current).toString();
   }
-  throw httpError(502, `Too many redirects (more than ${MAX_REDIRECTS})`);
+  throw httpError(502, `Too many redirects (more than ${MAX_REDIRECTS}).`);
 }
 
 module.exports = { safeFetch, assertPublicUrl, isBlockedIp, isAmbiguousNumericHost };

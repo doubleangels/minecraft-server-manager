@@ -312,7 +312,7 @@ async function createServerImpl(input, { actor = 'system', start = false, onProg
     if (input.portBedrock) toCheck.push(input.portBedrock);
     if (input.portQuery) toCheck.push(input.portQuery);
     for (const p of toCheck) {
-      if (!(await isPortFree(p))) throw httpError(400, `Port ${p} is already in use or invalid`);
+      if (!(await isPortFree(p))) throw httpError(400, `Port ${p} is already in use or invalid.`);
     }
     ports = { game: input.portGame, rcon, bedrock: input.portBedrock || null };
   } else {
@@ -416,7 +416,7 @@ async function createServerImpl(input, { actor = 'system', start = false, onProg
       /* best effort */
     }
     if (err.statusCode === 409 && input.containerName) {
-      throw httpError(409, `Container name "${input.containerName}" is already in use by another Docker container`);
+      throw httpError(409, `Container name "${input.containerName}" is already in use by another Docker container.`);
     }
     throw err;
   }
@@ -609,7 +609,7 @@ async function recreateServerImpl(id, { actor = 'system', quiet = false } = {}) 
     const removedOrphan = await containers.removeStaleNameConflict(targetName, id).catch(() => false);
     if (!removedOrphan) {
       if (server.containerName) {
-        throw httpError(409, `Container name "${server.containerName}" is already in use by another Docker container`);
+        throw httpError(409, `Container name "${server.containerName}" is already in use by another Docker container.`);
       }
       throw err;
     }
@@ -832,7 +832,7 @@ function updateServer(id, changes, { actor = 'system' } = {}) {
     serverId: id,
     actor,
     type: 'config-changed',
-    summary: `Configuration changed: ${Object.keys(diff).join(', ')}${needsRecreate ? ' (rebuild required)' : ''}`,
+    summary: `Configuration changed: ${Object.keys(diff).join(', ')}${needsRecreate ? ' (rebuild required).' : '.'}`,
     details: { diff, needsRecreate },
   });
   return { server: getServer(id), needsRecreate };

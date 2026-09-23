@@ -197,7 +197,7 @@ async function importArchive(
   // Free-space preflight: extraction + re-zip can need ~3x the archive size.
   const { free } = await indexer.diskFree();
   if (free < stat.size * 3) {
-    throw httpError(507, `Not enough disk space to import this world (~${humanBytes(stat.size * 3)} needed)`);
+    throw httpError(507, `Not enough disk space to import this world (~${humanBytes(stat.size * 3)} needed).`);
   }
 
   const tmpDir = dataPath('tmp', `world-import-${nanoid(6)}`);
@@ -299,7 +299,7 @@ async function extractFromServerImpl(serverId, { name = '', actor = 'system' } =
   const worldBytes = await dirsSize(dims);
   const { free } = await indexer.diskFree();
   if (free < worldBytes * 2.2) {
-    throw httpError(507, `Not enough disk space to snapshot this world (~${humanBytes(worldBytes * 2.2)} needed)`);
+    throw httpError(507, `Not enough disk space to snapshot this world (~${humanBytes(worldBytes * 2.2)} needed).`);
   }
 
   const releaseReservation = indexer.reserveDiskSpace(worldBytes);
@@ -463,14 +463,14 @@ async function installToServerImpl(libraryId, serverId, { mode = 'replace', newN
   // the old dims were removed left the active world partially missing.
   const libZipPath = dataPath(lib.rel_path);
   const libZipStat = await fsp.stat(libZipPath).catch(() => null);
-  if (!libZipStat) throw httpError(404, `Library world archive is missing on disk: ${lib.filename}`);
+  if (!libZipStat) throw httpError(404, `Library world archive is missing on disk: ${lib.filename}.`);
   const uncompressedBytes = await zipUncompressedBytes(libZipPath).catch(() => libZipStat.size * 4);
   indexer.assertUnderQuota(server, uncompressedBytes);
   const { free } = await indexer.diskFree();
   if (free < uncompressedBytes * 1.1) {
     throw httpError(
       507,
-      `Not enough disk space to install this world (~${humanBytes(uncompressedBytes * 1.1)} needed)`
+      `Not enough disk space to install this world (~${humanBytes(uncompressedBytes * 1.1)} needed).`
     );
   }
 
@@ -656,7 +656,7 @@ async function duplicateWorldImpl(serverId, worldName, { actor = 'system' } = {}
   indexer.assertUnderQuota(server, sizeBytes);
   const { free } = await indexer.diskFree();
   if (free < sizeBytes * 1.1)
-    throw httpError(507, `Not enough disk space to duplicate (~${humanBytes(sizeBytes)} needed)`);
+    throw httpError(507, `Not enough disk space to duplicate (~${humanBytes(sizeBytes)} needed).`);
 
   const active = worldName === activeLevelName(server);
   const running = active && (await isRunning(serverId));
@@ -697,11 +697,11 @@ async function renameWorldImpl(serverId, worldName, newName, { actor = 'system' 
   const server = mustServer(serverId);
   checkWorldName(worldName);
   const clean = sanitizeWorldName(newName);
-  if (await isRunning(serverId)) throw httpError(409, 'Stop the server before renaming worlds');
+  if (await isRunning(serverId)) throw httpError(409, 'Stop the server before renaming worlds.');
   const dims = serverWorldDims(serverId, worldName);
   if (!fs.existsSync(dims[0])) throw httpError(404, `No world named "${worldName}" on this server`);
   if (fs.existsSync(dataPath('servers', serverId, clean))) {
-    throw httpError(409, `A world named "${clean}" already exists on this server`);
+    throw httpError(409, `A world named "${clean}" already exists on this server.`);
   }
 
   for (const dim of dims) {
@@ -728,7 +728,7 @@ const renameWorld = guardOp('rename', renameWorldImpl);
 async function activateWorldImpl(serverId, worldName, { actor = 'system' } = {}) {
   const server = mustServer(serverId);
   checkWorldName(worldName);
-  if (await isRunning(serverId)) throw httpError(409, 'Stop the server before switching worlds');
+  if (await isRunning(serverId)) throw httpError(409, 'Stop the server before switching worlds.');
   if (!fs.existsSync(dataPath('servers', serverId, worldName, 'level.dat'))) {
     throw httpError(404, `No world named "${worldName}" on this server`);
   }
@@ -764,7 +764,7 @@ async function resetWorldImpl(
   { seedMode = 'random', seed = '', levelType = '', backup = true, actor = 'system' } = {}
 ) {
   const server = mustServer(serverId);
-  if (await isRunning(serverId)) throw httpError(409, 'Stop the server before resetting the world');
+  if (await isRunning(serverId)) throw httpError(409, 'Stop the server before resetting the world.');
   const level = activeLevelName(server);
   const dims = serverWorldDims(serverId, level);
   if (!fs.existsSync(dims[0])) throw httpError(404, `World "${level}" does not exist yet - nothing to reset`);
@@ -886,7 +886,7 @@ async function prepareWorldDownloadImpl(serverId, worldName, { actor = 'system' 
   const sizeBytes = await dirsSize(dims);
   const { free } = await indexer.diskFree();
   if (free < sizeBytes * 1.2)
-    throw httpError(507, `Not enough disk space to stage the download (~${humanBytes(sizeBytes)} needed)`);
+    throw httpError(507, `Not enough disk space to stage the download (~${humanBytes(sizeBytes)} needed).`);
 
   const active = worldName === activeLevelName(server);
   const running = active && (await isRunning(serverId));
@@ -1197,7 +1197,7 @@ async function extractArchive(file, destDir, originalName = '') {
       filter: (p) => !p.split(/[\\/]/).includes('..'),
     });
   }
-  throw httpError(400, `That doesn't look like a zip or tar archive${originalName ? ` (${originalName})` : ''}`);
+  throw httpError(400, `That doesn't look like a zip or tar archive${originalName ? ` (${originalName})` : ''}.`);
 }
 
 // ---------------------------------------------------------------------------
@@ -1313,7 +1313,7 @@ function sanitizeWorldName(name) {
     .replace(/^\.+/, '')
     .trim()
     .slice(0, 64);
-  if (!clean) throw httpError(400, 'World name cannot be empty');
+  if (!clean) throw httpError(400, 'World name cannot be empty.');
   return clean;
 }
 
