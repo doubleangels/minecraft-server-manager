@@ -87,19 +87,19 @@ for a malformed id.
 
 ## Response fields
 
-| Field           | Meaning                                                                                           |
-| --------------- | ------------------------------------------------------------------------------------------------- |
-| `total`         | How many servers are visible to this token (after its scope filter).                              |
-| `online`        | How many of those are in state: `running`.                                                        |
-| `id`            | Stable server id (`srv_...`).                                                                     |
-| `name`          | Display name.                                                                                     |
-| `type`          | itzg server type (`PAPER`, `FABRIC`, `AUTO_CURSEFORGE`, ...).                                     |
-| `state`         | `running`, `starting`, `stopped`, or `crashed` - a stable summary of the panel's internal status. |
-| `cpuPct`        | Recent CPU %, or `null` when the server is not running.                                           |
-| `memoryMb`      | Resident memory in MB, or `null`.                                                                 |
-| `memoryLimitMb` | Configured container memory limit in MB, or `null`.                                               |
-| `uptimeSeconds` | Seconds since the container started, or `null`.                                                   |
-| `players`       | `{ online, max }`, or `null` until the server reports a player list.                              |
+| Field           | Meaning                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------ |
+| `total`         | How many servers are visible to this token (after its scope filter).                             |
+| `online`        | How many of those are in state: `running`.                                                       |
+| `id`            | Stable server id (`srv_...`).                                                                    |
+| `name`          | Display name.                                                                                    |
+| `type`          | itzg server type (`PAPER`, `FABRIC`, `AUTO_CURSEFORGE`, ...).                                    |
+| `state`         | `running`, `starting`, `stopped`, or `crashed`: a stable summary of the panel's internal status. |
+| `cpuPct`        | Recent CPU %, or `null` when the server is not running.                                          |
+| `memoryMb`      | Resident memory in MB, or `null`.                                                                |
+| `memoryLimitMb` | Configured container memory limit in MB, or `null`.                                              |
+| `uptimeSeconds` | Seconds since the container started, or `null`.                                                  |
+| `players`       | `{ online, max }`, or `null` until the server reports a player list.                             |
 
 ## Example
 

@@ -54,7 +54,7 @@ modded recipes direct the player to JEI/REI rather than fabricating an answer.
 - `test/wizard.test.js`: authorization, tool-boundary, retention, outreach, and chat behavior tests.
 
 The internal `wizard` route/module/table names are retained for upgrade and API compatibility;
-“chatbot” is the user-facing product term. Likewise, the stored `power_testers_json` field maps to
+"chatbot" is the user-facing product term. Likewise, the stored `power_testers_json` field maps to
 the UI's **Basic users** group.
 
 ## Dependency footprint (`minecraft-data`)

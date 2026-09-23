@@ -20,10 +20,10 @@ Tick **"Also shrink the world afterwards"** (on the Backups tab, or in a backup 
 
 Backups are tagged by why they were taken:
 
-- **manual** - you clicked the button.
-- **scheduled** - created by a [schedule](schedules.md). Every new server is also seeded a daily scheduled backup automatically (staggered between 02:00 and 05:59), so a server has automatic coverage from day one, not just before updates.
-- **pre-update** - taken automatically before a pack upgrade, so an upgrade is always reversible.
-- **pre-restore** - taken automatically right before a restore or a world reset, as a safety net in case the restore isn't what you wanted.
+- **manual**: you clicked the button.
+- **scheduled**: created by a [schedule](schedules.md). Every new server is also seeded a daily scheduled backup automatically (staggered between 02:00 and 05:59), so a server has automatic coverage from day one, not just before updates.
+- **pre-update**: taken automatically before a pack upgrade, so an upgrade is always reversible.
+- **pre-restore**: taken automatically right before a restore or a world reset, as a safety net in case the restore isn't what you wanted.
 
 ## Retention
 

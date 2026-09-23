@@ -15,9 +15,9 @@ The wizard pre-fills memory, CPU, and disk-quota fields from **Defaults for new 
 You choose:
 
 - A **name** (and optional icon, accent color, and tags to organize your fleet).
-- A **server type** - vanilla, Paper, Fabric, Forge, NeoForge, and more, each mapped to the right itzg image behind the scenes.
-- A **Minecraft version** - `LATEST`, a snapshot, or a specific version.
-- **Resources** - RAM (heap), container memory limit, CPU, and a disk quota.
+- A **server type**: vanilla, Paper, Fabric, Forge, NeoForge, and more, each mapped to the right itzg image behind the scenes.
+- A **Minecraft version**: `LATEST`, a snapshot, or a specific version.
+- **Resources**: RAM (heap), container memory limit, CPU, and a disk quota.
 
 Prefer a modpack? The **From modpack** tab installs a CurseForge, Modrinth, FTB, or GT New Horizons pack instead (see [Modpacks](modpacks.md)), or takes a **custom zip you upload**: a CurseForge modpack export (`manifest.json`) or any zip of mod jars. The manifest (or a majority vote across the identified jars) fills in the loader and Minecraft version, and every mod installs in one task. You can also start from a saved [Blueprint](blueprints.md).
 
@@ -35,14 +35,14 @@ The **Servers** page lists your whole fleet with status and quick stats.
 
 Opening a server gives you a tabbed workspace:
 
-- **Overview** - status, live stats, uptime, and the primary start / stop / restart controls.
-- **Console** - the live log stream and command input, plus in-game chat ([details](console-and-chat.md)).
-- **Players** - who's online, plus inventory, statistics, and [chat commands](console-and-chat.md).
-- **Mods** - the installed mod list, the [mod browser](modpacks.md), and content updates. Its **Versions** sub-tab checks which future Minecraft versions your mods have builds for ([updates](updates.md#minecraft-version-compatibility)).
-- **World** - [worlds, the live map, and the file manager](worlds-and-files.md).
-- **Backups** - [snapshots and restore](backups.md) for this server.
-- **Monitoring** - per-server history and live metrics, including crash reports (see below).
-- **Settings** - everything about how the server runs, plus the [integrations](integrations.md) (Discord, status page, invites, chatbot).
+- **Overview**: status, live stats, uptime, and the primary start / stop / restart controls.
+- **Console**: the live log stream and command input, plus in-game chat ([details](console-and-chat.md)).
+- **Players**: who's online, plus inventory, statistics, and [chat commands](console-and-chat.md).
+- **Mods**: the installed mod list, the [mod browser](modpacks.md), and content updates. Its **Versions** sub-tab checks which future Minecraft versions your mods have builds for ([updates](updates.md#minecraft-version-compatibility)).
+- **World**: [worlds, the live map, and the file manager](worlds-and-files.md).
+- **Backups**: [snapshots and restore](backups.md) for this server.
+- **Monitoring**: per-server history and live metrics, including crash reports (see below).
+- **Settings**: everything about how the server runs, plus the [integrations](integrations.md) (Discord, status page, invites, chatbot).
 
 ![Server overview](images/server-overview.png)
 
@@ -58,7 +58,7 @@ The **World Controls** rail rides along on every tab: the in-game clock, weather
 
 The **Settings** tab is the full configuration surface: rename, resources, update policy, auto-start / auto-restart, environment variables, and advanced Docker overrides. Fields that change how the container runs are clearly marked as needing a restart.
 
-Direct setting changes always stick across restarts. A PvP or difficulty change made with the **World Controls** tab, a whitelist toggle on the **Players** tab, or a `server.properties` edit in the **Files** editor removes the matching environment variable (if one was set) and marks the server for recreation - so the on-disk value wins instead of being re-asserted by the container image on the next start.
+Direct setting changes always stick across restarts. A PvP or difficulty change made with the **World Controls** tab, a whitelist toggle on the **Players** tab, or a `server.properties` edit in the **Files** editor removes the matching environment variable (if one was set) and marks the server for a rebuild, so the on-disk value wins instead of being re-asserted by the container image on the next start.
 
 ![Server settings](images/server-settings.png)
 
@@ -74,7 +74,7 @@ Crash reports (`crash-reports/*.txt` and JVM `hs_err_pid*.log` files) are picked
 
 Each report card offers a built-in viewer (with collapsible sections and highlighted exceptions), copy-stack-trace, and download, plus two [mclo.gs](https://mclo.gs) actions:
 
-- **Share to mclo.gs** publishes the report as a public paste and copies the link - the exact thing mod authors and support Discords ask for. The link is remembered on the report, so nothing is ever uploaded twice.
+- **Share to mclo.gs** publishes the report as a public paste and copies the link. That is the exact thing mod authors and support Discords ask for. The link is remembered on the report, so nothing is ever uploaded twice.
 - **Analyze** runs mclo.gs's automated insights over the paste: known problems with suggested fixes (missing dependencies, version mismatches, common mod conflicts), rendered right in the panel.
 
 ![mclo.gs insights](images/crash-insights.png)

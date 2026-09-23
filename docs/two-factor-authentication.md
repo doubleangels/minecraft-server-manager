@@ -41,8 +41,8 @@ Enter the current 6-digit code from your app (or one of your backup codes) and y
 
 Open the same **Two-factor authentication** entry in the account menu while it's enabled. After confirming your password you can:
 
-- **Regenerate backup codes** - issues a new set and retires the old.
-- **Disable 2FA** - removes it from your account.
+- **Regenerate backup codes**: issues a new set and retires the old.
+- **Disable 2FA**: removes it from your account.
 
 Both re-check your current password first.
 
@@ -53,6 +53,6 @@ An **admin** can reset another user's 2FA from **Settings → Users** (the **Res
 ## Good to know
 
 - Codes are time-based and rotate every 30 seconds; the panel accepts a small clock drift, and quietly recovers if the server's clock is later corrected.
-- A code can't be replayed - once it's used to sign in, that same code won't work again within its window.
+- A code can't be replayed: once it's used to sign in, that same code won't work again within its window.
 - Wrong codes are rate-limited. The limiter is **shared** with the password step (a per-account lockout plus a per-IP `RATE_LIMIT_AUTH_PER_15MIN` limiter), so entering a correct password can't reset the counter right before guessing the 6-digit code.
 - 2FA changes (enable, disable, reset, backup-code use) are all recorded in the [Activity log](activity.md).
