@@ -92,7 +92,7 @@
         <div>
           <label class="label" for="st-cmem">Container memory limit</label>
           <div class="flex items-center gap-3">
-            <input type="range" min="1024" max="20480" step="512" value="{{server.resources.containerMemoryMb}}" id="st-cmem" class="msm-range msm-range-alt flex-1" data-out="out-cmem" data-unit=" MB">
+            <input type="range" min="1024" max="20480" step="512" value="{{server.resources.containerMemoryMb}}" id="st-cmem" class="msm-range flex-1" data-out="out-cmem" data-unit=" MB">
             <span class="w-20 text-right font-mono text-sm" id="out-cmem">{{server.resources.containerMemoryMb}} MB</span>
           </div>
           <p class="help">The hard limit Docker enforces. Keep it 25% to 50% above the Java heap: Java needs extra room beyond the heap, and if the server reaches this limit it is stopped for running out of memory.</p>
