@@ -2,16 +2,16 @@
 
 <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 {{#if serversOnly}}hidden{{/if}}">
   <div class="card p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">Servers online</div>
+    <div class="eyebrow flex items-center gap-1.5">Servers Online</div>
     {{! Green only when something IS online - 0/3 in success green lied. }}
     <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-soft"> / {{totals.total}}</span></div>
   </div>
   <div class="card p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">Players connected</div>
+    <div class="eyebrow flex items-center gap-1.5">Players Connected</div>
     <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums">{{totals.players}}</div>
   </div>
   <div class="card p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">Updates available</div>
+    <div class="eyebrow flex items-center gap-1.5">Updates Available</div>
     <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums {{#if totals.updates}}text-warn{{/if}}">{{totals.updates}}</div>
   </div>
   <div class="card p-5 sm:p-6 flex flex-col justify-between">
@@ -25,13 +25,13 @@
 {{#unless serversOnly}}
 <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 {{#if noServers}}hidden{{/if}}">
   <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">{{{icon 'memory-stick' 'size-4'}}} Memory allotted</div>
+    <div class="eyebrow flex items-center gap-1.5">{{{icon 'memory-stick' 'size-4'}}} Memory Allotted</div>
     <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{overview.mem.allottedMb}}<span class="text-base font-medium text-ink-soft"> MB</span></div>
     <div class="mt-1 text-xs text-ink-faint font-medium"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
   </div>
 
   <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">{{{icon 'hard-drive' 'size-4'}}} Storage used</div>
+    <div class="eyebrow flex items-center gap-1.5">{{{icon 'hard-drive' 'size-4'}}} Storage Used</div>
     <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{bytes overview.disk.usedBytes}}</div>
     <div class="mt-1 text-xs text-ink-faint font-medium">across all server data folders</div>
   </div>
