@@ -266,11 +266,11 @@ async function fetchJson(url, options = {}) {
   try {
     res = await fetch(url, { ...options, redirect: 'error', signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
   } catch {
-    throw httpError(502, 'Could not reach the AI server. Check its configuration and try again.');
+    throw httpError(502, 'Could not reach the LLM server. Check its configuration and try again.');
   }
   const body = await readJsonCapped(res);
   if (!res.ok) {
-    throw httpError(502, 'The AI server rejected the request. Check its configuration and try again.');
+    throw httpError(502, 'The LLM server rejected the request. Check its configuration and try again.');
   }
   return body;
 }
