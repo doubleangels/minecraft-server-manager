@@ -128,7 +128,7 @@ function schedule(job) {
           serverId: job.server_id || null,
           actor: 'scheduler',
           type: 'schedule-failed',
-          summary: `Scheduled ${job.task_type} failed: ${err.message}.`,
+          summary: `Scheduled ${job.task_type} failed.`,
         });
         logger.error('A scheduled task failed.', {
           scheduleId: job.id,

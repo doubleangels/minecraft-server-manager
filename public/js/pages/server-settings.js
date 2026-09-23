@@ -190,7 +190,7 @@ function init(serverId) {
     const pctAbove = heap ? Math.round(((cmem - heap) / heap) * 100) : 0;
     if (cmem <= heap) {
       headroomBox.className = HEADROOM.danger;
-      headroomBox.textContent = `The container limit (${cmem} MB) is at or below the Java heap (${heap} MB). The server will be killed for running out of memory on start. Raise the limit or lower the heap.`;
+      headroomBox.textContent = `The container limit (${cmem} MB) is at or below the Java heap (${heap} MB). The server will be stopped for running out of memory on start. Raise the limit or lower the heap.`;
     } else if (cmem < heap * 1.25) {
       headroomBox.className = HEADROOM.warn;
       headroomBox.textContent = `Tight headroom: the container limit is only ${pctAbove}% above the Java heap. Java needs extra room beyond the heap, so aim for 25% or more.`;
