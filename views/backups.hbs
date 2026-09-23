@@ -16,8 +16,9 @@
   <span class="ml-auto text-sm text-ink-faint" id="backups-total" data-count="{{totals.count}}" data-bytes="{{totals.bytes}}">Total: {{bytes totals.bytes}} in {{totals.count}} archive{{#if (ne totals.count 1)}}s{{/if}}</span>
 </div>
 
-<div class="card overflow-x-auto">
-  <table class="table-base table-stack" id="backups-table">
+<div class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="table-base table-stack" id="backups-table">
     <thead><tr><th>Server</th><th>Archive</th><th>Reason</th><th class="text-right">Size</th><th class="text-right">Created</th><th class="text-right">Actions</th></tr></thead>
     <tbody>
       {{#each backups}}
@@ -38,6 +39,7 @@
       {{/each}}
     </tbody>
   </table>
+  </div>
   <div class="hidden p-8 text-center text-sm text-ink-faint" id="backups-no-match">No backups match these filters.</div>
 </div>
 {{else}}

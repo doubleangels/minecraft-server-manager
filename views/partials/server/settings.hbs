@@ -1,6 +1,6 @@
 <div class="grid gap-4 lg:grid-cols-2" data-settings-server="{{server.id}}" data-settings-icon="{{server.icon}}" data-settings-accent="{{server.accent}}" data-settings-tags="{{jsonAttr server.tags}}" data-settings-env="{{settingsEnv}}" data-settings-docker-name="{{server.containerName}}" data-settings-docker-network="{{server.networkName}}" data-settings-docker-ports="{{jsonAttr server.extraPorts}}" data-settings-docker-binds="{{jsonAttr server.extraBinds}}">
-  <div class="card p-4">
-    <h3 class="mb-4 font-semibold">Identity</h3>
+  <div class="card p-5 sm:p-6">
+    <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Identity</h3>
     <div class="space-y-4">
       <div>
         <label class="label" for="st-name">Display name</label>
@@ -78,8 +78,8 @@
   </div>
 
   <div class="space-y-4">
-    <div class="card p-4">
-      <h3 class="mb-4 font-semibold">Resources</h3>
+    <div class="card p-5 sm:p-6">
+      <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Resources</h3>
       <div class="space-y-4">
         <div>
           <label class="label" for="st-heap">Java heap</label>
@@ -125,8 +125,8 @@
     </div>
     {{/if}}
 
-    <div class="card p-4">
-      <h3 class="mb-3 font-semibold">Update Policy</h3>
+    <div class="card p-5 sm:p-6">
+      <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Update Policy</h3>
       <div class="space-y-2 text-sm">
         <label class="flex items-center gap-2.5"><input type="radio" name="up" value="manual" class="msm-radio" {{#if (eq server.updatePolicy 'manual')}}checked{{/if}}> Manual Only <span class="text-xs text-ink-faint">(never changes anything, and no update badges for this server)</span></label>
         <label class="flex items-center gap-2.5"><input type="radio" name="up" value="notify" class="msm-radio" {{#if (eq server.updatePolicy 'notify')}}checked{{/if}}> Notify Me <span class="text-xs text-ink-faint">(show a badge when updates exist; you apply them)</span></label>
@@ -137,8 +137,8 @@
     {{! Admin-only: same gate as the wizard's Advanced Docker settings - the
         API 403s these fields for other roles. }}
     {{#if (eq user.role 'admin')}}
-    <div class="card p-4">
-      <h3 class="mb-4 font-semibold">Advanced Docker Settings</h3>
+    <div class="card p-5 sm:p-6">
+      <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Advanced Docker Settings</h3>
       <div class="space-y-4">
         <div class="grid gap-4 sm:grid-cols-2">
           <div>
@@ -178,8 +178,8 @@
     </div>
     {{/if}}
 
-    <div class="card p-4">
-      <h3 class="mb-3 font-semibold">Blueprint &amp; Maintenance</h3>
+    <div class="card p-5 sm:p-6">
+      <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Blueprint &amp; Maintenance</h3>
       <div class="flex flex-wrap gap-2">
         <button class="btn" id="st-export-bp">{{{icon 'drafting-compass' 'size-4'}}} Export as Blueprint</button>
         <button class="btn" id="st-clone">{{{icon 'copy' 'size-4'}}} Clone Server</button>

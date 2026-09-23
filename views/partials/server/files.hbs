@@ -1,22 +1,22 @@
 <div data-files-server="{{server.id}}" data-files-path="{{filePath}}" class="contents">
   <div class="card">
-    <div class="flex flex-wrap items-center gap-2 border-b border-line p-3">
-      <nav class="flex min-w-0 flex-wrap items-center gap-1 font-mono text-sm text-ink-soft" aria-label="Breadcrumb">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line/50 bg-inset/20 p-4">
+      <nav class="flex min-w-0 flex-wrap items-center gap-1.5 font-mono text-sm text-ink-soft bg-surface px-3 py-1.5 rounded-full shadow-sm border border-line/50" aria-label="Breadcrumb">
         {{#if crumbs.length}}
-          <a class="hover:text-link" href="/servers/{{server.id}}/files">data</a>
+          <a class="hover:text-link transition" href="/servers/{{server.id}}/files">data</a>
           {{#each crumbs}}
             <span class="text-ink-faint">/</span>
             {{#if @last}}
-              <span class="truncate text-ink">{{name}}</span>
+              <span class="truncate text-ink font-semibold">{{name}}</span>
             {{else}}
-              <a class="hover:text-link" href="/servers/{{../server.id}}/files?path={{urlq path}}">{{name}}</a>
+              <a class="hover:text-link transition" href="/servers/{{../server.id}}/files?path={{urlq path}}">{{name}}</a>
             {{/if}}
           {{/each}}
         {{else}}
-          <span class="text-ink">data</span>
+          <span class="text-ink font-semibold">data</span>
         {{/if}}
       </nav>
-      <div class="ml-auto flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-2 shrink-0">
         <button class="btn btn-sm" id="files-search" data-tip="Search the text of files under this folder.">{{{icon 'search' 'size-3.5'}}} Find in Files</button>
         <button class="btn btn-sm" id="files-upload">{{{icon 'upload' 'size-3.5'}}} Upload</button>
         <button class="btn btn-sm" id="files-mkdir">{{{icon 'folder-plus' 'size-3.5'}}} New Folder</button>

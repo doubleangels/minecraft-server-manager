@@ -29,7 +29,7 @@
       the two sections at xl. }}
   <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" id="packs-installed">
     {{#each packServers}}
-      <div class="card cursor-pointer p-4 transition hover:border-line-strong hover:shadow-raised" style="border-top: 3px solid {{accent}}"
+      <div class="card cursor-pointer p-5 transition hover:border-line-strong hover:shadow-raised" style="border-top: 3px solid {{accent}}"
            data-pack-card data-server-id="{{id}}" data-server-name="{{name}}"
            data-pack-name="{{pack.name}}" data-current="{{pack.version}}" data-latest="{{pack.latest}}"
            {{#if pack.latestVersionId}}data-version-id="{{pack.latestVersionId}}"{{/if}}>

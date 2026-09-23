@@ -1,51 +1,51 @@
 {{#unless serversOnly}}{{> page-header heading="DASHBOARD" sub="Every server at a glance: status, resource use, and the latest activity across the panel."}}{{/unless}}
 
-<div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 {{#if serversOnly}}hidden{{/if}}">
-  <div class="card p-4">
-    <div class="eyebrow">Servers online</div>
+<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 {{#if serversOnly}}hidden{{/if}}">
+  <div class="card p-5 sm:p-6 flex flex-col justify-between">
+    <div class="eyebrow flex items-center gap-1.5">Servers online</div>
     {{! Green only when something IS online - 0/3 in success green lied. }}
-    <div class="mt-1 text-2xl font-bold tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-faint"> / {{totals.total}}</span></div>
+    <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-soft"> / {{totals.total}}</span></div>
   </div>
-  <div class="card p-4">
-    <div class="eyebrow">Players connected</div>
-    <div class="mt-1 text-2xl font-bold tabular-nums">{{totals.players}}</div>
+  <div class="card p-5 sm:p-6 flex flex-col justify-between">
+    <div class="eyebrow flex items-center gap-1.5">Players connected</div>
+    <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums">{{totals.players}}</div>
   </div>
-  <div class="card p-4">
-    <div class="eyebrow">Updates available</div>
-    <div class="mt-1 text-2xl font-bold tabular-nums {{#if totals.updates}}text-warn{{/if}}">{{totals.updates}}</div>
+  <div class="card p-5 sm:p-6 flex flex-col justify-between">
+    <div class="eyebrow flex items-center gap-1.5">Updates available</div>
+    <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums {{#if totals.updates}}text-warn{{/if}}">{{totals.updates}}</div>
   </div>
-  <div class="card p-4">
-    <div class="eyebrow">Docker</div>
-    <div class="mt-1 flex items-center gap-2 text-sm font-semibold text-ink-faint" id="docker-status">
+  <div class="card p-5 sm:p-6 flex flex-col justify-between">
+    <div class="eyebrow flex items-center gap-1.5">Docker</div>
+    <div class="mt-2 flex items-center gap-2 text-sm font-medium text-ink-soft" id="docker-status">
       <span class="status-dot relative bg-stone-500"></span> Checking…
     </div>
   </div>
 </div>
 
 {{#unless serversOnly}}
-<div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 {{#if noServers}}hidden{{/if}}">
-  <div class="card min-w-0 p-4">
-    <div class="eyebrow flex items-center gap-1">{{{icon 'memory-stick' 'size-3.5'}}} Memory allotted</div>
-    <div class="mt-1 break-words text-2xl font-bold tabular-nums">{{overview.mem.allottedMb}}<span class="text-base font-medium text-ink-faint"> MB</span></div>
-    <div class="text-xs text-ink-faint"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
+<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 {{#if noServers}}hidden{{/if}}">
+  <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+    <div class="eyebrow flex items-center gap-1.5">{{{icon 'memory-stick' 'size-4'}}} Memory allotted</div>
+    <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{overview.mem.allottedMb}}<span class="text-base font-medium text-ink-soft"> MB</span></div>
+    <div class="mt-1 text-xs text-ink-faint font-medium"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
   </div>
 
-  <div class="card min-w-0 p-4">
-    <div class="eyebrow flex items-center gap-1">{{{icon 'hard-drive' 'size-3.5'}}} Storage used</div>
-    <div class="mt-1 break-words text-2xl font-bold tabular-nums">{{bytes overview.disk.usedBytes}}</div>
-    <div class="text-xs text-ink-faint">across all server data folders</div>
+  <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+    <div class="eyebrow flex items-center gap-1.5">{{{icon 'hard-drive' 'size-4'}}} Storage used</div>
+    <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{bytes overview.disk.usedBytes}}</div>
+    <div class="mt-1 text-xs text-ink-faint font-medium">across all server data folders</div>
   </div>
 
-  <div class="card min-w-0 p-4">
-    <div class="eyebrow flex items-center gap-1">{{{icon 'activity' 'size-3.5'}}} Health · 24h</div>
-    <div class="mt-1 break-words text-2xl font-bold tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="text-base font-medium text-ink-faint"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
-    <div class="text-xs text-ink-faint">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
+  <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+    <div class="eyebrow flex items-center gap-1.5">{{{icon 'activity' 'size-4'}}} Health · 24h</div>
+    <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="text-base font-medium text-ink-soft"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
+    <div class="mt-1 text-xs text-ink-faint font-medium">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
   </div>
 
-  <div class="card min-w-0 p-4">
-    <div class="eyebrow flex items-center gap-1">{{{icon 'circle-arrow-up' 'size-3.5'}}} Updates</div>
-    <div class="mt-1 break-words text-2xl font-bold tabular-nums {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
-    <div class="text-xs text-ink-faint">{{overview.updates.mods}} mod{{#unless (eq overview.updates.mods 1)}}s{{/unless}} / {{overview.updates.server}} server-level</div>
+  <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+    <div class="eyebrow flex items-center gap-1.5">{{{icon 'circle-arrow-up' 'size-4'}}} Updates</div>
+    <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
+    <div class="mt-1 text-xs text-ink-faint font-medium">{{overview.updates.mods}} mod{{#unless (eq overview.updates.mods 1)}}s{{/unless}} / {{overview.updates.server}} server-level</div>
   </div>
 </div>
 {{/unless}}
@@ -53,14 +53,14 @@
 {{#unless serversOnly}}
 <div class="mb-6 {{#if noServers}}hidden{{/if}}">
   <h2 class="mb-3 font-semibold">Servers by Status</h2>
-  <div class="card flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm">
-    {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "running"}}"></span>{{overview.byStatus.running}} Running</span>{{/if}}
-    {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "starting"}}"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
-    {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "unhealthy"}}"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
-    {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "stalled"}}"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
-    {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "updating"}}"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
-    {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "crashed"}}"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
-    {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot {{statusDot "stopped"}}"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
+  <div class="flex flex-wrap items-center gap-2">
+    {{#if overview.byStatus.running}}<span class="chip chip-ok"><span class="status-dot {{statusDot "running"}}"></span>{{overview.byStatus.running}} Running</span>{{/if}}
+    {{#if overview.byStatus.starting}}<span class="chip"><span class="status-dot {{statusDot "starting"}}"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
+    {{#if overview.byStatus.unhealthy}}<span class="chip chip-warn"><span class="status-dot {{statusDot "unhealthy"}}"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
+    {{#if overview.byStatus.stalled}}<span class="chip chip-danger"><span class="status-dot {{statusDot "stalled"}}"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
+    {{#if overview.byStatus.updating}}<span class="chip chip-info"><span class="status-dot {{statusDot "updating"}}"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
+    {{#if overview.byStatus.crashed}}<span class="chip chip-danger"><span class="status-dot {{statusDot "crashed"}}"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
+    {{#if overview.byStatus.stopped}}<span class="chip"><span class="status-dot {{statusDot "stopped"}}"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
   </div>
 </div>
 {{/unless}}
@@ -85,21 +85,23 @@
 {{/unless}}
 
 {{#unless noServers}}
-<div class="mb-4 flex flex-wrap items-center gap-2">
-  <input class="input max-w-xs" placeholder="Search servers, tags…" id="server-filter">
-  {{! Visible "Sort" label: only the first option carried a "Sort:" prefix, so
-      the closed trigger read context-free once anything else was picked. }}
-  <label class="text-xs text-ink-faint" for="server-sort">Sort</label>
-  <select class="input w-auto" id="server-sort" data-label="Sort servers">
-    <option value="status" {{#if (eq sort 'status')}}selected{{/if}}>Status</option>
-    <option value="name" {{#if (eq sort 'name')}}selected{{/if}}>Name</option>
-    <option value="size" {{#if (eq sort 'size')}}selected{{/if}}>Size</option>
-    <option value="started" {{#if (eq sort 'started')}}selected{{/if}}>Last started</option>
-    <option value="created" {{#if (eq sort 'created')}}selected{{/if}}>Created</option>
-  </select>
-  <div class="seg ml-auto" role="group" aria-label="View">
-    <button class="seg-btn" id="view-grid" aria-pressed="false" data-tip="Grid view.">{{{icon 'layout-grid' 'size-4'}}}</button>
-    <button class="seg-btn" id="view-list" aria-pressed="false" data-tip="List view.">{{{icon 'list' 'size-4'}}}</button>
+<div class="mb-4 flex flex-col gap-3 sticky top-0 z-40 bg-canvas/90 backdrop-blur-md pt-2 pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 sm:static sm:bg-transparent sm:flex-row sm:items-center sm:justify-between sm:pb-0 sm:pt-0">
+  <input class="input flex-1 sm:max-w-xs shadow-sm" placeholder="Search servers, tags…" id="server-filter">
+  <div class="flex flex-wrap items-center gap-3">
+    <div class="flex items-center gap-2">
+      <label class="text-xs font-medium text-ink-faint shrink-0" for="server-sort">Sort</label>
+      <select class="input w-auto shrink-0 shadow-sm" id="server-sort" data-label="Sort servers">
+        <option value="status" {{#if (eq sort 'status')}}selected{{/if}}>Status</option>
+        <option value="name" {{#if (eq sort 'name')}}selected{{/if}}>Name</option>
+        <option value="size" {{#if (eq sort 'size')}}selected{{/if}}>Size</option>
+        <option value="started" {{#if (eq sort 'started')}}selected{{/if}}>Last started</option>
+        <option value="created" {{#if (eq sort 'created')}}selected{{/if}}>Created</option>
+      </select>
+    </div>
+    <div class="seg shrink-0 ml-auto sm:ml-0 shadow-sm" role="group" aria-label="View">
+      <button class="seg-btn" id="view-grid" aria-pressed="false" data-tip="Grid view.">{{{icon 'layout-grid' 'size-4'}}}</button>
+      <button class="seg-btn" id="view-list" aria-pressed="false" data-tip="List view.">{{{icon 'list' 'size-4'}}}</button>
+    </div>
   </div>
 </div>
 
@@ -113,7 +115,7 @@
     {{> server-card}}
   {{/each}}
 
-  <a href="/servers/new" class="grid min-h-44 place-items-center rounded-lg border-2 border-dashed border-line text-ink-faint transition hover:border-ok hover:text-ok">
+  <a href="/servers/new" class="grid min-h-44 place-items-center rounded-xl border-2 border-dashed border-line text-ink-faint transition hover:border-ok hover:text-ok hover:bg-inset/10">
     <div class="grid place-items-center text-center">
       {{{icon 'plus' 'size-8'}}}
       <div class="mt-2 text-sm font-medium">Create a Server</div>

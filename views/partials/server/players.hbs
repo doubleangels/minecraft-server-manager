@@ -1,22 +1,24 @@
 <div data-players-root data-server-id="{{server.id}}" data-running="{{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}1{{else}}0{{/if}}">
 
-  <div class="mb-4 flex flex-wrap items-center gap-2">
-    {{#if players.length}}
-    <input class="input max-w-xs" placeholder="Search players…" id="players-search">
-    <select class="input w-auto" id="players-filter" data-label="Filter players">
-      <option value="all">All Players</option>
-      <option value="online">Online</option>
-      <option value="whitelisted">Whitelisted</option>
-      <option value="ops">Ops</option>
-      <option value="banned">Banned</option>
-    </select>
-    {{/if}}
-    <label class="flex cursor-pointer items-center gap-2 text-sm">
-      <span class="msm-toggle"><input type="checkbox" id="players-wl-enforce" {{#if whitelistEnforced}}checked{{/if}}><span></span></span>
-      Whitelist Enforced
-    </label>
-    <div class="ml-auto flex gap-2">
-      <button class="btn btn-primary btn-sm" id="players-add">{{{icon 'user-plus' 'size-3.5'}}} Add Player</button>
+  <div class="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line/50 pb-4">
+    <div class="flex flex-wrap items-center gap-2 flex-1">
+      {{#if players.length}}
+      <input class="input flex-1 sm:max-w-xs shadow-sm" placeholder="Search players…" id="players-search">
+      <select class="input w-auto shadow-sm" id="players-filter" data-label="Filter players">
+        <option value="all">All Players</option>
+        <option value="online">Online</option>
+        <option value="whitelisted">Whitelisted</option>
+        <option value="ops">Ops</option>
+        <option value="banned">Banned</option>
+      </select>
+      {{/if}}
+      <label class="flex cursor-pointer items-center gap-2 text-sm font-medium text-ink-soft ml-2">
+        <span class="msm-toggle"><input type="checkbox" id="players-wl-enforce" {{#if whitelistEnforced}}checked{{/if}}><span></span></span>
+        Whitelist Enforced
+      </label>
+    </div>
+    <div class="flex gap-2 shrink-0">
+      <button class="btn btn-primary btn-sm shadow-md" id="players-add">{{{icon 'user-plus' 'size-3.5'}}} Add Player</button>
     </div>
   </div>
 
@@ -28,11 +30,12 @@
   {{/unless}}
 
   {{#if players.length}}
-  <div class="card overflow-x-auto">
-    <table class="table-base table-stack">
-      <thead><tr>
-        <th>Player</th><th>Status</th><th>Roles</th><th>Details</th><th class="text-right">Actions</th>
-      </tr></thead>
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="table-base table-stack">
+        <thead><tr>
+          <th>Player</th><th>Status</th><th>Roles</th><th>Details</th><th class="text-right">Actions</th>
+        </tr></thead>
       <tbody>
         {{#each players}}
           <tr data-player-row
@@ -44,7 +47,7 @@
               data-last-seen="{{lastSeen}}">
             <td data-th="">
               <a href="/servers/{{../server.id}}/players/{{name}}" class="group flex items-center gap-2.5" data-tip="Open {{name}}'s page: roles, teleport, and inventory.">
-                <span class="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded bg-inset text-xs font-bold">
+                <span class="relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-inset text-xs font-bold shadow-sm ring-1 ring-inset ring-black/10">
                   {{#if bedrock}}{{{icon 'gamepad-2' 'size-4'}}}{{else}}{{name.[0]}}{{/if}}
                   {{#if uuid}}<img class="absolute inset-0 h-full w-full object-cover" data-skin-uuid="{{uuid}}" alt="{{name}}" aria-hidden="true" loading="lazy">{{/if}}
                 </span>
@@ -128,15 +131,16 @@
         {{/each}}
       </tbody>
     </table>
+    </div>
     <div class="hidden p-8 text-center text-sm text-ink-faint" id="players-no-match">No players match these filters.</div>
   </div>
   {{else}}
     {{> empty-state iconName='users' title='No Players Seen Yet' message='Add a player by name and the panel looks them up with Mojang, or players appear here automatically the first time they join.'}}
   {{/if}}
 
-  <div class="card mt-6 p-4">
-    <div class="mb-3 flex flex-wrap items-end gap-2">
-      <h3 class="w-full font-semibold">Banned IPs</h3>
+  <div class="card mt-6 p-5 sm:p-6">
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-4 border-b border-line/50 pb-4">
+      <h3 class="font-semibold tracking-tight text-lg">Banned IPs</h3>
       <div class="ml-auto flex flex-wrap items-end justify-end gap-2">
         <input class="input w-40 max-w-full" placeholder="IP address" id="banip-ip">
         <input class="input w-48 max-w-full" placeholder="Reason (optional)" id="banip-reason">
@@ -156,7 +160,7 @@
       </div>
     </div>
     {{! Both branches stay in the DOM so bans/pardons can swap them in place. }}
-    <div class="overflow-x-auto {{#unless bannedIps.length}}hidden{{/unless}}" id="banip-table">
+    <div class="overflow-x-auto -mx-5 sm:-mx-6 mb-4 {{#unless bannedIps.length}}hidden{{/unless}}" id="banip-table">
       <table class="table-base table-stack">
         <thead><tr><th>IP</th><th>Player</th><th>Reason</th><th>Date</th><th>Expires</th><th class="text-right">Actions</th></tr></thead>
         <tbody id="banip-rows">

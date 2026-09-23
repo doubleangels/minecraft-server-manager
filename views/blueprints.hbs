@@ -9,7 +9,7 @@
 {{#if blueprints.length}}
 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" id="bp-grid">
   {{#each blueprints}}
-    <div class="card p-4" data-bp-card data-bp-id="{{id}}" data-bp-name="{{name}}">
+    <div class="card p-5 sm:p-6" data-bp-card data-bp-id="{{id}}" data-bp-name="{{name}}">
       <div class="flex items-start gap-3">
         <span class="grid size-10 place-items-center rounded-md bg-inset text-xl">{{{icon 'drafting-compass' 'size-5'}}}</span>
         <div class="min-w-0 flex-1">
@@ -22,9 +22,9 @@
         </div>
       </div>
       <dl class="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3 text-xs">
-        <div><dt class="text-ink-faint">Pack</dt><dd class="mt-0.5 font-medium">{{default pack '-'}}</dd></div>
-        <div><dt class="text-ink-faint">Custom mods</dt><dd class="mt-0.5 font-medium">{{overlayCount}}</dd></div>
-        <div><dt class="text-ink-faint">Size</dt><dd class="mt-0.5 font-medium">{{bytes size_bytes}}</dd></div>
+        <div><dt class="text-base font-semibold text-ink">Pack</dt><dd class="mt-0.5 text-sm font-medium">{{default pack '-'}}</dd></div>
+        <div><dt class="text-base font-semibold text-ink">Custom mods</dt><dd class="mt-0.5 text-sm font-medium">{{overlayCount}}</dd></div>
+        <div><dt class="text-base font-semibold text-ink">Size</dt><dd class="mt-0.5 text-sm font-medium">{{bytes size_bytes}}</dd></div>
       </dl>
       <div class="mt-3 flex gap-2">
         <button class="btn btn-sm flex-1" data-bp-create>{{{icon 'pickaxe' 'size-3.5'}}} Create a Server</button>

@@ -64,8 +64,8 @@
       <div class="border-t border-line pt-4">
         <span class="label">Bind address &amp; port</span>
         <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-          <div><dt class="text-xs text-ink-faint">Bind address</dt><dd class="font-mono font-medium">{{panel.host}}</dd></div>
-          <div><dt class="text-xs text-ink-faint">Port</dt><dd class="font-mono font-medium">{{panel.port}}</dd></div>
+          <div><dt class="text-base font-semibold text-ink">Bind address</dt><dd class="mt-0.5 font-mono font-medium">{{panel.host}}</dd></div>
+          <div><dt class="text-base font-semibold text-ink">Port</dt><dd class="mt-0.5 font-mono font-medium">{{panel.port}}</dd></div>
         </dl>
         <p class="help">Set these in <span class="font-mono">.env</span> (PANEL_HOST and PANEL_PORT). A restart applies the changes. Theme is per-browser, set with the topbar toggle.</p>
       </div>
@@ -122,7 +122,7 @@
   {{/settings/card}}
 
   {{#> settings/card heading="Users" wide=true}}
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto -mx-5 sm:-mx-6 mb-4">
       <table class="table-base table-stack" id="users-table">
         <thead><tr><th>User</th><th>Role</th><th>2FA</th><th>Created</th><th class="text-right">Actions</th></tr></thead>
         <tbody>
@@ -130,9 +130,9 @@
             <tr data-user-id="{{id}}" data-username="{{username}}">
               <td data-th="User" class="font-medium">
                 <div class="flex items-center gap-2">
-                  <span class="grid size-6 shrink-0 place-items-center overflow-hidden rounded-md bg-diamond-700 text-[10px] font-bold text-white">
+                  <span class="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-diamond-700 text-xs font-bold text-white shadow-sm">
                     {{#if (avatarSrc avatar)}}
-                      <img src="{{avatarSrc avatar}}" alt="" class="size-full object-contain">
+                      <img src="{{avatarSrc avatar}}" alt="" class="size-full object-cover">
                     {{else}}
                       {{initial username}}
                     {{/if}}
@@ -199,7 +199,7 @@
 
     <div class="mt-4 border-t border-line pt-4">
       <p class="help mt-0 max-w-prose">Each app connects with its own <b>access key</b> (sent as an <span class="font-mono">Authorization: Bearer</span> header). Make one key per app; anyone holding a key can see the servers you allow it: name, type, whether it's running, players online, and resource use. Cancel a key to cut that app off straight away.</p>
-      <div class="mt-4 overflow-x-auto">
+      <div class="mt-4 overflow-x-auto -mx-5 sm:-mx-6">
         <table class="table-base table-stack" id="api-tokens-table">
           <thead><tr><th>Name</th><th>Key</th><th>Can See</th><th>Created</th><th>Last Used</th><th>Expires</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
           <tbody>

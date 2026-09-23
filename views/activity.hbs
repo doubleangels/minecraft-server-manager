@@ -1,20 +1,22 @@
 {{> page-header heading="ACTIVITY" sub="Every action across every server: who did what, when, with the details on record."}}
 
 {{#if (or events.length (or filters.q (or filters.server filters.type)))}}
-<form class="mb-4 flex flex-wrap items-center gap-2" method="get" action="/activity" id="activity-filters">
-  <input class="input max-w-xs" name="q" value="{{filters.q}}" placeholder="Search events…" autocomplete="off">
-  <select class="input w-auto" name="server" data-label="Filter by server">
-    <option value="">All servers</option>
-    {{#each servers}}<option value="{{id}}" {{#if (eq id ../filters.server)}}selected{{/if}}>{{name}}</option>{{/each}}
-  </select>
-  <select class="input w-auto" name="type" data-label="Filter by type">
-    <option value="">All types</option>
-    {{#each types}}<option value="{{this}}" {{#if (eq this ../filters.type)}}selected{{/if}}>{{this}}</option>{{/each}}
-  </select>
-  <button class="btn btn-sm" type="submit">{{{icon 'search' 'size-3.5'}}} Apply Filters</button>
-  <div class="ml-auto flex gap-1">
-    <a class="btn btn-sm" href="/api/events/export?format=csv{{exportQs}}" data-tip="Export the filtered events as CSV.">{{{icon 'download' 'size-3.5'}}} CSV</a>
-    <a class="btn btn-sm" href="/api/events/export?format=json{{exportQs}}" data-tip="Export the filtered events as JSON.">{{{icon 'download' 'size-3.5'}}} JSON</a>
+<form class="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line/50 pb-4" method="get" action="/activity" id="activity-filters">
+  <div class="flex flex-wrap items-center gap-2 flex-1">
+    <input class="input flex-1 sm:max-w-xs shadow-sm" name="q" value="{{filters.q}}" placeholder="Search events…" autocomplete="off">
+    <select class="input w-auto shadow-sm" name="server" data-label="Filter by server">
+      <option value="">All servers</option>
+      {{#each servers}}<option value="{{id}}" {{#if (eq id ../filters.server)}}selected{{/if}}>{{name}}</option>{{/each}}
+    </select>
+    <select class="input w-auto shadow-sm" name="type" data-label="Filter by type">
+      <option value="">All types</option>
+      {{#each types}}<option value="{{this}}" {{#if (eq this ../filters.type)}}selected{{/if}}>{{this}}</option>{{/each}}
+    </select>
+    <button class="btn btn-sm shadow-md" type="submit">{{{icon 'search' 'size-3.5'}}} Apply</button>
+  </div>
+  <div class="flex gap-2 shrink-0">
+    <a class="btn btn-sm shadow-sm" href="/api/events/export?format=csv{{exportQs}}" data-tip="Export the filtered events as CSV.">{{{icon 'download' 'size-3.5'}}} CSV</a>
+    <a class="btn btn-sm shadow-sm" href="/api/events/export?format=json{{exportQs}}" data-tip="Export the filtered events as JSON.">{{{icon 'download' 'size-3.5'}}} JSON</a>
   </div>
 </form>
 

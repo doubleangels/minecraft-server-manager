@@ -5,8 +5,9 @@
 </div>
 
 {{#if schedules.length}}
-<div class="card overflow-x-auto">
-  <table class="table-base table-stack" id="schedules-table">
+<div class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="table-base table-stack" id="schedules-table">
     <thead><tr><th>Server</th><th>Task</th><th>Cron</th><th class="text-right">Next Run</th><th>Enabled</th><th class="text-right"></th></tr></thead>
     <tbody>
       {{#each schedules}}
@@ -23,12 +24,13 @@
           </td>
           <td data-th="" class="text-right"><div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap">
             <button class="btn btn-ghost btn-sm" data-schedule-edit data-tip="Edit this schedule.">{{{icon 'pencil' 'size-3.5'}}}</button>
-            <button class="btn btn-ghost btn-sm text-danger" data-schedule-delete data-tip="Delete this schedule."> aria-label="Delete schedule">{{{icon 'trash-2' 'size-3.5'}}}</button>
+            <button class="btn btn-ghost btn-sm text-danger" data-schedule-delete data-tip="Delete this schedule." aria-label="Delete schedule">{{{icon 'trash-2' 'size-3.5'}}}</button>
           </div></td>
         </tr>
       {{/each}}
     </tbody>
   </table>
+  </div>
 </div>
 {{else}}
   {{> empty-state iconName='calendar-clock' title='No Scheduled Tasks Yet' message='Automate restarts, backups, and console commands on a schedule. Use New Task above to create the first one.'}}

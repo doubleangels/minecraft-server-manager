@@ -27,12 +27,9 @@
     <button id="theme-toggle" class="btn btn-ghost btn-sm" aria-label="Toggle theme" data-tip="Switch theme">
       <span data-theme-icon="dark">{{{icon 'moon' 'size-4'}}}</span><span data-theme-icon="light" class="hidden">{{{icon 'sun' 'size-4'}}}</span>
     </button>
-    {{! rounded-md, not a circle - the only fully-round control would break the
-        blocky register. Diamond is identity color here (decorative, not meaning),
-        used only as the fallback initial-letter background. }}
-    <button class="grid size-8 place-items-center overflow-hidden rounded-md bg-diamond-700 text-xs font-bold text-white [@media(pointer:coarse)]:size-11" data-menu="user-menu" data-tip="{{user.username}} ({{capitalize user.role}})" data-user-totp-enabled="{{#if user.totpEnabled}}1{{/if}}" data-user-avatar="{{user.avatar}}">
+    <button class="grid size-8 place-items-center overflow-hidden rounded-full bg-diamond-700 text-xs font-bold text-white shadow-sm transition hover:shadow-md [@media(pointer:coarse)]:size-11" data-menu="user-menu" data-tip="{{user.username}} ({{capitalize user.role}})" data-user-totp-enabled="{{#if user.totpEnabled}}1{{/if}}" data-user-avatar="{{user.avatar}}">
       {{#if (avatarSrc user.avatar)}}
-        <img src="{{avatarSrc user.avatar}}" alt="" class="size-full object-contain">
+        <img src="{{avatarSrc user.avatar}}" alt="" class="size-full object-cover">
       {{else}}
         {{initial user.username}}
       {{/if}}

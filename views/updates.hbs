@@ -12,8 +12,9 @@
 </p>
 
 {{#if updates.length}}
-<div class="card overflow-x-auto">
-  <table class="table-base table-stack" id="updates-table">
+<div class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="table-base table-stack" id="updates-table">
     <thead><tr><th>Server</th><th>Type</th><th>Subject</th><th>Current</th><th>Latest</th><th class="text-right">Actions</th></tr></thead>
     <tbody>
       {{#each updates}}
@@ -44,6 +45,7 @@
       {{/each}}
     </tbody>
   </table>
+  </div>
 </div>
 
 <div class="notice mt-4 text-xs">

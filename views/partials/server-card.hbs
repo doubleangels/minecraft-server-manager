@@ -1,9 +1,11 @@
-<a href="/servers/{{id}}" class="card group relative block overflow-hidden transition hover:border-line-strong hover:shadow-raised"
+<a href="/servers/{{id}}" class="card group relative block overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-md"
    data-filter="{{name}} {{flavor}} {{mcVersion}}{{#each tags}} {{this}}{{/each}}"
-   style="border-top: 3px solid {{accent}}">
-  <div class="p-4">
-    <div class="flex items-start gap-3">
-      <img src="{{iconSrc this.icon}}" alt="" class="size-11 shrink-0 rounded-md" style="background: {{accent}}" data-fallback-icon="/icons/servers/grass.svg">
+   style="border-left: 4px solid {{accent}}">
+  <div class="p-5 sm:p-6">
+    <div class="flex items-start gap-3 sm:gap-4">
+      <div class="relative shrink-0">
+        <img src="{{iconSrc this.icon}}" alt="" class="size-12 rounded-xl object-cover shadow-sm ring-1 ring-inset ring-black/10" style="background: {{accent}}" data-fallback-icon="/icons/servers/grass.svg">
+      </div>
 
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2">
@@ -27,24 +29,24 @@
       </span>
     </div>
 
-    <div class="mt-3 grid grid-cols-3 gap-3 text-xs tabular-nums" data-card-stats>
+    <div class="mt-4 grid grid-cols-3 gap-3 rounded-lg bg-inset/30 p-3 text-xs tabular-nums shadow-inner" data-card-stats>
       <div class="min-w-0">
-        <div class="text-ink-faint">Players</div>
-        <div class="mt-0.5 font-semibold">{{players.online}}<span class="font-normal text-ink-faint">/{{players.max}}</span></div>
+        <div class="text-base font-semibold text-ink">Players</div>
+        <div class="mt-1 font-semibold text-ink">{{players.online}}<span class="font-normal text-ink-soft">/{{players.max}}</span></div>
       </div>
       <div class="min-w-0">
-        <div class="text-ink-faint">CPU</div>
-        <div class="mt-0.5 font-semibold">{{#if (eq status 'running')}}{{stats.cpuPct}}%{{else}}-{{/if}}</div>
+        <div class="text-base font-semibold text-ink">CPU</div>
+        <div class="mt-1 font-semibold text-ink">{{#if (eq status 'running')}}{{stats.cpuPct}}%{{else}}-{{/if}}</div>
       </div>
       <div class="min-w-0">
-        <div class="text-ink-faint">Memory</div>
-        <div class="mt-0.5 truncate font-semibold"{{#if memory.note}} data-tip="{{memory.note}}"{{/if}}>{{#if (eq status 'running')}}{{stats.memUsedMb}}<span class="font-normal text-ink-faint"> / {{resources.containerMemoryMb}} MB</span>{{else}}-{{/if}}</div>
+        <div class="text-base font-semibold text-ink">Memory</div>
+        <div class="mt-1 truncate font-semibold text-ink"{{#if memory.note}} data-tip="{{memory.note}}"{{/if}}>{{#if (eq status 'running')}}{{stats.memUsedMb}}<span class="font-normal text-ink-soft"> / {{resources.containerMemoryMb}} MB</span>{{else}}-{{/if}}</div>
       </div>
     </div>
 
     <div class="mt-3" data-card-disk>
-      <div class="mb-1 flex justify-between text-[11px] text-ink-faint">
-        <span>Disk</span><span>{{bytes disk.used}}{{#if disk.quota}} of {{bytes disk.quota}}{{else}} (no quota){{/if}}</span>
+      <div class="mb-1 flex justify-between text-base font-semibold text-ink">
+        <span>Disk</span><span class="text-xs font-normal text-ink-faint">{{bytes disk.used}}{{#if disk.quota}} of {{bytes disk.quota}}{{else}} (no quota){{/if}}</span>
       </div>
       <div class="meter"><div class="{{meterColor disk.used disk.quota}}" style="width: {{pct disk.used disk.quota}}%"></div></div>
     </div>

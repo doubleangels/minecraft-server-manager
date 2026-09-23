@@ -41,7 +41,7 @@
         <div class="pt-3 pb-1 pl-3 eyebrow">Servers</div>
         {{#each servers}}
           <a class="nav-item" href="/servers/{{id}}">
-            <img src="{{iconSrc this.icon}}" alt="" class="size-5 rounded-sm" style="background: {{this.accent}}" data-fallback-icon="/icons/servers/grass.svg">
+            <img src="{{iconSrc this.icon}}" alt="" class="size-5 rounded-md object-cover shadow-sm" style="background: {{this.accent}}" data-fallback-icon="/icons/servers/grass.svg">
             <span class="truncate" title="{{name}}">{{name}}</span>
             <span class="status-dot relative ml-auto shrink-0 {{statusDot status}} {{#if (statusPulse status)}}pulse{{/if}}" title="{{statusLabel status}}"></span>
           </a>

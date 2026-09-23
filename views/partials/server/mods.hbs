@@ -30,11 +30,12 @@
   {{/if}}
 
   {{#if mods.length}}
-  <div class="card overflow-x-auto">
-    <table class="table-base table-stack" id="mods-table">
-      <thead><tr>
-        <th>Mod</th><th>Source</th><th>Version</th><th class="text-right">Size</th><th>Status</th><th class="text-right">Actions</th>
-      </tr></thead>
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="table-base table-stack" id="mods-table">
+        <thead><tr>
+          <th>Mod</th><th>Source</th><th>Version</th><th class="text-right">Size</th><th>Status</th><th class="text-right">Actions</th>
+        </tr></thead>
       <tbody>
         {{#each mods}}
           <tr class="{{#unless enabled}}opacity-60{{/unless}}" data-mod-row data-file="{{file}}" data-name="{{name}}" data-source="{{source}}" data-enabled="{{enabled}}">
@@ -103,7 +104,8 @@
           </tr>
         {{/each}}
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
   {{! Cloned in by the global image-error handler (app.js) when a /library/icons
       request 404s, so a stale icon path degrades to this exact placeholder

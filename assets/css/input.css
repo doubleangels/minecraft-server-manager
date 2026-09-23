@@ -314,60 +314,38 @@
     line-height: 1.6;
   }
 
-  /* Minecraft-style buttons: blocky, beveled (light top edge, dark bottom
-     edge), and they physically PRESS - on :active the button shifts down and
-     the bevel inverts, exactly like clicking a button in-game. */
+  /* Modern, polished buttons: soft shadows, smooth transitions, pill-like or soft-rounded corners. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-line-strong
-      bg-raised px-3.5 py-2 text-sm font-medium text-ink transition-[background,transform,box-shadow]
-      duration-75 hover:bg-inset focus-visible:outline-2 focus-visible:outline-offset-2
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line-strong
+      bg-surface px-4 py-2 text-sm font-medium text-ink shadow-sm transition-all
+      duration-200 hover:bg-inset hover:border-line focus-visible:outline-2 focus-visible:outline-offset-2
       focus-visible:outline-diamond-400 disabled:pointer-events-none disabled:opacity-50;
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.07),
-      inset 0 -3px 0 rgb(0 0 0 / 0.28);
   }
   .btn:active {
-    transform: translateY(2px);
-    box-shadow:
-      inset 0 2px 0 rgb(0 0 0 / 0.22),
-      inset 0 -1px 0 rgb(255 255 255 / 0.05);
+    transform: scale(0.98);
   }
   .btn-primary {
-    /* Hover darkens: white text passes 4.5:1 on grass-600/700 but not grass-500. */
-    @apply border-grass-800 bg-grass-600 text-white hover:bg-grass-700;
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.22),
-      inset 0 -3px 0 rgb(0 0 0 / 0.32);
-    text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+    @apply border-transparent bg-grass-600 text-white shadow-md hover:bg-grass-500 hover:-translate-y-0.5 hover:shadow-lg;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
   }
   .btn-primary:active {
-    box-shadow:
-      inset 0 2px 0 rgb(0 0 0 / 0.28),
-      inset 0 -1px 0 rgb(255 255 255 / 0.08);
+    @apply shadow-sm;
   }
   .btn-danger {
-    @apply border-redstone-800 bg-redstone-600 text-white hover:bg-redstone-700;
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.18),
-      inset 0 -3px 0 rgb(0 0 0 / 0.32);
-    text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+    @apply border-transparent bg-redstone-600 text-white shadow-md hover:bg-redstone-500 hover:-translate-y-0.5 hover:shadow-lg;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
   }
   .btn-danger:active {
-    box-shadow:
-      inset 0 2px 0 rgb(0 0 0 / 0.28),
-      inset 0 -1px 0 rgb(255 255 255 / 0.08);
+    @apply shadow-sm;
   }
   .btn-ghost {
-    @apply border-transparent bg-transparent hover:bg-inset;
-    box-shadow: none;
-    text-shadow: none;
+    @apply border-transparent bg-transparent shadow-none hover:bg-inset hover:shadow-none hover:translate-y-0;
   }
   .btn-ghost:active {
-    transform: translateY(1px);
-    box-shadow: none;
+    transform: scale(0.98);
   }
   .btn-sm {
-    @apply px-2.5 py-1.5 text-xs;
+    @apply px-3 py-1.5 text-xs rounded-md;
   }
   /* Touch-only floor: an icon-only .btn-sm/.chip (the row actions used all
      over - players, files, backups, schedules, users…) visually measures
@@ -430,16 +408,13 @@
      common short/icon segs, and safe with seg.js's pill (it positions off
      offsetLeft/offsetTop, unaffected by scroll position). */
   .seg {
-    @apply relative inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-md border border-line bg-inset/40 p-0.5;
+    @apply relative inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-line bg-inset/40 p-0.5;
   }
   /* Sliding pill (injected by lib/seg.js): the raised key GLIDES between
      segments instead of teleporting. It carries the exact selected-state
      visuals; when active, the buttons keep only their text color. */
   .seg-pill {
-    @apply pointer-events-none absolute left-0 top-0 rounded bg-raised opacity-0;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.06),
-      inset 0 0 0 1px var(--color-line-strong);
+    @apply pointer-events-none absolute left-0 top-0 rounded-full bg-surface shadow-sm opacity-0;
     transition:
       transform 200ms cubic-bezier(0.3, 0.7, 0.4, 1),
       width 200ms cubic-bezier(0.3, 0.7, 0.4, 1),
@@ -455,16 +430,13 @@
     box-shadow: none;
   }
   .seg-btn {
-    @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded px-3 text-sm
+    @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm
       font-medium text-ink-faint transition-colors hover:text-ink
       focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-diamond-400;
   }
   .seg-btn[aria-selected='true'],
   .seg-btn[aria-pressed='true'] {
-    @apply bg-raised text-ok;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.06),
-      inset 0 0 0 1px var(--color-line-strong);
+    @apply bg-surface shadow-sm text-ok;
   }
   .seg-btn:disabled {
     @apply pointer-events-none opacity-50;
@@ -474,7 +446,7 @@
      pick-one-of-N controls, these navigate. One shared class instead of the
      same utility string hand-rolled per template. */
   .subtab {
-    @apply rounded-md px-2.5 py-1 text-sm font-medium text-ink-faint transition hover:bg-raised hover:text-ink
+    @apply rounded-full px-3 py-1.5 text-sm font-medium text-ink-faint transition hover:bg-inset hover:text-ink
       focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
   }
   .subtab.active {
@@ -484,66 +456,58 @@
   /* Icon-only buttons (modal/toast close, inline glyph actions): a real hit
      area and a visible focus state instead of a naked 16px glyph. */
   .icon-btn {
-    @apply grid size-8 shrink-0 place-items-center rounded-md text-ink-faint transition-colors
+    @apply grid size-8 shrink-0 place-items-center rounded-full text-ink-faint transition-colors
       hover:bg-inset hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1
       focus-visible:outline-diamond-400;
   }
 
   .card {
-    /* One elevation language per edge: the border carries it (plus the surface
-       lightness step in dark mode) - no shadow doubling the same edge. */
-    @apply rounded-lg border border-line bg-surface;
+    @apply rounded-xl border border-line/50 bg-surface shadow-sm transition-shadow hover:shadow-md;
   }
 
-  /* Badges: neutral by default; the four semantic variants are the ONLY badge
-     colorways - no ad-hoc bg/text pairs at call sites. */
+  /* Badges: modern, soft, fully rounded pills for status and metadata. */
   .badge {
-    @apply inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-inset text-ink-soft;
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider bg-inset text-ink-soft transition-colors;
   }
   .badge-ok {
-    @apply bg-grass-500/15 text-ok;
+    @apply bg-grass-500/15 text-ok border border-grass-500/20;
   }
   .badge-warn {
-    @apply bg-gold-400/15 text-warn;
+    @apply bg-gold-400/15 text-warn border border-gold-400/20;
   }
   .badge-danger {
-    @apply bg-redstone-500/15 text-danger;
+    @apply bg-redstone-500/15 text-danger border border-redstone-500/20;
   }
   .badge-info {
-    @apply bg-diamond-400/15 text-link;
+    @apply bg-diamond-400/15 text-link border border-diamond-400/20;
   }
-  /* Sentence-case badge for note/caution chips in the settings catalog - the
-     badge base uppercases; this is the only sanctioned way to keep it lowercase. */
+  /* Sentence-case badge for note/caution chips in the settings catalog */
   .badge-note {
     @apply normal-case tracking-normal font-normal;
   }
 
   .chip {
-    /* rounded-sm, not a pill - the whole product sits in the blocky register. */
-    @apply inline-flex items-center gap-1 rounded-sm border border-line bg-inset px-2 py-0.5 text-xs text-ink-soft;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-inset px-3 py-1 text-xs text-ink-soft shadow-sm transition-colors;
   }
 
-  /* Semantic chip colorways - state-shaped chips (roles, compatibility, status).
-     Same construction as the notice/badge variants: never raw palette at call
-     sites. These express a persistent state color; button.chip[aria-pressed]
-     still expresses selection. */
+  /* Semantic chip colorways */
   .chip-ok {
-    @apply border-ok/40 bg-grass-500/10 text-ok;
+    @apply border-grass-500/30 bg-grass-500/10 text-ok;
   }
   .chip-warn {
-    @apply border-warn/40 bg-gold-500/10 text-warn;
+    @apply border-gold-500/30 bg-gold-500/10 text-warn;
   }
   .chip-danger {
-    @apply border-danger/40 bg-redstone-500/10 text-danger;
+    @apply border-redstone-500/30 bg-redstone-500/10 text-danger;
   }
   .chip-info {
-    @apply border-link/40 bg-diamond-500/10 text-link;
+    @apply border-diamond-500/30 bg-diamond-500/10 text-link;
   }
 
   /* Notices: the ONE inline callout. Border and tint pairs are fixed per
      meaning - no ad-hoc border/background combinations at call sites. */
   .notice {
-    @apply flex items-start gap-2 rounded-md border border-line bg-inset/40 px-3 py-2 text-sm text-ink-soft;
+    @apply flex items-start gap-2 rounded-lg border border-line bg-inset/40 px-3 py-2 text-sm text-ink-soft;
   }
   .notice-ok {
     @apply border-ok/40 bg-grass-500/10;
@@ -620,7 +584,7 @@
   }
 
   .input {
-    @apply w-full rounded-md border border-line-strong bg-inset px-3 py-2 text-sm text-ink
+    @apply w-full rounded-lg border border-line-strong bg-inset px-3 py-2 text-sm text-ink
       transition-[border-color,box-shadow] duration-150
       placeholder:text-ink-faint focus:border-diamond-400 focus:outline-none
       focus:ring-1 focus:ring-diamond-400;
@@ -635,7 +599,7 @@
   }
 
   .label {
-    @apply mb-1 block text-sm font-medium text-ink;
+    @apply mb-1.5 block text-base font-semibold text-ink;
   }
   .help {
     @apply mt-1 max-w-prose text-xs leading-relaxed text-ink-faint;
@@ -645,7 +609,7 @@
      (sidebar "Servers", world-controls sections, modpacks column headers).
      Was hand-rolled as this exact utility string ~15 times. */
   .eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-wider text-ink-faint;
+    @apply text-base font-semibold tracking-tight text-ink;
   }
 
   /* Inline code inside body copy (a var name, a command, a hostname). Three
@@ -660,7 +624,7 @@
   }
   /* px-4 so the first/last columns align with card headers and card padding. */
   .table-base th {
-    @apply border-b border-line px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-ink-faint;
+    @apply border-b border-line px-4 py-2.5 text-[0.9375rem] font-semibold text-ink;
   }
   .table-base td {
     @apply border-b border-line/60 px-4 py-2.5 align-middle;
@@ -691,7 +655,7 @@
     }
     .table-stack td::before {
       content: attr(data-th);
-      @apply shrink-0 text-xs font-semibold uppercase tracking-wider text-ink-faint;
+      @apply shrink-0 text-base font-semibold text-ink;
     }
     .table-stack td[data-th='']::before {
       content: none;
@@ -705,7 +669,7 @@
   }
 
   .nav-item {
-    @apply flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-ink-soft
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-soft
       transition hover:bg-inset hover:text-ink focus-visible:outline-2
       focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
   }
@@ -714,21 +678,12 @@
     box-shadow: inset 2px 0 0 var(--color-grass-500);
   }
 
-  /* Meters read like the in-game XP bar: blocky, with a beveled trough and a
-     glossy top edge on the fill. */
+  /* Modern flat meters */
   .meter {
-    @apply relative h-2.5 w-full overflow-hidden rounded-sm bg-inset;
-    box-shadow:
-      inset 0 1px 2px rgb(0 0 0 / 0.4),
-      inset 0 -1px 0 rgb(255 255 255 / 0.05);
+    @apply relative h-2 w-full overflow-hidden rounded-full bg-inset;
   }
   .meter > div {
-    /* Width (not scaleX) is transitioned on purpose: scaling would distort the
-       fill's beveled inset shadows. */
-    @apply h-full rounded-sm transition-[width];
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.3),
-      inset 0 -2px 0 rgb(0 0 0 / 0.25);
+    @apply h-full rounded-full transition-[width] duration-300;
   }
   /* Indeterminate meter: an honest sliding block (progress unknown), replacing
      fake pulsing bars stuck at an arbitrary percentage. Set the fill to ~25%. */
