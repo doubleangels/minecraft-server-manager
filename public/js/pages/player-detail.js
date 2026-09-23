@@ -66,7 +66,7 @@ function init(root) {
     const tips = {
       whitelist: on ? 'Remove from whitelist' : 'Add to Whitelist',
       op: on ? 'Remove operator status' : 'Make Operator (Level 4)',
-      ban: on ? 'Pardon this player' : 'Ban this player',
+      ban: on ? 'Pardon This Player' : 'Ban This Player',
     };
     chip.dataset.tip = tips[role];
   }
