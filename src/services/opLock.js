@@ -32,7 +32,7 @@ function guardOp(op, fn, getId = (id) => id) {
     const existing = inFlightOps.get(id);
     if (existing) {
       if (existing.op === op && op === 'start') return existing.promise; // piggyback on the same start
-      throw httpError(409, `Cannot ${op}: a ${existing.op} operation is already in progress for this server`);
+      throw httpError(409, `Cannot ${op}: a ${existing.op} operation is already in progress for this server.`);
     }
     const promise = Promise.resolve().then(() => fn(...args));
     const entry = { op, promise };
