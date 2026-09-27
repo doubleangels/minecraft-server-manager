@@ -173,8 +173,8 @@ test('dashboard renders the combined resource overview', async () => {
   assert.match(r.text, /Resource Overview/);
   assert.match(r.text, /id="combined-overview"/);
   // The "At a glance" band (memory, storage, health, updates) renders.
-  assert.match(r.text, /Memory allotted/);
-  assert.match(r.text, /Storage used/);
+  assert.match(r.text, /Memory Allotted/i);
+  assert.match(r.text, /Storage Used/i);
   assert.match(r.text, /Servers by Status/);
   // A stopped server produces no live breakdown, so the fallback copy shows.
   assert.match(r.text, /No servers are running right now\./);

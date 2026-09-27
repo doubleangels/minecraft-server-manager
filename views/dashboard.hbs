@@ -53,7 +53,7 @@
 {{#unless serversOnly}}
 <div class="mb-6 {{#if noServers}}hidden{{/if}}">
   <h2 class="mb-3 font-semibold">Servers by Status</h2>
-  <div class="flex flex-wrap items-center gap-2">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
     {{#if overview.byStatus.running}}<span class="chip chip-ok"><span class="status-dot {{statusDot "running"}}"></span>{{overview.byStatus.running}} Running</span>{{/if}}
     {{#if overview.byStatus.starting}}<span class="chip"><span class="status-dot {{statusDot "starting"}}"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
     {{#if overview.byStatus.unhealthy}}<span class="chip chip-warn"><span class="status-dot {{statusDot "unhealthy"}}"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}

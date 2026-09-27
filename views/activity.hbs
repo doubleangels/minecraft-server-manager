@@ -2,7 +2,7 @@
 
 {{#if (or events.length (or filters.q (or filters.server filters.type)))}}
 <form class="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line/50 pb-4" method="get" action="/activity" id="activity-filters">
-  <div class="flex flex-wrap items-center gap-2 flex-1">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2 flex-1">
     <input class="input flex-1 sm:max-w-xs shadow-sm" name="q" value="{{filters.q}}" placeholder="Search events…" autocomplete="off">
     <select class="input w-auto shadow-sm" name="server" data-label="Filter by server">
       <option value="">All servers</option>

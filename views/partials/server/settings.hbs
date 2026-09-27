@@ -180,7 +180,7 @@
 
     <div class="card p-5 sm:p-6">
       <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Blueprint &amp; Maintenance</h3>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
         <button class="btn" id="st-export-bp">{{{icon 'drafting-compass' 'size-4'}}} Export as Blueprint</button>
         <button class="btn" id="st-clone">{{{icon 'copy' 'size-4'}}} Clone Server</button>
         <button class="btn{{#unless perms.power}} hidden{{/unless}}" data-server-action="recreate" data-server-id="{{server.id}}" data-server-name="{{server.name}}" data-tip="Applies pending settings and resource changes.">{{{icon 'wrench' 'size-4'}}} Rebuild Container</button>

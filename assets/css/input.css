@@ -840,14 +840,14 @@
 
   /* Range sliders */
   input[type='range'].msm-range {
-    @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-inset
+    @apply h-2 w-full px-2 cursor-pointer appearance-none rounded-md bg-inset
       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
   }
   input[type='range'].msm-range::-webkit-slider-thumb {
-    @apply size-4 appearance-none rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
+    @apply size-4 appearance-none rounded-md border border-grass-700 bg-grass-500 shadow-raised;
   }
   input[type='range'].msm-range::-moz-range-thumb {
-    @apply size-4 rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
+    @apply size-4 rounded-md border border-grass-700 bg-grass-500 shadow-raised;
   }
   input[type='range'].msm-range.msm-range-alt::-webkit-slider-thumb {
     @apply border-diamond-700 bg-diamond-400;
