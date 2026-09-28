@@ -194,11 +194,11 @@ async function hydrateDocker() {
     const data = await res.json();
     const d = data.docker || {};
     if (d.available) {
-      el.className = 'mt-1 flex items-center gap-2 text-sm font-semibold text-ok';
+      el.className = 'mt-2 flex items-center gap-2 text-sm font-medium text-ok';
       el.innerHTML = '<span class="status-dot relative bg-grass-500 pulse"></span> ';
       el.append(`Connected${d.version ? ` · v${d.version}` : ''}`);
     } else {
-      el.className = 'mt-1 flex items-center gap-2 text-sm font-semibold text-danger';
+      el.className = 'mt-2 flex items-center gap-2 text-sm font-medium text-danger';
       el.innerHTML = '<span class="status-dot relative bg-redstone-500"></span> ';
       el.append('Unreachable');
       el.title = d.error || 'Docker is not reachable. Is Docker running?';
@@ -213,7 +213,7 @@ async function hydrateDocker() {
     }
   } catch {
     // No eternal "Checking…" - say we don't know, and retry shortly.
-    el.className = 'mt-1 flex items-center gap-2 text-sm font-semibold text-ink-faint';
+    el.className = 'mt-2 flex items-center gap-2 text-sm font-medium text-ink-faint';
     el.innerHTML = '<span class="status-dot relative bg-stone-500"></span> ';
     el.append('Unknown, retrying…');
     setTimeout(hydrateDocker, 8000);

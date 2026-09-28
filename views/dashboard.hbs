@@ -1,51 +1,56 @@
 {{#unless serversOnly}}{{> page-header heading="DASHBOARD" sub="Every server at a glance: status, resource use, and the latest activity across the panel."}}{{/unless}}
 
-<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 {{#if serversOnly}}hidden{{/if}}">
-  <div class="card p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">Servers Online</div>
-    {{! Green only when something IS online - 0/3 in success green lied. }}
-    <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-soft"> / {{totals.total}}</span></div>
-  </div>
-  <div class="card p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">Players Connected</div>
-    <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums">{{totals.players}}</div>
-  </div>
-  <div class="card p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">Updates Available</div>
-    <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums {{#if totals.updates}}text-warn{{/if}}">{{totals.updates}}</div>
-  </div>
-  <div class="card p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">Docker</div>
-    <div class="mt-2 flex items-center gap-2 text-sm font-medium text-ink-soft" id="docker-status">
-      <span class="status-dot relative bg-stone-500"></span> Checking…
-    </div>
-  </div>
-</div>
-
 {{#unless serversOnly}}
-<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 {{#if noServers}}hidden{{/if}}">
-  <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">{{{icon 'memory-stick' 'size-4'}}} Memory Allotted</div>
-    <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{overview.mem.allottedMb}}<span class="text-base font-medium text-ink-soft"> MB</span></div>
-    <div class="mt-1 text-xs text-ink-faint font-medium"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
-  </div>
+<div class="mb-6 {{#if noServers}}hidden{{/if}}">
+  <h2 class="mb-3 font-semibold">Overview</h2>
+  <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'server' 'size-4'}}} Servers Online</div>
+      {{! Green only when something IS online - 0/3 in success green lied. }}
+      <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-soft"> / {{totals.total}}</span></div>
+    </div>
 
-  <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">{{{icon 'hard-drive' 'size-4'}}} Storage Used</div>
-    <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{bytes overview.disk.usedBytes}}</div>
-    <div class="mt-1 text-xs text-ink-faint font-medium">across all server data folders</div>
-  </div>
+    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'users' 'size-4'}}} Players Connected</div>
+      <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums">{{totals.players}}</div>
+    </div>
 
-  <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">{{{icon 'activity' 'size-4'}}} Health · 24h</div>
-    <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="text-base font-medium text-ink-soft"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
-    <div class="mt-1 text-xs text-ink-faint font-medium">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
-  </div>
+    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'cpu' 'size-4'}}} CPU Usage</div>
+      <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums">{{combined.cpuTotal}}<span class="text-base font-medium text-ink-soft">%</span></div>
+      <div class="mt-1 text-xs text-ink-faint font-medium">of {{combined.cpuCapacity}}% core capacity</div>
+    </div>
 
-  <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-    <div class="eyebrow flex items-center gap-1.5">{{{icon 'circle-arrow-up' 'size-4'}}} Updates</div>
-    <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
-    <div class="mt-1 text-xs text-ink-faint font-medium">{{overview.updates.mods}} mod{{#unless (eq overview.updates.mods 1)}}s{{/unless}} / {{overview.updates.server}} server-level</div>
+    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'container' 'size-4'}}} Docker</div>
+      <div class="mt-2 flex items-center gap-2 text-sm font-medium text-ink-soft" id="docker-status">
+        <span class="status-dot relative bg-stone-500"></span> Checking…
+      </div>
+    </div>
+
+    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'memory-stick' 'size-4'}}} Memory Allotted</div>
+      <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{overview.mem.allottedMb}}<span class="text-base font-medium text-ink-soft"> MB</span></div>
+      <div class="mt-1 text-xs text-ink-faint font-medium"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
+    </div>
+
+    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'hard-drive' 'size-4'}}} Storage Used</div>
+      <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{bytes overview.disk.usedBytes}}</div>
+      <div class="mt-1 text-xs text-ink-faint font-medium">across all server data folders</div>
+    </div>
+
+    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'activity' 'size-4'}}} Health · 24h</div>
+      <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="text-base font-medium text-ink-soft"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
+      <div class="mt-1 text-xs text-ink-faint font-medium">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
+    </div>
+
+    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'circle-arrow-up' 'size-4'}}} Updates</div>
+      <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
+      <div class="mt-1 text-xs text-ink-faint font-medium">{{overview.updates.mods}} mod{{#unless (eq overview.updates.mods 1)}}s{{/unless}} / {{overview.updates.server}} server-level</div>
+    </div>
   </div>
 </div>
 {{/unless}}
