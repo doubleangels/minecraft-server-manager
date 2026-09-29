@@ -12,8 +12,31 @@
 //   - the Permissions page + API (admin-only, validation, reset)
 //   - schedules, backups-by-id, world targets, events
 
+require('./helpers/env');
 const test = require('node:test');
 const assert = require('node:assert/strict');
+
+// No Docker daemon is needed to test authorization: stub the client (before the
+// app loads and destructures it) as a daemon that has no containers, so every
+// container lookup answers 404 exactly like a server that was never started.
+const connect = require('../src/docker/connect');
+const notFound = () => Promise.reject(Object.assign(new Error('no such container'), { statusCode: 404 }));
+connect.getDocker = () => ({
+  getContainer: () => ({
+    inspect: notFound,
+    logs: notFound,
+    stats: notFound,
+    exec: notFound,
+    start: notFound,
+    stop: notFound,
+    restart: notFound,
+    remove: notFound,
+  }),
+  getImage: () => ({ inspect: notFound }),
+  listContainers: async () => [],
+  modem: { demuxStream() {} },
+});
+
 const app = require('./helpers/app');
 const authService = require('../src/services/auth');
 const db = require('../src/db');
