@@ -9,11 +9,6 @@
       <li>Click a cell to pick the permissions that user gets on that server. Every permission includes view.</li>
       <li>Turn everything off to hide the server from that user completely. It disappears from their sidebar, dashboard, and every list.</li>
     </ul>
-    <div class="mt-3 flex flex-wrap gap-1.5">
-      {{#each matrix.capabilities}}
-        <span class="chip" data-tip="{{help}}">{{label}}</span>
-      {{/each}}
-    </div>
   </section>
 
   {{#if matrix.users.length}}
