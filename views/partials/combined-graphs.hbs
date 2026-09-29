@@ -1,28 +1,21 @@
 {{#if combined.breakdown.length}}
-  <div class="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-4">
+  <div class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
     <div class="card min-w-0 p-5 sm:p-6">
-      <div class="eyebrow">Total Memory</div>
-      <div class="mt-1 break-words text-2xl font-bold tabular-nums"><span data-combined-total-mem>{{combined.memoryUsedMb}}</span><span class="text-base font-medium text-ink-faint"> MB</span></div>
-      <div class="text-xs text-ink-faint"><span data-combined-total-mem-limit>{{combined.memoryLimitMb}}</span> MB allotted</div>
+      <div class="eyebrow">{{{icon 'hard-drive' 'size-4'}}} Disk Used</div>
+      <div class="mt-1 break-words text-2xl font-bold tabular-nums">{{bytes combined.diskUsed}}</div>
+      <div class="text-xs text-ink-faint">by <span data-combined-total-running>{{combined.running}}</span> running {{plural combined.running 'server' 'servers'}} (see Storage Used above for the whole fleet)</div>
     </div>
     <div class="card min-w-0 p-5 sm:p-6">
-      <div class="eyebrow">Total CPU</div>
-      <div class="mt-1 break-words text-2xl font-bold tabular-nums"><span data-combined-total-cpu>{{combined.cpuTotal}}</span><span class="text-base font-medium text-ink-faint">%</span></div>
-      <div class="text-xs text-ink-faint">across <span data-combined-total-running>{{combined.running}}</span> {{plural combined.running 'server' 'servers'}}</div>
-    </div>
-    <div class="card min-w-0 p-5 sm:p-6">
-      <div class="eyebrow">Players Online</div>
-      <div class="mt-1 break-words text-2xl font-bold tabular-nums"><span data-combined-total-players>{{combined.playersOnline}}</span><span class="text-base font-medium text-ink-faint"> / <span data-combined-total-players-max>{{combined.playersMax}}</span></span></div>
-      <div class="text-xs text-ink-faint">across <span data-combined-total-running-2>{{combined.running}}</span> {{plural combined.running 'server' 'servers'}}</div>
-    </div>
-    <div class="card min-w-0 p-5 sm:p-6">
-      <div class="eyebrow">Running</div>
-      <div class="mt-1 break-words text-2xl font-bold tabular-nums" data-combined-total-running-3>{{combined.running}}</div>
-      <div class="text-xs text-ink-faint">server{{#unless (eq combined.running 1)}}s{{/unless}} live now</div>
+      <div class="eyebrow">{{{icon 'arrow-down-up' 'size-4'}}} Network I/O</div>
+      <div class="mt-1 flex flex-wrap items-baseline gap-x-4 break-words text-2xl font-bold tabular-nums">
+        <span class="inline-flex items-baseline gap-1">{{{icon 'arrow-down' 'size-3.5 text-ink-faint'}}}{{bytes combined.netRxBytes}}</span>
+        <span class="inline-flex items-baseline gap-1">{{{icon 'arrow-up' 'size-3.5 text-ink-faint'}}}{{bytes combined.netTxBytes}}</span>
+      </div>
+      <div class="text-xs text-ink-faint">received / sent since each server started</div>
     </div>
   </div>
 
-  <div class="mt-4 grid gap-4 lg:grid-cols-2">
+  <div class="mt-4 grid gap-4 lg:grid-cols-3">
     <div class="card p-5 sm:p-6">
       <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Memory <span class="text-sm font-normal text-ink-faint ml-1">used vs allotted</span></h3>
       <div class="flex h-3 w-full overflow-hidden rounded-sm bg-inset" data-combined-bar="memory" data-combined-limit="{{combined.memoryLimitMb}}">
@@ -48,19 +41,34 @@
         <span>{{combined.cpuCapacity}}% core capacity</span>
       </div>
     </div>
+
+    <div class="card p-5 sm:p-6">
+      <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Disk <span class="text-sm font-normal text-ink-faint ml-1">share of disk in use</span></h3>
+      <div class="flex h-3 w-full overflow-hidden rounded-sm bg-inset" data-combined-bar="disk">
+        {{#each combined.breakdown}}
+          <div data-combined-seg="disk" data-seg-id="{{this.id}}" style="width: {{pct this.diskUsed ../combined.diskUsed}}%; background: {{this.accent}};" title="{{this.name}}"></div>
+        {{/each}}
+      </div>
+      <div class="mt-1 flex items-baseline justify-between gap-2 break-words text-xs text-ink-faint">
+        <span>{{bytes combined.diskUsed}}</span>
+        <span>used by running servers</span>
+      </div>
+    </div>
   </div>
 
   <div class="mt-4 card p-5 sm:p-6">
     <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Per-Server Live Usage</h3>
     <div class="divide-y divide-line text-sm -mx-5 sm:-mx-6 px-5 sm:px-6">
       {{#each combined.breakdown}}
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 py-3" data-combined-row="{{this.id}}" data-row-players="{{this.playersOnline}}" data-row-players-max="{{this.playersMax}}">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 py-3" data-combined-row="{{this.id}}">
           <span class="size-2.5 shrink-0 rounded-full" style="background: {{this.accent}}"></span>
           <a href="/servers/{{this.id}}" class="min-w-0 font-medium hover:underline">{{this.name}}</a>
           <span class="ml-auto grid w-full min-w-0 grid-cols-3 gap-3 text-xs tabular-nums sm:w-auto sm:grid-cols-none sm:gap-6 sm:text-right">
             <span class="flex items-center justify-between gap-1 sm:block"><span class="text-ink-faint sm:hidden">CPU</span><span class="break-words" data-combined-row-cpu="{{this.id}}">{{this.cpuPct}}%</span></span>
             <span class="flex items-center justify-between gap-1 sm:block"><span class="text-ink-faint sm:hidden">Mem</span><span class="break-words" data-combined-row-mem="{{this.id}}">{{this.memUsedMb}} <span class="text-ink-faint">MB</span></span></span>
+            <span class="flex items-center justify-between gap-1 sm:block"><span class="text-ink-faint sm:hidden">Disk</span><span class="break-words">{{bytes this.diskUsed}}</span></span>
             <span class="flex items-center justify-between gap-1 sm:block"><span class="text-ink-faint sm:hidden">Players</span><span class="break-words" data-combined-row-players="{{this.id}}">{{this.playersOnline}}<span class="text-ink-faint">/{{this.playersMax}}</span></span></span>
+            <span class="flex items-center justify-between gap-1 sm:block"><span class="text-ink-faint sm:hidden">Uptime</span><span class="break-words">{{default this.uptime '-'}}</span></span>
           </span>
         </div>
       {{/each}}

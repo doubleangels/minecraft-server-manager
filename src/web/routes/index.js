@@ -200,6 +200,10 @@ function buildCombinedOverview(servers) {
       memLimitMb: s.resources.containerMemoryMb || 0,
       playersOnline: s.players.online || 0,
       playersMax: s.players.max || 0,
+      diskUsed: s.disk.used || 0,
+      netRxBytes: s.stats.netRxBytes || 0,
+      netTxBytes: s.stats.netTxBytes || 0,
+      uptime: s.stats.uptime || null,
     });
   }
   return {
@@ -213,6 +217,12 @@ function buildCombinedOverview(servers) {
     // Each server's own CPU% is relative to its own core allowance, so the
     // meaningful total is the sum of the used portions of those allowances.
     cpuCapacity: running.reduce((n, s) => n + s.cpus * 100, 0),
+    // Disk has no fleet-wide "capacity" (quotas are per-server and optional,
+    // often unset) - the bar shows each running server's share of disk used
+    // by running servers, not a share of a limit.
+    diskUsed: running.reduce((n, s) => n + s.diskUsed, 0),
+    netRxBytes: running.reduce((n, s) => n + s.netRxBytes, 0),
+    netTxBytes: running.reduce((n, s) => n + s.netTxBytes, 0),
     breakdown: running,
   };
 }
@@ -298,7 +308,15 @@ async function renderServerList(req, res, next, { page }) {
           status: 'unknown',
           ports: { game: rows[i].port_game, rcon: rows[i].port_rcon, bedrock: rows[i].port_bedrock },
           resources: { heapMb: rows[i].heap_mb, containerMemoryMb: rows[i].container_memory_mb, cpus: rows[i].cpus },
-          stats: { cpuPct: 0, memUsedMb: 0, uptime: null, perf: null, perfSupported: true },
+          stats: {
+            cpuPct: 0,
+            memUsedMb: 0,
+            netRxBytes: 0,
+            netTxBytes: 0,
+            uptime: null,
+            perf: null,
+            perfSupported: true,
+          },
           players: { online: 0, max: Number((rows[i].env && rows[i].env.MAX_PLAYERS) || 20), names: [] },
           disk: { used: 0, quota: rows[i].disk_quota_bytes || 0 },
           pack: null,

@@ -79,7 +79,9 @@ function applyCombinedLive(data) {
   for (const seg of root.querySelectorAll('[data-combined-seg]')) ids.add(seg.dataset.segId);
 
   // First pass: sum active used + denominators so stacked widths are relative
-  // to the combined total (matching SSR's pct(s.used, combined.denom)).
+  // to the combined total (matching SSR's pct(s.used, combined.denom)). Disk
+  // and network aren't in the live poll payload (they change slowly / aren't
+  // per-tick), so those stay as SSR rendered them until the next page load.
   const sums = { memUsed: 0, memLimit: 0, cpuUsed: 0, cpuCap: 0 };
   let runningCount = 0;
 
@@ -89,8 +91,6 @@ function applyCombinedLive(data) {
     if (!active) continue;
     const memSeg = root.querySelector(`[data-combined-seg="memory"][data-seg-id="${id}"]`);
     const cpuSeg = root.querySelector(`[data-combined-seg="cpu"][data-seg-id="${id}"]`);
-    // Live numbers when the poll has them, the server-rendered ones otherwise -
-    // so the "Total memory / Total CPU" cards move with the servers, not just the bars.
     if (memSeg) {
       sums.memUsed += live && live.memUsedMb != null ? Number(live.memUsedMb) : Number(memSeg.dataset.segMb) || 0;
       sums.memLimit += Number(memSeg.dataset.segLimit) || 0;
@@ -99,15 +99,6 @@ function applyCombinedLive(data) {
       sums.cpuUsed += live && live.cpuPct != null ? Number(live.cpuPct) : Number(cpuSeg.dataset.segCpu) || 0;
       sums.cpuCap += Number(cpuSeg.dataset.segCap) || 0;
     }
-    if (live && live.players) {
-      const pRow = root.querySelector(`[data-combined-row="${id}"]`);
-      // Persist the live players on the row so the total can recompute even if
-      // a later poll drops the players payload (RCON unavailable, etc.).
-      if (pRow) {
-        pRow.dataset.rowPlayers = live.players.online ?? pRow.dataset.rowPlayers;
-        pRow.dataset.rowPlayersMax = live.players.max ?? pRow.dataset.rowPlayersMax;
-      }
-    }
     runningCount++;
   }
 
@@ -115,14 +106,7 @@ function applyCombinedLive(data) {
   updateCombinedBar(root, 'cpu', sums.cpuUsed, sums.cpuCap, liveMap, (live) => live?.cpuPct);
 
   const q = (sel) => root.querySelector(sel);
-  setText(q('[data-combined-total-mem]'), String(sums.memUsed));
-  setText(q('[data-combined-total-mem-limit]'), String(sums.memLimit));
-  setText(q('[data-combined-total-cpu]'), String(Math.round(sums.cpuUsed)));
-  for (const el of root.querySelectorAll(
-    '[data-combined-total-running],[data-combined-total-running-2],[data-combined-total-running-3]'
-  )) {
-    setText(el, String(runningCount));
-  }
+  setText(q('[data-combined-total-running]'), String(runningCount));
   const memTotal = q('[data-combined-mem-total]');
   if (memTotal) memTotal.textContent = `${sums.memUsed} MB`;
   const cpuTotal = q('[data-combined-cpu-total]');
@@ -146,21 +130,9 @@ function applyCombinedLive(data) {
         memCell.innerHTML = `${Number(live.memUsedMb)} <span class="text-ink-faint">MB</span>`;
       if (playersCell && live.players) {
         playersCell.innerHTML = `${Number(live.players.online)}<span class="text-ink-faint">/${Number(live.players.max)}</span>`;
-        row.dataset.rowPlayers = live.players.online;
-        row.dataset.rowPlayersMax = live.players.max;
       }
     }
   }
-
-  // Players total = sum across visible rows (SSR values, updated live above).
-  let playersOnline = 0;
-  let playersMax = 0;
-  for (const row of root.querySelectorAll('[data-combined-row]:not(.hidden)')) {
-    playersOnline += Number(row.dataset.rowPlayers) || 0;
-    playersMax += Number(row.dataset.rowPlayersMax) || 0;
-  }
-  setText(q('[data-combined-total-players]'), String(playersOnline));
-  setText(q('[data-combined-total-players-max]'), String(playersMax));
 }
 
 // Recompute one stacked bar's segment widths from the combined sums, pulling

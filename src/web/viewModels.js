@@ -140,7 +140,7 @@ async function serverVM(s, { withLive = true, ctx = null } = {}) {
     // Java up front reads as fully used from the first minute, so the meters
     // say so and where the heap sits relative to the container limit.
     memory: memoryVM(s),
-    stats: { cpuPct: 0, memUsedMb: 0, uptime: null, perf: null, perfSupported: true },
+    stats: { cpuPct: 0, memUsedMb: 0, netRxBytes: 0, netTxBytes: 0, uptime: null, perf: null, perfSupported: true },
     players: { online: 0, max: Number(s.env.MAX_PLAYERS) || 20, names: [] },
     disk: { used: diskUsedFor(s.id), quota: s.disk_quota_bytes },
     pack,
@@ -171,6 +171,10 @@ async function serverVM(s, { withLive = true, ctx = null } = {}) {
     if (live.stats) {
       vm.stats.cpuPct = live.stats.cpuPct;
       vm.stats.memUsedMb = Math.round((live.stats.memUsedBytes || 0) / 1024 / 1024);
+      // Cumulative since the container started (Docker's stats API, not a
+      // rate) - the dashboard's Network I/O card sums these across the fleet.
+      vm.stats.netRxBytes = live.stats.netRx || 0;
+      vm.stats.netTxBytes = live.stats.netTx || 0;
     }
     if (live.startedAt) {
       vm.stats.uptime = formatUptime(Date.now() - Date.parse(live.startedAt));
