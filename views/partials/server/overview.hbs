@@ -21,11 +21,11 @@
     <div class="prose-sm max-w-prose text-sm text-ink-soft [&_a]:text-link [&_code]:rounded [&_code]:bg-inset [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:text-ink-soft">{{{markdown server.description}}}</div>
     <dl class="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
       <div><dt class="text-base font-semibold text-ink">Created</dt><dd class="mt-1 font-medium">{{server.created}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">Last started</dt><dd class="mt-1 font-medium">{{server.lastStarted}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">Update policy</dt><dd class="mt-1 font-medium">{{capitalize server.updatePolicy}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">Start on boot</dt><dd class="mt-1 font-medium">{{#if server.autoStart}}Yes{{else}}No{{/if}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">Game port</dt><dd class="mt-1 font-medium">{{server.ports.game}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">RCON port</dt><dd class="mt-1 font-medium">{{server.ports.rcon}}</dd></div>
+      <div><dt class="text-base font-semibold text-ink">Last Started</dt><dd class="mt-1 font-medium">{{server.lastStarted}}</dd></div>
+      <div><dt class="text-base font-semibold text-ink">Update Policy</dt><dd class="mt-1 font-medium">{{capitalize server.updatePolicy}}</dd></div>
+      <div><dt class="text-base font-semibold text-ink">Start on Boot</dt><dd class="mt-1 font-medium">{{#if server.autoStart}}Yes{{else}}No{{/if}}</dd></div>
+      <div><dt class="text-base font-semibold text-ink">Game Port</dt><dd class="mt-1 font-medium">{{server.ports.game}}</dd></div>
+      <div><dt class="text-base font-semibold text-ink">RCON Port</dt><dd class="mt-1 font-medium">{{server.ports.rcon}}</dd></div>
     </dl>
     {{#if server.pack}}
       <div class="mt-6 rounded-xl border border-line bg-surface p-4 shadow-sm text-sm">
@@ -61,7 +61,7 @@
           {{#if server.memory.note}}<p class="mt-1 text-ink-faint">{{server.memory.note}}</p>{{/if}}
         </div>
         <div>
-          <div class="mb-1.5 flex justify-between font-medium text-ink-soft"><span>Disk quota</span><span>{{bytes server.disk.used}}{{#if server.disk.quota}} <span class="font-normal text-ink-faint">/ {{bytes server.disk.quota}}</span>{{else}} <span class="font-normal text-ink-faint">(no quota)</span>{{/if}}</span></div>
+          <div class="mb-1.5 flex justify-between font-medium text-ink-soft"><span>Disk Quota</span><span>{{bytes server.disk.used}}{{#if server.disk.quota}} <span class="font-normal text-ink-faint">/ {{bytes server.disk.quota}}</span>{{else}} <span class="font-normal text-ink-faint">(no quota)</span>{{/if}}</span></div>
           <div class="meter"><div class="{{meterColor server.disk.used server.disk.quota}}" style="width: {{pct server.disk.used server.disk.quota}}%"></div></div>
         </div>
       </div>
