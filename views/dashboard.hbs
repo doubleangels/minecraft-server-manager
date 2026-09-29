@@ -40,10 +40,11 @@
       <div class="mt-1 text-xs text-ink-faint font-medium">across all server data folders</div>
     </div>
 
-    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
+    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between" data-health-card>
       <div class="eyebrow flex items-center gap-1.5">{{{icon 'activity' 'size-4'}}} Health · 24h</div>
-      <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="text-base font-medium text-ink-soft"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
-      <div class="mt-1 text-xs text-ink-faint font-medium">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
+      <div data-health-total class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="text-base font-medium text-ink-soft"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
+      <div data-health-detail class="mt-1 text-xs text-ink-faint font-medium">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
+      <button type="button" class="btn btn-ghost btn-sm mt-3 self-start {{#unless overview.healthTotal}}hidden{{/unless}}" data-open-alerts>View Alerts</button>
     </div>
 
     <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
@@ -152,3 +153,4 @@
   </div>
 </div>
 <script type="module" src="/js/pages/dashboard.js"></script>
+<script type="module" src="/js/pages/health-alerts.js"></script>
