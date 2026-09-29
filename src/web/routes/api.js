@@ -465,10 +465,6 @@ router.get(
 
 // Dashboard health alerts (crashes, out-of-memory stops, auto-restarts): each
 // user dismisses their own; the history events stay. See services/healthAlerts.js.
-router.get('/alerts', (req, res) => {
-  res.json({ ok: true, ...healthAlerts.list(req.user, permissions.visibleServerIds(req.user)) });
-});
-
 router.post('/alerts/clear', (req, res) => {
   res.json({ ok: true, cleared: healthAlerts.clearAll(req.user, permissions.visibleServerIds(req.user)) });
 });
