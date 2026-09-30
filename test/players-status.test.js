@@ -88,7 +88,7 @@ test('roster status column renders Joined / Whitelisted / Banned with enforcemen
   assert.match(r.text, /seen ~2027-01-01/);
 });
 
-test('enforced whitelist turns un-whitelisted players into "Not whitelisted, join blocked"', async () => {
+test('enforced whitelist turns un-whitelisted players into a Blocked status', async () => {
   const id = seed('srv_roster_on');
   fs.writeFileSync(dataPath('servers', id, 'server.properties'), '# test\nwhite-list=true\nonline-mode=true\n');
 
@@ -96,7 +96,7 @@ test('enforced whitelist turns un-whitelisted players into "Not whitelisted, joi
   assert.equal(r.status, 200);
 
   assert.match(r.text, /> Joined<\/span>/);
-  assert.match(r.text, />Not whitelisted, join blocked<\/div>/);
+  assert.match(r.text, /Whitelist enforcement is on[^"]*">Blocked<\/div>/);
   assert.match(r.text, /id="players-wl-enforce" checked/);
   // Whitelisted and banned players keep their own statuses.
   assert.match(r.text, />Whitelist<\/span>/);

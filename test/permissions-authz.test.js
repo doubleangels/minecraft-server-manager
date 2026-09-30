@@ -197,13 +197,11 @@ test('viewer with power+console on B: allowed on B, still refused on A and panel
 test('server page reflects the grant: power buttons shown on B, hidden on A; files tab absent', async () => {
   const pageB = await app.req('GET', `/servers/${B}`, { cookie: viewerCookie, headers: { Accept: 'text/html' } });
   assert.equal(pageB.status, 200);
-  assert.ok(
-    !/class="flex flex-col sm:flex-row sm:flex-wrap gap-2 hidden">\s*<button class="btn btn-primary" data-server-action="start"/.test(
-      pageB.text
-    )
-  );
+  // The power row carries `hidden` only when the viewer lacks the power capability.
+  const powerRowHidden = /gap-2 mt-4 sm:mt-0 hidden shrink-0">/;
+  assert.ok(!powerRowHidden.test(pageB.text));
   const pageA = await app.req('GET', `/servers/${A}`, { cookie: viewerCookie, headers: { Accept: 'text/html' } });
-  assert.ok(/class="flex flex-col sm:flex-row sm:flex-wrap gap-2 hidden">/.test(pageA.text), 'power row hidden on A');
+  assert.ok(powerRowHidden.test(pageA.text), 'power row hidden on A');
   assert.ok(!pageA.text.includes(`/servers/${A}/files"`), 'files tab absent without the files capability');
   const filesPage = await app.req('GET', `/servers/${A}/files`, {
     cookie: viewerCookie,
