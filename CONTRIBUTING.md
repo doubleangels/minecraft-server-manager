@@ -139,7 +139,7 @@ users:
 - **History summaries:** every `recordEvent({ summary })` string ends in a
   period, including the terse `Label: detail` lines ("Folder created:
   plugins/x.jar.", "Server restarted.").
-- **In-progress status lines end in `…`, never a period** — `runTask` /
+- **In-progress status lines end in `…`, never a period**: `runTask` /
   progress modal titles and every `task.step(...)` / `onProgress(...)` /
   `onStep(...)` label, as sentence-case gerunds ("Creating backup…",
   "Querying Modrinth, CurseForge, …"). A step that reports an outcome rather
