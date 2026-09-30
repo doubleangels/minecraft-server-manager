@@ -11,6 +11,7 @@ const { nanoid } = require('nanoid');
 const db = require('../db');
 const { recordEvent } = require('../events');
 const { getTimezone } = require('./settings');
+const tasks = require('./tasks');
 const logger = require('../logger')(path.basename(__filename));
 const { serializeError } = require('../utils/logSanitize');
 
@@ -31,7 +32,7 @@ const TASK_TYPES = {
   'content-meta-backfill': { label: 'Content metadata backfill', serverScoped: false },
 };
 
-async function runTask(schedule) {
+async function runTask(schedule, task = null) {
   const payload = JSON.parse(schedule.payload_json || '{}');
   const actor = 'scheduler';
   const servers = require('./servers');
@@ -56,13 +57,14 @@ async function runTask(schedule) {
       const backup = await backups.createBackup(schedule.server_id, {
         reason: 'scheduled',
         actor,
+        task,
         // Opt-in per schedule: trim rarely-visited chunks after the archive is
         // written. Only runs when the server is stopped (see createBackupImpl).
         shrinkAfter: Boolean(payload.shrink),
       });
       // Read the fresh archive back end to end. A damaged one throws, so the
       // run is marked failed and the operator hears about it now, not at restore time.
-      await backups.verifyBackup(backup.id, { actor });
+      await backups.verifyBackup(backup.id, { actor, task });
       break;
     }
     case 'rcon': {
@@ -83,13 +85,16 @@ async function runTask(schedule) {
       break;
     }
     case 'update-check':
+      if (task) task.step('Checking for updates…');
       await require('../updates/checker').checkAll({ actor });
+      if (task) task.step('Applying automatic updates…');
       // Only the scheduled daily check triggers auto-updates - the manual
       // "check now" buttons never apply anything (#24; the settings-page
       // policy label promises exactly this).
       await require('../updates/upgrade').runAutoUpgrades({ actor });
       break;
     case 'storage-scan':
+      if (task) task.step('Scanning storage…');
       await require('../storage/indexer').scan();
       await require('../storage/indexer').enforceStrictQuotas();
       break;
@@ -108,6 +113,20 @@ async function runTask(schedule) {
     default:
       throw new Error(`Unknown task type ${schedule.task_type}`);
   }
+}
+
+// Scheduled jobs a person would wonder about show in the top-bar task tray. The
+// once-a-minute housekeeping jobs (temp files, ban sweep, metadata backfill,
+// rcon) stay out of it so the tray does not flicker all day.
+const TRAY_VERBS = { restart: 'Restarting', stop: 'Stopping', start: 'Starting', backup: 'Backing up' };
+const TRAY_TITLES = { 'update-check': 'Checking for updates…', 'storage-scan': 'Scanning storage…' };
+
+function runTracked(job) {
+  const server = job.server_id ? db.get('SELECT display_name FROM servers WHERE id = ?', job.server_id) : null;
+  const verb = TRAY_VERBS[job.task_type];
+  const title = verb && server ? `${verb} ${server.display_name} (scheduled)…` : TRAY_TITLES[job.task_type];
+  if (!title) return runTask(job);
+  return tasks.track(title, { serverId: job.server_id || null, actor: 'scheduler' }, (task) => runTask(job, task));
 }
 
 function schedule(job) {
@@ -133,7 +152,7 @@ function schedule(job) {
         serverId: job.server_id || undefined,
       });
       try {
-        await runTask(job);
+        await runTracked(job);
       } catch (err) {
         recordEvent({
           serverId: job.server_id || null,

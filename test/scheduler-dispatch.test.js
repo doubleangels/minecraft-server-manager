@@ -94,7 +94,9 @@ test('a backup task creates a scheduled backup and forwards the shrink option', 
   redundant = false;
   await fireOnce({ serverId: 'srv_sch_a', taskType: 'backup', payload: { shrink: true } });
   const call = calls.find((c) => c[0] === 'backup');
-  assert.deepEqual(call, ['backup', 'srv_sch_a', { reason: 'scheduled', actor: 'scheduler', shrinkAfter: true }]);
+  const { task, ...rest } = call[2];
+  assert.deepEqual(rest, { reason: 'scheduled', actor: 'scheduler', shrinkAfter: true });
+  assert.equal(typeof task.step, 'function', 'the backup reports progress into a tray task');
 });
 
 test('a scheduled backup is verified right after it is created', async () => {
@@ -102,10 +104,8 @@ test('a scheduled backup is verified right after it is created', async () => {
   await fireOnce({ serverId: 'srv_sch_a', taskType: 'backup', payload: {} });
   const names = calls.map((c) => c[0]);
   assert.ok(names.indexOf('verify') > names.indexOf('backup'));
-  assert.deepEqual(
-    calls.find((c) => c[0] === 'verify'),
-    ['verify', 'bk_sched', { actor: 'scheduler' }]
-  );
+  assert.deepEqual(calls.find((c) => c[0] === 'verify').slice(0, 2), ['verify', 'bk_sched']);
+  assert.equal(calls.find((c) => c[0] === 'verify')[2].actor, 'scheduler');
 });
 
 test('a scheduled backup is skipped when the server is stopped and already backed up', async () => {
