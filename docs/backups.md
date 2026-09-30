@@ -40,6 +40,8 @@ Retention is capped **per server, per reason**: the newest in each group are kep
 
 Two optional ceilings apply on top of the per-reason counts, both off by default: a **maximum age** (backups older than N days are pruned, whatever their reason) and a **maximum total size** per server (the oldest backups are pruned until the total fits, `pre-restore` ones first). The newest backup of a server is never pruned by either ceiling. All of these can be changed globally on the Settings page, and overridden per server on its Backups tab.
 
+Any backup can be **verified** on demand (the shield button on each row, or `POST /api/backups/:id/verify`): the panel reads every file in the archive and checks its checksum, exactly the bytes a restore would extract, without stopping the server or writing anything. **Scheduled backups are verified automatically** right after they are written. A damaged archive is reported as an error (a failed run for a schedule) and logged to the activity history, so you find out before you need it.
+
 Backups can be **renamed** from the backup list (the rename button on each row). The archive on disk and the panel's record move together, so download, restore, and retention keep working with the new name.
 
 ![Rename a backup](images/backup-rename.png)

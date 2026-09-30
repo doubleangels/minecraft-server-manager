@@ -34,7 +34,8 @@ const rec =
 servers.restartServer = rec('restart');
 servers.stopServer = rec('stop');
 servers.startServer = rec('start');
-backups.createBackup = rec('backup');
+backups.createBackup = rec('backup', { id: 'bk_sched' });
+backups.verifyBackup = rec('verify', { ok: true });
 let redundant = false;
 backups.isScheduledBackupRedundant = rec('redundant?', () => redundant);
 containers.execCapture = rec('rcon', 'There are 0 players');
@@ -96,6 +97,17 @@ test('a backup task creates a scheduled backup and forwards the shrink option', 
   assert.deepEqual(call, ['backup', 'srv_sch_a', { reason: 'scheduled', actor: 'scheduler', shrinkAfter: true }]);
 });
 
+test('a scheduled backup is verified right after it is created', async () => {
+  redundant = false;
+  await fireOnce({ serverId: 'srv_sch_a', taskType: 'backup', payload: {} });
+  const names = calls.map((c) => c[0]);
+  assert.ok(names.indexOf('verify') > names.indexOf('backup'));
+  assert.deepEqual(
+    calls.find((c) => c[0] === 'verify'),
+    ['verify', 'bk_sched', { actor: 'scheduler' }]
+  );
+});
+
 test('a scheduled backup is skipped when the server is stopped and already backed up', async () => {
   redundant = true;
   const s = scheduler.createSchedule({ serverId: 'srv_sch_a', taskType: 'backup', cron: EVERY_SECOND });
@@ -106,6 +118,7 @@ test('a scheduled backup is skipped when the server is stopped and already backe
   redundant = false;
   assert.ok(calls.some((c) => c[0] === 'redundant?'));
   assert.ok(!calls.some((c) => c[0] === 'backup'));
+  assert.ok(!calls.some((c) => c[0] === 'verify'));
 });
 
 test('an rcon task runs rcon-cli with the words split, defaults to "list", and records the output', async () => {
