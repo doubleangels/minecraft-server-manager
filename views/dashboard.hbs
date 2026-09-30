@@ -84,7 +84,7 @@
             </div>
             <div>
               <div class="text-sm font-bold tracking-wide">System Health</div>
-              <div class="text-xs text-ink-faint font-medium mt-0.5">{{#if overview.healthTotal}}{{overview.health.crashes}} crashes, {{overview.health.oom}} OOM{{else}}All systems stable · 24h{{/if}}</div>
+              <div class="text-xs text-ink-faint font-medium mt-0.5">{{#if overview.healthTotal}}{{overview.health.crashes}} crashes, {{overview.health.oom}} out of memory{{else}}All systems stable · 24h{{/if}}</div>
             </div>
           </div>
           <div class="text-2xl font-bold tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}} group-hover:scale-110 transition-transform">{{overview.healthTotal}}</div>
