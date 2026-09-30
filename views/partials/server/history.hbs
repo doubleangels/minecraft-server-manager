@@ -1,42 +1,49 @@
 <div data-history-server="{{server.id}}" class="contents">
 {{#if events.length}}
-<div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-  <input class="input max-w-xs" id="hist-search" placeholder="Search events…">
-  <select class="input w-auto" id="hist-type" data-label="Filter by type"><option value="">All Types</option></select>
-  <select class="input w-auto" id="hist-actor" data-label="Filter by actor"><option value="">All Actors</option></select>
-  <button class="btn btn-sm ml-auto" data-menu="hist-export-menu">{{{icon 'download' 'size-3.5'}}} Export</button>
-  <template id="hist-export-menu">
-    <a href="/api/servers/{{server.id}}/events/export?format=json" target="_blank" rel="noopener">{{{icon 'file-text' 'size-3.5'}}} Export as JSON</a>
-    <a href="/api/servers/{{server.id}}/events/export?format=csv" target="_blank" rel="noopener">{{{icon 'download' 'size-3.5'}}} Export as CSV</a>
-  </template>
+<div class="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line/50 pb-4">
+  <div class="flex flex-wrap items-center gap-2 flex-1">
+    <input class="input flex-1 sm:max-w-xs shadow-sm" id="hist-search" placeholder="Search events…">
+    <select class="input w-auto shadow-sm" id="hist-type" data-label="Filter by type"><option value="">All Types</option></select>
+    <select class="input w-auto shadow-sm" id="hist-actor" data-label="Filter by actor"><option value="">All Actors</option></select>
+  </div>
+  <div class="flex gap-2 shrink-0">
+    <button class="btn btn-sm btn-ghost border border-line/50 shadow-sm bg-canvas hover:bg-inset/30" data-menu="hist-export-menu">{{{icon 'download' 'size-3.5'}}} Export</button>
+    <template id="hist-export-menu">
+      <a href="/api/servers/{{server.id}}/events/export?format=json" target="_blank" rel="noopener">{{{icon 'file-text' 'size-3.5'}}} Export as JSON</a>
+      <a href="/api/servers/{{server.id}}/events/export?format=csv" target="_blank" rel="noopener">{{{icon 'download' 'size-3.5'}}} Export as CSV</a>
+    </template>
+  </div>
 </div>
 {{/if}}
 
 {{#if crashReports.length}}
-  <div class="card mb-4 border-danger/40">
-    <div class="border-b border-line p-3 font-semibold text-danger">{{{icon 'flame' 'size-4'}}} Crash Reports</div>
-    <div class="divide-y divide-line">
+  <div class="card overflow-hidden shadow-sm mb-6 border border-danger/30">
+    <div class="border-b border-danger/30 bg-danger/10 p-5 font-bold tracking-wide text-sm flex items-center justify-between gap-4 text-danger-strong">
+      <div class="flex items-center gap-2">{{{icon 'flame' 'size-4'}}} Crash Reports</div>
+      <span class="badge bg-danger/20 border border-danger/30 text-[9px] uppercase tracking-wider text-danger-strong font-bold">{{crashReports.length}} New</span>
+    </div>
+    <div class="divide-y divide-line/30 bg-canvas">
       {{#each crashReports}}
-        <div class="p-3" data-crash-card data-crash-id="{{id}}" data-crash-file="{{file}}" {{#if mclogsUrl}}data-crash-mclogs="{{mclogsUrl}}"{{/if}}>
-          <div class="flex flex-wrap items-center gap-2 text-sm">
-            {{#unless viewed}}<span class="badge badge-danger">new</span>{{/unless}}
-            <span class="font-mono text-xs text-ink-faint">{{file}}</span>
-            <span class="ml-auto text-xs tabular-nums text-ink-faint"><span data-ts="{{ts}}">{{ts}}</span> · {{bytes size}}</span>
+        <div class="p-5 hover:bg-danger/5 transition-colors group" data-crash-card data-crash-id="{{id}}" data-crash-file="{{file}}" {{#if mclogsUrl}}data-crash-mclogs="{{mclogsUrl}}"{{/if}}>
+          <div class="flex flex-wrap items-center gap-3 text-sm mb-2">
+            {{#unless viewed}}<span class="badge bg-danger text-white border-none text-[9px] uppercase tracking-wider shadow-sm">new</span>{{/unless}}
+            <span class="font-mono text-xs font-bold text-ink-soft bg-inset/30 px-2 py-1 rounded border border-line/30">{{file}}</span>
+            <span class="ml-auto text-[11px] font-medium tabular-nums text-ink-faint"><span data-ts="{{ts}}">{{ts}}</span> · {{bytes size}}</span>
           </div>
-          <p class="mt-1.5 font-mono text-xs text-ink-soft">{{summary}}</p>
-          <div class="mt-2 flex flex-wrap items-center gap-2">
+          <p class="font-mono text-[11px] font-medium text-ink bg-inset/10 p-3 rounded-lg border border-line/30 shadow-inner leading-relaxed">{{summary}}</p>
+          <div class="mt-3 flex flex-wrap items-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
             {{#each suspected}}
-              <span class="badge badge-warn" title="Suspected from the stack trace.">suspect: {{this}}</span>
+              <span class="badge bg-warn/10 text-warn-strong border border-warn/30 text-[9px] uppercase tracking-wider font-bold mr-2" title="Suspected from the stack trace.">suspect: {{this}}</span>
             {{/each}}
             {{! One treatment (icon + label) for all three sibling actions. }}
-            <button class="btn btn-ghost btn-sm" data-crash-action="view">{{{icon 'file-search' 'size-3.5'}}} Open Viewer</button>
-            <button class="btn btn-ghost btn-sm" data-crash-action="copy">{{{icon 'clipboard-copy' 'size-3.5'}}} Copy Stack Trace</button>
-            <button class="btn btn-ghost btn-sm" data-crash-action="download">{{{icon 'download' 'size-3.5'}}} Download</button>
-            <button class="btn btn-ghost btn-sm" data-crash-action="insights" data-tip="Automated analysis by mclo.gs: known problems with suggested fixes. Publishes the report as a public paste first.">{{{icon 'sparkles' 'size-3.5'}}} Analyze</button>
+            <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 shadow-sm border border-transparent hover:border-line/50 transition-colors" data-crash-action="view">{{{icon 'file-search' 'size-3.5'}}} Open Viewer</button>
+            <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 shadow-sm border border-transparent hover:border-line/50 transition-colors" data-crash-action="copy">{{{icon 'clipboard-copy' 'size-3.5'}}} Copy Stack Trace</button>
+            <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 shadow-sm border border-transparent hover:border-line/50 transition-colors" data-crash-action="download">{{{icon 'download' 'size-3.5'}}} Download</button>
+            <button class="btn btn-ghost btn-sm text-link hover:bg-link/10 shadow-sm border border-transparent hover:border-link/30 transition-colors" data-crash-action="insights" data-tip="Automated analysis by mclo.gs: known problems with suggested fixes. Publishes the report as a public paste first.">{{{icon 'sparkles' 'size-3.5'}}} Analyze</button>
             {{#if mclogsUrl}}
-              <a class="btn btn-ghost btn-sm" data-role="mclogs-link" href="{{mclogsUrl}}" target="_blank" rel="noopener">{{{icon 'external-link' 'size-3.5'}}} mclo.gs Paste</a>
+              <a class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 shadow-sm border border-transparent hover:border-line/50 transition-colors" data-role="mclogs-link" href="{{mclogsUrl}}" target="_blank" rel="noopener">{{{icon 'external-link' 'size-3.5'}}} mclo.gs Paste</a>
             {{else}}
-              <button class="btn btn-ghost btn-sm" data-crash-action="share" data-tip="Publish this report as a public mclo.gs paste, a link anyone can open (mod authors usually ask for one).">{{{icon 'share-2' 'size-3.5'}}} Share to mclo.gs</button>
+              <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 shadow-sm border border-transparent hover:border-line/50 transition-colors" data-crash-action="share" data-tip="Publish this report as a public mclo.gs paste, a link anyone can open (mod authors usually ask for one).">{{{icon 'share-2' 'size-3.5'}}} Share to mclo.gs</button>
             {{/if}}
           </div>
         </div>
@@ -46,28 +53,35 @@
 {{/if}}
 
 {{#if events.length}}
-<div class="card">
-  <ol class="divide-y divide-line" id="hist-events">
+<div class="card overflow-hidden shadow-sm">
+  <div class="border-b border-line/50 bg-inset/10 p-5 font-bold tracking-wide text-sm flex items-center justify-between gap-4">
+    <div class="flex items-center gap-2">{{{icon 'scroll-text' 'size-4 text-link'}}} Audit Log</div>
+    <span class="text-[10px] uppercase tracking-widest text-ink-faint bg-inset/50 border border-line/30 px-2 py-0.5 rounded shadow-inner font-bold">{{events.length}} Events</span>
+  </div>
+  <ol class="divide-y divide-line/30 bg-canvas" id="hist-events">
     {{#each events}}
-      <li class="p-3" data-event-row data-type="{{type}}" data-actor="{{actor}}">
-        <div class="flex flex-wrap items-center gap-2 text-sm">
-          <span class="badge {{eventBadge type}}">{{type}}</span>
-          <span class="min-w-0 flex-1">{{summary}}</span>
-          <span class="text-xs text-ink-faint">{{actor}} · <span data-ts="{{ts}}">{{ts}}</span></span>
+      <li class="p-4 sm:p-5 hover:bg-inset/5 transition-colors group" data-event-row data-type="{{type}}" data-actor="{{actor}}">
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          <span class="badge {{eventBadge type}} shadow-sm">{{type}}</span>
+          <span class="min-w-0 flex-1 font-bold text-ink">{{summary}}</span>
+          <span class="text-[11px] font-medium text-ink-faint tabular-nums"><b class="text-ink-soft">{{actor}}</b> · <span data-ts="{{ts}}">{{ts}}</span></span>
         </div>
         {{#if diff}}
           {{! break-all: unbroken values (paths, JVM flag strings) must wrap, not push past the card. }}
-          <div class="mt-2 break-all rounded bg-raised p-2 font-mono text-xs">
-            {{#each diff}}<div><span class="text-ink-faint">{{@key}}:</span> <span class="text-danger line-through">{{this.[0]}}</span> → <span class="text-ok">{{this.[1]}}</span></div>{{/each}}
+          <div class="mt-3 break-all rounded-lg bg-inset/30 border border-line/30 shadow-inner p-3 font-mono text-[11px] leading-relaxed">
+            {{#each diff}}<div><span class="text-ink-faint font-bold">{{@key}}:</span> <span class="text-danger-strong bg-danger/10 px-1 rounded line-through opacity-75">{{this.[0]}}</span> <span class="text-ink-faint mx-1">→</span> <span class="text-ok-strong bg-ok/10 px-1 rounded font-bold">{{this.[1]}}</span></div>{{/each}}
           </div>
         {{/if}}
         {{#if hasLog}}
-          <button class="btn btn-ghost btn-sm mt-1.5" data-event-log data-event-id="{{id}}">{{{icon 'file-text' 'size-3.5'}}} View Captured Log</button>
+          <button class="btn btn-ghost btn-sm mt-3 text-ink-faint hover:text-ink hover:bg-inset/30 border border-transparent hover:border-line/50 transition-colors shadow-sm sm:opacity-0 group-hover:opacity-100" data-event-log data-event-id="{{id}}">{{{icon 'file-text' 'size-3.5'}}} View Captured Log</button>
         {{/if}}
       </li>
     {{/each}}
   </ol>
-  <div class="hidden p-8 text-center text-sm text-ink-faint" id="hist-no-match">No events match these filters.</div>
+  <div class="hidden p-12 text-center text-sm font-medium text-ink-faint bg-canvas" id="hist-no-match">
+    <span class="grid size-12 place-items-center rounded-full bg-inset/30 border border-line/30 shadow-inner mx-auto mb-3">{{{icon 'search' 'size-5 opacity-50'}}}</span>
+    No events match these filters.
+  </div>
 </div>
 {{else}}
   {{> empty-state iconName='history' title='No Events Recorded Yet' message='Everything that happens to this server (starts, stops, setting changes, backups, and crashes) is logged here, with who did it and when.'}}

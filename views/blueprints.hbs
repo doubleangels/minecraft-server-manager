@@ -9,27 +9,40 @@
 {{#if blueprints.length}}
 <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" id="bp-grid">
   {{#each blueprints}}
-    <div class="card p-5 sm:p-6" data-bp-card data-bp-id="{{id}}" data-bp-name="{{name}}">
-      <div class="flex items-start gap-3">
-        <span class="grid size-10 place-items-center rounded-md bg-inset text-xl">{{{icon 'drafting-compass' 'size-5'}}}</span>
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2">
-            <h3 class="truncate font-semibold">{{name}}</h3>
-            {{#if builtin}}<span class="badge badge-info">starter</span>{{/if}}
+    <div class="card p-0 overflow-hidden flex flex-col group hover:-translate-y-1 hover:shadow-lg transition-all border border-line/50" data-bp-card data-bp-id="{{id}}" data-bp-name="{{name}}">
+      <div class="p-5 sm:p-6 flex-1 flex flex-col">
+        <div class="flex items-start gap-4">
+          <span class="grid size-12 place-items-center rounded-xl bg-inset/40 text-link border border-line/50 shadow-inner shrink-0">{{{icon 'drafting-compass' 'size-6'}}}</span>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="truncate font-bold text-lg text-ink">{{name}}</h3>
+              {{#if builtin}}<span class="badge badge-info bg-info/10 text-link border border-info/20 text-[10px] uppercase tracking-wider py-0.5 px-2">starter</span>{{/if}}
+            </div>
+            {{! line-clamp keeps long notes from making grid card heights ragged. }}
+            <p class="mt-1.5 line-clamp-2 text-xs font-medium text-ink-faint leading-relaxed" title="{{notes}}">{{notes}}</p>
           </div>
-          {{! line-clamp keeps long notes from making grid card heights ragged. }}
-          <p class="mt-0.5 line-clamp-2 text-xs text-ink-faint" title="{{notes}}">{{notes}}</p>
         </div>
+        
+        <dl class="mt-6 grid grid-cols-3 gap-3">
+          <div class="bg-inset/30 p-3 rounded-xl border border-line/50 flex flex-col items-center text-center">
+            <dt class="text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1">{{{icon 'package' 'size-3 mb-0.5'}}}<br>Pack</dt>
+            <dd class="text-xs font-bold text-ink mt-auto">{{default pack '-'}}</dd>
+          </div>
+          <div class="bg-inset/30 p-3 rounded-xl border border-line/50 flex flex-col items-center text-center">
+            <dt class="text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1">{{{icon 'puzzle' 'size-3 mb-0.5'}}}<br>Mods</dt>
+            <dd class="text-sm font-bold text-ink mt-auto tabular-nums">{{overlayCount}}</dd>
+          </div>
+          <div class="bg-inset/30 p-3 rounded-xl border border-line/50 flex flex-col items-center text-center">
+            <dt class="text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1">{{{icon 'hard-drive' 'size-3 mb-0.5'}}}<br>Size</dt>
+            <dd class="text-xs font-bold text-ink mt-auto tabular-nums">{{bytes size_bytes}}</dd>
+          </div>
+        </dl>
       </div>
-      <dl class="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3 text-xs">
-        <div><dt class="text-base font-semibold text-ink">Pack</dt><dd class="mt-0.5 text-sm font-medium">{{default pack '-'}}</dd></div>
-        <div><dt class="text-base font-semibold text-ink">Custom Mods</dt><dd class="mt-0.5 text-sm font-medium">{{overlayCount}}</dd></div>
-        <div><dt class="text-base font-semibold text-ink">Size</dt><dd class="mt-0.5 text-sm font-medium">{{bytes size_bytes}}</dd></div>
-      </dl>
-      <div class="mt-3 flex flex-wrap gap-2">
-        <button class="btn btn-sm flex-1" data-bp-create>{{{icon 'pickaxe' 'size-3.5'}}} Create a Server</button>
-        <a class="btn btn-ghost btn-sm" href="/api/blueprints/{{id}}/download" data-tip="Download the blueprint." aria-label="Download {{name}}">{{{icon 'download' 'size-3.5'}}}</a>
-        {{#unless builtin}}<button class="btn btn-ghost btn-sm text-danger" data-bp-delete data-tip="Delete this blueprint ({{bytes size_bytes}})." aria-label="Delete {{name}}">{{{icon 'trash-2' 'size-3.5'}}}</button>{{/unless}}
+      
+      <div class="flex items-center gap-2 bg-inset/10 border-t border-line/30 p-3 sm:px-5">
+        <button class="btn btn-sm btn-primary flex-1 shadow-sm" data-bp-create>{{{icon 'pickaxe' 'size-3.5'}}} Create a Server</button>
+        <a class="btn btn-ghost btn-sm border border-line/50 bg-canvas hover:bg-inset/30 size-9 p-0 grid place-items-center rounded-full text-ink-faint hover:text-ink transition-colors" href="/api/blueprints/{{id}}/download" data-tip="Download the blueprint." aria-label="Download {{name}}">{{{icon 'download' 'size-4'}}}</a>
+        {{#unless builtin}}<button class="btn btn-ghost btn-sm border border-line/50 bg-canvas hover:bg-danger/10 text-danger size-9 p-0 grid place-items-center rounded-full transition-colors" data-bp-delete data-tip="Delete this blueprint ({{bytes size_bytes}})." aria-label="Delete {{name}}">{{{icon 'trash-2' 'size-4'}}}</button>{{/unless}}
       </div>
     </div>
   {{/each}}

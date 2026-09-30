@@ -122,67 +122,77 @@
   {{/settings/card}}
 
   {{#> settings/card heading="Users" wide=true}}
-    <div class="overflow-x-auto -mx-5 sm:-mx-6 mb-4">
-      <table class="table-base table-stack" id="users-table">
-        <thead><tr><th>User</th><th>Role</th><th>2FA</th><th>Created</th><th class="text-right">Actions</th></tr></thead>
-        <tbody>
+    <div class="overflow-x-auto -mx-5 sm:-mx-6 mb-4 mt-[-1.25rem]">
+      <table class="table-base table-stack w-full text-sm" id="users-table">
+        <thead class="bg-canvas/50">
+          <tr class="text-[10px] uppercase tracking-widest text-ink-faint border-b border-line/30">
+            <th class="font-bold py-3 pl-5">User</th>
+            <th class="font-bold py-3">Role</th>
+            <th class="font-bold py-3">2FA</th>
+            <th class="font-bold py-3">Created</th>
+            <th class="text-right font-bold py-3 pr-5">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line/30">
           {{#each users}}
-            <tr data-user-id="{{id}}" data-username="{{username}}">
-              <td data-th="User" class="font-medium">
-                <div class="flex items-center gap-2">
-                  <span class="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-diamond-700 text-xs font-bold text-white shadow-sm">
+            <tr class="hover:bg-inset/10 transition-colors group" data-user-id="{{id}}" data-username="{{username}}">
+              <td data-th="User" class="p-3 pl-5 font-bold text-ink">
+                <div class="flex items-center gap-3">
+                  <span class="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-link/10 text-[10px] font-bold text-link border border-link/20 shadow-sm">
                     {{#if (avatarSrc avatar)}}
                       <img src="{{avatarSrc avatar}}" alt="" class="size-full object-cover">
                     {{else}}
                       {{initial username}}
                     {{/if}}
                   </span>
-                  {{username}}{{#if (eq id ../user.id)}} <span class="badge">you</span>{{/if}}
+                  {{username}}{{#if (eq id ../user.id)}} <span class="badge bg-inset/50 border border-line/50 text-[9px] uppercase tracking-wider ml-1">you</span>{{/if}}
                 </div>
               </td>
-              <td data-th="Role">
-                <select class="input w-auto" data-user-role data-prev-role="{{role}}" data-label="Role for {{username}}">
+              <td data-th="Role" class="p-3">
+                <select class="input w-auto text-xs py-1" data-user-role data-prev-role="{{role}}" data-label="Role for {{username}}">
                   <option value="admin" {{#if (eq role 'admin')}}selected{{/if}}>Admin</option>
                   <option value="operator" {{#if (eq role 'operator')}}selected{{/if}}>Operator</option>
                   <option value="viewer" {{#if (eq role 'viewer')}}selected{{/if}}>Viewer</option>
                 </select>
               </td>
-              <td data-th="2FA">
+              <td data-th="2FA" class="p-3">
                 {{#if totpEnabled}}
-                  <span class="badge badge-ok">On</span>
+                  <span class="badge bg-ok/10 text-ok-strong border border-ok/20 text-[9px] uppercase tracking-wider">On</span>
                 {{else}}
-                  <span class="text-xs text-ink-faint">Off</span>
+                  <span class="text-[11px] font-medium text-ink-faint">Off</span>
                 {{/if}}
               </td>
-              <td data-th="Created" class="whitespace-nowrap text-xs text-ink-faint" data-ts="{{createdAt}}">{{createdAt}}</td>
-              <td data-th="" class="text-right">
-                <button class="btn btn-ghost btn-sm" data-menu="user-menu-{{@index}}" data-tip="Actions for {{username}}." aria-label="Actions for {{username}}">{{{icon 'ellipsis' 'size-3.5'}}}</button>
-                <template id="user-menu-{{@index}}">
-                  <button data-user-password data-user-id="{{id}}" data-username="{{username}}">{{{icon 'key' 'size-3.5'}}} Set Password</button>
-                  {{! Your own row: self-service, same modal as the topbar user menu -
-                      2FA can only ever be set up on the device you're enrolling, so
-                      there's nothing an admin can do here for someone ELSE's row. }}
-                  {{#if (eq id ../user.id)}}
-                    <button data-open-2fa>{{{icon 'shield-check' 'size-3.5'}}} {{#if totpEnabled}}Manage 2FA{{else}}Set Up 2FA{{/if}}</button>
-                  {{else if totpEnabled}}
-                    <button data-user-totp-reset data-user-id="{{id}}" data-username="{{username}}">{{{icon 'shield-check' 'size-3.5'}}} Reset 2FA</button>
-                  {{/if}}
-                  {{! No self-delete affordance - deleting your own account mid-session is a trap, not a feature. }}
-                  {{#unless (eq id ../user.id)}}
-                    <button class="btn btn-ghost btn-sm text-danger" data-user-delete data-user-id="{{id}}" data-username="{{username}}">{{{icon 'trash-2' 'size-3.5'}}} Delete User</button>
-                  {{/unless}}
-                </template>
+              <td data-th="Created" class="whitespace-nowrap text-[11px] font-medium text-ink-faint p-3" data-ts="{{createdAt}}">{{createdAt}}</td>
+              <td data-th="" class="p-3 sm:text-right pr-5">
+                <div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap">
+                  <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 rounded-full size-8 p-0 grid place-items-center sm:opacity-0 group-hover:opacity-100 transition-opacity" data-menu="user-menu-{{@index}}" data-tip="Actions for {{username}}." aria-label="Actions for {{username}}">{{{icon 'ellipsis' 'size-4'}}}</button>
+                  <template id="user-menu-{{@index}}">
+                    <button data-user-password data-user-id="{{id}}" data-username="{{username}}">{{{icon 'key' 'size-3.5'}}} Set Password</button>
+                    {{! Your own row: self-service, same modal as the topbar user menu -
+                        2FA can only ever be set up on the device you're enrolling, so
+                        there's nothing an admin can do here for someone ELSE's row. }}
+                    {{#if (eq id ../user.id)}}
+                      <button data-open-2fa>{{{icon 'shield-check' 'size-3.5'}}} {{#if totpEnabled}}Manage 2FA{{else}}Set Up 2FA{{/if}}</button>
+                    {{else if totpEnabled}}
+                      <button data-user-totp-reset data-user-id="{{id}}" data-username="{{username}}">{{{icon 'shield-check' 'size-3.5'}}} Reset 2FA</button>
+                    {{/if}}
+                    {{! No self-delete affordance - deleting your own account mid-session is a trap, not a feature. }}
+                    {{#unless (eq id ../user.id)}}
+                      <button class="btn btn-ghost btn-sm text-danger" data-user-delete data-user-id="{{id}}" data-username="{{username}}">{{{icon 'trash-2' 'size-3.5'}}} Delete User</button>
+                    {{/unless}}
+                  </template>
+                </div>
               </td>
             </tr>
           {{/each}}
         </tbody>
       </table>
     </div>
-    <div class="mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-2">
-      <button class="btn btn-primary btn-sm" id="user-add">{{{icon 'plus' 'size-3.5'}}} Add User</button>
-      <a class="btn btn-sm" href="/settings/permissions">{{{icon 'shield-check' 'size-3.5'}}} Server Permissions</a>
+    <div class="mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-2 border-t border-line/30 pt-4">
+      <button class="btn btn-primary btn-sm shadow-sm" id="user-add">{{{icon 'plus' 'size-3.5'}}} Add User</button>
+      <a class="btn btn-ghost btn-sm border border-line/50 shadow-sm bg-canvas hover:bg-inset/30 transition-colors" href="/settings/permissions">{{{icon 'shield-check' 'size-3.5'}}} Server Permissions</a>
     </div>
-    <p class="help mt-2 max-w-prose">Roles: <b>Admin</b> can do everything. <b>Operator</b> can manage servers, but not storage, users, or update policies. <b>Viewer</b> is read-only. Server Permissions lets you change what an operator or viewer may do on each server.</p>
+    <p class="help mt-3 max-w-prose text-xs leading-relaxed font-medium">Roles: <b class="text-ink">Admin</b> can do everything. <b class="text-ink">Operator</b> can manage servers, but not storage, users, or update policies. <b class="text-ink">Viewer</b> is read-only. Server Permissions lets you change what an operator or viewer may do on each server.</p>
   {{/settings/card}}
 
   {{#> settings/card heading="Sign-in Security" id="lockouts-card" wide=true desc="Accounts and addresses currently blocked from signing in after too many failed attempts. Locks clear on their own after the cooldown; unlock one here to end it early."}}
@@ -197,34 +207,52 @@
         inputId="public-api-enabled"
         checked=publicApiEnabled}}
 
-    <div class="mt-4 border-t border-line pt-4">
-      <p class="help mt-0 max-w-prose">Each app connects with its own <b>access key</b> (sent as an <span class="font-mono">Authorization: Bearer</span> header). Make one key per app; anyone holding a key can see the servers you allow it: name, type, whether it's running, players online, and resource use. Cancel a key to cut that app off straight away.</p>
-      <div class="mt-4 overflow-x-auto -mx-5 sm:-mx-6">
-        <table class="table-base table-stack" id="api-tokens-table">
-          <thead><tr><th>Name</th><th>Key</th><th>Can See</th><th>Created</th><th>Last Used</th><th>Expires</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
-          <tbody>
+    <div class="mt-4 border-t border-line/30 pt-4">
+      <p class="help mt-0 max-w-prose text-xs leading-relaxed font-medium">Each app connects with its own <b class="text-ink">access key</b> (sent as an <span class="font-mono bg-inset/30 px-1 py-0.5 rounded border border-line/30">Authorization: Bearer</span> header). Make one key per app; anyone holding a key can see the servers you allow it: name, type, whether it's running, players online, and resource use. Cancel a key to cut that app off straight away.</p>
+      <div class="mt-4 overflow-x-auto -mx-5 sm:-mx-6 mt-[-1.25rem]">
+        <table class="table-base table-stack w-full text-sm" id="api-tokens-table">
+          <thead class="bg-canvas/50">
+            <tr class="text-[10px] uppercase tracking-widest text-ink-faint border-b border-line/30">
+              <th class="font-bold py-3 pl-5">Name</th>
+              <th class="font-bold py-3">Key</th>
+              <th class="font-bold py-3">Can See</th>
+              <th class="font-bold py-3">Created</th>
+              <th class="font-bold py-3">Last Used</th>
+              <th class="font-bold py-3">Expires</th>
+              <th class="font-bold py-3">Status</th>
+              <th class="text-right font-bold py-3 pr-5">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line/30">
             {{#each apiTokens}}
-              <tr data-token-id="{{id}}">
-                <td data-th="Name" class="font-medium">{{label}}</td>
-                <td data-th="Key" class="font-mono text-xs">{{tokenPrefix}}&hellip;</td>
-                <td data-th="Can See">{{#if scope.all}}Every server{{else}}{{scope.serverIds.length}} server(s){{/if}}</td>
-                <td data-th="Created" class="whitespace-nowrap text-xs text-ink-faint" data-ts="{{createdAt}}">{{createdAt}}</td>
-                <td data-th="Last Used" class="whitespace-nowrap text-xs text-ink-faint">{{#if lastUsedAt}}<span data-ts="{{lastUsedAt}}">{{lastUsedAt}}</span>{{else}}never{{/if}}</td>
-                <td data-th="Expires" class="whitespace-nowrap text-xs text-ink-faint">{{#if expiresAt}}<span data-ts="{{expiresAt}}">{{expiresAt}}</span>{{else}}never{{/if}}</td>
-                <td data-th="Status">{{#if (eq status 'active')}}<span class="badge badge-ok">Active</span>{{else}}<span class="badge">{{status}}</span>{{/if}}</td>
-                <td data-th="" class="text-right">
-                  {{#unless revokedAt}}
-                    <button class="btn btn-ghost btn-sm text-danger" data-token-revoke data-token-id="{{id}}" data-label="{{label}}">Cancel</button>
-                  {{/unless}}
+              <tr class="hover:bg-inset/10 transition-colors group" data-token-id="{{id}}">
+                <td data-th="Name" class="p-3 pl-5 font-bold text-ink">{{label}}</td>
+                <td data-th="Key" class="p-3"><span class="font-mono text-xs text-ink-soft bg-inset/30 px-1.5 py-0.5 rounded border border-line/30">{{tokenPrefix}}&hellip;</span></td>
+                <td data-th="Can See" class="p-3 font-medium text-ink-soft">{{#if scope.all}}<span class="badge bg-inset/50 border border-line/50 text-[9px] uppercase tracking-wider text-ink-faint">Every server</span>{{else}}<span class="font-bold tabular-nums">{{scope.serverIds.length}}</span> server(s){{/if}}</td>
+                <td data-th="Created" class="whitespace-nowrap text-[11px] font-medium text-ink-faint p-3" data-ts="{{createdAt}}">{{createdAt}}</td>
+                <td data-th="Last Used" class="whitespace-nowrap text-[11px] font-medium text-ink-faint p-3">{{#if lastUsedAt}}<span data-ts="{{lastUsedAt}}">{{lastUsedAt}}</span>{{else}}<span class="opacity-50">never</span>{{/if}}</td>
+                <td data-th="Expires" class="whitespace-nowrap text-[11px] font-medium text-ink-faint p-3">{{#if expiresAt}}<span data-ts="{{expiresAt}}">{{expiresAt}}</span>{{else}}<span class="opacity-50">never</span>{{/if}}</td>
+                <td data-th="Status" class="p-3">{{#if (eq status 'active')}}<span class="badge bg-ok/10 text-ok-strong border border-ok/20 text-[9px] uppercase tracking-wider">Active</span>{{else}}<span class="badge bg-inset/50 border border-line/50 text-[9px] uppercase tracking-wider">{{status}}</span>{{/if}}</td>
+                <td data-th="" class="p-3 sm:text-right pr-5">
+                  <div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                    {{#unless revokedAt}}
+                      <button class="btn btn-ghost btn-sm text-danger hover:bg-danger/10 rounded-full px-3 font-bold border border-transparent shadow-sm" data-token-revoke data-token-id="{{id}}" data-label="{{label}}">Cancel</button>
+                    {{/unless}}
+                  </div>
                 </td>
               </tr>
             {{else}}
-              <tr><td data-th="" colspan="8" class="text-sm text-ink-faint">No keys yet. Make one for each app that needs access.</td></tr>
+              <tr><td data-th="" colspan="8" class="py-12 text-center text-sm text-ink-faint">
+                <span class="grid size-12 place-items-center rounded-full bg-inset/30 border border-line/30 shadow-inner mx-auto mb-3">{{{icon 'key' 'size-6 opacity-50'}}}</span>
+                <p class="font-medium">No keys yet. Make one for each app that needs access.</p>
+              </td></tr>
             {{/each}}
           </tbody>
         </table>
       </div>
-      <button class="btn btn-primary btn-sm mt-4 w-full sm:w-auto" id="api-token-add">{{{icon 'plus' 'size-3.5'}}} New Key</button>
+      <div class="mt-4 border-t border-line/30 pt-4">
+        <button class="btn btn-primary btn-sm shadow-sm w-full sm:w-auto" id="api-token-add">{{{icon 'plus' 'size-3.5'}}} New Key</button>
+      </div>
       <script type="application/json" id="api-token-servers">{{jsonScript serverOptions}}</script>
     </div>
   {{/settings/card}}

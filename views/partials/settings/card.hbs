@@ -7,10 +7,12 @@
 
     Params: heading, desc (optional sub-line), wide (span both columns at lg),
     id (optional element id). --}}
-<section class="card p-5 sm:p-6{{#if wide}} lg:col-span-2{{/if}}"{{#if id}} id="{{id}}"{{/if}}>
-  <div class="mb-5 border-b border-line/50 pb-4">
-    <h3 class="text-lg font-semibold tracking-tight text-ink">{{heading}}</h3>
-    {{#if desc}}<p class="mt-1.5 max-w-prose text-sm text-ink-soft">{{desc}}</p>{{/if}}
+<section class="card overflow-hidden shadow-sm{{#if wide}} lg:col-span-2{{/if}}"{{#if id}} id="{{id}}"{{/if}}>
+  <div class="border-b border-line/50 bg-inset/10 p-5 font-bold tracking-wide text-sm">
+    <h3 class="flex items-center gap-2 text-ink">{{{icon 'settings' 'size-4 text-link'}}} {{heading}}</h3>
+    {{#if desc}}<p class="mt-2 text-xs font-medium text-ink-faint leading-relaxed max-w-prose normal-case tracking-normal">{{desc}}</p>{{/if}}
   </div>
-  {{> @partial-block}}
+  <div class="p-5 sm:p-6 bg-canvas">
+    {{> @partial-block}}
+  </div>
 </section>

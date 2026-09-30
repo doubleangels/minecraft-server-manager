@@ -165,205 +165,223 @@
 
   {{! Cards are unnumbered on purpose: tabs hide the type card, so hard-coded
       "1…4" used to count 1 → 3 → 4. }}
-  <div class="card p-5">
-    <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Identity</h3>
-    <div class="grid gap-4 sm:grid-cols-[minmax(14rem,1fr)_auto]">
-      <div>
-        <label class="label" for="wz-name">Server name</label>
-        <input class="input" id="wz-name" placeholder="e.g. Weekend Survival" autocomplete="off">
+  {{! Cards are unnumbered on purpose: tabs hide the type card, so hard-coded
+      "1…4" used to count 1 → 3 → 4. }}
+  <div class="card overflow-hidden shadow-sm">
+    <div class="border-b border-line/50 bg-inset/10 p-5 font-bold tracking-wide text-sm flex items-center gap-2">
+      {{{icon 'fingerprint' 'size-4 text-link'}}} Identity
+    </div>
+    <div class="p-5 sm:p-6 bg-canvas">
+      <div class="grid gap-4 sm:grid-cols-[minmax(14rem,1fr)_auto]">
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-name">Server name</label>
+          <input class="input bg-canvas shadow-sm" id="wz-name" placeholder="e.g. Weekend Survival" autocomplete="off">
+        </div>
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5">Icon & color</label>
+          {{! flex-wrap: the icon row must give way instead of crushing the name input at ~700px. }}
+          <div class="flex flex-wrap gap-1.5 bg-inset/10 p-2 rounded-lg border border-line/30 shadow-inner w-fit" id="wz-icons">
+            <button type="button" data-icon="grass" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="true"><img src="/icons/servers/grass.svg" alt="Grass" class="size-full rounded-md object-cover shadow-sm"></button>
+            <button type="button" data-icon="creeper" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/creeper.svg" alt="Creeper" class="size-full rounded-md object-cover shadow-sm"></button>
+            <button type="button" data-icon="diamond" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/diamond.svg" alt="Diamond" class="size-full rounded-md object-cover shadow-sm"></button>
+            <button type="button" data-icon="tnt" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/tnt.svg" alt="TNT" class="size-full rounded-md object-cover shadow-sm"></button>
+            <button type="button" data-icon="portal" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/portal.svg" alt="Portal" class="size-full rounded-md object-cover shadow-sm"></button>
+            <button type="button" data-icon="chest" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/chest.svg" alt="Chest" class="size-full rounded-md object-cover shadow-sm"></button>
+            <button type="button" data-icon="sword" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/sword.svg" alt="Sword" class="size-full rounded-md object-cover shadow-sm"></button>
+            <button type="button" data-icon="potion" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/potion.svg" alt="Potion" class="size-full rounded-md object-cover shadow-sm"></button>
+          </div>
+        </div>
       </div>
-      <div>
-        <label class="label">Icon & color</label>
-        {{! flex-wrap: the icon row must give way instead of crushing the name input at ~700px. }}
-        <div class="flex flex-wrap gap-1.5" id="wz-icons">
-          <button type="button" data-icon="grass" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="true"><img src="/icons/servers/grass.svg" alt="Grass" class="size-full rounded-md object-cover shadow-sm"></button>
-          <button type="button" data-icon="creeper" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/creeper.svg" alt="Creeper" class="size-full rounded-md object-cover shadow-sm"></button>
-          <button type="button" data-icon="diamond" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/diamond.svg" alt="Diamond" class="size-full rounded-md object-cover shadow-sm"></button>
-          <button type="button" data-icon="tnt" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/tnt.svg" alt="TNT" class="size-full rounded-md object-cover shadow-sm"></button>
-          <button type="button" data-icon="portal" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/portal.svg" alt="Portal" class="size-full rounded-md object-cover shadow-sm"></button>
-          <button type="button" data-icon="chest" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/chest.svg" alt="Chest" class="size-full rounded-md object-cover shadow-sm"></button>
-          <button type="button" data-icon="sword" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/sword.svg" alt="Sword" class="size-full rounded-md object-cover shadow-sm"></button>
-          <button type="button" data-icon="potion" class="tile size-10 p-1" style="background: #3fa62b" aria-pressed="false"><img src="/icons/servers/potion.svg" alt="Potion" class="size-full rounded-md object-cover shadow-sm"></button>
+      <div class="mt-4 grid gap-4 sm:grid-cols-[minmax(14rem,1fr)_auto]">
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-desc">Description <span class="text-[9px] font-medium text-ink-faint">(optional)</span></label>
+          <input class="input bg-canvas shadow-sm" id="wz-desc" placeholder="What is this server for?">
+        </div>
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5">Accent color</label>
+          {{! .swatch: theme-aware selected ring - the old border-white/60 marker
+              was invisible on the light theme's white card. }}
+          <div class="flex flex-wrap gap-1.5 bg-inset/10 p-2 rounded-lg border border-line/30 shadow-inner w-fit" id="wz-colors">
+            <button type="button" data-accent="#3fa62b" class="swatch size-10 shadow-sm" style="background:#3fa62b" data-tip="Grass" aria-pressed="true"></button>
+            <button type="button" data-accent="#21a7ab" class="swatch size-10 shadow-sm" style="background:#21a7ab" data-tip="Diamond" aria-pressed="false"></button>
+            <button type="button" data-accent="#e5484d" class="swatch size-10 shadow-sm" style="background:#e5484d" data-tip="Redstone" aria-pressed="false"></button>
+            <button type="button" data-accent="#e99417" class="swatch size-10 shadow-sm" style="background:#e99417" data-tip="Gold" aria-pressed="false"></button>
+            {{! Amethyst - the palette's purple, from the in-game block }}
+            <button type="button" data-accent="#9a5cc6" class="swatch size-10 shadow-sm" style="background:#9a5cc6" data-tip="Amethyst" aria-pressed="false"></button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="mt-3 grid gap-4 sm:grid-cols-[minmax(14rem,1fr)_auto]">
-      <div>
-        <label class="label" for="wz-desc">Description <span class="text-xs font-normal text-ink-faint">(optional)</span></label>
-        <input class="input" id="wz-desc" placeholder="What is this server for?">
+  </div>
+
+  <div class="card overflow-hidden shadow-sm mt-6" id="wz-card-flavor">
+    <div class="border-b border-line/50 bg-inset/10 p-5 font-bold tracking-wide text-sm flex items-center gap-2">
+      {{{icon 'cpu' 'size-4 text-link'}}} Server Type &amp; Version
+    </div>
+    <div class="p-5 sm:p-6 bg-canvas">
+      <p class="help mb-4 text-xs font-medium leading-relaxed text-ink-soft">Vanilla and plugin servers. Want mods? Use the <b>From Mods</b> tab. That's where the mod loaders (Fabric, Forge, NeoForge, Quilt) live.</p>
+      <div class="mb-5 grid grid-cols-3 gap-2 bg-inset/10 p-2 rounded-lg border border-line/30 shadow-inner" id="wz-flavors">
+        <button type="button" data-type="VANILLA" data-mc-latest="{{latestRelease}}" class="tile p-3 bg-canvas shadow-sm" aria-pressed="true">{{{icon 'box' 'size-5'}}}<span class="text-[11px] font-bold uppercase tracking-wider mt-1">Vanilla</span></button>
+        <button type="button" data-type="PAPER" data-mc-latest="{{#if paperLatestRelease}}{{paperLatestRelease}}{{else}}{{latestRelease}}{{/if}}" class="tile p-3 bg-canvas shadow-sm" aria-pressed="false">{{{icon 'scroll-text' 'size-5'}}}<span class="text-[11px] font-bold uppercase tracking-wider mt-1">Paper</span></button>
+        <button type="button" data-type="PURPUR" data-mc-latest="{{#if purpurLatestRelease}}{{purpurLatestRelease}}{{else}}{{latestRelease}}{{/if}}" class="tile p-3 bg-canvas shadow-sm" aria-pressed="false">{{{icon 'gem' 'size-5'}}}<span class="text-[11px] font-bold uppercase tracking-wider mt-1">Purpur</span></button>
       </div>
-      <div>
-        <label class="label">Accent color</label>
-        {{! .swatch: theme-aware selected ring - the old border-white/60 marker
-            was invisible on the light theme's white card. }}
-        <div class="flex flex-wrap gap-1.5" id="wz-colors">
-          <button type="button" data-accent="#3fa62b" class="swatch size-10" style="background:#3fa62b" data-tip="Grass" aria-pressed="true"></button>
-          <button type="button" data-accent="#21a7ab" class="swatch size-10" style="background:#21a7ab" data-tip="Diamond" aria-pressed="false"></button>
-          <button type="button" data-accent="#e5484d" class="swatch size-10" style="background:#e5484d" data-tip="Redstone" aria-pressed="false"></button>
-          <button type="button" data-accent="#e99417" class="swatch size-10" style="background:#e99417" data-tip="Gold" aria-pressed="false"></button>
-          {{! Amethyst - the palette's purple, from the in-game block }}
-          <button type="button" data-accent="#9a5cc6" class="swatch size-10" style="background:#9a5cc6" data-tip="Amethyst" aria-pressed="false"></button>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-version">Minecraft version</label>
+          <select class="input bg-canvas shadow-sm" id="wz-version" data-label="Minecraft version">
+            <option value="LATEST" selected>LATEST ({{latestRelease}})</option>
+            {{#each versions}}<option value="{{id}}"{{#unless (eq type "release")}} data-desc="{{#if (eq type "snapshot")}}Snapshot{{else if (eq type "old_beta")}}Beta{{else}}Alpha{{/if}}"{{/unless}}>{{id}}</option>{{/each}}
+          </select>
+          <p class="help mt-2 text-[10px] font-medium text-ink-faint">Every Mojang version: releases, snapshots, betas, and alphas. The matching Java version is picked automatically.</p>
+        </div>
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-port">Game port</label>
+          <input class="input max-w-48 font-mono bg-canvas shadow-sm" id="wz-port" value="{{suggestedPort}}" inputmode="numeric">
+          <p class="help mt-2 text-[10px] font-medium text-ink-faint" id="wz-port-help">A free port, suggested automatically. The panel's remote console (RCON) runs on the port 1000 higher than this one.</p>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="card mt-4 p-5" id="wz-card-flavor">
-    <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Server Type &amp; Version</h3>
-    <p class="help mb-3">Vanilla and plugin servers. Want mods? Use the <b>From Mods</b> tab. That's where the mod loaders (Fabric, Forge, NeoForge, Quilt) live.</p>
-    <div class="mb-4 grid grid-cols-3 gap-2" id="wz-flavors">
-      <button type="button" data-type="VANILLA" data-mc-latest="{{latestRelease}}" class="tile p-3" aria-pressed="true">{{{icon 'box' 'size-5'}}}<span class="text-xs font-semibold">Vanilla</span></button>
-      <button type="button" data-type="PAPER" data-mc-latest="{{#if paperLatestRelease}}{{paperLatestRelease}}{{else}}{{latestRelease}}{{/if}}" class="tile p-3" aria-pressed="false">{{{icon 'scroll-text' 'size-5'}}}<span class="text-xs font-semibold">Paper</span></button>
-      <button type="button" data-type="PURPUR" data-mc-latest="{{#if purpurLatestRelease}}{{purpurLatestRelease}}{{else}}{{latestRelease}}{{/if}}" class="tile p-3" aria-pressed="false">{{{icon 'gem' 'size-5'}}}<span class="text-xs font-semibold">Purpur</span></button>
+  <div class="card overflow-hidden shadow-sm mt-6" id="wz-card-world">
+    <div class="border-b border-line/50 bg-inset/10 p-5 font-bold tracking-wide text-sm flex items-center gap-2">
+      {{{icon 'globe' 'size-4 text-link'}}} World &amp; Rules
     </div>
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div>
-        <label class="label" for="wz-version">Minecraft version</label>
-        <select class="input" id="wz-version" data-label="Minecraft version">
-          <option value="LATEST" selected>LATEST ({{latestRelease}})</option>
-          {{#each versions}}<option value="{{id}}"{{#unless (eq type "release")}} data-desc="{{#if (eq type "snapshot")}}Snapshot{{else if (eq type "old_beta")}}Beta{{else}}Alpha{{/if}}"{{/unless}}>{{id}}</option>{{/each}}
-        </select>
-        <p class="help">Every Mojang version: releases, snapshots, betas, and alphas. The matching Java version is picked automatically.</p>
+    <div class="p-5 sm:p-6 bg-canvas">
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-seed">World seed <span class="text-[9px] font-medium text-ink-faint">(optional)</span></label>
+          <input class="input font-mono bg-canvas shadow-sm" id="wz-seed" placeholder="random">
+        </div>
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-maxplayers">Max players</label>
+          <input class="input max-w-48 bg-canvas shadow-sm" id="wz-maxplayers" type="number" inputmode="numeric" value="10" min="1" max="1000">
+        </div>
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-difficulty">Difficulty</label>
+          <select class="input bg-canvas shadow-sm" id="wz-difficulty" data-label="Difficulty">
+            <option value="peaceful">Peaceful</option><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option>
+          </select>
+        </div>
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-mode">Game mode</label>
+          <select class="input bg-canvas shadow-sm" id="wz-mode" data-label="Game mode">
+            <option value="survival" selected>Survival</option><option value="creative">Creative</option><option value="adventure">Adventure</option><option value="spectator">Spectator</option>
+          </select>
+        </div>
+        <div>
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-pvp">PvP</label>
+          <select class="input bg-canvas shadow-sm" id="wz-pvp" data-label="PvP">
+            <option value="true" selected>On</option><option value="false">Off</option>
+          </select>
+          <p class="help mt-2 text-[10px] font-medium text-ink-faint">Applied from the first start; no restart needed.</p>
+        </div>
       </div>
-      <div>
-        <label class="label" for="wz-port">Game port</label>
-        <input class="input max-w-48 font-mono" id="wz-port" value="{{suggestedPort}}" inputmode="numeric">
-        <p class="help" id="wz-port-help">A free port, suggested automatically. The panel's remote console (RCON) runs on the port 1000 higher than this one.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="card mt-4 p-5" id="wz-card-world">
-    <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">World &amp; Rules</h3>
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div>
-        <label class="label" for="wz-seed">World seed <span class="text-xs font-normal text-ink-faint">(optional)</span></label>
-        <input class="input font-mono" id="wz-seed" placeholder="random">
-      </div>
-      <div>
-        <label class="label" for="wz-maxplayers">Max players</label>
-        <input class="input max-w-48" id="wz-maxplayers" type="number" inputmode="numeric" value="10" min="1" max="1000">
-      </div>
-      <div>
-        <label class="label" for="wz-difficulty">Difficulty</label>
-        <select class="input" id="wz-difficulty" data-label="Difficulty">
-          <option value="peaceful">Peaceful</option><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option>
-        </select>
-      </div>
-      <div>
-        <label class="label" for="wz-mode">Game mode</label>
-        <select class="input" id="wz-mode" data-label="Game mode">
-          <option value="survival" selected>Survival</option><option value="creative">Creative</option><option value="adventure">Adventure</option><option value="spectator">Spectator</option>
-        </select>
-      </div>
-      <div>
-        <label class="label" for="wz-pvp">PvP</label>
-        <select class="input" id="wz-pvp" data-label="PvP">
-          <option value="true" selected>On</option><option value="false">Off</option>
-        </select>
-        <p class="help">Applied from the first start; no restart needed.</p>
-      </div>
-    </div>
-    <div class="mt-4">
-      <label class="label" for="wz-motd">MOTD <span class="text-xs font-normal text-ink-faint">(color codes supported)</span></label>
-      <input class="input font-mono" id="wz-motd" value="&aA Minecraft server">
-      <div class="console mt-2 py-2 text-sm" id="wz-motd-preview"></div>
-    </div>
-  </div>
-
-  <div class="card mt-4 p-5" id="wz-card-resources">
-    <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Resources</h3>
-    <div>
-      <label class="label">RAM (Java heap)</label>
-      <div class="flex items-center gap-3">
-        <input type="range" min="1024" max="16384" step="512" value="{{defaults.heapMb}}" class="msm-range flex-1" id="wz-ram" data-out="wz-ram-out" data-unit=" MB">
-        <span class="w-24 text-right font-mono text-sm" id="wz-ram-out">{{defaults.heapMb}} MB</span>
-      </div>
-      <p class="help">The container's memory limit is set automatically, 50% above the heap.</p>
-    </div>
-    <div class="mt-4">
-      <label class="label">Disk quota</label>
-      <div class="flex items-center gap-3">
-        <input type="range" min="0" max="200" step="5" value="{{defaults.diskQuotaGb}}" class="msm-range flex-1" id="wz-quota" data-out="wz-quota-out" data-unit=" GB" data-zero="off">
-        <span class="w-24 text-right font-mono text-sm" id="wz-quota-out">{{defaults.diskQuotaGb}} GB</span>
+      <div class="mt-5">
+        <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-motd">MOTD <span class="text-[9px] font-medium text-ink-faint">(color codes supported)</span></label>
+        <input class="input font-mono bg-canvas shadow-sm" id="wz-motd" value="&aA Minecraft server">
+        <div class="console mt-3 py-3 px-4 rounded-lg text-sm bg-[#1a1b1e] text-[#a9b1d6] shadow-inner font-mono" id="wz-motd-preview"></div>
       </div>
     </div>
   </div>
 
-  <div id="wz-advanced" class="mt-4 hidden space-y-3">
-    <div class="notice notice-info text-xs">
-      {{{icon 'info' 'size-3.5 mt-0.5 shrink-0'}}}
+  <div class="card overflow-hidden shadow-sm mt-6" id="wz-card-resources">
+    <div class="border-b border-line/50 bg-inset/10 p-5 font-bold tracking-wide text-sm flex items-center gap-2">
+      {{{icon 'database' 'size-4 text-link'}}} Resources
+    </div>
+    <div class="p-5 sm:p-6 bg-canvas">
+      <div>
+        <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5">RAM (Java heap)</label>
+        <div class="flex items-center gap-4 bg-inset/10 p-3 rounded-lg border border-line/30 shadow-inner">
+          <input type="range" min="1024" max="16384" step="512" value="{{defaults.heapMb}}" class="msm-range flex-1" id="wz-ram" data-out="wz-ram-out" data-unit=" MB">
+          <span class="w-24 text-right font-mono font-bold text-sm bg-canvas px-2 py-1 rounded shadow-sm border border-line/30" id="wz-ram-out">{{defaults.heapMb}} MB</span>
+        </div>
+        <p class="help mt-2 text-[10px] font-medium text-ink-faint">The container's memory limit is set automatically, 50% above the heap.</p>
+      </div>
+      <div class="mt-5">
+        <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5">Disk quota</label>
+        <div class="flex items-center gap-4 bg-inset/10 p-3 rounded-lg border border-line/30 shadow-inner">
+          <input type="range" min="0" max="200" step="5" value="{{defaults.diskQuotaGb}}" class="msm-range flex-1" id="wz-quota" data-out="wz-quota-out" data-unit=" GB" data-zero="off">
+          <span class="w-24 text-right font-mono font-bold text-sm bg-canvas px-2 py-1 rounded shadow-sm border border-line/30" id="wz-quota-out">{{defaults.diskQuotaGb}} GB</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wz-advanced" class="mt-6 hidden space-y-4">
+    <div class="notice notice-info text-xs font-medium leading-relaxed shadow-sm">
+      {{{icon 'info' 'size-4 mt-0.5 shrink-0 text-link'}}}
       <div>Every environment variable the server image supports, taken straight from its documentation. Leave a field empty to use that variable's default;
       only values you change are applied. The Simple-mode choices above (version, port, world rules, resources) still apply.</div>
     </div>
     {{#each advancedSections}}
-      <details class="card group">
-        <summary class="flex cursor-pointer items-center gap-2.5 p-4 font-semibold marker:content-none">
-          {{{icon icon 'size-4 text-ink-faint'}}} {{label}}
-          <span class="badge ml-1">{{fields.length}}</span>
+      <details class="card overflow-hidden shadow-sm group">
+        <summary class="flex cursor-pointer items-center gap-3 p-5 font-bold tracking-wide text-sm marker:content-none hover:bg-inset/5 transition-colors">
+          {{{icon icon 'size-4 text-link'}}} {{label}}
+          <span class="badge bg-inset/50 border border-line/50 text-[9px] uppercase tracking-wider ml-1">{{fields.length}}</span>
           <span class="ml-auto text-ink-faint transition group-open:rotate-180">{{{icon 'chevron-down' 'size-4'}}}</span>
         </summary>
-        <div class="divide-y divide-line/60 border-t border-line px-4 pb-4">
+        <div class="divide-y divide-line/30 border-t border-line/50 p-5 sm:p-6 bg-canvas">
           {{#each fields}}
             {{> catalog-field}}
           {{/each}}
         </div>
       </details>
     {{/each}}
-    <details class="card group">
-      <summary class="flex cursor-pointer items-center gap-2.5 p-4 font-semibold marker:content-none">
-        {{{icon 'terminal' 'size-4 text-ink-faint'}}} Extra Environment Variables
+    <details class="card overflow-hidden shadow-sm group">
+      <summary class="flex cursor-pointer items-center gap-3 p-5 font-bold tracking-wide text-sm marker:content-none hover:bg-inset/5 transition-colors">
+        {{{icon 'terminal' 'size-4 text-link'}}} Extra Environment Variables
         <span class="ml-auto text-ink-faint transition group-open:rotate-180">{{{icon 'chevron-down' 'size-4'}}}</span>
       </summary>
-      <div class="border-t border-line p-4">
-        <textarea class="input font-mono text-xs" id="wz-extra-env" rows="4" placeholder="KEY=value&#10;ANOTHER_KEY=value"></textarea>
-        <p class="help">A place for any variable that isn't in the list above yet. One KEY=value per line. These override everything above.</p>
+      <div class="border-t border-line/50 p-5 sm:p-6 bg-canvas">
+        <textarea class="input font-mono text-xs bg-canvas shadow-sm" id="wz-extra-env" rows="4" placeholder="KEY=value&#10;ANOTHER_KEY=value"></textarea>
+        <p class="help mt-3 text-[11px] font-medium text-ink-faint">A place for any variable that isn't in the list above yet. One KEY=value per line. These override everything above.</p>
       </div>
     </details>
     {{! Admin-only: extra binds mount arbitrary host paths (root-equivalent
         through the Docker socket) - the API rejects these fields for other
         roles, so don't render dead controls for them. }}
     {{#if (eq user.role 'admin')}}
-    <details class="card group">
-      <summary class="flex cursor-pointer items-center gap-2.5 p-4 font-semibold marker:content-none">
-        {{{icon 'container' 'size-4 text-ink-faint'}}} Advanced Docker Settings
+    <details class="card overflow-hidden shadow-sm group">
+      <summary class="flex cursor-pointer items-center gap-3 p-5 font-bold tracking-wide text-sm marker:content-none hover:bg-inset/5 transition-colors">
+        {{{icon 'container' 'size-4 text-link'}}} Advanced Docker Settings
         <span class="ml-auto text-ink-faint transition group-open:rotate-180">{{{icon 'chevron-down' 'size-4'}}}</span>
       </summary>
-      <div class="space-y-4 border-t border-line p-4">
-        <div class="grid gap-4 sm:grid-cols-2">
+      <div class="space-y-6 border-t border-line/50 p-5 sm:p-6 bg-canvas">
+        <div class="grid gap-5 sm:grid-cols-2">
           <div>
-            <label class="label" for="wz-docker-name">Container name <span class="text-xs font-normal text-ink-faint">(optional)</span></label>
-            <input class="input font-mono" id="wz-docker-name" placeholder="msm-<auto>" autocomplete="off">
-            <p class="help">Letters, digits, underscores, periods, and hyphens are allowed. Leave blank for the default.</p>
+            <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-docker-name">Container name <span class="text-[9px] font-medium text-ink-faint">(optional)</span></label>
+            <input class="input font-mono bg-canvas shadow-sm" id="wz-docker-name" placeholder="msm-<auto>" autocomplete="off">
+            <p class="help mt-2 text-[10px] font-medium text-ink-faint">Letters, digits, underscores, periods, and hyphens are allowed. Leave blank for the default.</p>
           </div>
           <div>
-            <label class="label" for="wz-docker-network">Docker network <span class="text-xs font-normal text-ink-faint">(optional)</span></label>
-            <input class="input font-mono" id="wz-docker-network" list="wz-docker-networks" placeholder="Default (bridge)" autocomplete="off">
+            <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="wz-docker-network">Docker network <span class="text-[9px] font-medium text-ink-faint">(optional)</span></label>
+            <input class="input font-mono bg-canvas shadow-sm" id="wz-docker-network" list="wz-docker-networks" placeholder="Default (bridge)" autocomplete="off">
             <datalist id="wz-docker-networks"></datalist>
-            <p class="help">Attach to an existing Docker network, or type a new name and the panel will create it for you. Leave blank for the default bridge.</p>
+            <p class="help mt-2 text-[10px] font-medium text-ink-faint">Attach to an existing Docker network, or type a new name and the panel will create it for you. Leave blank for the default bridge.</p>
           </div>
         </div>
 
         <div>
-          <div class="mb-2 flex items-center justify-between">
-            <span class="text-sm font-semibold">Extra port mappings</span>
-            <button type="button" class="btn btn-sm" id="wz-docker-port-add">{{{icon 'plus' 'size-3.5'}}} Add Port</button>
+          <div class="mb-3 flex items-center justify-between bg-inset/10 p-3 rounded-lg border border-line/30 shadow-inner">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-ink">Extra port mappings</span>
+            <button type="button" class="btn btn-sm btn-primary shadow-sm" id="wz-docker-port-add">{{{icon 'plus' 'size-3.5'}}} Add Port</button>
           </div>
           <div class="space-y-2" id="wz-docker-ports"></div>
-          <p class="help">For example, UDP 19132 for Bedrock or Geyser, or TCP 8100 for BlueMap.</p>
+          <p class="help mt-3 text-[10px] font-medium text-ink-faint">For example, UDP 19132 for Bedrock or Geyser, or TCP 8100 for BlueMap.</p>
         </div>
 
         <div>
-          <div class="mb-2 flex items-center justify-between">
-            <span class="text-sm font-semibold">Extra volume binds</span>
-            <button type="button" class="btn btn-sm" id="wz-docker-bind-add">{{{icon 'plus' 'size-3.5'}}} Add Bind</button>
+          <div class="mb-3 flex items-center justify-between bg-inset/10 p-3 rounded-lg border border-line/30 shadow-inner">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-ink">Extra volume binds</span>
+            <button type="button" class="btn btn-sm btn-primary shadow-sm" id="wz-docker-bind-add">{{{icon 'plus' 'size-3.5'}}} Add Bind</button>
           </div>
           <div class="space-y-2" id="wz-docker-binds"></div>
-          <p class="help">Free-form host paths. The panel already has root-equivalent access through the Docker socket, so double-check these before creating.</p>
+          <p class="help mt-3 text-[10px] font-medium text-ink-faint">Free-form host paths. The panel already has root-equivalent access through the Docker socket, so double-check these before creating.</p>
         </div>
 
-        <div class="flex justify-end">
-          <button type="button" class="btn" id="wz-docker-preview">{{{icon 'file-code' 'size-4'}}} Preview as YAML</button>
+        <div class="flex justify-end pt-4 border-t border-line/30">
+          <button type="button" class="btn btn-ghost border border-line/50 shadow-sm bg-canvas hover:bg-inset/30" id="wz-docker-preview">{{{icon 'file-code' 'size-4'}}} Preview as YAML</button>
         </div>
       </div>
     </details>

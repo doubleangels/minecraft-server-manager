@@ -2,94 +2,113 @@
      data-fixed-uuid="{{#if fixedPlayer}}{{fixedPlayer.uuid}}{{/if}}" data-fixed-name="{{#if fixedPlayer}}{{fixedPlayer.name}}{{/if}}"
      data-running="{{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}1{{else}}0{{/if}}">
 
-  <div class="mb-4 flex flex-col sm:flex-row sm:items-end sm:flex-wrap gap-3">
+  <div class="mb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-line/50 pb-4">
     <div class="w-full sm:w-72 sm:max-w-xs{{#if fixedPlayer}} hidden{{/if}}">
-      <label class="label" for="inv-player">Player</label>
-      <select class="input" id="inv-player" data-label="Player">
+      <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="inv-player">Player</label>
+      <select class="input bg-canvas shadow-sm" id="inv-player" data-label="Player">
         <option value="">Loading Players…</option>
       </select>
     </div>
-    <button class="btn btn-sm" id="inv-refresh" data-tip="Re-read the player's saved data file.">{{{icon 'refresh-cw' 'size-3.5'}}} Refresh</button>
-    <button class="btn btn-sm" id="inv-snapshot" data-tip="Save this inventory as a snapshot for later comparison.">{{{icon 'camera' 'size-3.5'}}} Snapshot</button>
-    <div class="ml-auto flex gap-2">
-      {{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}
-        <button class="btn btn-sm" id="inv-give" data-tip="Browse every item on this server (vanilla and modded) and give one to an online player.">{{{icon 'gift' 'size-3.5'}}} Give Item</button>
-        <button class="btn btn-sm" id="inv-clear" data-tip="Remove items from an online player.">{{{icon 'eraser' 'size-3.5'}}} Clear Items</button>
-      {{else}}
-        <button class="btn btn-sm" id="inv-give" data-tip="Browse every item on this server and add one straight into the selected player's save file.">{{{icon 'gift' 'size-3.5'}}} Give Item</button>
-        <span data-tip="Start the server to clear items in bulk, or delete slots one by one below."><button class="btn btn-sm" id="inv-clear" disabled>{{{icon 'eraser' 'size-3.5'}}} Clear Items</button></span>
-      {{/if}}
+    <div class="flex flex-wrap items-center gap-2 shrink-0">
+      <button class="btn btn-sm btn-ghost border border-line/50 shadow-sm bg-canvas hover:bg-inset/30" id="inv-refresh" data-tip="Re-read the player's saved data file.">{{{icon 'refresh-cw' 'size-3.5'}}} Refresh</button>
+      <button class="btn btn-sm btn-ghost border border-line/50 shadow-sm bg-canvas hover:bg-inset/30" id="inv-snapshot" data-tip="Save this inventory as a snapshot for later comparison.">{{{icon 'camera' 'size-3.5'}}} Snapshot</button>
+      <div class="flex items-center gap-2 border-l border-line/50 pl-2 ml-2">
+        {{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}
+          <button class="btn btn-sm btn-primary shadow-sm" id="inv-give" data-tip="Browse every item on this server (vanilla and modded) and give one to an online player.">{{{icon 'gift' 'size-3.5'}}} Give Item</button>
+          <button class="btn btn-sm btn-danger shadow-sm" id="inv-clear" data-tip="Remove items from an online player.">{{{icon 'eraser' 'size-3.5'}}} Clear Items</button>
+        {{else}}
+          <button class="btn btn-sm btn-primary shadow-sm" id="inv-give" data-tip="Browse every item on this server and add one straight into the selected player's save file.">{{{icon 'gift' 'size-3.5'}}} Give Item</button>
+          <span data-tip="Start the server to clear items in bulk, or delete slots one by one below."><button class="btn btn-sm btn-danger opacity-50 shadow-sm" id="inv-clear" disabled>{{{icon 'eraser' 'size-3.5'}}} Clear Items</button></span>
+        {{/if}}
+      </div>
     </div>
   </div>
 
-  <div class="notice mb-4 max-w-prose text-xs">
-    {{{icon 'info' 'size-4 mt-0.5 shrink-0'}}}
+  <div class="notice notice-info mb-6 max-w-prose text-xs font-medium leading-relaxed shadow-sm">
+    {{{icon 'info' 'size-4 mt-0.5 shrink-0 text-link'}}}
     <div>Inventories are read from each player's saved data. For online players, this shows the state as of the last world save.
     Click any slot to edit it: change counts, replace, move, or delete items.
     Snapshots are taken automatically on joins and deaths.</div>
   </div>
 
-  <div class="hidden card p-10 text-center text-sm text-ink-faint" id="inv-empty">
+  <div class="hidden card overflow-hidden shadow-sm p-12 text-center text-[11px] font-medium text-ink-faint bg-canvas" id="inv-empty">
+    <span class="grid size-12 place-items-center rounded-full bg-inset/30 border border-line/30 shadow-inner mx-auto mb-3">{{{icon 'backpack' 'size-5 opacity-50'}}}</span>
     No player data yet. Inventories appear after the first player joins this server.
   </div>
 
   {{! Visible until inventory.js swaps in the real grids or the empty state -
       the tab used to show only the toolbar while the fetches ran. }}
-  <div class="card p-10 text-center text-sm text-ink-faint" id="inv-loading" aria-busy="true">
-    <svg class="icon mx-auto size-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-    <p class="mt-2">Loading inventories…</p>
+  <div class="card overflow-hidden shadow-sm p-12 text-center text-[11px] font-bold uppercase tracking-wider text-ink-faint bg-canvas" id="inv-loading" aria-busy="true">
+    <svg class="icon mx-auto size-6 animate-spin mb-3 text-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+    <p>Loading inventories…</p>
   </div>
 
   <div class="hidden" id="inv-view">
-    <div class="mb-2 flex flex-wrap gap-1.5 text-xs" id="inv-meta"></div>
-    <div class="mb-4 flex items-center gap-1.5 text-xs text-ink-faint" id="inv-mech"></div>
+    <div class="mb-2 flex flex-wrap gap-1.5 text-[11px] font-bold" id="inv-meta"></div>
+    <div class="mb-5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-ink-faint" id="inv-mech"></div>
 
     {{! minmax(0,auto): a bare `auto` track is sized off the w-max grid's
         content and can push the whole grid past the viewport at lg. }}
     <div class="grid gap-6 lg:grid-cols-[minmax(0,auto)_1fr]">
-      <div class="card p-4">
-        <h3 class="mb-3 flex items-center gap-2 font-semibold">{{{icon 'backpack' 'size-4'}}} Inventory</h3>
-        {{! The 9-wide slot grids are ~392px min - wider than a phone. Scroll
-            them inside the card instead of widening the page (same pattern as
-            every data table). }}
-        <div class="mb-1 eyebrow">Main</div>
-        <div class="overflow-x-auto"><div class="grid w-max grid-cols-9 gap-1" id="inv-grid-main"></div></div>
-        <div class="mb-1 mt-3 eyebrow">Hotbar</div>
-        <div class="overflow-x-auto"><div class="grid w-max grid-cols-9 gap-1" id="inv-grid-hotbar"></div></div>
-        <div class="mb-1 mt-3 eyebrow">Armor &amp; Offhand</div>
-        <div class="overflow-x-auto"><div class="grid w-max grid-cols-5 gap-1" id="inv-grid-armor"></div></div>
+      <div class="card overflow-hidden shadow-sm">
+        <div class="border-b border-line/50 bg-inset/10 p-4 font-bold tracking-wide text-sm flex items-center gap-2">
+          {{{icon 'backpack' 'size-4 text-link'}}} Inventory
+        </div>
+        <div class="p-5 sm:p-6 bg-canvas">
+          {{! The 9-wide slot grids are ~392px min - wider than a phone. Scroll
+              them inside the card instead of widening the page (same pattern as
+              every data table). }}
+          <div class="mb-2 text-[10px] font-bold uppercase tracking-wider text-ink-faint">Main</div>
+          <div class="overflow-x-auto"><div class="grid w-max grid-cols-9 gap-1 bg-inset/10 p-2 rounded-lg border border-line/30 shadow-inner" id="inv-grid-main"></div></div>
+          <div class="mb-2 mt-5 text-[10px] font-bold uppercase tracking-wider text-ink-faint">Hotbar</div>
+          <div class="overflow-x-auto"><div class="grid w-max grid-cols-9 gap-1 bg-inset/10 p-2 rounded-lg border border-line/30 shadow-inner" id="inv-grid-hotbar"></div></div>
+          <div class="mb-2 mt-5 text-[10px] font-bold uppercase tracking-wider text-ink-faint">Armor &amp; Offhand</div>
+          <div class="overflow-x-auto"><div class="grid w-max grid-cols-5 gap-1 bg-inset/10 p-2 rounded-lg border border-line/30 shadow-inner" id="inv-grid-armor"></div></div>
+        </div>
       </div>
 
-      <div class="card h-max p-4">
-        <h3 class="mb-3 flex items-center gap-2 font-semibold">{{{icon 'box' 'size-4'}}} Ender Chest</h3>
-        <div class="overflow-x-auto"><div class="grid w-max grid-cols-9 gap-1" id="inv-grid-ender"></div></div>
+      <div class="card overflow-hidden shadow-sm h-max">
+        <div class="border-b border-line/50 bg-inset/10 p-4 font-bold tracking-wide text-sm flex items-center gap-2">
+          {{{icon 'box' 'size-4 text-link'}}} Ender Chest
+        </div>
+        <div class="p-5 sm:p-6 bg-canvas">
+          <div class="overflow-x-auto"><div class="grid w-max grid-cols-9 gap-1 bg-inset/10 p-2 rounded-lg border border-line/30 shadow-inner" id="inv-grid-ender"></div></div>
+        </div>
       </div>
     </div>
   </div>
 
   {{#unless fixedPlayer}}
-  <div class="card mt-6 p-4">
-    <div class="mb-3 flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-      <h3 class="flex items-center gap-2 font-semibold">{{{icon 'search' 'size-4'}}} Item Search</h3>
-      <span class="text-xs text-ink-faint">Searches every player's inventory, armor, and ender chest on this server.</span>
-      <div class="sm:ml-auto flex flex-col sm:flex-row sm:flex-wrap sm:justify-end gap-2">
-        <input class="input w-64 max-w-full" id="inv-search-q" placeholder="diamond, netherite_sword, Excalibur…" maxlength="100">
-        <button class="btn btn-sm" id="inv-search-go">{{{icon 'search' 'size-3.5'}}} Search</button>
+  <div class="card overflow-hidden shadow-sm mt-6">
+    <div class="border-b border-line/50 bg-inset/10 p-5 font-bold tracking-wide text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        {{{icon 'search' 'size-4 text-link'}}} Item Search
+        <span class="text-[9px] uppercase tracking-wider font-medium text-ink-faint ml-2 hidden sm:inline">Searches every player on server</span>
+      </div>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 shrink-0">
+        <input class="input input-sm w-full sm:w-64 max-w-full bg-canvas shadow-sm font-mono text-xs" id="inv-search-q" placeholder="diamond, netherite_sword…" maxlength="100">
+        <button class="btn btn-sm btn-primary shadow-sm" id="inv-search-go">{{{icon 'search' 'size-3.5'}}} Search</button>
       </div>
     </div>
-    <div id="inv-search-results" class="hidden overflow-x-auto"></div>
-    <p class="text-sm text-ink-faint" id="inv-search-hint">Matches item IDs and custom display names (renamed items), and is not case-sensitive.</p>
+    <div class="p-5 sm:p-6 bg-canvas">
+      <div id="inv-search-results" class="hidden overflow-x-auto mb-4"></div>
+      <p class="text-[11px] font-medium text-ink-faint" id="inv-search-hint">Matches item IDs and custom display names (renamed items), and is not case-sensitive.</p>
+    </div>
   </div>
   {{/unless}}
 
-  <div class="card mt-6 p-4">
-    <div class="mb-3 flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-      <h3 class="flex items-center gap-2 font-semibold">{{{icon 'history' 'size-4'}}} Snapshots</h3>
-      <span class="text-xs text-ink-faint">Pick two to compare.</span>
-      <span class="ml-auto" data-tip="Select exactly two snapshots to compare them."><button class="btn btn-sm" id="inv-diff-go" disabled>{{{icon 'diff' 'size-3.5'}}} Compare Selected</button></span>
+  <div class="card overflow-hidden shadow-sm mt-6">
+    <div class="border-b border-line/50 bg-inset/10 p-5 font-bold tracking-wide text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        {{{icon 'history' 'size-4 text-link'}}} Snapshots
+        <span class="text-[9px] uppercase tracking-wider font-medium text-ink-faint ml-2 hidden sm:inline">Pick two to compare</span>
+      </div>
+      <span class="shrink-0" data-tip="Select exactly two snapshots to compare them."><button class="btn btn-sm btn-ghost border border-line/50 shadow-sm bg-canvas hover:bg-inset/30" id="inv-diff-go" disabled>{{{icon 'diff' 'size-3.5'}}} Compare Selected</button></span>
     </div>
-    <div id="inv-snapshots"></div>
-    <div id="inv-diff" class="mt-4 hidden"></div>
+    <div class="p-5 sm:p-6 bg-canvas">
+      <div id="inv-snapshots"></div>
+      <div id="inv-diff" class="mt-5 hidden pt-5 border-t border-line/50"></div>
+    </div>
   </div>
 </div>
 

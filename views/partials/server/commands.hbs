@@ -1,86 +1,93 @@
 <div data-commands-root data-server-id="{{server.id}}" data-prefix="{{chatPrefix}}"
      data-running="{{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}1{{else}}0{{/if}}">
 
-  <div class="card mb-4 p-4">
-    <div class="flex flex-wrap items-start gap-4">
-      <div class="min-w-0 flex-1">
-        <h3 class="flex items-center gap-2 font-semibold">{{{icon 'terminal' 'size-4 text-link'}}} Custom Chat Commands</h3>
-        <p class="mt-1 max-w-prose text-sm text-ink-faint">
-          Players type a trigger in the game chat, such as <code class="code-inline" data-cc-prefix-sample>{{chatPrefix}}rtp2</code>,
-          and the panel runs the action you chose <b class="text-ink-soft">as that player</b>: a random teleport, a structure or biome
-          teleport, or your own console commands. It works on any server, version, or modpack, with no mods needed.
-          Each command has its own permission level and per-player cooldown.
-        </p>
-      </div>
-      <div class="flex items-end gap-2">
+  <div class="card overflow-hidden shadow-sm mb-6">
+    <div class="border-b border-line/50 bg-inset/10 p-5 font-bold tracking-wide text-sm flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">{{{icon 'terminal' 'size-4 text-link'}}} Custom Chat Commands</div>
+    </div>
+    <div class="p-5 sm:p-6 bg-canvas flex flex-col xl:flex-row gap-6 items-start">
+      <p class="flex-1 text-xs font-medium leading-relaxed text-ink-soft m-0">
+        Players type a trigger in the game chat, such as <span class="font-mono bg-inset/30 px-1 py-0.5 rounded border border-line/30 text-ink-strong mx-1" data-cc-prefix-sample>{{chatPrefix}}rtp2</span>,
+        and the panel runs the action you chose <b class="text-ink">as that player</b>: a random teleport, a structure or biome
+        teleport, or your own console commands. It works on any server, version, or modpack, with no mods needed.
+        Each command has its own permission level and per-player cooldown.
+      </p>
+      <div class="flex items-end gap-3 shrink-0 bg-inset/10 p-3 rounded-lg border border-line/30 shadow-inner">
         <div>
-          <label class="label" for="cc-prefix">Prefix</label>
-          <input class="input w-16 text-center font-mono" id="cc-prefix" value="{{chatPrefix}}" maxlength="2" autocomplete="off" spellcheck="false" data-tip="One or two characters, such as ! or . It cannot be /, which Minecraft uses for its own commands.">
+          <label class="label text-[10px] font-bold uppercase tracking-wider text-ink-faint mb-1.5" for="cc-prefix">Prefix</label>
+          <input class="input input-sm w-16 text-center font-mono font-bold bg-canvas shadow-sm" id="cc-prefix" value="{{chatPrefix}}" maxlength="2" autocomplete="off" spellcheck="false" data-tip="One or two characters, such as ! or . It cannot be /, which Minecraft uses for its own commands.">
         </div>
-        <button class="btn btn-sm" id="cc-prefix-save">{{{icon 'check' 'size-3.5'}}} Save</button>
+        <button class="btn btn-sm btn-primary shadow-sm" id="cc-prefix-save">{{{icon 'check' 'size-3.5'}}} Save</button>
       </div>
     </div>
   </div>
 
   {{#unless (or (eq server.status 'running') (eq server.status 'unhealthy'))}}
-    <div class="notice notice-warn mb-4 max-w-prose text-xs">
+    <div class="notice notice-warn mb-4 max-w-prose text-xs font-medium shadow-sm">
       The server is offline. Commands are saved and start working the moment the server is running again.
       The Test button needs a running server.
     </div>
   {{/unless}}
 
-  <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-    <h3 class="font-semibold">Commands</h3>
-    <div class="ml-auto">
-      <button class="btn btn-primary btn-sm" id="cc-add">{{{icon 'plus' 'size-3.5'}}} Add Command</button>
-    </div>
-  </div>
-
   {{#if chatCommands.length}}
-  <div class="card overflow-x-auto">
-    <table class="table-base table-stack">
-      <thead><tr>
-        <th>Command</th><th>Action</th><th>Permission</th><th>Cooldown</th><th class="text-right">Uses</th><th>Enabled</th><th class="text-right">Actions</th>
-      </tr></thead>
-      <tbody>
-        {{#each chatCommands}}
-          <tr data-cc-row data-id="{{id}}">
-            <td data-th="Command">
-              <div class="font-mono font-medium">{{../chatPrefix}}{{trigger}}</div>
-              {{#if description}}<div class="truncate text-xs text-ink-faint sm:max-w-56" data-tip="{{description}}">{{description}}</div>{{/if}}
-            </td>
-            <td data-th="Action">
-              <span class="chip">{{action}}</span>
-              <div class="mt-0.5 truncate text-xs text-ink-faint sm:max-w-56" data-tip="{{actionSummary}}">{{actionSummary}}</div>
-            </td>
-            <td data-th="Permission">
-              {{#if (eq permission 'ops')}}
-                <span class="badge badge-danger">ops only</span>
-              {{else if (eq permission 'whitelist')}}
-                <span class="badge badge-info">whitelisted</span>
-              {{else}}
-                <span class="badge badge-ok">everyone</span>
-              {{/if}}
-            </td>
-            <td data-th="Cooldown" class="text-sm text-ink-soft">{{cooldownLabel}}</td>
-            <td data-th="Uses" class="text-right text-sm tabular-nums text-ink-soft">
-              <span data-cc-uses>{{uses}}</span>
-              {{#if lastUsed}}<div class="text-[11px] text-ink-faint">last {{lastUsed}}</div>{{/if}}
-            </td>
-            <td data-th="Enabled">
-              <label class="inline-flex cursor-pointer"><span class="msm-toggle"><input type="checkbox" data-cc-toggle {{#if enabled}}checked{{/if}}><span></span></span></label>
-            </td>
-            <td data-th="" class="text-right">
-              <div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap">
-                <button class="btn btn-ghost btn-sm" data-cc-test data-tip="Run now as a named player (permission and cooldown checks are skipped).">{{{icon 'play' 'size-3.5'}}}</button>
-                <button class="btn btn-ghost btn-sm" data-cc-edit data-tip="Edit this command.">{{{icon 'pencil' 'size-3.5'}}}</button>
-                <button class="btn btn-ghost btn-sm text-danger" data-cc-delete data-tip="Delete this command." aria-label="Delete {{trigger}}">{{{icon 'trash-2' 'size-3.5'}}}</button>
-              </div>
-            </td>
+  <div class="card overflow-hidden shadow-sm">
+    <div class="border-b border-line/50 bg-inset/10 p-4 font-bold tracking-wide text-sm flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">{{{icon 'list' 'size-4 text-link'}}} Commands</div>
+      <button class="btn btn-primary btn-sm shadow-sm" id="cc-add">{{{icon 'plus' 'size-3.5'}}} Add Command</button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="table-base table-stack w-full text-sm">
+        <thead class="bg-canvas/50">
+          <tr class="text-[10px] uppercase tracking-widest text-ink-faint">
+            <th class="font-bold py-3 pl-5">Command</th>
+            <th class="font-bold py-3">Action</th>
+            <th class="font-bold py-3">Permission</th>
+            <th class="font-bold py-3">Cooldown</th>
+            <th class="text-right font-bold py-3">Uses</th>
+            <th class="font-bold py-3">Enabled</th>
+            <th class="text-right font-bold py-3 pr-5">Actions</th>
           </tr>
-        {{/each}}
-      </tbody>
-    </table>
+        </thead>
+        <tbody class="divide-y divide-line/30">
+          {{#each chatCommands}}
+            <tr class="hover:bg-inset/10 transition-colors group" data-cc-row data-id="{{id}}">
+              <td data-th="Command" class="p-3 pl-5">
+                <div class="font-mono font-bold text-ink">{{../chatPrefix}}{{trigger}}</div>
+                {{#if description}}<div class="truncate text-[10px] font-medium text-ink-faint sm:max-w-56 mt-1" data-tip="{{description}}">{{description}}</div>{{/if}}
+              </td>
+              <td data-th="Action" class="p-3">
+                <span class="badge bg-inset/50 border border-line/50 text-[9px] uppercase tracking-wider">{{action}}</span>
+                <div class="mt-1.5 truncate text-[10px] font-medium text-ink-faint sm:max-w-56" data-tip="{{actionSummary}}">{{actionSummary}}</div>
+              </td>
+              <td data-th="Permission" class="p-3">
+                {{#if (eq permission 'ops')}}
+                  <span class="badge bg-danger/10 text-danger-strong border border-danger/30 text-[9px] uppercase tracking-wider font-bold">ops only</span>
+                {{else if (eq permission 'whitelist')}}
+                  <span class="badge bg-link/10 text-link border border-link/30 text-[9px] uppercase tracking-wider font-bold">whitelisted</span>
+                {{else}}
+                  <span class="badge bg-ok/10 text-ok-strong border border-ok/20 text-[9px] uppercase tracking-wider font-bold">everyone</span>
+                {{/if}}
+              </td>
+              <td data-th="Cooldown" class="p-3 text-[11px] font-bold text-ink-soft">{{cooldownLabel}}</td>
+              <td data-th="Uses" class="p-3 sm:text-right text-[11px] tabular-nums font-bold text-ink-soft">
+                <span data-cc-uses>{{uses}}</span>
+                {{#if lastUsed}}<div class="text-[10px] font-medium text-ink-faint mt-1">last {{lastUsed}}</div>{{/if}}
+              </td>
+              <td data-th="Enabled" class="p-3">
+                <label class="inline-flex cursor-pointer"><span class="msm-toggle"><input type="checkbox" data-cc-toggle {{#if enabled}}checked{{/if}}><span></span></span></label>
+              </td>
+              <td data-th="" class="p-3 sm:text-right pr-5">
+                <div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 rounded-full size-8 p-0 grid place-items-center" data-cc-test data-tip="Run now as a named player (permission and cooldown checks are skipped).">{{{icon 'play' 'size-4'}}}</button>
+                  <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 rounded-full size-8 p-0 grid place-items-center" data-cc-edit data-tip="Edit this command.">{{{icon 'pencil' 'size-4'}}}</button>
+                  <button class="btn btn-ghost btn-sm text-danger hover:bg-danger/10 rounded-full size-8 p-0 grid place-items-center" data-cc-delete data-tip="Delete this command." aria-label="Delete {{trigger}}">{{{icon 'trash-2' 'size-4'}}}</button>
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
   </div>
   {{else}}
     {{> empty-state iconName='terminal' title='No Chat Commands Yet'
@@ -88,20 +95,24 @@
         ctaId='cc-add-empty' ctaLabel='Add Command'}}
   {{/if}}
 
-  <div class="card mt-6 p-4">
-    <h3 class="mb-3 font-semibold">Recent Uses</h3>
+  <div class="card overflow-hidden shadow-sm mt-6">
+    <div class="border-b border-line/50 bg-inset/10 p-4 font-bold tracking-wide text-sm flex items-center gap-2">
+      {{{icon 'history' 'size-4 text-link'}}} Recent Uses
+    </div>
     {{#if chatCommandEvents.length}}
-      <div class="divide-y divide-line text-sm">
+      <div class="divide-y divide-line/30 bg-canvas text-sm">
         {{#each chatCommandEvents}}
-          <div class="flex items-start gap-2.5 py-2">
-            {{#if failed}}{{{icon 'circle-x' 'size-4 shrink-0 text-danger'}}}{{else}}{{{icon 'circle-check' 'size-4 shrink-0 text-ok'}}}{{/if}}
-            <span class="min-w-0 flex-1">{{summary}}</span>
-            <span class="shrink-0 text-xs text-ink-faint" data-ts-ago="{{ts}}">{{ts}}</span>
+          <div class="flex items-start gap-3 p-4 hover:bg-inset/5 transition-colors">
+            {{#if failed}}{{{icon 'circle-x' 'size-4 shrink-0 text-danger mt-0.5'}}}{{else}}{{{icon 'circle-check' 'size-4 shrink-0 text-ok mt-0.5'}}}{{/if}}
+            <span class="min-w-0 flex-1 font-medium text-ink">{{summary}}</span>
+            <span class="shrink-0 text-[11px] font-medium text-ink-faint tabular-nums mt-0.5" data-ts-ago="{{ts}}">{{ts}}</span>
           </div>
         {{/each}}
       </div>
     {{else}}
-      <p class="text-sm text-ink-faint">Nothing yet. Every use, from chat or the Test button, shows up here and in the History tab.</p>
+      <div class="p-8 text-center text-[11px] font-medium text-ink-faint bg-canvas">
+        Nothing yet. Every use, from chat or the Test button, shows up here and in the History tab.
+      </div>
     {{/if}}
   </div>
 </div>

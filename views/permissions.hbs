@@ -1,51 +1,61 @@
 {{> page-header heading="PERMISSIONS" sub="Decide what each user may do on each server. A role sets the default everywhere; a cell here overrides it for one server."}}
 
 <div class="space-y-5" id="permissions-page">
-  <section class="card p-4 sm:p-5">
-    <h3 class="text-sm font-semibold text-ink">How It Works</h3>
-    <ul class="mt-2 grid gap-1.5 text-xs leading-relaxed text-ink-faint sm:grid-cols-2">
-      <li><b class="text-ink-soft">Admins</b> always have every permission on every server, so they are not listed here.</li>
-      <li><b class="text-ink-soft">Operators</b> start with every permission on every server. <b class="text-ink-soft">Viewers</b> start with view only.</li>
-      <li>Click a cell to pick the permissions that user gets on that server. Every permission includes view.</li>
-      <li>Turn everything off to hide the server from that user completely. It disappears from their sidebar, dashboard, and every list.</li>
-    </ul>
+  <section class="card p-0 overflow-hidden shadow-sm">
+    <div class="border-b border-line/50 bg-inset/10 p-4 font-bold tracking-wide text-sm flex items-center gap-2">
+      {{{icon 'info' 'size-4 text-link'}}} How It Works
+    </div>
+    <div class="p-4 sm:p-5 bg-canvas">
+      <ul class="grid gap-2 text-xs leading-relaxed text-ink-faint sm:grid-cols-2">
+        <li class="flex items-start gap-2">{{{icon 'check' 'size-3.5 mt-0.5 text-ok shrink-0'}}} <span><b class="text-ink font-bold">Admins</b> always have every permission on every server, so they are not listed here.</span></li>
+        <li class="flex items-start gap-2">{{{icon 'check' 'size-3.5 mt-0.5 text-ok shrink-0'}}} <span><b class="text-ink font-bold">Operators</b> start with every permission on every server. <b class="text-ink font-bold">Viewers</b> start with view only.</span></li>
+        <li class="flex items-start gap-2">{{{icon 'check' 'size-3.5 mt-0.5 text-ok shrink-0'}}} <span>Click a cell to pick the permissions that user gets on that server. Every permission includes view.</span></li>
+        <li class="flex items-start gap-2">{{{icon 'check' 'size-3.5 mt-0.5 text-ok shrink-0'}}} <span>Turn everything off to hide the server from that user completely. It disappears from their sidebar, dashboard, and every list.</span></li>
+      </ul>
+    </div>
   </section>
 
   {{#if matrix.users.length}}
     {{#if matrix.servers.length}}
-      <div class="card overflow-x-auto p-0">
-        <table class="table-base table-stack" id="permissions-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              {{#each matrix.servers}}
-                <th>
-                  <span class="inline-flex items-center gap-2">
-                    <img src="{{iconSrc icon}}" alt="" class="size-5 rounded-sm" style="background: {{accent}}" data-fallback-icon="/icons/servers/grass.svg">
-                    <span class="truncate" title="{{name}}">{{name}}</span>
-                  </span>
-                </th>
-              {{/each}}
-            </tr>
-          </thead>
-          <tbody>
-            {{#each matrix.rows}}
-              <tr data-user-id="{{user.id}}" data-username="{{user.username}}" data-role="{{user.role}}">
-                <td data-th="User" class="whitespace-nowrap font-medium">
-                  {{user.username}}
-                  <span class="badge ml-1">{{capitalize user.role}}</span>
-                </td>
-                {{#each servers}}
-                  <td data-th="{{lookup (lookup ../../matrix.servers @index) 'name'}}">
-                    <button type="button" class="chip" data-perm-cell data-server-id="{{serverId}}" data-server-name="{{lookup (lookup ../../matrix.servers @index) 'name'}}" data-grant="{{jsonAttr grant}}" data-effective="{{jsonAttr effective}}" aria-label="Permissions for {{../user.username}} on {{lookup (lookup ../../matrix.servers @index) 'name'}}">
-                      <span data-perm-summary></span>
-                    </button>
-                  </td>
+      <div class="card overflow-hidden shadow-sm">
+        <div class="border-b border-line/50 bg-inset/10 p-4 font-bold tracking-wide text-sm flex items-center justify-between gap-4">
+          <div class="flex items-center gap-2">{{{icon 'shield' 'size-4 text-link'}}} Permission Matrix</div>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="table-base table-stack w-full text-sm" id="permissions-table">
+            <thead class="bg-canvas/50">
+              <tr class="text-[10px] uppercase tracking-widest text-ink-faint">
+                <th class="font-bold py-3 pl-5">User</th>
+                {{#each matrix.servers}}
+                  <th class="font-bold py-3 text-center">
+                    <span class="inline-flex flex-col items-center gap-1.5 mx-auto">
+                      <img src="{{iconSrc icon}}" alt="" class="size-6 rounded-md shadow-sm border border-line/30" style="background: {{accent}}" data-fallback-icon="/icons/servers/grass.svg">
+                      <span class="truncate max-w-[80px]" title="{{name}}">{{name}}</span>
+                    </span>
+                  </th>
                 {{/each}}
               </tr>
-            {{/each}}
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="divide-y divide-line/30">
+              {{#each matrix.rows}}
+                <tr class="hover:bg-inset/10 transition-colors" data-user-id="{{user.id}}" data-username="{{user.username}}" data-role="{{user.role}}">
+                  <td data-th="User" class="whitespace-nowrap font-bold text-ink p-3 pl-5">
+                    {{user.username}}
+                    <span class="badge bg-inset/50 border border-line/30 text-[9px] uppercase tracking-wider ml-1.5">{{user.role}}</span>
+                  </td>
+                  {{#each servers}}
+                    <td data-th="{{lookup (lookup ../../matrix.servers @index) 'name'}}" class="p-3 text-center">
+                      <button type="button" class="chip bg-canvas border-line/50 shadow-sm hover:bg-inset/30 transition-colors px-3 py-1 font-bold text-ink-soft text-[11px]" data-perm-cell data-server-id="{{serverId}}" data-server-name="{{lookup (lookup ../../matrix.servers @index) 'name'}}" data-grant="{{jsonAttr grant}}" data-effective="{{jsonAttr effective}}" aria-label="Permissions for {{../user.username}} on {{lookup (lookup ../../matrix.servers @index) 'name'}}">
+                        <span data-perm-summary></span>
+                      </button>
+                    </td>
+                  {{/each}}
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
       </div>
     {{else}}
       {{> empty-state iconName='server' title='No Servers Yet' message='Create a server first. Its column appears here as soon as it exists.' ctaHref='/servers/new' ctaLabel='Create a Server'}}
@@ -54,39 +64,47 @@
     {{> empty-state iconName='users' title='No Operators or Viewers Yet' message='Admins always have every permission. Add an operator or viewer account under Settings to give them access to specific servers.' ctaHref='/settings' ctaLabel='Manage Users'}}
   {{/if}}
 
-  <section class="card p-4 sm:p-5" id="permissions-reference">
-    <h3 class="text-sm font-semibold text-ink">What Each Permission Covers</h3>
-    <p class="mt-1 max-w-prose text-xs leading-relaxed text-ink-faint">Open a permission to see what it lets a person do on a server, what people often expect but is a different permission, and the exact panel routes it unlocks. The last list is checked against the running code by the test suite, so it never drifts.</p>
-    <div class="mt-4 divide-y divide-line">
-      {{#each matrix.capabilities}}
-        <details class="group py-3" id="permission-{{key}}">
-          <summary class="flex cursor-pointer list-none items-start gap-3 [&::-webkit-details-marker]:hidden">
-            <span class="mt-0.5 shrink-0 text-ink-faint transition group-open:rotate-90">{{{icon 'chevron-right' 'size-4'}}}</span>
-            <span class="min-w-0">
-              <span class="block text-sm font-medium text-ink">{{label}}</span>
-              <span class="mt-0.5 block max-w-prose text-xs leading-relaxed text-ink-faint">{{help}}</span>
-            </span>
-          </summary>
-          <div class="mt-3 grid gap-4 pl-7 lg:grid-cols-2">
-            <div>
-              <h4 class="eyebrow">You Can</h4>
-              <ul class="mt-1.5 list-disc space-y-1 pl-4 text-xs leading-relaxed text-ink-soft">
-                {{#each covers}}<li>{{this}}</li>{{/each}}
-              </ul>
-              <h4 class="eyebrow mt-3">Not Included</h4>
-              <p class="mt-1.5 max-w-prose text-xs leading-relaxed text-ink-soft">{{excludes}}</p>
-            </div>
-            <div>
-              <h4 class="eyebrow">Technical Reach</h4>
-              <ul class="mt-1.5 space-y-0.5 font-mono text-[11px] leading-relaxed text-ink-faint">
-                {{#each reach}}<li>{{this}}</li>{{/each}}
-              </ul>
-            </div>
-          </div>
-        </details>
-      {{/each}}
+  <section class="card p-0 overflow-hidden shadow-sm" id="permissions-reference">
+    <div class="border-b border-line/50 bg-inset/10 p-4 font-bold tracking-wide text-sm flex items-center gap-2">
+      {{{icon 'book-open' 'size-4 text-link'}}} Reference
     </div>
-    <p class="help mt-3 max-w-prose">Always admin-only, on every server: the chatbot, backup retention, advanced Docker overrides, the panel-wide data folder, users, and API keys. Creating or cloning a server follows the global role.</p>
+    <div class="p-4 sm:p-5 bg-canvas">
+      <p class="max-w-prose text-xs leading-relaxed text-ink-faint font-medium mb-4">Open a permission to see what it lets a person do on a server, what people often expect but is a different permission, and the exact panel routes it unlocks. The last list is checked against the running code by the test suite, so it never drifts.</p>
+      
+      <div class="divide-y divide-line/30 border border-line/30 rounded-xl bg-inset/5">
+        {{#each matrix.capabilities}}
+          <details class="group p-4" id="permission-{{key}}">
+            <summary class="flex cursor-pointer list-none items-start gap-3 [&::-webkit-details-marker]:hidden">
+              <span class="mt-0.5 shrink-0 text-ink-faint transition group-open:rotate-90 bg-canvas border border-line/50 rounded-full size-5 grid place-items-center shadow-sm">{{{icon 'chevron-right' 'size-3'}}}</span>
+              <span class="min-w-0">
+                <span class="block text-sm font-bold text-ink">{{label}}</span>
+                <span class="mt-0.5 block max-w-prose text-xs leading-relaxed text-ink-faint">{{help}}</span>
+              </span>
+            </summary>
+            <div class="mt-4 grid gap-5 pl-8 lg:grid-cols-2">
+              <div class="bg-canvas border border-line/30 rounded-lg p-3 shadow-inner">
+                <h4 class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-2">You Can</h4>
+                <ul class="list-disc space-y-1 pl-4 text-xs leading-relaxed text-ink-soft font-medium">
+                  {{#each covers}}<li>{{this}}</li>{{/each}}
+                </ul>
+                <h4 class="text-[10px] font-bold text-warn-strong uppercase tracking-wider mt-4 mb-2">Not Included</h4>
+                <p class="text-xs leading-relaxed text-ink-soft font-medium">{{excludes}}</p>
+              </div>
+              <div class="bg-canvas border border-line/30 rounded-lg p-3 shadow-inner">
+                <h4 class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-2">Technical Reach</h4>
+                <ul class="space-y-1 font-mono text-[10px] leading-relaxed text-ink-soft bg-inset/30 p-2 rounded border border-line/30">
+                  {{#each reach}}<li>{{this}}</li>{{/each}}
+                </ul>
+              </div>
+            </div>
+          </details>
+        {{/each}}
+      </div>
+      <p class="text-[11px] font-medium text-ink-faint mt-4 flex items-start gap-2 bg-inset/30 p-3 rounded-lg border border-line/30 max-w-prose">
+        {{{icon 'shield-alert' 'size-4 shrink-0 text-warn'}}}
+        <span>Always admin-only, on every server: the chatbot, backup retention, advanced Docker overrides, the panel-wide data folder, users, and API keys. Creating or cloning a server follows the global role.</span>
+      </p>
+    </div>
   </section>
 </div>
 <script type="application/json" id="permissions-capabilities">{{jsonScript matrix.capabilities}}</script>
