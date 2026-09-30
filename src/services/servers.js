@@ -1157,7 +1157,7 @@ async function dirSize(dir) {
 
 function mustGet(id) {
   const server = getServer(id);
-  if (!server) throw httpError(404, 'Server not found');
+  if (!server) throw httpError(404, 'Server not found.');
   return server;
 }
 
@@ -1184,7 +1184,7 @@ function parseProperties(text) {
  */
 function unsetEnvKeys(serverId, envKeys, { actor = 'system' } = {}) {
   const server = getServer(serverId);
-  if (!server) throw httpError(404, 'Server not found');
+  if (!server) throw httpError(404, 'Server not found.');
   const removed = [];
   for (const key of envKeys) {
     if (key && Object.prototype.hasOwnProperty.call(server.env, key)) {
@@ -1225,7 +1225,7 @@ function unlockPropertyEnv(serverId, propKeys, { actor = 'system' } = {}) {
  * @returns {{ rebuildNeeded: boolean, unlocked: string[] }}
  */
 function writeServerProperties(serverId, content, { actor = 'system' } = {}) {
-  if (!getServer(serverId)) throw httpError(404, 'Server not found');
+  if (!getServer(serverId)) throw httpError(404, 'Server not found.');
   let oldText = '';
   try {
     oldText = fs.readFileSync(dataPath('servers', serverId, 'server.properties'), 'utf8');
@@ -1255,7 +1255,7 @@ function writeServerProperties(serverId, content, { actor = 'system' } = {}) {
  * @returns {{ rebuildNeeded: boolean, unlocked: string[] }}
  */
 function setServerProperty(serverId, key, value, { actor = 'system', baseText } = {}) {
-  if (!getServer(serverId)) throw httpError(404, 'Server not found');
+  if (!getServer(serverId)) throw httpError(404, 'Server not found.');
   let text = '';
   try {
     text = baseText ?? fs.readFileSync(dataPath('servers', serverId, 'server.properties'), 'utf8');

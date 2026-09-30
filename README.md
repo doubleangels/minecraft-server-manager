@@ -287,7 +287,7 @@ Not affiliated with any of them.
   `KEY=value` escape hatch. Only non-default values are applied.
 - **Modpacks are always pinned**: "latest" is resolved to a concrete version id at install time and
   pinned, so the image never silently upgrades a pack on restart. Upgrades are explicit: preview →
-  automatic pre-update backup → graceful stop → re-pin → recreate → health monitoring → **one-click
+  automatic pre-update backup → graceful stop → re-pin → rebuild → health monitoring → **one-click
   rollback** if it doesn't come up. The Updates page also checks Docker-image staleness and, for
   servers with no managed pack, explicit Minecraft-version / loader-build pins.
 - **Version compatibility before a version update**: a server's Versions tab checks every installed

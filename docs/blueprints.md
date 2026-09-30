@@ -18,4 +18,4 @@ Import a blueprint file (or pick one from the library) to create a new server pr
 - Move a server between panels.
 - Keep a known-good template you can always fall back to.
 
-Because a blueprint records the exact [pack pin](modpacks.md), a modpack server recreated from a blueprint installs the same pinned version, with no surprise upgrades.
+Because a blueprint records the exact [pack pin](modpacks.md), a modpack server rebuilt from a blueprint installs the same pinned version, with no surprise upgrades.

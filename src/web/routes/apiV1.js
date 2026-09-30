@@ -93,7 +93,7 @@ router.get('/servers/:id', (req, res) => {
   const row = servers.getServer(id);
   // Same 404 for "unknown" and "out of scope" - no existence oracle.
   if (!row || !inScope(req, id)) {
-    return res.status(404).json({ ok: false, error: 'Server not found' });
+    return res.status(404).json({ ok: false, error: 'Server not found.' });
   }
   res.json({ ok: true, server: serverStatusView(row) });
 });
