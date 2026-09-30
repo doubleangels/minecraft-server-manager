@@ -1,47 +1,79 @@
 {{> page-header heading="BACKUPS" sub="Every archive across all servers, with reason and retention tracking."}}
 
 {{#if backups.length}}
-<div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-  <select class="input w-auto" id="backups-filter-server" data-label="Filter by server">
-    <option value="">All Servers</option>
-    {{#each servers}}<option value="{{id}}">{{name}}</option>{{/each}}
-  </select>
-  <select class="input w-auto" id="backups-filter-reason" data-label="Filter by reason">
-    <option value="">All Reasons</option>
-    <option value="manual">Manual</option>
-    <option value="scheduled">Scheduled</option>
-    <option value="pre-update">Pre-update</option>
-    <option value="pre-restore">Pre-restore</option>
-  </select>
-  <span class="ml-auto text-sm text-ink-faint" id="backups-total" data-count="{{totals.count}}" data-bytes="{{totals.bytes}}">Total: {{bytes totals.bytes}} in {{totals.count}} archive{{#if (ne totals.count 1)}}s{{/if}}</span>
-</div>
-
 <div class="card overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="table-base table-stack" id="backups-table">
-    <thead><tr><th>Server</th><th>Archive</th><th>Reason</th><th class="text-right">Size</th><th class="text-right">Created</th><th class="text-right">Actions</th></tr></thead>
-    <tbody>
-      {{#each backups}}
-        <tr data-backup-row data-backup-id="{{id}}" data-server-id="{{serverId}}" data-server-name="{{server}}" data-file="{{file}}" data-size="{{size}}" data-reason="{{reason}}">
-          <td data-th="Server" class="whitespace-nowrap"><a class="text-link hover:underline" href="/servers/{{serverId}}/backups">{{server}}</a></td>
-          {{! w-full + max-w-0 (sm+ only) so long archive names truncate instead of pushing Actions off-screen. }}
-          <td data-th="Archive" class="sm:w-full sm:max-w-0"><span class="block truncate font-mono text-xs" title="{{file}}">{{file}}</span></td>
-          <td data-th="Reason"><span class="badge {{#if (eq reason 'pre-update')}}badge-warn{{/if}}">{{reason}}</span></td>
-          <td data-th="Size" class="whitespace-nowrap text-right text-ink-faint">{{bytes size}}</td>
-          <td data-th="Created" class="whitespace-nowrap text-right text-ink-faint" data-ts="{{ts}}">{{ts}}</td>
-          <td data-th="" class="text-right"><div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap">
-            <button class="btn btn-ghost btn-sm text-warn" data-backup-action="restore" data-tip="Restore (stops the server, safety backup taken first).">{{{icon 'undo-2' 'size-3.5'}}}</button>
-            <button class="btn btn-ghost btn-sm" data-backup-action="verify" data-tip="Check that the archive is readable and undamaged." aria-label="Verify {{file}}">{{{icon 'shield-check' 'size-3.5'}}}</button>
-            <button class="btn btn-ghost btn-sm" data-backup-action="download" data-tip="Download the archive.">{{{icon 'download' 'size-3.5'}}}</button>
-            <button class="btn btn-ghost btn-sm" data-backup-action="rename" data-tip="Rename the archive." aria-label="Rename {{file}}">{{{icon 'square-pen' 'size-3.5'}}}</button>
-            <button class="btn btn-ghost btn-sm text-danger" data-backup-action="delete" data-tip="Delete this archive ({{bytes size}} freed)." aria-label="Delete {{file}}">{{{icon 'trash-2' 'size-3.5'}}}</button>
-          </div></td>
-        </tr>
-      {{/each}}
-    </tbody>
-  </table>
+  <div class="border-b border-line/50 bg-inset/10 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      {{{icon 'archive' 'size-4 text-link'}}}
+      <span class="font-bold tracking-wide text-sm">Backup Archive</span>
+    </div>
+    
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+      <select class="input w-auto text-xs bg-canvas shadow-sm border-line/50" id="backups-filter-server" data-label="Filter by server">
+        <option value="">All Servers</option>
+        {{#each servers}}<option value="{{id}}">{{name}}</option>{{/each}}
+      </select>
+      <select class="input w-auto text-xs bg-canvas shadow-sm border-line/50" id="backups-filter-reason" data-label="Filter by reason">
+        <option value="">All Reasons</option>
+        <option value="manual">Manual</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="pre-update">Pre-update</option>
+        <option value="pre-restore">Pre-restore</option>
+      </select>
+      <div class="ml-0 sm:ml-2 bg-inset/50 px-2 py-1 rounded-md border border-line/30 text-[11px] font-bold text-ink-faint tabular-nums shadow-inner text-center sm:text-left" id="backups-total" data-count="{{totals.count}}" data-bytes="{{totals.bytes}}">
+        <span class="text-ink-soft">{{totals.count}}</span> archive{{#if (ne totals.count 1)}}s{{/if}} <span class="mx-1 opacity-50">·</span> <span class="text-ink-soft">{{bytes totals.bytes}}</span> total
+      </div>
+    </div>
   </div>
-  <div class="hidden p-8 text-center text-sm text-ink-faint" id="backups-no-match">No backups match these filters.</div>
+
+  <div class="overflow-x-auto">
+    <table class="table-base table-stack w-full text-sm">
+      <thead class="bg-canvas/50">
+        <tr class="text-[10px] uppercase tracking-widest text-ink-faint">
+          <th class="font-bold py-3">Server</th>
+          <th class="font-bold py-3">Archive</th>
+          <th class="font-bold py-3">Reason</th>
+          <th class="text-right font-bold py-3">Size</th>
+          <th class="text-right font-bold py-3">Created</th>
+          <th class="text-right font-bold py-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-line/30" id="backups-table">
+        {{#each backups}}
+          <tr class="hover:bg-inset/10 transition-colors group" data-backup-row data-backup-id="{{id}}" data-server-id="{{serverId}}" data-server-name="{{server}}" data-file="{{file}}" data-size="{{size}}" data-reason="{{reason}}">
+            <td data-th="Server" class="whitespace-nowrap p-3"><a class="font-bold text-ink hover:text-link transition-colors" href="/servers/{{serverId}}/backups">{{server}}</a></td>
+            
+            {{! w-full + max-w-0 (sm+ only) so long archive names truncate instead of pushing Actions off-screen. }}
+            <td data-th="Archive" class="sm:w-full sm:max-w-0 p-3">
+              <span class="block truncate font-mono text-xs text-ink-soft bg-inset/30 px-1.5 py-0.5 rounded border border-line/30 inline-block max-w-full" title="{{file}}">{{file}}</span>
+            </td>
+            
+            <td data-th="Reason" class="p-3">
+              <span class="badge {{#if (eq reason 'pre-update')}}badge-warn bg-warn/10 text-warn-strong border border-warn/30{{else if (eq reason 'scheduled')}}bg-info/10 text-link border border-info/20{{else}}bg-inset/50 border border-line/50{{/if}} text-[10px] uppercase font-bold tracking-wider py-0.5 px-2">{{reason}}</span>
+            </td>
+            
+            <td data-th="Size" class="whitespace-nowrap sm:text-right font-bold text-ink-soft tabular-nums p-3">{{bytes size}}</td>
+            
+            <td data-th="Created" class="whitespace-nowrap sm:text-right text-[11px] font-medium text-ink-faint p-3" data-ts="{{ts}}">{{ts}}</td>
+            
+            <td data-th="" class="sm:text-right p-3">
+              <div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                <button class="btn btn-ghost btn-sm text-warn hover:bg-warn/10 rounded-full size-8 p-0 grid place-items-center" data-backup-action="restore" data-tip="Restore (stops the server, safety backup taken first).">{{{icon 'undo-2' 'size-4'}}}</button>
+                <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 rounded-full size-8 p-0 grid place-items-center" data-backup-action="verify" data-tip="Check that the archive is readable and undamaged." aria-label="Verify {{file}}">{{{icon 'shield-check' 'size-4'}}}</button>
+                <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 rounded-full size-8 p-0 grid place-items-center" data-backup-action="download" data-tip="Download the archive.">{{{icon 'download' 'size-4'}}}</button>
+                <button class="btn btn-ghost btn-sm text-ink-faint hover:text-ink hover:bg-inset/30 rounded-full size-8 p-0 grid place-items-center" data-backup-action="rename" data-tip="Rename the archive." aria-label="Rename {{file}}">{{{icon 'square-pen' 'size-4'}}}</button>
+                <button class="btn btn-ghost btn-sm text-danger hover:bg-danger/10 rounded-full size-8 p-0 grid place-items-center" data-backup-action="delete" data-tip="Delete this archive ({{bytes size}} freed)." aria-label="Delete {{file}}">{{{icon 'trash-2' 'size-4'}}}</button>
+              </div>
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  <div class="hidden p-10 text-center flex flex-col items-center justify-center text-ink-faint" id="backups-no-match">
+    {{{icon 'search' 'size-6 mb-3 opacity-30'}}}
+    <span class="text-xs font-medium">No backups match these filters.</span>
+  </div>
 </div>
 {{else}}
   {{> empty-state iconName='archive' title='No Backups Yet' message="Create one from a server's Backups tab. Scheduled and pre-update backups also collect here, with their reason and retention tracked."}}

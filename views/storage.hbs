@@ -1,60 +1,88 @@
 {{> page-header heading="STORAGE" sub="A full view of the panel's data folder. Every byte is accounted for, and every cleanup is previewed first."}}
 
 <div class="mb-6 grid gap-4 lg:grid-cols-3">
-  <div class="card p-5 sm:p-6 lg:col-span-2">
+  <div class="card p-5 sm:p-6 lg:col-span-2 flex flex-col justify-between transition hover:shadow-lg">
     <div class="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line/50 pb-4">
-      <h3 class="font-semibold tracking-tight text-lg">Disk Usage</h3>
-      <div class="flex items-center gap-2 text-xs text-ink-faint">
-        <span>Last scanned <span data-ts="{{storage.lastScan}}">{{storage.lastScan}}</span></span>
-        <button class="btn btn-sm" id="storage-rescan">{{{icon 'refresh-cw' 'size-3.5'}}} Re-Scan Now</button>
+      <h3 class="font-bold tracking-wide text-lg flex items-center gap-2">{{{icon 'hard-drive' 'size-5 text-link'}}} Disk Usage</h3>
+      <div class="flex items-center gap-2 text-xs font-medium text-ink-faint">
+        <span>Last scanned <span class="bg-inset/50 px-2 py-0.5 rounded-md text-ink-soft" data-ts="{{storage.lastScan}}">{{storage.lastScan}}</span></span>
+        <button class="btn btn-sm shadow-sm" id="storage-rescan">{{{icon 'refresh-cw' 'size-3.5'}}} Re-Scan Now</button>
       </div>
     </div>
-    <div class="mt-3 flex items-end gap-2">
-      <span class="text-3xl font-bold tabular-nums">{{bytes storage.totalUsed}}</span>
-      <span class="pb-1 text-sm text-ink-faint">panel data · {{bytes storage.diskFree}} free of {{bytes storage.diskTotal}} on drive</span>
+    
+    <div class="mt-2 flex items-end justify-between gap-4">
+      <div>
+        <div class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-1">Total Panel Data</div>
+        <span class="text-4xl font-bold tabular-nums text-ink">{{bytes storage.totalUsed}}</span>
+      </div>
+      <div class="text-right">
+        <div class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-1">Drive Free Space</div>
+        <span class="text-2xl font-bold tabular-nums text-ok">{{bytes storage.diskFree}}</span>
+        <span class="text-sm font-medium text-ink-soft">/ {{bytes storage.diskTotal}}</span>
+      </div>
     </div>
-    {{! meterColor: the headline bar must go gold/red as the drive fills - it
-        stayed success-green even at 95%. }}
-    <div class="meter mt-3 h-3"><div class="{{meterColor storage.totalUsed storage.diskTotal}}" style="width: {{pct storage.totalUsed storage.diskTotal}}%"></div></div>
-    <div class="mt-4 flex h-6 w-full overflow-hidden rounded-md" title="Breakdown by category.">
-      {{#each storage.breakdown}}
-        <div class="{{cls}}" style="width: {{width}}%" title="{{label}}: {{bytes size}}"></div>
-      {{/each}}
-    </div>
-    <div class="mt-2 flex flex-wrap gap-3 text-xs text-ink-faint">
-      {{#each storage.breakdown}}
-        <span><span class="mr-1 inline-block size-2 rounded-sm {{cls}}"></span>{{label}} · {{bytes size}}</span>
-      {{/each}}
+    
+    <div class="mt-6 border-t border-line/30 pt-5">
+      <div class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-2">Usage Relative to Total Drive Capacity</div>
+      <div class="meter h-2.5 rounded-full overflow-hidden bg-inset/50 border border-line/30">
+        <div class="{{meterColor storage.totalUsed storage.diskTotal}} h-full rounded-full transition-all duration-500" style="width: {{pct storage.totalUsed storage.diskTotal}}%"></div>
+      </div>
+      
+      <div class="mt-5 text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-2">Breakdown by Category</div>
+      <div class="flex h-4 w-full overflow-hidden rounded-full shadow-inner border border-line/50" title="Breakdown by category.">
+        {{#each storage.breakdown}}
+          <div class="{{cls}} hover:opacity-80 transition-opacity" style="width: {{width}}%" title="{{label}}: {{bytes size}}"></div>
+        {{/each}}
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2.5 text-[11px] font-bold text-ink-soft">
+        {{#each storage.breakdown}}
+          <span class="bg-inset/30 border border-line/30 px-2 py-1 rounded-md flex items-center gap-1.5"><span class="inline-block size-2.5 rounded-full shadow-sm ring-1 ring-inset ring-black/10 {{cls}}"></span>{{label}} <span class="text-ink ml-1">{{bytes size}}</span></span>
+        {{/each}}
+      </div>
     </div>
   </div>
 
-  <div class="card p-5 sm:p-6">
-    <h3 class="mb-5 border-b border-line/50 pb-4 font-semibold tracking-tight text-lg">Growth Trend</h3>
+  <div class="card p-5 sm:p-6 flex flex-col justify-between transition hover:shadow-lg">
+    <h3 class="mb-5 border-b border-line/50 pb-4 font-bold tracking-wide text-lg flex items-center gap-2">{{{icon 'trending-up' 'size-5 text-link'}}} Growth Trend</h3>
     {{#if storage.trend.length}}
-      <div class="flex h-24 items-end gap-1">
+      <div class="flex h-28 items-end gap-1.5 mt-auto bg-inset/10 rounded-lg p-3 border border-line/30">
         {{#each storage.trend}}
-          <div class="flex-1 rounded-t bg-diamond-500/70" style="height: {{this}}%" title="{{this}}% of the largest scan."></div>
+          <div class="flex-1 rounded-t-sm bg-link/60 hover:bg-link transition-colors" style="height: {{this}}%" title="{{this}}% of the largest scan."></div>
         {{/each}}
       </div>
-      <p class="help">GB used over the last scans. Snapshots recorded on every scan.</p>
+      <p class="mt-4 text-xs font-medium text-ink-faint leading-relaxed bg-inset/30 p-2.5 rounded-lg border border-line/30">GB used over the last scans. Snapshots recorded on every scan.</p>
     {{else}}
-      <p class="grid h-24 place-items-center text-sm text-ink-faint">No scans recorded yet. Run one to start the trend.</p>
+      <div class="grid flex-1 place-items-center text-center text-sm font-medium text-ink-faint border-2 border-dashed border-line/50 rounded-xl p-4">
+        <div>
+          {{{icon 'activity' 'size-6 mb-2 opacity-30 mx-auto'}}}
+          No scans recorded yet. Run one to start the trend.
+        </div>
+      </div>
     {{/if}}
   </div>
 </div>
 
 <div class="grid gap-4 lg:grid-cols-2">
-  <div class="card">
-    <div class="border-b border-line/50 bg-inset/20 p-4 sm:p-5 font-semibold tracking-tight text-lg">By Category</div>
+  <div class="card overflow-hidden">
+    <div class="border-b border-line/50 bg-inset/10 p-4 sm:p-5 font-bold tracking-wide text-sm flex items-center gap-2">{{{icon 'folder-tree' 'size-4 text-link'}}} By Category</div>
     <div class="overflow-x-auto">
-      <table class="table-base table-stack">
-        <tbody>
+      <table class="table-base table-stack w-full text-sm">
+        <tbody class="divide-y divide-line/30">
           {{#each storage.categories}}
-            <tr>
-              <td data-th="Category"><div class="font-medium">{{name}}</div><div class="break-all font-mono text-xs text-ink-faint">{{path}}</div></td>
-              <td data-th="Size" class="sm:w-40"><div class="meter"><div class="{{meterColor size ../storage.totalUsed}}" style="width: {{pct size ../storage.totalUsed}}%"></div></div></td>
-              <td data-th="Total" class="text-ink-faint sm:w-24 sm:text-right">{{bytes size}}</td>
-              <td data-th="Open" class="sm:w-10 sm:text-right"><a class="btn btn-ghost btn-sm" href="{{link}}" data-tip="Open in the global file manager.">{{{icon 'folder-open' 'size-3.5'}}}</a></td>
+            <tr class="hover:bg-inset/10 transition-colors">
+              <td data-th="Category" class="p-3 sm:p-4">
+                <div class="font-bold text-ink">{{name}}</div>
+                <div class="break-all font-mono text-[10px] text-ink-faint mt-0.5">{{path}}</div>
+              </td>
+              <td data-th="Size" class="sm:w-40 p-3 sm:p-4 align-middle">
+                <div class="meter h-2 rounded-full overflow-hidden bg-inset/50 border border-line/30">
+                  <div class="{{meterColor size ../storage.totalUsed}} h-full rounded-full transition-all duration-500" style="width: {{pct size ../storage.totalUsed}}%"></div>
+                </div>
+              </td>
+              <td data-th="Total" class="font-bold text-ink-soft sm:w-24 sm:text-right p-3 sm:p-4 align-middle">{{bytes size}}</td>
+              <td data-th="Open" class="sm:w-16 sm:text-right p-3 sm:p-4 align-middle">
+                <a class="btn btn-ghost btn-sm text-ink-faint hover:text-link hover:bg-link/10 rounded-full size-8 p-0 grid place-items-center transition-colors ml-auto" href="{{link}}" data-tip="Open in the global file manager.">{{{icon 'folder-open' 'size-4'}}}</a>
+              </td>
             </tr>
           {{/each}}
         </tbody>
@@ -63,31 +91,35 @@
   </div>
 
   <div class="space-y-4">
-    <div class="card">
-      <div class="border-b border-line/50 bg-inset/20 p-4 sm:p-5 font-semibold tracking-tight text-lg">One-Click Cleanup</div>
-      <div class="divide-y divide-line">
+    <div class="card overflow-hidden">
+      <div class="border-b border-line/50 bg-inset/10 p-4 sm:p-5 font-bold tracking-wide text-sm flex items-center gap-2">{{{icon 'trash-2' 'size-4 text-link'}}} One-Click Cleanup</div>
+      <div class="divide-y divide-line/30">
         {{#each storage.cleanup}}
-          <div class="flex items-center gap-3 p-3 text-sm">
-            <span class="flex-1">{{action}}</span>
-            <button class="btn btn-sm" data-cleanup-action="{{key}}" data-cleanup-label="{{action}}" {{#if days}}data-cleanup-days="{{days}}"{{/if}}>Preview…</button>
+          <div class="flex items-center gap-3 p-4 hover:bg-inset/10 transition-colors">
+            <span class="flex-1 font-bold text-sm text-ink-soft">{{action}}</span>
+            <button class="btn btn-sm btn-ghost border border-line/50 shadow-sm hover:bg-inset/30 font-medium" data-cleanup-action="{{key}}" data-cleanup-label="{{action}}" {{#if days}}data-cleanup-days="{{days}}"{{/if}}>Preview…</button>
           </div>
         {{/each}}
       </div>
     </div>
 
-    <div class="card">
-      <div class="border-b border-line/50 bg-inset/20 p-4 sm:p-5 font-semibold tracking-tight text-lg">Quota Status (All Servers)</div>
+    <div class="card overflow-hidden">
+      <div class="border-b border-line/50 bg-inset/10 p-4 sm:p-5 font-bold tracking-wide text-sm flex items-center gap-2">{{{icon 'pie-chart' 'size-4 text-link'}}} Quota Status <span class="text-[10px] uppercase font-bold text-ink-faint tracking-wider ml-1 bg-inset/50 px-1.5 py-0.5 rounded">All Servers</span></div>
       <div class="overflow-x-auto">
-        <table class="table-base table-stack">
-          <tbody>
+        <table class="table-base table-stack w-full text-sm">
+          <tbody class="divide-y divide-line/30">
             {{#each servers}}
-              <tr>
-                <td data-th="Server"><a class="font-medium text-link hover:underline" href="/servers/{{id}}">{{name}}</a></td>
-                <td data-th="Disk" class="sm:w-40"><div class="meter"><div class="{{meterColor disk.used disk.quota}}" style="width: {{pct disk.used disk.quota}}%"></div></div></td>
-                <td data-th="Used" class="text-xs text-ink-faint sm:w-32 sm:text-right">{{bytes disk.used}}{{#if disk.quota}} / {{bytes disk.quota}}{{else}} (no quota){{/if}}</td>
+              <tr class="hover:bg-inset/10 transition-colors">
+                <td data-th="Server" class="p-3 sm:p-4"><a class="font-bold text-ink hover:text-link transition-colors" href="/servers/{{id}}">{{name}}</a></td>
+                <td data-th="Disk" class="sm:w-40 p-3 sm:p-4 align-middle">
+                  <div class="meter h-2 rounded-full overflow-hidden bg-inset/50 border border-line/30">
+                    <div class="{{meterColor disk.used disk.quota}} h-full rounded-full transition-all duration-500" style="width: {{pct disk.used disk.quota}}%"></div>
+                  </div>
+                </td>
+                <td data-th="Used" class="text-[11px] font-bold text-ink-soft sm:w-32 sm:text-right p-3 sm:p-4 align-middle">{{bytes disk.used}}{{#if disk.quota}} <span class="text-ink-faint font-medium">/ {{bytes disk.quota}}</span>{{else}} <span class="opacity-50 font-medium ml-0.5">(no quota)</span>{{/if}}</td>
               </tr>
             {{else}}
-              <tr><td data-th="" class="p-6 text-center text-ink-faint">No servers yet. Per-server quotas appear here once you create one.</td></tr>
+              <tr><td data-th="" class="p-6 text-center text-ink-faint text-xs font-medium">No servers yet. Per-server quotas appear here once you create one.</td></tr>
             {{/each}}
           </tbody>
         </table>
@@ -96,12 +128,12 @@
   </div>
 </div>
 
-<div class="card mt-6">
-  <div class="border-b border-line/50 bg-inset/20 p-4 sm:p-5 font-semibold tracking-tight text-lg">Largest Files</div>
+<div class="card mt-6 overflow-hidden">
+  <div class="border-b border-line/50 bg-inset/10 p-4 sm:p-5 font-bold tracking-wide text-sm flex items-center gap-2">{{{icon 'bar-chart-2' 'size-4 text-link'}}} Largest Files</div>
   <div class="overflow-x-auto">
-    <table class="table-base table-stack">
-      <tbody id="largest-files-body">
-        <tr><td data-th="" class="p-6 text-center text-ink-faint">Finding the largest files…</td></tr>
+    <table class="table-base table-stack w-full text-sm">
+      <tbody id="largest-files-body" class="divide-y divide-line/30">
+        <tr><td data-th="" class="p-8 text-center text-ink-faint text-xs font-medium flex flex-col items-center gap-2">{{{icon 'search' 'size-5 opacity-50'}}} Finding the largest files…</td></tr>
       </tbody>
     </table>
   </div>

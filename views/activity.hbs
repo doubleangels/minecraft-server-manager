@@ -20,32 +20,48 @@
   </div>
 </form>
 
-<div class="card">
-  <ol class="divide-y divide-line">
+<div class="card overflow-hidden">
+  <div class="border-b border-line/50 bg-inset/10 p-3 sm:p-4 font-bold tracking-wide text-sm flex items-center justify-between">
+    <div class="flex items-center gap-2">{{{icon 'list' 'size-4 text-link'}}} Event Log</div>
+    <span class="text-[10px] font-bold uppercase tracking-widest text-ink-faint bg-inset/50 px-2 py-0.5 rounded border border-line/30">{{total}} Events</span>
+  </div>
+  <ol class="divide-y divide-line/30">
     {{#each events}}
-      <li class="flex flex-wrap items-center gap-2 p-3 text-sm">
-        <span class="badge shrink-0 {{eventBadge type}}">{{type}}</span>
-        <span class="min-w-0 flex-1">{{summary}}</span>
-        {{#if serverId}}
-          <a href="/servers/{{serverId}}" class="shrink-0 text-xs text-link hover:underline">{{server}}</a>
-        {{else}}
-          <span class="shrink-0 text-xs text-ink-faint">{{server}}</span>
-        {{/if}}
-        <span class="shrink-0 text-xs text-ink-faint">{{actor}} · <span data-ts="{{ts}}">{{ts}}</span></span>
-        {{#if hasLog}}<button class="btn btn-ghost btn-sm shrink-0" data-event-excerpt data-event-id="{{id}}" data-event-type="{{type}}" data-tip="View the captured log.">{{{icon 'file-text' 'size-3.5'}}}</button>{{/if}}
+      <li class="flex flex-col sm:flex-row sm:items-center gap-y-2 gap-x-4 p-3 sm:p-4 hover:bg-inset/10 transition-colors">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <span class="badge shrink-0 {{eventBadge type}} text-[10px] uppercase font-bold tracking-wider py-0.5 px-2 border border-black/10">{{type}}</span>
+          <span class="text-[11px] font-medium text-ink-faint bg-inset/50 px-1.5 py-0.5 rounded-sm sm:hidden ml-auto"><span data-ts="{{ts}}">{{ts}}</span></span>
+        </div>
+        <span class="min-w-0 flex-1 font-medium text-ink break-words text-sm">{{summary}}</span>
+        <div class="flex items-center gap-4 text-xs mt-1 sm:mt-0 ml-auto sm:ml-0">
+          <div class="flex flex-col sm:items-end">
+            {{#if serverId}}
+              <a href="/servers/{{serverId}}" class="font-bold text-ink hover:text-link transition-colors truncate max-w-[120px]">{{server}}</a>
+            {{else}}
+              <span class="font-medium text-ink-faint truncate max-w-[120px]">{{server}}</span>
+            {{/if}}
+            <span class="text-[10px] font-medium text-ink-soft uppercase tracking-wider">{{actor}}</span>
+          </div>
+          <span class="hidden sm:block text-[11px] font-medium text-ink-faint bg-inset/50 px-2 py-0.5 rounded border border-line/30"><span data-ts="{{ts}}">{{ts}}</span></span>
+          {{#if hasLog}}
+            <button class="btn btn-ghost btn-sm text-ink-faint hover:text-link hover:bg-link/10 rounded-full size-8 p-0 grid place-items-center transition-colors shrink-0" data-event-excerpt data-event-id="{{id}}" data-event-type="{{type}}" data-tip="View the captured log.">{{{icon 'file-text' 'size-4'}}}</button>
+          {{/if}}
+        </div>
       </li>
     {{else}}
-      <li class="p-10 text-center text-sm text-ink-faint">No events match these filters.</li>
-      {{! wording kept in sync with the History tab's empty state }}
+      <li class="p-10 flex flex-col items-center text-center text-ink-faint">
+        {{{icon 'search' 'size-6 mb-3 opacity-30'}}}
+        <span class="text-xs font-medium">No events match these filters.</span>
+      </li>
     {{/each}}
   </ol>
   {{#if events.length}}
-  <div class="flex items-center justify-between border-t border-line p-3 text-xs text-ink-faint">
-    <span>Showing {{from}} to {{to}} of {{total}} events</span>
-    <div class="flex items-center gap-2">
-      {{#if prevHref}}<a class="btn btn-ghost btn-sm" href="{{prevHref}}" aria-label="Previous page">{{{icon 'chevron-left' 'size-4'}}}</a>{{else}}<button class="btn btn-ghost btn-sm" disabled aria-label="Previous page">{{{icon 'chevron-left' 'size-4'}}}</button>{{/if}}
-      <span class="tabular-nums">Page {{page}} of {{pages}}</span>
-      {{#if nextHref}}<a class="btn btn-ghost btn-sm" href="{{nextHref}}" aria-label="Next page">{{{icon 'chevron-right' 'size-4'}}}</a>{{else}}<button class="btn btn-ghost btn-sm" disabled aria-label="Next page">{{{icon 'chevron-right' 'size-4'}}}</button>{{/if}}
+  <div class="flex items-center justify-between border-t border-line/50 bg-inset/10 p-3 sm:px-5 text-xs text-ink-faint font-medium">
+    <span>Showing <span class="font-bold text-ink-soft">{{from}}</span> to <span class="font-bold text-ink-soft">{{to}}</span> of <span class="font-bold text-ink-soft">{{total}}</span></span>
+    <div class="flex items-center gap-3">
+      {{#if prevHref}}<a class="btn btn-ghost btn-sm border border-line/50 bg-canvas shadow-sm hover:bg-inset/30" href="{{prevHref}}" aria-label="Previous page">{{{icon 'chevron-left' 'size-3.5'}}}</a>{{else}}<button class="btn btn-ghost btn-sm border border-line/50 bg-canvas opacity-50 cursor-not-allowed" disabled aria-label="Previous page">{{{icon 'chevron-left' 'size-3.5'}}}</button>{{/if}}
+      <span class="tabular-nums font-bold text-ink-soft tracking-wide">Page {{page}} <span class="text-ink-faint font-medium mx-0.5">/</span> {{pages}}</span>
+      {{#if nextHref}}<a class="btn btn-ghost btn-sm border border-line/50 bg-canvas shadow-sm hover:bg-inset/30" href="{{nextHref}}" aria-label="Next page">{{{icon 'chevron-right' 'size-3.5'}}}</a>{{else}}<button class="btn btn-ghost btn-sm border border-line/50 bg-canvas opacity-50 cursor-not-allowed" disabled aria-label="Next page">{{{icon 'chevron-right' 'size-3.5'}}}</button>{{/if}}
     </div>
   </div>
   {{/if}}

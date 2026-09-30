@@ -2,70 +2,109 @@
 
 {{#unless serversOnly}}
 <div class="mb-6 {{#if noServers}}hidden{{/if}}">
-  <h2 class="mb-3 font-semibold">Overview</h2>
-  <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-      <div class="eyebrow flex items-center gap-1.5">{{{icon 'server' 'size-4'}}} Servers Online</div>
-      {{! Green only when something IS online - 0/3 in success green lied. }}
-      <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="ml-1.5 text-base font-medium text-ink-soft">/ {{totals.total}}</span></div>
-    </div>
-
-    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-      <div class="eyebrow flex items-center gap-1.5">{{{icon 'users' 'size-4'}}} Players Connected</div>
-      <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums">{{totals.players}}</div>
-    </div>
-
-    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-      <div class="eyebrow flex items-center gap-1.5">{{{icon 'cpu' 'size-4'}}} CPU Usage</div>
-      <div class="mt-2 text-3xl font-bold tracking-tight tabular-nums">{{combined.cpuTotal}}<span class="text-base font-medium text-ink-soft">%</span></div>
-      <div class="mt-1 text-xs text-ink-faint font-medium">of {{combined.cpuCapacity}}% core capacity</div>
-    </div>
-
-    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-      <div class="eyebrow flex items-center gap-1.5">{{{icon 'container' 'size-4'}}} Docker</div>
-      <div class="mt-2 flex items-center gap-2 text-sm font-medium text-ink-soft" id="docker-status">
-        <span class="status-dot relative bg-stone-500"></span> Checking…
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <!-- Servers & Players -->
+    <div class="card min-w-0 p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden">
+      <div class="absolute -right-4 -top-4 text-ink-faint/5 pointer-events-none">
+        {{{icon 'server' 'size-24'}}}
+      </div>
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'server' 'size-4'}}} Servers & Players</div>
+      <div class="mt-4 flex items-end justify-between gap-4">
+        <div>
+          <div class="text-4xl font-bold tracking-tight tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="ml-1 text-lg font-medium text-ink-soft">/ {{totals.total}}</span></div>
+          <div class="mt-1 text-xs text-ink-faint font-medium uppercase tracking-wide">Servers Online</div>
+        </div>
+        <div class="text-right">
+          <div class="text-4xl font-bold tracking-tight tabular-nums">{{totals.players}}</div>
+          <div class="mt-1 text-xs text-ink-faint font-medium uppercase tracking-wide">Players Connected</div>
+        </div>
+      </div>
+      <div class="mt-5 pt-4 border-t border-line/50 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium">
+        {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5 text-ok" title="Running"><span class="status-dot {{statusDot 'running'}}"></span>{{overview.byStatus.running}}</span>{{/if}}
+        {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5 text-link" title="Starting"><span class="status-dot {{statusDot 'starting'}}"></span>{{overview.byStatus.starting}}</span>{{/if}}
+        {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5 text-warn" title="Unhealthy"><span class="status-dot {{statusDot 'unhealthy'}}"></span>{{overview.byStatus.unhealthy}}</span>{{/if}}
+        {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5 text-danger" title="Stalled"><span class="status-dot {{statusDot 'stalled'}}"></span>{{overview.byStatus.stalled}}</span>{{/if}}
+        {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5 text-link" title="Updating"><span class="status-dot {{statusDot 'updating'}}"></span>{{overview.byStatus.updating}}</span>{{/if}}
+        {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5 text-danger" title="Crashed"><span class="status-dot {{statusDot 'crashed'}}"></span>{{overview.byStatus.crashed}}</span>{{/if}}
+        {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5 text-ink-faint" title="Stopped"><span class="status-dot {{statusDot 'stopped'}}"></span>{{overview.byStatus.stopped}}</span>{{/if}}
       </div>
     </div>
 
-    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-      <div class="eyebrow flex items-center gap-1.5">{{{icon 'memory-stick' 'size-4'}}} Memory Allotted</div>
-      <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{overview.mem.allottedMb}}<span class="ml-1.5 text-base font-medium text-ink-soft">MB</span></div>
-      <div class="mt-1 text-xs text-ink-faint font-medium"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
+    <!-- Compute -->
+    <div class="card min-w-0 p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden">
+      <div class="absolute -right-4 -top-4 text-ink-faint/5 pointer-events-none">
+        {{{icon 'cpu' 'size-24'}}}
+      </div>
+      <div class="eyebrow flex items-center justify-between gap-1.5">
+        <span class="flex items-center gap-1.5">{{{icon 'cpu' 'size-4'}}} Compute</span>
+        <div class="flex items-center gap-1.5 text-[10px] font-bold text-ink-soft uppercase tracking-wider bg-inset/50 px-2 py-1 rounded-md" id="docker-status">
+          <span class="status-dot relative bg-stone-500"></span> DOCKER
+        </div>
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-4">
+        <div>
+          <div class="text-3xl font-bold tracking-tight tabular-nums">{{combined.cpuTotal}}<span class="text-sm font-medium text-ink-soft">%</span></div>
+          <div class="mt-1 text-xs text-ink-faint font-medium uppercase tracking-wide">CPU Usage</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold tracking-tight tabular-nums"><span data-overview-mem-used>{{overview.mem.usedMb}}</span><span class="text-sm font-medium text-ink-soft">MB</span></div>
+          <div class="mt-1 text-xs text-ink-faint font-medium uppercase tracking-wide">RAM Used</div>
+        </div>
+      </div>
+      <div class="mt-5 pt-4 border-t border-line/50 flex flex-col gap-1.5 text-xs font-medium">
+        <div class="flex justify-between items-center"><span class="text-ink-faint">CPU Core Capacity</span> <span class="text-ink bg-inset/50 px-1.5 py-0.5 rounded">{{combined.cpuCapacity}}%</span></div>
+        <div class="flex justify-between items-center"><span class="text-ink-faint">Total RAM Allotted</span> <span class="text-ink bg-inset/50 px-1.5 py-0.5 rounded">{{overview.mem.allottedMb}} MB</span></div>
+      </div>
     </div>
 
-    <div class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between">
-      <div class="eyebrow flex items-center gap-1.5">{{{icon 'hard-drive' 'size-4'}}} Storage Used</div>
-      <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums">{{bytes overview.disk.usedBytes}}</div>
-      <div class="mt-1 text-xs text-ink-faint font-medium">across all server data folders</div>
+    <!-- Storage -->
+    <div class="card min-w-0 p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden">
+      <div class="absolute -right-4 -top-4 text-ink-faint/5 pointer-events-none">
+        {{{icon 'hard-drive' 'size-24'}}}
+      </div>
+      <div class="eyebrow flex items-center gap-1.5">{{{icon 'hard-drive' 'size-4'}}} Storage</div>
+      <div class="mt-4">
+        <div class="text-4xl font-bold tracking-tight tabular-nums">{{bytes overview.disk.usedBytes}}</div>
+        <div class="mt-1 text-xs text-ink-faint font-medium uppercase tracking-wide">Total Data Footprint</div>
+      </div>
+      <div class="mt-auto pt-4 border-t border-line/50">
+        <p class="text-xs text-ink-faint font-medium leading-relaxed">
+          Storage used by all server data folders and configurations across your panel.
+        </p>
+      </div>
     </div>
 
-    <a href="/health" class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between transition hover:border-line-strong hover:shadow-raised" aria-label="Open the health page">
-      <div class="eyebrow flex items-center gap-1.5">{{{icon 'activity' 'size-4'}}} Health · 24h</div>
-      <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="ml-1.5 text-base font-medium text-ink-soft">alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
-      <div class="mt-1 text-xs text-ink-faint font-medium">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
-    </a>
-
-    <a href="/updates" class="card min-w-0 p-5 sm:p-6 flex flex-col justify-between transition hover:border-line-strong hover:shadow-raised" aria-label="Open the updates page">
-      <div class="eyebrow flex items-center gap-1.5">{{{icon 'circle-arrow-up' 'size-4'}}} Updates</div>
-      <div class="mt-2 break-words text-3xl font-bold tracking-tight tabular-nums {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
-      <div class="mt-1 text-xs text-ink-faint font-medium">{{overview.updates.mods}} mod{{#unless (eq overview.updates.mods 1)}}s{{/unless}} / {{overview.updates.server}} server-level</div>
-    </a>
-  </div>
-</div>
-{{/unless}}
-
-{{#unless serversOnly}}
-<div class="mb-6 {{#if noServers}}hidden{{/if}}">
-  <h2 class="mb-3 font-semibold">Servers by Status</h2>
-  <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-    {{#if overview.byStatus.running}}<span class="chip chip-ok"><span class="status-dot {{statusDot "running"}}"></span>{{overview.byStatus.running}} Running</span>{{/if}}
-    {{#if overview.byStatus.starting}}<span class="chip"><span class="status-dot {{statusDot "starting"}}"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
-    {{#if overview.byStatus.unhealthy}}<span class="chip chip-warn"><span class="status-dot {{statusDot "unhealthy"}}"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
-    {{#if overview.byStatus.stalled}}<span class="chip chip-danger"><span class="status-dot {{statusDot "stalled"}}"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
-    {{#if overview.byStatus.updating}}<span class="chip chip-info"><span class="status-dot {{statusDot "updating"}}"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
-    {{#if overview.byStatus.crashed}}<span class="chip chip-danger"><span class="status-dot {{statusDot "crashed"}}"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
-    {{#if overview.byStatus.stopped}}<span class="chip"><span class="status-dot {{statusDot "stopped"}}"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
+    <!-- Health & Updates -->
+    <div class="flex flex-col gap-3 sm:gap-4">
+      <a href="/health" class="card min-w-0 p-4 sm:p-5 flex-1 flex flex-col justify-center transition hover:border-line-strong hover:shadow-raised group" aria-label="Open the health page">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3.5">
+            <div class="p-2.5 rounded-xl {{#if overview.healthTotal}}bg-danger/15 text-danger{{else}}bg-ok/15 text-ok{{/if}}">
+              {{{icon 'activity' 'size-5'}}}
+            </div>
+            <div>
+              <div class="text-sm font-bold tracking-wide">System Health</div>
+              <div class="text-xs text-ink-faint font-medium mt-0.5">{{#if overview.healthTotal}}{{overview.health.crashes}} crashes, {{overview.health.oom}} OOM{{else}}All systems stable · 24h{{/if}}</div>
+            </div>
+          </div>
+          <div class="text-2xl font-bold tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}} group-hover:scale-110 transition-transform">{{overview.healthTotal}}</div>
+        </div>
+      </a>
+      <a href="/updates" class="card min-w-0 p-4 sm:p-5 flex-1 flex flex-col justify-center transition hover:border-line-strong hover:shadow-raised group" aria-label="Open the updates page">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3.5">
+            <div class="p-2.5 rounded-xl {{#if overview.updates.all}}bg-warn/15 text-warn{{else}}bg-inset text-ink-soft{{/if}}">
+              {{{icon 'circle-arrow-up' 'size-5'}}}
+            </div>
+            <div>
+              <div class="text-sm font-bold tracking-wide">Available Updates</div>
+              <div class="text-xs text-ink-faint font-medium mt-0.5">{{overview.updates.mods}} mods, {{overview.updates.server}} server</div>
+            </div>
+          </div>
+          <div class="text-2xl font-bold tabular-nums {{#if overview.updates.all}}text-warn{{else}}text-ink-soft{{/if}} group-hover:scale-110 transition-transform">{{overview.updates.all}}</div>
+        </div>
+      </a>
+    </div>
   </div>
 </div>
 {{/unless}}
@@ -79,9 +118,12 @@
 </div>
 
 {{#unless serversOnly}}
-<div class="mb-6 {{#if noServers}}hidden{{/if}}" id="combined-overview">
-  <div class="mb-3 flex items-center justify-between">
-    <h2 class="font-semibold">Resource Overview</h2>
+<div class="mb-8 {{#if noServers}}hidden{{/if}}" id="combined-overview">
+  <div class="mb-4 flex items-center justify-between">
+    <h2 class="font-bold text-lg tracking-wide flex items-center gap-2">
+      {{{icon 'bar-chart' 'size-5 text-ink-soft'}}}
+      Live Resource Overview
+    </h2>
   </div>
   <div data-combined-root>
     {{> combined-graphs}}

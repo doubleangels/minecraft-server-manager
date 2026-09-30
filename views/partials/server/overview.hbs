@@ -1,42 +1,61 @@
 <div class="grid gap-4 lg:grid-cols-3">
   <div class="card p-5 lg:col-span-2">
     {{#if addresses.length}}
-      <div class="mb-5 border-b border-line pb-5">
-        <label class="label" for="ov-address">Server address <span class="text-xs font-normal text-ink-faint">(share this with players on your network)</span></label>
-        <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
+      <div class="mb-6 border-b border-line/50 pb-6">
+        <label class="label text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-ink-faint mb-2" for="ov-address">{{{icon 'globe' 'size-3.5'}}} Server address <span class="text-ink-soft opacity-70 ml-1">(share this to connect)</span></label>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2.5">
           {{#if (gt addresses.length 1)}}
-            <select class="input w-auto font-mono" id="ov-address" data-label="Server address">
+            <select class="input w-auto font-mono bg-inset/20 shadow-sm border-line/50" id="ov-address" data-label="Server address">
               {{#each addresses}}<option value="{{this}}">{{this}}</option>{{/each}}
             </select>
           {{else}}
-            {{! size attr: the field grows with the address instead of clipping long LAN hostnames. }}
-            <input class="input w-auto font-mono" id="ov-address" value="{{addresses.[0]}}" size="{{addresses.[0].length}}" readonly>
+            <input class="input w-auto font-mono font-medium bg-inset/20 shadow-sm border-line/50" id="ov-address" value="{{addresses.[0]}}" size="{{addresses.[0].length}}" readonly>
           {{/if}}
-          <button class="btn" data-copy-from="#ov-address">{{{icon 'copy' 'size-4'}}} Copy Address</button>
+          <button class="btn btn-primary" data-copy-from="#ov-address">{{{icon 'copy' 'size-4'}}} Copy Address</button>
         </div>
-        <p class="help">Playing from the internet? Set up port forwarding or grab the full invite from the Invites tab (under Settings).</p>
+        <p class="help mt-2">Playing from the internet? Set up port forwarding or grab the full invite from the Invites tab.</p>
       </div>
     {{/if}}
-    <h3 class="mb-3 font-semibold text-lg tracking-tight">About</h3>
-    <div class="prose-sm max-w-prose text-sm text-ink-soft [&_a]:text-link [&_code]:rounded [&_code]:bg-inset [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:text-ink-soft">{{{markdown server.description}}}</div>
-    <dl class="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
-      <div><dt class="text-base font-semibold text-ink">Created</dt><dd class="mt-1 font-medium">{{server.created}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">Last Started</dt><dd class="mt-1 font-medium">{{server.lastStarted}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">Update Policy</dt><dd class="mt-1 font-medium">{{capitalize server.updatePolicy}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">Start on Boot</dt><dd class="mt-1 font-medium">{{#if server.autoStart}}Yes{{else}}No{{/if}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">Game Port</dt><dd class="mt-1 font-medium">{{server.ports.game}}</dd></div>
-      <div><dt class="text-base font-semibold text-ink">RCON Port</dt><dd class="mt-1 font-medium">{{server.ports.rcon}}</dd></div>
+    <h3 class="mb-3 font-bold text-lg tracking-wide flex items-center gap-2">{{{icon 'info' 'size-4 text-ink-soft'}}} About</h3>
+    <div class="prose-sm max-w-prose text-sm text-ink-soft leading-relaxed [&_a]:text-link [&_code]:rounded [&_code]:bg-inset/50 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:text-ink-soft [&_code]:border [&_code]:border-line/30">{{{markdown server.description}}}</div>
+    
+    <dl class="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div class="bg-inset/30 p-3.5 rounded-xl border border-line/50 flex flex-col hover:bg-inset/50 transition-colors">
+        <dt class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-1 flex items-center gap-1.5">{{{icon 'calendar' 'size-3'}}} Created</dt>
+        <dd class="text-sm font-bold text-ink mt-auto">{{server.created}}</dd>
+      </div>
+      <div class="bg-inset/30 p-3.5 rounded-xl border border-line/50 flex flex-col hover:bg-inset/50 transition-colors">
+        <dt class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-1 flex items-center gap-1.5">{{{icon 'clock' 'size-3'}}} Last Started</dt>
+        <dd class="text-sm font-bold text-ink mt-auto">{{server.lastStarted}}</dd>
+      </div>
+      <div class="bg-inset/30 p-3.5 rounded-xl border border-line/50 flex flex-col hover:bg-inset/50 transition-colors">
+        <dt class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-1 flex items-center gap-1.5">{{{icon 'refresh-cw' 'size-3'}}} Update Policy</dt>
+        <dd class="text-sm font-bold text-ink mt-auto">{{capitalize server.updatePolicy}}</dd>
+      </div>
+      <div class="bg-inset/30 p-3.5 rounded-xl border border-line/50 flex flex-col hover:bg-inset/50 transition-colors">
+        <dt class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-1 flex items-center gap-1.5">{{{icon 'power' 'size-3'}}} Start on Boot</dt>
+        <dd class="text-sm font-bold text-ink mt-auto">{{#if server.autoStart}}Yes{{else}}<span class="text-ink-faint font-medium">No</span>{{/if}}</dd>
+      </div>
+      <div class="bg-inset/30 p-3.5 rounded-xl border border-line/50 flex flex-col hover:bg-inset/50 transition-colors">
+        <dt class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-1 flex items-center gap-1.5">{{{icon 'network' 'size-3'}}} Game Port</dt>
+        <dd class="text-sm font-bold text-ink font-mono mt-auto">{{server.ports.game}}</dd>
+      </div>
+      <div class="bg-inset/30 p-3.5 rounded-xl border border-line/50 flex flex-col hover:bg-inset/50 transition-colors">
+        <dt class="text-[10px] font-bold text-ink-faint uppercase tracking-wider mb-1 flex items-center gap-1.5">{{{icon 'terminal' 'size-3'}}} RCON Port</dt>
+        <dd class="text-sm font-bold text-ink font-mono mt-auto">{{server.ports.rcon}}</dd>
+      </div>
     </dl>
+    
     {{#if server.pack}}
-      <div class="mt-6 rounded-xl border border-line bg-surface p-4 shadow-sm text-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-          <span class="badge badge-info">{{platformName server.pack.platform}}</span>
-          <b class="font-semibold">{{server.pack.name}}</b>
-          <span class="chip">pinned @ {{server.pack.version}}</span>
-          {{#if server.updateAvailable}}
-            <a class="btn btn-sm ml-auto" href="/updates">{{{icon 'circle-arrow-up' 'size-3.5'}}} {{server.pack.latest}} Available</a>
-          {{/if}}
+      <div class="mt-6 rounded-xl border border-line/50 bg-inset/10 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-3 transition hover:shadow-md">
+        <div class="flex items-center gap-2.5">
+          <span class="badge badge-info bg-link/10 text-link border border-link/20 px-2 py-0.5 text-[10px] uppercase font-bold tracking-widest">{{platformName server.pack.platform}}</span>
+          <b class="font-bold text-base">{{server.pack.name}}</b>
         </div>
+        <span class="chip text-xs bg-canvas border-line/50 ml-sm:auto font-medium">pinned @ <span class="font-bold ml-1">{{server.pack.version}}</span></span>
+        {{#if server.updateAvailable}}
+          <a class="btn btn-sm btn-primary ml-auto" href="/updates">{{{icon 'circle-arrow-up' 'size-3.5'}}} <span class="font-bold">{{server.pack.latest}}</span> Available</a>
+        {{/if}}
       </div>
     {{/if}}
   </div>
@@ -45,43 +64,60 @@
     <div class="card p-5" data-ov-live="{{server.id}}"
          data-running="{{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}1{{/if}}"
          data-mem-limit="{{server.resources.containerMemoryMb}}" data-cpus="{{server.resources.cpus}}">
-      <h3 class="mb-4 font-semibold text-lg tracking-tight">Live Usage</h3>
-      <div class="space-y-4 text-xs tabular-nums">
+      <h3 class="mb-4 font-bold text-sm tracking-wide flex items-center justify-between border-b border-line/50 pb-3">
+        <span class="flex items-center gap-1.5">{{{icon 'activity' 'size-4 text-ok'}}} Live Usage</span>
+      </h3>
+      <div class="space-y-5 text-xs tabular-nums">
+        <!-- CPU -->
         <div>
-          {{! CPU normalized against the core limit and clamped via pct - the raw
-              value exceeds 100% on multi-core servers and clipped misleadingly. }}
-          <div class="mb-1.5 flex justify-between font-medium text-ink-soft"><span>CPU</span><span data-ov-cpu-label>{{server.stats.cpuPct}}% {{#if server.resources.cpus}}<span class="font-normal text-ink-faint">of {{server.resources.cpus}} cores</span>{{/if}}</span></div>
-          <div class="meter"><div data-ov-cpu-bar class="{{#if server.resources.cpus}}{{meterColor server.stats.cpuPct (mul server.resources.cpus 100)}}{{else}}{{meterColor server.stats.cpuPct 100}}{{/if}}" style="width: {{#if server.resources.cpus}}{{pct server.stats.cpuPct (mul server.resources.cpus 100)}}{{else}}{{pct server.stats.cpuPct 100}}{{/if}}%"></div></div>
+          <div class="mb-2 flex items-end justify-between font-medium">
+            <span class="text-[10px] font-bold text-ink-faint uppercase tracking-wider flex items-center gap-1.5">{{{icon 'cpu' 'size-3.5'}}} CPU</span>
+            <span class="text-sm font-bold text-ink" data-ov-cpu-label>{{server.stats.cpuPct}}% {{#if server.resources.cpus}}<span class="text-[10px] font-medium text-ink-soft uppercase ml-1">/ {{server.resources.cpus}} cores</span>{{/if}}</span>
+          </div>
+          <div class="meter h-2 rounded-full overflow-hidden bg-inset/50 border border-line/30"><div data-ov-cpu-bar class="{{#if server.resources.cpus}}{{meterColor server.stats.cpuPct (mul server.resources.cpus 100)}}{{else}}{{meterColor server.stats.cpuPct 100}}{{/if}} h-full rounded-full transition-all duration-500" style="width: {{#if server.resources.cpus}}{{pct server.stats.cpuPct (mul server.resources.cpus 100)}}{{else}}{{pct server.stats.cpuPct 100}}{{/if}}%"></div></div>
         </div>
+        <!-- Memory -->
         <div>
-          <div class="mb-1.5 flex justify-between font-medium text-ink-soft"><span>Memory</span><span data-ov-mem-label>{{server.stats.memUsedMb}} <span class="font-normal text-ink-faint">/ {{server.resources.containerMemoryMb}} MB</span></span></div>
-          {{! The tick marks the Java heap on the container-limit scale: usage
-              parked on the tick is the heap doing what it was told (#25). }}
-          <div class="meter"><div data-ov-mem-bar class="{{meterColor server.stats.memUsedMb server.resources.containerMemoryMb}}" style="width: {{pct server.stats.memUsedMb server.resources.containerMemoryMb}}%"></div>{{#if server.memory.heapPct}}<span class="meter-mark" style="left: {{server.memory.heapPct}}%" data-tip="Java heap: {{server.memory.heapMb}} MB."></span>{{/if}}</div>
-          {{#if server.memory.note}}<p class="mt-1 text-ink-faint">{{server.memory.note}}</p>{{/if}}
+          <div class="mb-2 flex items-end justify-between font-medium">
+            <span class="text-[10px] font-bold text-ink-faint uppercase tracking-wider flex items-center gap-1.5">{{{icon 'memory-stick' 'size-3.5'}}} Memory</span>
+            <span class="text-sm font-bold text-ink" data-ov-mem-label>{{server.stats.memUsedMb}} <span class="text-[10px] font-medium text-ink-soft uppercase ml-1">/ {{server.resources.containerMemoryMb}} MB</span></span>
+          </div>
+          <div class="meter h-2 rounded-full overflow-hidden bg-inset/50 border border-line/30 relative"><div data-ov-mem-bar class="{{meterColor server.stats.memUsedMb server.resources.containerMemoryMb}} h-full rounded-full transition-all duration-500" style="width: {{pct server.stats.memUsedMb server.resources.containerMemoryMb}}%"></div>{{#if server.memory.heapPct}}<span class="meter-mark absolute top-0 bottom-0 w-[2px] bg-ink" style="left: {{server.memory.heapPct}}%" data-tip="Java heap: {{server.memory.heapMb}} MB."></span>{{/if}}</div>
+          {{#if server.memory.note}}<p class="mt-2 text-[10px] font-medium text-ink-faint bg-inset/30 p-1.5 rounded">{{server.memory.note}}</p>{{/if}}
         </div>
+        <!-- Disk -->
         <div>
-          <div class="mb-1.5 flex justify-between font-medium text-ink-soft"><span>Disk Quota</span><span>{{bytes server.disk.used}}{{#if server.disk.quota}} <span class="font-normal text-ink-faint">/ {{bytes server.disk.quota}}</span>{{else}} <span class="font-normal text-ink-faint">(no quota)</span>{{/if}}</span></div>
-          <div class="meter"><div class="{{meterColor server.disk.used server.disk.quota}}" style="width: {{pct server.disk.used server.disk.quota}}%"></div></div>
+          <div class="mb-2 flex items-end justify-between font-medium">
+            <span class="text-[10px] font-bold text-ink-faint uppercase tracking-wider flex items-center gap-1.5">{{{icon 'hard-drive' 'size-3.5'}}} Disk</span>
+            <span class="text-sm font-bold text-ink">{{bytes server.disk.used}}{{#if server.disk.quota}} <span class="text-[10px] font-medium text-ink-soft uppercase ml-1">/ {{bytes server.disk.quota}}</span>{{else}} <span class="text-[10px] font-medium text-ink-soft opacity-50 ml-1">(no quota)</span>{{/if}}</span>
+          </div>
+          <div class="meter h-2 rounded-full overflow-hidden bg-inset/50 border border-line/30"><div class="{{meterColor server.disk.used server.disk.quota}} h-full rounded-full transition-all duration-500" style="width: {{pct server.disk.used server.disk.quota}}%"></div></div>
         </div>
       </div>
     </div>
 
-    <div class="card p-5">
-      <h3 class="mb-4 font-semibold text-lg tracking-tight">Players <span class="text-sm font-normal text-ink-faint ml-1">{{server.players.online}}/{{server.players.max}}</span></h3>
+    <div class="card p-0 overflow-hidden border border-line/50">
+      <div class="p-4 sm:p-5 border-b border-line/50 bg-inset/10 flex items-center justify-between">
+        <h3 class="font-bold tracking-wide text-sm flex items-center gap-2">
+          {{{icon 'users' 'size-4 text-link'}}} Players
+        </h3>
+        <span class="text-xs font-bold text-ink bg-canvas px-2 py-0.5 rounded-md border border-line/30 shadow-sm">{{server.players.online}}<span class="text-ink-faint font-medium ml-0.5">/{{server.players.max}}</span></span>
+      </div>
       {{#if server.players.names.length}}
-        <ul class="space-y-2 text-sm">
+        <ul class="divide-y divide-line/30 text-sm">
           {{#each server.players.names}}
-            <li class="flex items-center gap-3">
-              <span class="grid size-7 place-items-center rounded-full bg-inset text-xs font-bold shadow-sm">{{this.[0]}}</span>
-              <span class="flex-1 truncate font-medium">{{this}}</span>
-              {{! arrow, not "⋯" - the ellipsis glyph means "menu" everywhere else, this navigates. }}
-              <a class="btn btn-ghost btn-sm" href="/servers/{{../server.id}}/players" data-tip="Manage on the Players tab." aria-label="Manage {{this}}">{{{icon 'arrow-right' 'size-3.5'}}}</a>
+            <li class="flex items-center gap-3 p-3 sm:px-5 hover:bg-inset/20 transition-colors">
+              <span class="grid size-8 place-items-center rounded-full bg-inset text-xs font-bold shadow-inner border border-line/50">{{this.[0]}}</span>
+              <span class="flex-1 truncate font-bold text-ink">{{this}}</span>
+              <a class="btn btn-ghost btn-sm text-ink-faint hover:text-link hover:bg-link/10 rounded-full size-8 p-0 grid place-items-center transition-colors" href="/servers/{{../server.id}}/players" data-tip="Manage on the Players tab." aria-label="Manage {{this}}">{{{icon 'arrow-right' 'size-4'}}}</a>
             </li>
           {{/each}}
         </ul>
       {{else}}
-        <p class="text-sm text-ink-faint">No players online.</p>
+        <div class="p-6 flex flex-col items-center justify-center text-center text-ink-faint min-h-32">
+          {{{icon 'users' 'size-6 mb-2 opacity-30'}}}
+          <p class="text-xs font-medium">No players online.</p>
+        </div>
       {{/if}}
     </div>
   </div>
