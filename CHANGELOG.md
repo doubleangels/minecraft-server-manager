@@ -5,6 +5,37 @@ All notable changes to this project are documented here. The format is based on
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Each push is cut as a new release with
 its own dated entry.
 
+## [Unreleased]
+
+### Added
+
+- **Prometheus metrics.** `GET /api/v1/metrics` exports each server's up state, CPU, memory and
+  limit, uptime, players, and TPS/MSPT for Grafana, Uptime Kuma, and other scrapers. It uses the
+  same API token and rate limit as the rest of `/api/v1`, and leaves out any reading the server has
+  not reported.
+- **Players and backups over the API.** `GET /api/v1/servers/:id/players` returns who is online plus
+  recent sessions, and `GET /api/v1/servers/:id/backups` returns backup history without file paths.
+- **Back up all servers and Restart all running servers.** Two admin-only schedule tasks that handle
+  every eligible server in turn. One failing server does not stop the rest, and any failure fails
+  the run.
+- **Last backup on server cards.** Each card shows when the server was last backed up, and warns
+  after 7 days or when a server has never been backed up.
+
+### Changed
+
+- **A snappier live console.** A boot backlog of thousands of lines now draws in one pass instead of
+  one layout per line, and the server batches rapid log output into fewer frames.
+- **Compressed responses.** Pages, scripts, styles, and JSON are now gzip-compressed.
+- **Faster storage scans.** The storage indexer and folder-size lookups check files in parallel
+  batches.
+- **API responses are cacheable for 5 seconds.** Successful `/api/v1` responses carry
+  `Cache-Control: private, max-age=5`, so pollers stop spending their rate limit on identical
+  requests.
+
+### Fixed
+
+- **The Server column on the Schedules page was blank** for per-server schedules.
+
 ## [0.14.1] - 2026-09-21
 
 Minecraft version updates now have to be earned: a newer version is only offered when every mod on
