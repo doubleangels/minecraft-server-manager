@@ -32,6 +32,10 @@ its own dated entry.
   `Cache-Control: private, max-age=5`, so pollers stop spending their rate limit on identical
   requests.
 
+- **Consistent wording.** Checkbox and radio labels, dropdown choices, table headers, and a few
+  headings that were still sentence case are now Title Case, and error and warning messages that
+  lacked a final period (for example "Invalid server id.") now have one.
+
 ### Fixed
 
 - **The Server column on the Schedules page was blank** for per-server schedules.

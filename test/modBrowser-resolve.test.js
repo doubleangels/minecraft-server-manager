@@ -219,7 +219,7 @@ test('resolveDependencies: a dependency with no compatible build is skipped with
     selection: [{ platform: 'modrinth', ref: 'A', versionId: 'a1' }],
   });
   assert.equal(out.deps.length, 0);
-  assert.deepEqual(out.warnings, ['Mod B has no forge 1.20.1 build - skipped']);
+  assert.deepEqual(out.warnings, ['Mod B has no forge 1.20.1 build, so it was skipped.']);
 });
 
 test('resolveDependencies: unknown projects, missing versions, and junk selections never throw', async () => {

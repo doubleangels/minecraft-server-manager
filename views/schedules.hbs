@@ -34,7 +34,7 @@
           </td>
           {{! nextMs + the panel-TZ hydrator: the table used to show UTC while
               the modal preview showed panel time for the SAME schedule. }}
-          <td data-th="Next run" class="p-3 whitespace-nowrap sm:text-right tabular-nums text-[11px] font-bold text-ink-faint">{{#if nextMs}}<span data-ts="{{nextMs}}">{{next}}</span>{{else}}<span class="opacity-50">Not scheduled</span>{{/if}}</td>
+          <td data-th="Next Run" class="p-3 whitespace-nowrap sm:text-right tabular-nums text-[11px] font-bold text-ink-faint">{{#if nextMs}}<span data-ts="{{nextMs}}">{{next}}</span>{{else}}<span class="opacity-50">Not scheduled</span>{{/if}}</td>
           <td data-th="Enabled" class="p-3">
             <label class="msm-toggle"><input type="checkbox" data-schedule-toggle {{#if enabled}}checked{{/if}}><span></span></label>
           </td>
