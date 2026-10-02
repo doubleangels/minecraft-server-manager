@@ -59,6 +59,12 @@
       <div class="meter h-1.5 rounded-full overflow-hidden bg-inset/50 border border-line/30"><div class="{{meterColor disk.used disk.quota}} h-full rounded-full transition-all duration-500" style="width: {{pct disk.used disk.quota}}%"></div></div>
     </div>
 
+    <!-- Last backup -->
+    <div class="mt-3 flex items-center justify-between text-xs font-medium" data-card-backup>
+      <span class="flex items-center gap-1.5 text-ink-soft">{{{icon 'archive' 'size-3.5'}}} Last Backup</span>
+      <span class="tabular-nums {{#if backup.stale}}text-warn font-semibold{{else}}text-ink-faint{{/if}}"{{#if backup.stale}} data-tip="No backup in over 7 days."{{/if}}>{{backup.text}}</span>
+    </div>
+
     <!-- Tags -->
     {{#if tags.length}}
       <div class="mt-4 pt-4 border-t border-line/30 flex flex-wrap gap-1.5" data-card-tags>
