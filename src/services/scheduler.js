@@ -380,7 +380,9 @@ function listSchedules() {
     return {
       id: s.id,
       serverId: s.server_id,
-      server: server ? server.display_name : '- global -',
+      // serverNames maps id -> display name. A schedule whose server row is gone
+      // shows its id, not "global", so it is not mistaken for a panel-wide one.
+      server: s.server_id ? (server ?? s.server_id) : '- global -',
       task: TASK_TYPES[s.task_type]?.label || s.task_type,
       taskType: s.task_type,
       cron: s.cron,
