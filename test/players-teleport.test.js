@@ -186,12 +186,17 @@ test('getPlayerPosition reads the marker position and dimension', async () => {
   await assert.rejects(players.getPlayerPosition(SID, 'Steve'), { status: 502 });
 });
 
+// A real-shaped UUID: the service ignores anything else read from a server's own
+// files and falls back to the Mojang API, which would make this test depend on
+// the network (and fail whenever Mojang is unreachable or rate limits the runner).
+const GRIEFER_UUID = '3f5f7c2a-8a4e-4a1a-9c1b-000000000001';
+
 test('sweepExpiredBans pardons expired player and IP bans', async () => {
   const dir = dataPath('servers', SID);
   const past = new Date(Date.now() - 86_400_000).toISOString().slice(0, 19).replace('T', ' ') + ' +0000';
   fs.writeFileSync(
     `${dir}/banned-players.json`,
-    JSON.stringify([{ uuid: 'u', name: 'Griefer', created: past, source: 's', expires: past, reason: 'r' }])
+    JSON.stringify([{ uuid: GRIEFER_UUID, name: 'Griefer', created: past, source: 's', expires: past, reason: 'r' }])
   );
   fs.writeFileSync(
     `${dir}/banned-ips.json`,
