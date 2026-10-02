@@ -67,10 +67,10 @@ test('env differences expand per key, with catalog labels, additions and deletio
   assert.equal(motd.before, 'Hi');
   assert.equal(motd.after, 'Hello there');
   assert.equal(motd.requiresRebuild, true);
-  // ALLOW_FLIGHT (catalog label 'Allow flight') is dropped from the incoming
+  // ALLOW_FLIGHT (catalog label 'Allow Flight') is dropped from the incoming
   // env → reported as deleted.
-  assert.equal(byLabel['Allow flight'].before, 'true');
-  assert.equal(byLabel['Allow flight'].after, null);
+  assert.equal(byLabel['Allow Flight'].before, 'true');
+  assert.equal(byLabel['Allow Flight'].after, null);
   // MEMORY (catalog label 'RAM (Java heap)') is brand new.
   assert.equal(byLabel['RAM (Java heap)'].before, null);
   assert.equal(byLabel['RAM (Java heap)'].after, '1G');
