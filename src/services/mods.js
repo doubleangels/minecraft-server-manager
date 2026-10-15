@@ -963,6 +963,7 @@ function setIgnoredUpdate(serverId, { file, contentId }, { ignore, actor = 'syst
       throw httpError(409, 'No pending update to ignore. Run an update check first.');
     }
     db.run('UPDATE server_content SET ignored_update_version = ? WHERE id = ?', check.latest_name, row.id);
+    require('../updates/checker').invalidateOutdatedCache();
     recordEvent({
       serverId,
       actor,
@@ -973,6 +974,7 @@ function setIgnoredUpdate(serverId, { file, contentId }, { ignore, actor = 'syst
   }
 
   db.run('UPDATE server_content SET ignored_update_version = NULL WHERE id = ?', row.id);
+  require('../updates/checker').invalidateOutdatedCache();
   recordEvent({
     serverId,
     actor,
@@ -1034,6 +1036,7 @@ async function applyOverlayUpdate(serverId, { file, contentId }, { actor = 'syst
     serverId,
     result.filename
   );
+  require('../updates/checker').invalidateOutdatedCache();
   return {
     name: result.library.name,
     filename: result.filename,
@@ -1096,6 +1099,7 @@ async function revertOverlayUpdate(serverId, { file, contentId }, { actor = 'sys
     revertedFrom || null
   );
   if (!wasEnabled) await setEnabled(serverId, filename, false, { actor });
+  require('../updates/checker').invalidateOutdatedCache();
 
   recordEvent({
     serverId,

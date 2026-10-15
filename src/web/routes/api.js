@@ -363,7 +363,14 @@ router.put(
 
 router.get(
   '/servers/:id/stats',
-  asyncHandler(async (req, res, next) => {
+  asyncHandler(async (req, res) => {
+    requireServer(req.params.id);
+    const live = require('../../services/liveCache').get(req.params.id);
+    // The brokered docker-stats stream keeps per-tick samples in memory while a
+    // server runs, so a stats read is sub-millisecond instead of a ~2 s Docker
+    // round trip. Only containers with no live feed (stopped, or cache not yet
+    // attached) fall back to a one-shot statsOnce.
+    if (live.stats) return res.json({ ok: true, stats: live.stats });
     res.json({ ok: true, stats: await statsOnce(req.params.id) });
   })
 );
@@ -377,7 +384,11 @@ router.get('/servers/live', (req, res) => {
   const db = require('../../db');
   const all = liveCache.getAll();
   const out = {};
-  const rows = permissions.filterVisible(req.user, db.all('SELECT id, status FROM servers WHERE deleted_at IS NULL'));
+  const rows = permissions.filterVisible(
+    req.user,
+    db.all('SELECT id, status FROM servers WHERE deleted_at IS NULL'),
+    permissions.visibleServerIds(req.user)
+  );
   for (const row of rows) {
     const e = all[row.id] || {};
     out[row.id] = {
@@ -420,13 +431,15 @@ router.get(
       'update-failed',
     ];
 
+    // Alerts use the full visibility set (deleted servers included) so a
+    // crash on a server removed since is still reported, as before. Built here
+    // and shared with the row filter so the granted set is queried once.
+    const visibleIds = permissions.visibleServerIds(req.user);
     const serverRows = permissions.filterVisible(
       req.user,
-      db.all('SELECT id, display_name, status FROM servers WHERE deleted_at IS NULL ORDER BY created_at')
+      db.all('SELECT id, display_name, status FROM servers WHERE deleted_at IS NULL ORDER BY created_at'),
+      visibleIds
     );
-    // Alerts use the full visibility set (deleted servers included) so a
-    // crash on a server removed since is still reported, as before.
-    const visibleIds = permissions.visibleServerIds(req.user);
     const problems = serverRows
       .filter((s) => PROBLEM_STATUSES.has(s.status))
       .map((s) => ({ serverId: s.id, server: s.display_name, kind: s.status }));
@@ -1455,6 +1468,21 @@ router.post(
   '/storage/scan',
   asyncHandler(async (req, res, next) => {
     res.json({ ok: true, ...(await indexer.scan()) });
+  })
+);
+
+// Largest files: a bounded filesystem walk, so it runs from an admin-only GET
+// the Storage page fires after render instead of blocking every page load (it
+// used to run four cleanup dry-runs PLUS this scan on each load).
+router.get(
+  '/storage/largest-files',
+  requireRoleKeys('admin'),
+  asyncHandler(async (req, res) => {
+    const files = (await storageCleanup.largestFiles({ top: 15, maxScan: 3000 }).catch(() => [])).map((f) => ({
+      ...f,
+      link: `/files?path=${encodeURIComponent(f.path.split('/').slice(0, -1).join('/'))}`,
+    }));
+    res.json({ ok: true, files });
   })
 );
 
