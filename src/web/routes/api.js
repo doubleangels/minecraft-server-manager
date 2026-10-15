@@ -119,6 +119,37 @@ router.post(
   })
 );
 
+// Shared PATCH + changes-preview input. One schema so the "what will change"
+// modal can never drift from what the PATCH accepts (a field accepted in the
+// preview but rejected by the save would be a confusing promise).
+const serverPatchSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80).optional(),
+    description: z.string().max(4000).optional(),
+    icon: z.string().max(64).optional(),
+    accent: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/)
+      .optional(),
+    tags: z.array(z.string().trim().min(1).max(24)).max(16).optional(),
+    notes: z.string().max(8000).optional(),
+    mcVersion: z.string().trim().max(32).optional(),
+    javaTag: z.string().max(16).optional(),
+    heapMb: z.coerce.number().int().min(512).max(262144).optional(),
+    containerMemoryMb: z.coerce.number().int().min(1024).max(524288).optional(),
+    cpus: optNum0(128),
+    diskQuotaGb: optNum0(16384),
+    quotaStrict: z.coerce.boolean().optional(),
+    updatePolicy: z.enum(['manual', 'notify', 'auto']).optional(),
+    autoStart: z.coerce.boolean().optional(),
+    autoRestart: z.coerce.boolean().optional(),
+    env: z.record(z.string(), z.string()).optional(),
+    ...dockerOverridesSchema,
+  })
+  .refine((v) => !v.containerMemoryMb || !v.heapMb || v.containerMemoryMb > v.heapMb, {
+    message: 'Container memory limit must be higher than the Java heap.',
+  });
+
 // Per-server permissions: resolve once per request, hide unviewable servers,
 // then every route below names the capability it needs (see docs/users-and-roles.md).
 const { serverScope, requireCap, requireCapForWrites, backupServerId } = require('../middleware/serverAccess');
@@ -146,39 +177,36 @@ for (const action of Object.keys(POWER_TITLES)) {
   );
 }
 
+// Plugin-family gate (#53): changing mc_version on a Paper-family server to a
+// loader-unsupported target is refused up front (cheap when untouched - the
+// probe only fires when the version actually changes). Registry down → pass
+// through, exactly like the upgrade route. Shared by the PATCH and the
+// changes-preview so the confirmation modal can never confirm a save the PATCH
+// would refuse.
+async function assertPluginFamilyMcGate(before, mcVersion) {
+  if (mcVersion !== before.mc_version && require('../../services/mods').loaderOf(before) === 'paper') {
+    const gate = await require('../../services/loaderVersions').mcAvailableOnServerType(before.type, mcVersion, {
+      channel: before.env.PAPER_CHANNEL || 'default',
+    });
+    if (!gate.supported) {
+      const flavor = require('../../web/viewModels').flavorLabel(before.type);
+      throw httpError(
+        409,
+        `${flavor} has not published a Minecraft ${mcVersion} build yet. Switch this server to the experimental channel to track pre-releases, or pick a released version.`
+      );
+    }
+  }
+}
+
 router.patch(
   '/servers/:id',
   requireCap('settings'),
   asyncHandler(async (req, res, next) => {
-    const changes = z
-      .object({
-        name: z.string().trim().min(1).max(80).optional(),
-        description: z.string().max(4000).optional(),
-        icon: z.string().max(64).optional(),
-        accent: z
-          .string()
-          .regex(/^#[0-9a-fA-F]{6}$/)
-          .optional(),
-        tags: z.array(z.string().trim().min(1).max(24)).max(16).optional(),
-        notes: z.string().max(8000).optional(),
-        mcVersion: z.string().trim().max(32).optional(),
-        javaTag: z.string().max(16).optional(),
-        heapMb: z.coerce.number().int().min(512).max(262144).optional(),
-        containerMemoryMb: z.coerce.number().int().min(1024).max(524288).optional(),
-        cpus: optNum0(128),
-        diskQuotaGb: optNum0(16384),
-        quotaStrict: z.coerce.boolean().optional(),
-        updatePolicy: z.enum(['manual', 'notify', 'auto']).optional(),
-        autoStart: z.coerce.boolean().optional(),
-        autoRestart: z.coerce.boolean().optional(),
-        env: z.record(z.string(), z.string()).optional(),
-        ...dockerOverridesSchema,
-      })
-      .refine((v) => !v.containerMemoryMb || !v.heapMb || v.containerMemoryMb > v.heapMb, {
-        message: 'Container memory limit must be higher than the Java heap.',
-      })
-      .parse(req.body);
+    const changes = serverPatchSchema.parse(req.body);
     requireAdminForOverrides(req, changes);
+    if (changes.mcVersion) {
+      await assertPluginFamilyMcGate(requireServer(req.params.id), changes.mcVersion);
+    }
     if (
       changes.containerName !== undefined ||
       changes.networkName !== undefined ||
@@ -198,6 +226,40 @@ router.patch(
     }
     const { server, needsRecreate } = servers.updateServer(req.params.id, changes, { actor: req.user.username });
     res.json({ ok: true, needsRecreate, server: publicServer(server) });
+  })
+);
+
+// What the settings save-confirmation modal shows BEFORE the PATCH runs: the
+// same diff, expanded per-key, without mutating anything. A POST so the
+// method-based requireWrite gate keeps viewers out exactly like the PATCH.
+router.post(
+  '/servers/:id/changes-preview',
+  requireCap('settings'),
+  asyncHandler(async (req, res, next) => {
+    const changes = serverPatchSchema.parse(req.body);
+    requireAdminForOverrides(req, changes);
+    if (changes.mcVersion) {
+      await assertPluginFamilyMcGate(requireServer(req.params.id), changes.mcVersion);
+    }
+    if (
+      changes.containerName !== undefined ||
+      changes.networkName !== undefined ||
+      changes.extraPorts !== undefined ||
+      changes.extraBinds !== undefined
+    ) {
+      const before = requireServer(req.params.id);
+      await dockerSpec.validateOverrides(
+        {
+          containerName: changes.containerName || null,
+          networkName: changes.networkName || null,
+          extraPorts: changes.extraPorts ?? before.extraPorts,
+          extraBinds: changes.extraBinds ?? before.extraBinds,
+        },
+        { previousExtraPorts: before.extraPorts }
+      );
+    }
+    const preview = servers.summarizeServerChanges(req.params.id, changes);
+    res.json({ ok: true, ...preview });
   })
 );
 
@@ -1194,7 +1256,7 @@ const LOADER_BUILD_ENV_KEYS = [
 router.post(
   '/servers/:id/mcversion/upgrade',
   requireCap('settings'),
-  asyncHandler((req, res, next) => {
+  asyncHandler(async (req, res, next) => {
     const { targetVersion, targetLoaderBuild, envKey, force } = z
       .object({
         targetVersion: z
@@ -1236,6 +1298,27 @@ router.post(
             missingCount: verdict.missingCount,
             unknownCount: verdict.unknownCount,
           },
+        });
+      }
+    }
+    // Plugin-family gate (#53): Paper & forks ship per-MC builds that lag
+    // Mojang, so an unmodded target the loader has not published is refused
+    // unless explicitly forced - the same override contract as the compat gate.
+    // The probe is authoritative only when it HEARD back; an outage passes.
+    if (
+      targetVersion &&
+      targetVersion !== server.mc_version &&
+      !force &&
+      require('../../services/mods').loaderOf(server) === 'paper'
+    ) {
+      const gate = await require('../../services/loaderVersions').mcAvailableOnServerType(server.type, targetVersion, {
+        channel: server.env.PAPER_CHANNEL || 'default',
+      });
+      if (!gate.supported) {
+        const flavor = require('../../web/viewModels').flavorLabel(server.type);
+        return res.status(409).json({
+          ok: false,
+          error: `${flavor} has not published a Minecraft ${targetVersion} build yet. Switch this server to the experimental channel to track pre-releases, or pick a released version.`,
         });
       }
     }
