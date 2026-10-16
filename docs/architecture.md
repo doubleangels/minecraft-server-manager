@@ -58,7 +58,7 @@ Dependencies flow in one direction:
   serves server status, per-server players and backup history, and a Prometheus `/metrics` scrape
   target, all from the in-memory live cache and the database (never a Docker call per request).
   Successful responses are cacheable for five seconds (`Cache-Control: private, max-age=5`).
-- **`services/`** - the heart of the app. Each service owns one domain and may depend on
+- **`services/`**: the heart of the app. Each service owns one domain and may depend on
   infrastructure and on other services.
 - **`docker/`**: dockerode wrappers: `connect` (endpoint detection + daemon health), `containers`
   (create/start/stop/rebuild with bind mounts, memory/CPU limits, and labels), `logs`, `stats`,
