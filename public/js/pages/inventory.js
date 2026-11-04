@@ -112,7 +112,7 @@ function init(root) {
    * One slot cell. Passing `at` = {container, slot} makes it an editable
    * button (click -> action menu / place dialog).
    */
-  function slotCell(item, { label = '', at = null, onPick = null } = {}) {
+  function slotCell(item, { label = '', at = null, onPick = null, pickHint = '' } = {}) {
     const editable = Boolean(at || onPick);
     const cell = document.createElement(editable ? 'button' : 'div');
     if (editable) cell.type = 'button';
@@ -128,12 +128,17 @@ function init(root) {
     if (!item) {
       cell.className += 'border-line bg-inset/40';
       if (label)
-        cell.innerHTML = `<span class="text-[8px] uppercase tracking-wide text-ink-faint/60">${esc(label)}</span>`;
-      cell.dataset.tip = editable
+        cell.innerHTML = `<span class="max-w-full truncate px-0.5 text-[8px] uppercase tracking-wide text-ink-faint/60">${esc(label)}</span>`;
+      // A picker cell (onPick, no `at`: the Move To grids) has no page slot of
+      // its own; it describes what picking it does instead. Reading `at` here
+      // for one threw, so the Move To window opened with no grids at all.
+      cell.dataset.tip = at
         ? `Empty ${label || slotName(at.container, at.slot)}. Click to put an item here.`
-        : label
-          ? `Empty ${label} slot.`
-          : '';
+        : onPick
+          ? `Empty ${label ? `${label} slot` : 'slot'}. ${pickHint || 'Click to choose it.'}`
+          : label
+            ? `Empty ${label} slot.`
+            : '';
     } else {
       const named = Boolean(item.displayName);
       const enchanted = Boolean(item.enchants && item.enchants.length);
@@ -151,7 +156,9 @@ function init(root) {
             : '';
       cell.dataset.tip = itemTip(
         item,
-        [where, hasNested ? 'has contents' : '', editable ? 'click to edit' : ''].filter(Boolean).join(' · ')
+        [where, hasNested ? 'has contents' : '', at ? 'click to edit' : onPick ? pickHint || 'click to choose' : '']
+          .filter(Boolean)
+          .join(' · ')
       );
       cell.innerHTML = `
         <span data-slot-abbrev>${esc(abbrev(item.id))}</span>
@@ -423,6 +430,12 @@ function init(root) {
     openItemBrowser({ serverId, onPick: ask, onManual: () => ask(null) });
   }
 
+  /** Phone: a picker cell fills its grid column (square) instead of a fixed 48px. */
+  function fitCell(cell) {
+    cell.classList.remove('size-12');
+    cell.classList.add('aspect-square', 'w-full', 'sm:w-auto');
+  }
+
   /** Move/swap target picker: every container rendered as a clickable mini-grid. */
   function openMoveModal(from, item) {
     const content = document.createElement('div');
@@ -455,22 +468,24 @@ function init(root) {
     const section = (label, container, count, itemsBySlot, offset = 0, labels = null) => {
       const box = document.createElement('div');
       box.innerHTML = `<div class="mb-1 text-[11px] uppercase tracking-wider text-ink-faint">${esc(label)}</div>`;
-      // Scroll the 9-wide grid inside the modal rather than blowing it past a
-      // phone's viewport width.
+      // All 9 columns fit on a phone (cells shrink to the width, like the game's
+      // own inventory) instead of the last ones hiding off to the right behind
+      // a scroll nobody notices. sm+ keeps the fixed slot size.
       const scroller = document.createElement('div');
-      scroller.className = 'overflow-x-auto';
       const grid = document.createElement('div');
-      grid.className = 'grid w-max grid-cols-9 gap-1';
+      grid.className = 'grid w-full grid-cols-9 gap-1 sm:w-max';
       for (let i = 0; i < count; i++) {
         const occupant = itemsBySlot.get(offset + i) || null;
         const isSource = container === from.container && i === from.slot;
         const cell = slotCell(occupant, {
           label: labels ? labels[i] : '',
+          pickHint: isSource ? 'the item being moved' : occupant ? 'click to swap' : 'Click to move the item here.',
           onPick: isSource
             ? () => toast("That's the source slot.", { kind: 'error' })
             : () => doMove({ container, slot: i }),
         });
         if (isSource) cell.classList.add('ring-2', 'ring-gold-500');
+        fitCell(cell);
         grid.appendChild(cell);
       }
       scroller.appendChild(grid);
@@ -495,12 +510,14 @@ function init(root) {
     const armorRow = section('Armor & Offhand', 'armor', 4, armorBySlot, 0, ARMOR_PIECES);
     const offCell = slotCell(currentData.offhand || null, {
       label: 'offhand',
+      pickHint: currentData.offhand ? 'click to swap' : 'Click to move the item here.',
       onPick:
         from.container === 'offhand' && from.slot === 0
           ? () => toast("That's the source slot.", { kind: 'error' })
           : () => doMove({ container: 'offhand', slot: 0 }),
     });
     if (from.container === 'offhand') offCell.classList.add('ring-2', 'ring-gold-500');
+    fitCell(offCell);
     armorRow.querySelector('.grid').appendChild(offCell);
     grids.appendChild(armorRow);
     content.appendChild(grids);
