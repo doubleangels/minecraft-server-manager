@@ -208,7 +208,11 @@ async function hydrateDocker() {
         warn.classList.remove('hidden');
         warn.classList.add('flex');
         const reason = document.getElementById('docker-warning-reason');
-        if (reason && d.error) reason.textContent = d.error;
+        // The raw error is a system code (ENOENT, EACCES…), not something to
+        // show a person. Only a permission problem changes the advice.
+        if (reason && /EACCES|permission denied/i.test(d.error || ''))
+          reason.textContent =
+            'The panel is not allowed to use Docker. Give its user access to Docker (on Linux, add it to the Docker group), then restart the panel.';
       }
     }
   } catch {

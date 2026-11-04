@@ -3,6 +3,7 @@
 // Crash-report API. Mounted at /api/servers/:id/crashes (mergeParams gives
 // this router access to :id).
 
+const httpError = require('../../utils/httpError');
 const asyncHandler = require('../middleware/asyncHandler');
 const { makeJsonErrorHandler } = require('../middleware/jsonErrorHandler');
 const express = require('express');
@@ -64,11 +65,15 @@ router.get(
   })
 );
 
-// Bulk delete - everything older than ?olderThanDays=N for this server.
+// Bulk delete: ?all=1 clears every report for this server, otherwise
+// everything older than ?olderThanDays=N.
 router.delete(
   '/',
   asyncHandler((req, res, next) => {
     const serverId = serverIdSchema.parse(req.params.id);
+    if (req.query.all === '1') {
+      return res.json({ ok: true, ...crashes.deleteAll(serverId, { actor: req.user.username }) });
+    }
     const days = z.coerce.number().int().min(1).max(3650).parse(req.query.olderThanDays);
     const result = crashes.deleteOlderThan(serverId, days, { actor: req.user.username });
     res.json({ ok: true, ...result });
@@ -129,9 +134,7 @@ function ownedCrash(req) {
   const crashId = crashIdSchema.parse(req.params.crashId);
   const row = crashes.getCrash(crashId);
   if (!row || row.server_id !== serverId) {
-    const err = new Error('Crash report not found');
-    err.status = 404;
-    throw err;
+    throw httpError(404, 'Crash report not found.');
   }
   return row;
 }

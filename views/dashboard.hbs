@@ -1,6 +1,8 @@
 {{#unless serversOnly}}{{> page-header heading="DASHBOARD" sub="Every server at a glance: status, resource use, and the latest activity across the panel."}}{{/unless}}
 
-<div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 {{#if serversOnly}}hidden{{/if}}">
+{{! Update counts live in the Updates card below (with the mod/server split),
+    so this row is just people + infrastructure. }}
+<div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 {{#if serversOnly}}hidden{{/if}}">
   <div class="card p-4">
     <div class="text-xs text-ink-faint">Servers online</div>
     {{! Green only when something IS online - 0/3 in success green lied. }}
@@ -10,11 +12,7 @@
     <div class="text-xs text-ink-faint">Players connected</div>
     <div class="mt-1 text-2xl font-bold tabular-nums">{{totals.players}}</div>
   </div>
-  <div class="card p-4">
-    <div class="text-xs text-ink-faint">Updates available</div>
-    <div class="mt-1 text-2xl font-bold tabular-nums {{#if totals.updates}}text-warn{{/if}}">{{totals.updates}}</div>
-  </div>
-  <div class="card p-4">
+  <div class="card col-span-2 p-4 sm:col-span-1">
     <div class="text-xs text-ink-faint">Docker</div>
     <div class="mt-1 flex items-center gap-2 text-sm font-semibold text-ink-faint" id="docker-status">
       <span class="status-dot relative bg-stone-500"></span> Checking…
@@ -86,7 +84,7 @@
 
 {{#unless noServers}}
 <div class="mb-4 flex flex-wrap items-center gap-2">
-  <input class="input max-w-xs" placeholder="Search servers, tags…" id="server-filter">
+  <input class="input w-full sm:w-auto sm:max-w-xs sm:flex-1" type="search" placeholder="Search servers, tags…" aria-label="Search servers" id="server-filter">
   {{! Visible "Sort" label: only the first option carried a "Sort:" prefix, so
       the closed trigger read context-free once anything else was picked. }}
   <label class="text-xs text-ink-faint" for="server-sort">Sort</label>
@@ -131,12 +129,16 @@
   <div class="card">
     <ol class="divide-y divide-line">
       {{#each activity}}
-        <li class="flex flex-wrap items-center gap-2 p-3 text-sm">
+        {{! The summary keeps a readable minimum width; on a phone the server and
+            time drop to their own line instead of squeezing it to a word a line. }}
+        <li class="flex flex-wrap items-center gap-x-2 gap-y-1 p-3 text-sm">
           <span class="badge shrink-0">{{type}}</span>
-          <span class="min-w-0 flex-1">{{summary}}</span>
-          {{! deleted-server names are plain faint text - link-styled dead spans read as broken. }}
-          {{#if serverId}}<a href="/servers/{{serverId}}" class="shrink-0 text-xs text-link hover:underline">{{server}}</a>{{else}}<span class="shrink-0 text-xs text-ink-faint">{{server}}</span>{{/if}}
-          <span class="shrink-0 text-xs text-ink-faint" data-ts-ago="{{ts}}">{{ts}}</span>
+          <span class="min-w-[12rem] flex-1 break-words">{{summary}}</span>
+          <span class="flex shrink-0 items-center gap-2 text-xs">
+            {{! deleted-server names are plain faint text - link-styled dead spans read as broken. }}
+            {{#if serverId}}<a href="/servers/{{serverId}}" class="text-link hover:underline">{{server}}</a>{{else}}<span class="text-ink-faint">{{server}}</span>{{/if}}
+            <span class="text-ink-faint" data-ts-ago="{{ts}}">{{ts}}</span>
+          </span>
         </li>
       {{else}}
         <li class="p-8 text-center text-sm text-ink-faint">No activity yet. Actions on your servers will show up here.</li>

@@ -11,6 +11,7 @@
 const fs = require('node:fs');
 const { parentPort, workerData } = require('node:worker_threads');
 const { ZipArchive } = require('archiver');
+const { SKIP_DIRS, IGNORE_GLOBS, STORED_GLOBS } = require('./backupFilter');
 
 const { sourceDir, outFile } = workerData;
 
@@ -22,7 +23,10 @@ const finish = (msg) => {
 };
 
 const output = fs.createWriteStream(outFile);
-const archive = new ZipArchive({ zlib: { level: 6 } });
+// Level 9: a backup is written once and kept for weeks, so the extra deflate
+// effort pays for itself. Already-compressed files skip deflate entirely (see
+// backupFilter), which keeps the total CPU time close to what level 6 cost.
+const archive = new ZipArchive({ zlib: { level: 9 }, statConcurrency: 8 });
 
 const fail = (err) => {
   if (settled) return;
@@ -46,5 +50,9 @@ archive.on('progress', (d) => {
 });
 
 archive.pipe(output);
-archive.directory(sourceDir, false);
+// Two walks: everything that deflates, then the already-compressed formats
+// stored as-is. Both skip excluded folders without descending into them.
+const base = { cwd: sourceDir, dot: true, skip: SKIP_DIRS };
+archive.glob('**', { ...base, ignore: [...IGNORE_GLOBS, ...STORED_GLOBS] });
+archive.glob(STORED_GLOBS, { ...base, nodir: true, ignore: IGNORE_GLOBS }, { store: true });
 archive.finalize();

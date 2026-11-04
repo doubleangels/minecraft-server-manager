@@ -169,7 +169,7 @@ function makeRouter(scope) {
   router.post('/upload', uploadPreflight(scope), upload.array('files', 20), async (req, res, next) => {
     try {
       const rel = pathSchema.parse(req.query.path ?? '');
-      if (!req.files || !req.files.length) throw Object.assign(new Error('No files attached'), { status: 400 });
+      if (!req.files || !req.files.length) throw Object.assign(new Error('No files attached.'), { status: 400 });
       const uploaded = [];
       for (const f of req.files) {
         uploaded.push(await files.acceptUpload(sid(req), rel, f.path, f.originalname, { actor: actorOf(req) }));

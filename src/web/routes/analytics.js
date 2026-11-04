@@ -21,7 +21,7 @@ const EVENT_TYPES = ['chat', 'join', 'leave', 'death', 'advancement', 'pvp', 'co
 function mustServer(req) {
   const server = servers.getServer(req.params.id);
   if (!server) {
-    const err = new Error('Server not found');
+    const err = new Error('Server not found.');
     err.status = 404;
     throw err;
   }

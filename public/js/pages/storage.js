@@ -35,12 +35,12 @@ if (largestBody) {
         mono.textContent = f.path;
         cell.append(mono);
         td(tr, 'text-ink-faint sm:w-24 sm:text-right').textContent = fmtBytes(f.size);
-        const linkCell = td(tr, 'sm:w-10 sm:text-right');
+        const linkCell = td(tr, 'sm:w-28 sm:text-right');
         const a = document.createElement('a');
-        a.className = 'btn btn-ghost btn-sm';
         a.href = f.link;
         a.dataset.tip = f.path;
-        a.textContent = 'folder';
+        a.textContent = 'Open Folder';
+        a.className = 'btn btn-ghost btn-sm whitespace-nowrap';
         linkCell.append(a);
         largestBody.append(tr);
       }

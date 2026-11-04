@@ -810,6 +810,10 @@ router.get(
       context.backups = db
         .all('SELECT * FROM backups WHERE server_id = ? ORDER BY created_at DESC LIMIT 50', row.id)
         .map((b) => ({ id: b.id, file: b.filename, size: b.size_bytes, reason: b.reason, ts: b.created_at }));
+      context.backupStats = db.get(
+        'SELECT COUNT(*) AS count, COALESCE(SUM(size_bytes), 0) AS bytes FROM backups WHERE server_id = ?',
+        row.id
+      );
       const rc = backupRetention.effective(row.id);
       context.retention = {
         keepScheduled: rc.keepScheduled,

@@ -23,7 +23,7 @@ function mustGet(req) {
   const serverId = serverIdSchema.parse(req.params.id);
   const server = serversService.getServer(serverId);
   if (!server) {
-    const err = new Error('Server not found');
+    const err = new Error('Server not found.');
     err.status = 404;
     throw err;
   }

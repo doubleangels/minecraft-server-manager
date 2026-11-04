@@ -1,5 +1,5 @@
-// Server Backups tab: create (with real task progress), restore, download
-// (plain link in the partial), delete.
+// Server Backups tab: create (with real task progress), verify, restore,
+// download (plain link in the partial), rename, delete.
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { confirmDialog } from '../lib/confirm.js';
@@ -63,6 +63,20 @@ function init(serverId) {
     const backupId = row.dataset.backupId;
     const file = row.dataset.file;
     const size = Number(row.dataset.size) || 0;
+
+    const verifyBtn = e.target.closest('[data-backup-verify]');
+    if (verifyBtn) {
+      const restore = setBusy(verifyBtn);
+      try {
+        const res = await postJson(`/api/backups/${encodeURIComponent(backupId)}/verify`);
+        toast(`Backup verified: ${res.entries} files, ${fmtBytes(res.bytes)} read.`);
+      } catch (err) {
+        toast(err.message || 'That backup could not be verified. Please try again.', { kind: 'error', timeout: 9000 });
+      } finally {
+        restore();
+      }
+      return;
+    }
 
     if (e.target.closest('[data-backup-restore]')) {
       const ok = await confirmDialog({

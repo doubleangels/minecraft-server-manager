@@ -28,7 +28,7 @@ const searchSchema = z.object({
 function requireServer(id) {
   const server = servers.getServer(id);
   if (!server) {
-    const err = new Error('Server not found');
+    const err = new Error('Server not found.');
     err.status = 404;
     throw err;
   }

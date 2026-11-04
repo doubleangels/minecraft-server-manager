@@ -501,7 +501,7 @@
   /* Badges: neutral by default; the four semantic variants are the ONLY badge
      colorways - no ad-hoc bg/text pairs at call sites. */
   .badge {
-    @apply inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-inset text-ink-soft;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-inset text-ink-soft;
   }
   .badge-ok {
     @apply bg-grass-500/15 text-ok;

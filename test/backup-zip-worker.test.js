@@ -48,3 +48,43 @@ test('zipDirectory produces a valid, empty archive for an empty source (the "ser
 
   await fsp.rm(dir, { recursive: true, force: true });
 });
+
+test('zipDirectory leaves out logs, map renders and lock files, and stores already-compressed files', async () => {
+  const yauzl = require('yauzl');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'msm-bkzip-'));
+  const src = path.join(dir, 'server');
+  const put = (rel, body) => {
+    fs.mkdirSync(path.dirname(path.join(src, rel)), { recursive: true });
+    fs.writeFileSync(path.join(src, rel), body);
+  };
+  put('world/region/r.0.0.mca', 'R'.repeat(20_000));
+  put('world/session.lock', 'lock');
+  put('world/level.dat.tmp', 'tmp');
+  put('logs/latest.log', 'log');
+  put('bluemap/web/maps/world/tiles/0.png', 'tile');
+  put('plugins/BlueMap/web/maps/world/tiles/0.png', 'tile');
+  put('crash-reports/crash-1.txt', 'kept');
+  put('mods/a.jar', 'J'.repeat(5_000));
+
+  const out = path.join(dir, 'backup.zip');
+  await zipDirectory(src, out);
+
+  const entries = await new Promise((resolve, reject) => {
+    yauzl.open(out, { lazyEntries: true }, (err, zip) => {
+      if (err) return reject(err);
+      const list = new Map();
+      zip.on('entry', (e) => {
+        list.set(e.fileName, e.compressionMethod);
+        zip.readEntry();
+      });
+      zip.on('end', () => resolve(list));
+      zip.readEntry();
+    });
+  });
+  const files = [...entries.keys()].filter((n) => !n.endsWith('/'));
+  assert.deepEqual(files.sort(), ['crash-reports/crash-1.txt', 'mods/a.jar', 'world/region/r.0.0.mca']);
+  assert.equal(entries.get('mods/a.jar'), 0, 'a jar is stored, not deflated again');
+  assert.equal(entries.get('world/region/r.0.0.mca'), 8, 'region files are deflated');
+
+  await fsp.rm(dir, { recursive: true, force: true });
+});

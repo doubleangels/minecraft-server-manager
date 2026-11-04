@@ -1,10 +1,11 @@
 <div data-history-server="{{server.id}}" class="contents">
 {{#if events.length}}
-<div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-  <input class="input max-w-xs" id="hist-search" placeholder="Search events…">
-  <select class="input w-auto" id="hist-type" data-label="Filter by type"><option value="">All Types</option></select>
-  <select class="input w-auto" id="hist-actor" data-label="Filter by actor"><option value="">All Actors</option></select>
-  <button class="btn btn-sm ml-auto" data-menu="hist-export-menu">{{{icon 'download' 'size-3.5'}}} Export</button>
+{{! Phone: search on its own row, then both filters + Export share one row. }}
+<div class="mb-4 flex flex-wrap items-center gap-2">
+  <input class="input w-full sm:w-auto sm:max-w-xs sm:flex-1" id="hist-search" type="search" placeholder="Search events…" aria-label="Search events">
+  <select class="input min-w-0 flex-1 sm:w-auto sm:flex-none" id="hist-type" data-label="Filter by type"><option value="">All Types</option></select>
+  <select class="input min-w-0 flex-1 sm:w-auto sm:flex-none" id="hist-actor" data-label="Filter by actor"><option value="">All Actors</option></select>
+  <button class="btn btn-sm shrink-0 sm:ml-auto" data-menu="hist-export-menu">{{{icon 'download' 'size-3.5'}}} Export</button>
   <template id="hist-export-menu">
     <a href="/api/servers/{{server.id}}/events/export?format=json" target="_blank" rel="noopener">{{{icon 'file-text' 'size-3.5'}}} Export as JSON</a>
     <a href="/api/servers/{{server.id}}/events/export?format=csv" target="_blank" rel="noopener">{{{icon 'download' 'size-3.5'}}} Export as CSV</a>
@@ -14,29 +15,46 @@
 
 {{#if crashReports.length}}
   <div class="card mb-4 border-danger/40">
-    <div class="border-b border-line p-3 font-semibold text-danger">{{{icon 'flame' 'size-4'}}} Crash Reports</div>
+    <div class="flex flex-wrap items-center gap-2 border-b border-line p-3">
+      <span class="font-semibold text-danger">{{{icon 'flame' 'size-4'}}} Crash Reports</span>
+      <span class="badge" data-crash-count>{{crashReports.length}}</span>
+      {{#if perms.files}}
+        <div class="ml-auto flex items-center gap-1">
+          <a class="btn btn-ghost btn-sm" href="/api/servers/{{server.id}}/crashes/export.zip" data-tip="Download every crash report as one zip." aria-label="Download all crash reports">{{{icon 'download' 'size-3.5'}}} <span class="hidden sm:inline">Download All</span></a>
+          <button class="btn btn-danger btn-sm" data-crash-clear-all>{{{icon 'trash-2' 'size-3.5'}}} Clear All</button>
+        </div>
+      {{/if}}
+    </div>
     <div class="divide-y divide-line">
       {{#each crashReports}}
         <div class="p-3" data-crash-card data-crash-id="{{id}}" data-crash-file="{{file}}" {{#if mclogsUrl}}data-crash-mclogs="{{mclogsUrl}}"{{/if}}>
           <div class="flex flex-wrap items-center gap-2 text-sm">
             {{#unless viewed}}<span class="badge badge-danger">new</span>{{/unless}}
-            <span class="font-mono text-xs text-ink-faint">{{file}}</span>
-            <span class="ml-auto text-xs tabular-nums text-ink-faint"><span data-ts="{{ts}}">{{ts}}</span> · {{bytes size}}</span>
+            <span class="min-w-0 break-all font-mono text-xs text-ink-faint">{{file}}</span>
+            <span class="ml-auto whitespace-nowrap text-xs tabular-nums text-ink-faint"><span data-ts="{{ts}}">{{ts}}</span> · {{bytes size}}</span>
           </div>
-          <p class="mt-1.5 font-mono text-xs text-ink-soft">{{summary}}</p>
-          <div class="mt-2 flex flex-wrap items-center gap-2">
-            {{#each suspected}}
-              <span class="badge badge-warn" title="Suspected from the stack trace.">suspect: {{this}}</span>
-            {{/each}}
-            {{! One treatment (icon + label) for all three sibling actions. }}
+          <p class="mt-1.5 break-words font-mono text-xs text-ink-soft">{{summary}}</p>
+          {{#if suspected.length}}
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              {{#each suspected}}
+                <span class="badge badge-warn" title="Suspected from the stack trace.">suspect: {{this}}</span>
+              {{/each}}
+            </div>
+          {{/if}}
+          {{! Phone: the secondary actions go icon-only (tooltip + aria-label keep
+              them named) so a card's actions fit one or two rows, not five. }}
+          <div class="mt-2 flex flex-wrap items-center gap-1">
             <button class="btn btn-ghost btn-sm" data-crash-action="view">{{{icon 'file-search' 'size-3.5'}}} Open Viewer</button>
-            <button class="btn btn-ghost btn-sm" data-crash-action="copy">{{{icon 'clipboard-copy' 'size-3.5'}}} Copy Stack Trace</button>
-            <button class="btn btn-ghost btn-sm" data-crash-action="download">{{{icon 'download' 'size-3.5'}}} Download</button>
-            <button class="btn btn-ghost btn-sm" data-crash-action="insights" data-tip="Automated analysis by mclo.gs: known problems with suggested fixes. Publishes the report as a public paste first.">{{{icon 'sparkles' 'size-3.5'}}} Analyze</button>
+            <button class="btn btn-ghost btn-sm" data-crash-action="copy" data-tip="Copy the stack trace." aria-label="Copy stack trace">{{{icon 'clipboard-copy' 'size-3.5'}}} <span class="hidden md:inline">Copy Stack Trace</span></button>
+            <button class="btn btn-ghost btn-sm" data-crash-action="download" data-tip="Download this report." aria-label="Download">{{{icon 'download' 'size-3.5'}}} <span class="hidden md:inline">Download</span></button>
+            <button class="btn btn-ghost btn-sm" data-crash-action="insights" aria-label="Analyze" data-tip="Automated analysis by mclo.gs: known problems with suggested fixes. Publishes the report as a public paste first.">{{{icon 'sparkles' 'size-3.5'}}} <span class="hidden md:inline">Analyze</span></button>
             {{#if mclogsUrl}}
-              <a class="btn btn-ghost btn-sm" data-role="mclogs-link" href="{{mclogsUrl}}" target="_blank" rel="noopener">{{{icon 'external-link' 'size-3.5'}}} mclo.gs Paste</a>
+              <a class="btn btn-ghost btn-sm" data-role="mclogs-link" href="{{mclogsUrl}}" target="_blank" rel="noopener" aria-label="mclo.gs Paste" data-tip="Open the public mclo.gs paste.">{{{icon 'external-link' 'size-3.5'}}} <span class="hidden md:inline">mclo.gs Paste</span></a>
             {{else}}
-              <button class="btn btn-ghost btn-sm" data-crash-action="share" data-tip="Publish this report as a public mclo.gs paste, a link anyone can open (mod authors usually ask for one).">{{{icon 'share-2' 'size-3.5'}}} Share to mclo.gs</button>
+              <button class="btn btn-ghost btn-sm" data-crash-action="share" aria-label="Share to mclo.gs" data-tip="Publish this report as a public mclo.gs paste, a link anyone can open (mod authors usually ask for one).">{{{icon 'share-2' 'size-3.5'}}} <span class="hidden md:inline">Share to mclo.gs</span></button>
+            {{/if}}
+            {{#if @root.perms.files}}
+              <button class="btn btn-ghost btn-sm ml-auto text-danger" data-crash-action="delete" data-tip="Delete this crash report file and clear it from the list.">{{{icon 'trash-2' 'size-3.5'}}} Clear</button>
             {{/if}}
           </div>
         </div>
@@ -50,10 +68,12 @@
   <ol class="divide-y divide-line" id="hist-events">
     {{#each events}}
       <li class="p-3" data-event-row data-type="{{type}}" data-actor="{{actor}}">
-        <div class="flex flex-wrap items-center gap-2 text-sm">
+        {{! The summary keeps a readable minimum width, so on a phone the
+            who/when line drops below it instead of squeezing it to one word a line. }}
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
           <span class="badge">{{type}}</span>
-          <span class="min-w-0 flex-1">{{summary}}</span>
-          <span class="text-xs text-ink-faint">{{actor}} · <span data-ts="{{ts}}">{{ts}}</span></span>
+          <span class="min-w-[12rem] flex-1 break-words">{{summary}}</span>
+          <span class="whitespace-nowrap text-xs text-ink-faint">{{actor}} · <span data-ts="{{ts}}">{{ts}}</span></span>
         </div>
         {{#if diff}}
           {{! break-all: unbroken values (paths, JVM flag strings) must wrap, not push past the card. }}

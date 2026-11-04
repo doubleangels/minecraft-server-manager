@@ -1,13 +1,13 @@
 <div data-backups-server="{{server.id}}" class="contents">
 <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-  <p class="text-sm text-ink-faint">
+  <p class="text-sm text-ink-faint sm:flex-1">
     Keeps the newest {{retention.keepScheduled}} scheduled, {{retention.keepManual}} manual, {{retention.keepPreUpdate}} pre-update
     and {{retention.keepPreRestore}} safety backups, and trims older ones after each new backup.{{#if retention.maxAgeDays}} Backups older than {{retention.maxAgeDays}} days are removed too.{{/if}}{{#if retention.maxTotalGb}} The total is capped at {{retention.maxTotalGb}} GB, oldest first.{{/if}}
     {{#if retentionOwnAll}}All of these limits are set for this server.{{else if retentionOverride}}Some of these limits are set for this server; the rest are panel-wide.{{else}}This server uses the panel-wide limits.{{/if}}
   </p>
   <div class="sm:ml-auto flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
     <label class="flex items-center gap-2 text-xs text-ink-faint" data-tip="After the backup is saved, remove chunks no player has spent 30+ seconds in to shrink the world. Only runs while the server is stopped.">
-      <input type="checkbox" class="msm-check" id="bk-shrink"> Also Shrink the World Afterwards.
+      <input type="checkbox" class="msm-check" id="bk-shrink"> Also Shrink the World Afterwards
     </label>
     <button class="btn btn-primary btn-sm{{#unless perms.backups}} hidden{{/unless}}" id="bk-now">{{{icon 'save' 'size-3.5'}}} Back Up Now</button>
   </div>
@@ -29,6 +29,10 @@
 </details>
 {{/if}}
 {{#if backups.length}}
+<div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-faint">
+  <span><span class="font-semibold text-ink-soft tabular-nums">{{backupStats.count}}</span> {{#if (eq backupStats.count 1)}}backup{{else}}backups{{/if}}, <span class="font-semibold text-ink-soft tabular-nums">{{bytes backupStats.bytes}}</span> in total.</span>
+  <span class="sm:ml-auto" data-tip="Logs, map renders (BlueMap and dynmap tiles) and rebuildable caches are left out, and archives use maximum compression. A restore regenerates them.">{{{icon 'info' 'size-3.5'}}} Logs, map renders and caches are left out to keep archives small.</span>
+</div>
 <div class="card overflow-x-auto">
   <table class="table-base table-stack" id="bk-table">
     <thead><tr><th>Archive</th><th>Reason</th><th class="text-right">Size</th><th class="text-right">Created</th><th class="text-right">Actions</th></tr></thead>
@@ -38,13 +42,14 @@
           {{! w-full + max-w-0 (sm+ only) so long archive names truncate instead of pushing
               the Actions column into horizontal scroll. }}
           <td data-th="Archive" class="sm:w-full sm:max-w-0"><span class="block truncate font-mono text-xs" title="{{file}}">{{file}}</span></td>
-          <td data-th="Reason"><span class="badge {{#if (eq reason 'pre-update')}}badge-warn{{/if}}">{{reason}}</span></td>
+          <td data-th="Reason"><span class="badge {{#if (eq reason 'pre-update')}}badge-warn{{else if (eq reason 'pre-restore')}}badge-info{{/if}}">{{reason}}</span></td>
           <td data-th="Size" class="whitespace-nowrap text-right text-ink-faint">{{bytes size}}</td>
           <td data-th="Created" class="whitespace-nowrap text-right text-ink-faint" data-ts="{{ts}}">{{ts}}</td>
           <td data-th="" class="text-right"><div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap">
             {{! Restore stops the server and replaces its data - it must not scan
                 identically to the harmless Download beside it. }}
             <button class="btn btn-ghost btn-sm text-warn" data-backup-restore data-tip="Stops the server and restores this archive. Start it again when the restore finishes.">{{{icon 'undo-2' 'size-3.5'}}} Restore</button>
+            <button class="btn btn-ghost btn-sm" data-backup-verify data-tip="Check that the archive is readable and undamaged." aria-label="Verify {{file}}">{{{icon 'shield-check' 'size-3.5'}}}</button>
             <a class="btn btn-ghost btn-sm" href="/api/backups/{{id}}/download" data-tip="Download archive" aria-label="Download {{file}}">{{{icon 'download' 'size-3.5'}}}</a>
             <button class="btn btn-ghost btn-sm" data-backup-rename data-tip="Rename archive" aria-label="Rename {{file}}">{{{icon 'square-pen' 'size-3.5'}}}</button>
             <button class="btn btn-ghost btn-sm text-danger" data-backup-delete data-tip="Delete ({{bytes size}} freed)." aria-label="Delete {{file}}">{{{icon 'trash-2' 'size-3.5'}}}</button>

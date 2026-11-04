@@ -24,9 +24,12 @@ function init(serverId) {
         else if (action === 'download') withBusy(btn, () => download(serverId, crash));
         else if (action === 'share') withBusy(btn, () => shareToMclogs(serverId, crash, card));
         else if (action === 'insights') withBusy(btn, () => showInsights(serverId, crash, card));
+        else if (action === 'delete') withBusy(btn, () => clearCrash(serverId, crash, card));
       });
     });
   }
+  const clearAllBtn = document.querySelector('[data-crash-clear-all]');
+  clearAllBtn?.addEventListener('click', () => withBusy(clearAllBtn, () => clearAllCrashes(serverId)));
 
   // ---- Event list filters ------------------------------------------------
   const search = document.getElementById('hist-search');
@@ -105,6 +108,62 @@ function init(serverId) {
   });
 }
 
+/** Drop a card after its report is cleared; hide the whole section once empty. */
+function removeCrashCard(card) {
+  const section = card.closest('.card');
+  card.remove();
+  const left = section ? section.querySelectorAll('[data-crash-card]').length : 0;
+  const count = section?.querySelector('[data-crash-count]');
+  if (count) count.textContent = String(left);
+  if (section && !left) section.remove();
+}
+
+async function clearCrash(serverId, crash, card) {
+  const ok = await confirmDialog({
+    title: 'Clear this crash report?',
+    message: `${crash.filename} will be deleted from the server folder.`,
+    confirmLabel: 'Clear',
+    danger: true,
+  });
+  if (!ok) return;
+  try {
+    const res = await fetch(`/api/servers/${serverId}/crashes/${crash.id}`, { method: 'DELETE' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || friendlyError(res, { action: 'clear that crash report' }));
+    removeCrashCard(card);
+    toast('Crash report cleared.', { kind: 'success' });
+  } catch (err) {
+    toast(err.message, { kind: 'error' });
+  }
+}
+
+async function clearAllCrashes(serverId) {
+  const cards = [...document.querySelectorAll('[data-crash-card]')];
+  const ok = await confirmDialog({
+    title: 'Clear every crash report?',
+    message: `All ${cards.length} crash report files for this server will be deleted.`,
+    confirmLabel: 'Clear All',
+    danger: true,
+  });
+  if (!ok) return;
+  try {
+    const res = await fetch(`/api/servers/${serverId}/crashes?all=1`, { method: 'DELETE' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || friendlyError(res, { action: 'clear the crash reports' }));
+    if (data.failed) {
+      toast(`${data.deleted} cleared. ${data.failed} could not be deleted, check the data folder permissions.`, {
+        kind: 'warn',
+      });
+      setTimeout(() => location.reload(), 1200);
+      return;
+    }
+    for (const card of cards) removeCrashCard(card);
+    toast(`${data.deleted} crash ${data.deleted === 1 ? 'report' : 'reports'} cleared.`, { kind: 'success' });
+  } catch (err) {
+    toast(err.message, { kind: 'error' });
+  }
+}
+
 async function fetchText(serverId, crash) {
   const res = await fetch(`/api/servers/${serverId}/crashes/${crash.id}/text`);
   if (!res.ok) throw new Error(friendlyError(res, { action: 'load that crash report' }));
@@ -164,7 +223,15 @@ function markShared(card, url) {
     a.target = '_blank';
     a.rel = 'noopener';
     a.href = url;
-    a.textContent = 'mclo.gs paste';
+    a.dataset.role = 'mclogs-link';
+    a.setAttribute('aria-label', 'mclo.gs Paste');
+    a.dataset.tip = 'Open the public mclo.gs paste.';
+    // Keep the share button's icon, swap only the label.
+    const icon = shareBtn.querySelector('svg');
+    const label = document.createElement('span');
+    label.className = 'hidden md:inline';
+    label.textContent = 'mclo.gs Paste';
+    a.append(...(icon ? [icon, ' '] : []), label);
     shareBtn.replaceWith(a);
   }
 }

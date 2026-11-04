@@ -154,7 +154,7 @@ function listTokens() {
 function revokeToken(id, { actor }) {
   const res = db.run("UPDATE api_tokens SET revoked_at = datetime('now') WHERE id = ? AND revoked_at IS NULL", id);
   if (Number(res.changes) === 0) {
-    throw Object.assign(new Error('API token not found'), { status: 404 });
+    throw Object.assign(new Error('API token not found.'), { status: 404 });
   }
   recordEvent({ actor, type: 'api-token-revoked', summary: 'Public API token revoked.', details: { tokenId: id } });
   logger.info('Revoked a read-only API token.', { tokenId: id, actor });

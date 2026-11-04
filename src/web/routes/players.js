@@ -102,7 +102,7 @@ const teleportSchema = z.discriminatedUnion('mode', [
 async function loadContext(req) {
   const server = servers.getServer(req.params.id);
   if (!server) {
-    const err = new Error('Server not found');
+    const err = new Error('Server not found.');
     err.status = 404;
     throw err;
   }

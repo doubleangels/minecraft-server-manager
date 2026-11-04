@@ -2,12 +2,12 @@
 
 {{#if (or events.length (or filters.q (or filters.server filters.type)))}}
 <form class="mb-4 flex flex-wrap items-center gap-2" method="get" action="/activity" id="activity-filters">
-  <input class="input max-w-xs" name="q" value="{{filters.q}}" placeholder="Search events…" autocomplete="off">
-  <select class="input w-auto" name="server" data-label="Filter by server">
+  <input class="input w-full sm:w-auto sm:max-w-xs sm:flex-1" type="search" aria-label="Search events" name="q" value="{{filters.q}}" placeholder="Search events…" autocomplete="off">
+  <select class="input min-w-0 flex-1 sm:w-auto sm:flex-none" name="server" data-label="Filter by server">
     <option value="">All Servers</option>
     {{#each servers}}<option value="{{id}}" {{#if (eq id ../filters.server)}}selected{{/if}}>{{name}}</option>{{/each}}
   </select>
-  <select class="input w-auto" name="type" data-label="Filter by type">
+  <select class="input min-w-0 flex-1 sm:w-auto sm:flex-none" name="type" data-label="Filter by type">
     <option value="">All Types</option>
     {{#each types}}<option value="{{this}}" {{#if (eq this ../filters.type)}}selected{{/if}}>{{this}}</option>{{/each}}
   </select>
@@ -21,15 +21,19 @@
 <div class="card">
   <ol class="divide-y divide-line">
     {{#each events}}
-      <li class="flex flex-wrap items-center gap-2 p-3 text-sm">
+      {{! The summary keeps a readable minimum width; on a phone the server,
+          actor and time drop to their own line instead of squeezing it. }}
+      <li class="flex flex-wrap items-center gap-x-2 gap-y-1 p-3 text-sm">
         <span class="badge shrink-0">{{type}}</span>
-        <span class="min-w-0 flex-1">{{summary}}</span>
-        {{#if serverId}}
-          <a href="/servers/{{serverId}}" class="shrink-0 text-xs text-link hover:underline">{{server}}</a>
-        {{else}}
-          <span class="shrink-0 text-xs text-ink-faint">{{server}}</span>
-        {{/if}}
-        <span class="shrink-0 text-xs text-ink-faint">{{actor}} · <span data-ts="{{ts}}">{{ts}}</span></span>
+        <span class="min-w-[12rem] flex-1 break-words">{{summary}}</span>
+        <span class="flex shrink-0 flex-wrap items-center gap-x-2 text-xs">
+          {{#if serverId}}
+            <a href="/servers/{{serverId}}" class="text-link hover:underline">{{server}}</a>
+          {{else}}
+            <span class="text-ink-faint">{{server}}</span>
+          {{/if}}
+          <span class="whitespace-nowrap text-ink-faint">{{actor}} · <span data-ts="{{ts}}">{{ts}}</span></span>
+        </span>
         {{#if hasLog}}<button class="btn btn-ghost btn-sm shrink-0" data-event-excerpt data-event-id="{{id}}" data-event-type="{{type}}" data-tip="View the captured log.">{{{icon 'file-text' 'size-3.5'}}}</button>{{/if}}
       </li>
     {{else}}

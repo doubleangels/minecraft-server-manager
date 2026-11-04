@@ -223,7 +223,7 @@ router.post(
         // disk (defence in depth behind the sandbox CSP the serving route sets).
         const clean = sanitizeSvg(await fsp.readFile(req.file.path, 'utf8'));
         if (!/<svg[\s>]/i.test(clean)) {
-          throw Object.assign(new Error('That SVG could not be processed safely'), { status: 400 });
+          throw Object.assign(new Error('That SVG could not be processed safely.'), { status: 400 });
         }
         await fsp.writeFile(req.file.path, clean, 'utf8');
       } else {

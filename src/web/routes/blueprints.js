@@ -184,10 +184,15 @@ router.post(
       })
       .parse(req.body);
     requireFilesOn(req, input.serverId);
-    const { server, report, blueprint } = await blueprints.cloneServer(input.serverId, {
-      includeWorld: input.includeWorld,
-      actor: req.user.username,
-    });
+    const { server, report, blueprint } = await tasks.track(
+      'Cloning a server…',
+      { serverId: input.serverId, actor: req.user.username },
+      () =>
+        blueprints.cloneServer(input.serverId, {
+          includeWorld: input.includeWorld,
+          actor: req.user.username,
+        })
+    );
     res.status(201).json({
       ok: true,
       server: publicServer(server),

@@ -17,6 +17,24 @@ const httpError = require('../utils/httpError');
 
 const inFlightOps = new Map(); // serverId -> { op, promise }
 
+// How each op reads in the "busy" message people see.
+/** @type {Record<string, string>} */
+const OP_LABELS = {
+  recreate: 'rebuild',
+  kill: 'force stop',
+  delete: 'server deletion',
+  'delete-world': 'world deletion',
+  extract: 'world save to the library',
+  install: 'world install',
+  copy: 'world copy',
+  duplicate: 'world duplicate',
+  rename: 'world rename',
+  activate: 'world switch',
+  reset: 'world reset',
+  download: 'world download',
+  shrink: 'world shrink',
+};
+
 /**
  * @param {string} op        label used in the 409 conflict message
  * @param {Function} fn      the function to guard
@@ -34,7 +52,10 @@ function guardOp(op, fn, getId = (id) => id) {
       if (existing.op === op && op === 'start') return existing.promise; // piggyback on the same start
       // code BUSY: callers that wait and retry (scheduler, crash restarts) test the
       // code, never this wording.
-      const err = httpError(409, `Cannot ${op}: a ${existing.op} operation is already in progress for this server`);
+      const err = httpError(
+        409,
+        `This server is busy with a ${OP_LABELS[existing.op] || existing.op}. Try again when it finishes.`
+      );
       err.code = 'BUSY';
       throw err;
     }

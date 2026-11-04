@@ -47,11 +47,7 @@ const SERVER_TYPES = require('../../config/field-catalog/general')
 /** Load a server row or throw a JSON-friendly 404. */
 function requireServer(id) {
   const server = servers.getServer(id);
-  if (!server) {
-    const err = new Error('Server not found');
-    err.status = 404;
-    throw err;
-  }
+  if (!server) throw httpError(404, 'Server not found.');
   return server;
 }
 
@@ -114,7 +110,10 @@ router.post(
   asyncHandler(async (req, res, next) => {
     const input = createSchema.parse(req.body);
     requireAdminForOverrides(req, input);
-    const server = await servers.createServer(input, { actor: req.user.username, start: input.start !== false });
+    const actor = req.user.username;
+    const server = await tasks.track(`Creating ${input.name}…`, { actor }, () =>
+      servers.createServer(input, { actor, start: input.start !== false })
+    );
     res.status(201).json({ ok: true, server: publicServer(server) });
   })
 );
@@ -168,7 +167,7 @@ for (const action of Object.keys(POWER_TITLES)) {
     requireCap('power'),
     asyncHandler(async (req, res, next) => {
       const actor = req.user.username;
-      const name = servers.getServer(req.params.id).display_name;
+      const name = requireServer(req.params.id).display_name;
       await tasks.track(`${POWER_TITLES[action]} ${name}…`, { serverId: req.params.id, actor }, () =>
         servers[`${action}Server`](req.params.id, { actor })
       );
@@ -324,15 +323,12 @@ router.delete(
     // Deletion is opt-in: files + backups are KEPT by default, and only
     // removed when the caller explicitly asks via deleteFiles/deleteBackups.
     const actor = req.user.username;
-    const { freedBytes } = await tasks.track(
-      `Deleting ${servers.getServer(req.params.id).display_name}…`,
-      { actor },
-      () =>
-        servers.deleteServer(req.params.id, {
-          actor,
-          keepWorld: req.query.deleteFiles !== 'true' && req.query.keepFiles !== 'false',
-          keepBackups: req.query.deleteBackups !== 'true' && req.query.keepBackups !== 'false',
-        })
+    const { freedBytes } = await tasks.track(`Deleting ${requireServer(req.params.id).display_name}…`, { actor }, () =>
+      servers.deleteServer(req.params.id, {
+        actor,
+        keepWorld: req.query.deleteFiles !== 'true' && req.query.keepFiles !== 'false',
+        keepBackups: req.query.deleteBackups !== 'true' && req.query.keepBackups !== 'false',
+      })
     );
     res.json({ ok: true, freedBytes });
   })
@@ -854,8 +850,17 @@ router.post(
       })
       .parse(req.body);
     try {
-      const resolved = await packs.resolvePack(platform, ref, { versionId });
-      await packs.applyPack(req.params.id, resolved, { actor: req.user.username, force });
+      const resolved = await tasks.track(
+        'Applying a modpack…',
+        { serverId: req.params.id, actor: req.user.username },
+        async (t) => {
+          t.step('Resolving the pack…');
+          const r = await packs.resolvePack(platform, ref, { versionId });
+          t.step('Pinning the pack version…');
+          await packs.applyPack(req.params.id, r, { actor: req.user.username, force });
+          return r;
+        }
+      );
       res.json({ ok: true, pack: resolved, note: 'Applied. Rebuild or restart the server to install.' });
     } catch (err) {
       if (err.requiresForce) {
@@ -1066,11 +1071,11 @@ router.get(
       const server = requireServer(query.serverId);
       if (!permissions.can(req.user, server.id, 'view')) throw httpError(404, 'Server not found.');
       const pin = packs.getPack(server.id);
-      if (!pin) throw Object.assign(new Error('This server has no managed modpack'), { status: 404 });
+      if (!pin) throw Object.assign(new Error('This server has no managed modpack.'), { status: 404 });
       if (pin.platform === 'ftb')
-        throw Object.assign(new Error('FTB pack details are not supported yet'), { status: 400 });
+        throw Object.assign(new Error('FTB pack details are not supported yet.'), { status: 400 });
       if (pin.platform === 'gtnh')
-        throw Object.assign(new Error('GTNH pack details live on the GTNH site'), { status: 400 });
+        throw Object.assign(new Error('GTNH pack details live on the GTNH site.'), { status: 400 });
       platform = pin.platform;
       ref = pin.project_ref;
       installed = {
@@ -1122,7 +1127,7 @@ router.get(
   asyncHandler(async (req, res, next) => {
     requireServer(req.params.id);
     const pin = packs.getPack(req.params.id);
-    if (!pin) throw Object.assign(new Error('This server has no managed modpack'), { status: 404 });
+    if (!pin) throw Object.assign(new Error('This server has no managed modpack.'), { status: 404 });
     const all = await require('../../services/mods').listContent(req.params.id);
     const rows = all
       .filter((m) => m.source === 'pack')
@@ -1253,13 +1258,13 @@ router.post(
     }
     if (subjectType === 'content') {
       if (!serverId || !contentId) {
-        throw Object.assign(new Error('serverId and contentId are required for content'), { status: 400 });
+        throw Object.assign(new Error('serverId and contentId are required for content.'), { status: 400 });
       }
       const server = requireServer(serverId);
       const out = mods.setIgnoredUpdate(server.id, { contentId }, { ignore, actor });
       return res.json({ ok: true, ...out });
     }
-    if (!serverId) throw Object.assign(new Error('serverId is required'), { status: 400 });
+    if (!serverId) throw Object.assign(new Error('serverId is required.'), { status: 400 });
     const server = requireServer(serverId);
     const out = checker.setUpdateIgnored(subjectType, server.id, { ignore, actor });
     res.json({ ok: true, ...out });
@@ -1524,7 +1529,10 @@ const storageCleanup = require('./storageCleanup');
 router.post(
   '/storage/scan',
   asyncHandler(async (req, res, next) => {
-    res.json({ ok: true, ...(await indexer.scan()) });
+    res.json({
+      ok: true,
+      ...(await tasks.track('Rescanning storage…', { actor: req.user.username }, () => indexer.scan())),
+    });
   })
 );
 
@@ -1556,11 +1564,14 @@ router.post(
         dryRun: z.coerce.boolean().optional(),
       })
       .parse(req.body);
-    const result = await storageCleanup.runCleanup(action, {
-      olderThanDays,
-      dryRun: Boolean(dryRun),
-      actor: req.user.username,
-    });
+    const run = () =>
+      storageCleanup.runCleanup(action, {
+        olderThanDays,
+        dryRun: Boolean(dryRun),
+        actor: req.user.username,
+      });
+    // A preview is a quick read; only a real cleanup shows in the task tray.
+    const result = dryRun ? await run() : await tasks.track('Cleaning up storage…', { actor: req.user.username }, run);
     res.json({ ok: true, dryRun: Boolean(dryRun), ...result });
   })
 );
@@ -1576,8 +1587,8 @@ router.post(
     const note = String(req.body?.note || '');
     const shrinkAfter = Boolean(req.body?.shrink);
     const taskId = tasks.run(`Backing up ${server.display_name}…`, { serverId: server.id, actor }, async (t) => {
-      t.step('Snapshotting server directory (save-off → save-all → zip → save-on)…');
-      const backup = await backups.createBackup(server.id, { reason: 'manual', actor, note, shrinkAfter });
+      t.step('Preparing the backup…');
+      const backup = await backups.createBackup(server.id, { reason: 'manual', actor, note, shrinkAfter, task: t });
       return { id: backup.id, filename: backup.filename, size: backup.size_bytes };
     });
     res.status(202).json({ ok: true, taskId });
@@ -1597,8 +1608,8 @@ router.post(
       `Restoring backup on ${server.display_name}…`,
       { serverId: server.id, actor },
       async (t) => {
-        t.step('Stopping server & taking a safety backup…');
-        await backups.restoreBackup(server.id, backupId, { actor });
+        t.step('Checking the backup…');
+        await backups.restoreBackup(server.id, backupId, { actor, task: t });
         return { ok: true };
       }
     );
@@ -1614,9 +1625,9 @@ router.get(
   requireCap('backups', { resolve: backupServerId }),
   asyncHandler((req, res, next) => {
     const backup = db.get('SELECT * FROM backups WHERE id = ?', req.params.backupId);
-    if (!backup) throw Object.assign(new Error('Backup not found'), { status: 404 });
+    if (!backup) throw Object.assign(new Error('Backup not found.'), { status: 404 });
     const abs = dataPath(backup.rel_path);
-    if (!fs.existsSync(abs)) throw Object.assign(new Error('Backup archive is missing on disk'), { status: 404 });
+    if (!fs.existsSync(abs)) throw Object.assign(new Error('Backup archive is missing on disk.'), { status: 404 });
     res.download(abs, backup.filename);
   })
 );
@@ -2012,7 +2023,13 @@ router.post(
   '/servers/:id/map/enable',
   requireCap('settings'),
   asyncHandler(async (req, res, next) => {
-    res.json({ ok: true, ...(await mapService.enableMap(req.params.id, { actor: req.user.username })) });
+    const actor = req.user.username;
+    res.json({
+      ok: true,
+      ...(await tasks.track('Enabling the live map…', { serverId: req.params.id, actor }, () =>
+        mapService.enableMap(req.params.id, { actor })
+      )),
+    });
   })
 );
 
@@ -2129,8 +2146,11 @@ router.post(
     const server = requireServer(req.params.id);
     const actor = req.user.username;
 
-    const result = await mods.applyOverlayUpdate(server.id, { file, contentId }, { actor });
-    const restarted = await restartAfterModUpdate(server.id, actor);
+    const { result, restarted } = await tasks.track('Updating a mod…', { serverId: server.id, actor }, async (t) => {
+      const r = await mods.applyOverlayUpdate(server.id, { file, contentId }, { actor });
+      t.step('Restarting the server…');
+      return { result: r, restarted: await restartAfterModUpdate(server.id, actor) };
+    });
     res.json({
       ok: true,
       restarted,
@@ -2162,8 +2182,11 @@ router.post(
     const server = requireServer(req.params.id);
     const actor = req.user.username;
 
-    const result = await mods.revertOverlayUpdate(server.id, { file, contentId }, { actor });
-    const restarted = await restartAfterModUpdate(server.id, actor);
+    const { result, restarted } = await tasks.track('Reverting a mod…', { serverId: server.id, actor }, async (t) => {
+      const r = await mods.revertOverlayUpdate(server.id, { file, contentId }, { actor });
+      t.step('Restarting the server…');
+      return { result: r, restarted: await restartAfterModUpdate(server.id, actor) };
+    });
     res.json({
       ok: true,
       restarted,
@@ -2358,7 +2381,7 @@ router.post(
   modUpload.single('file'),
   asyncHandler(async (req, res, next) => {
     requireServer(req.params.id);
-    if (!req.file) throw Object.assign(new Error('No file uploaded'), { status: 400 });
+    if (!req.file) throw Object.assign(new Error('No file uploaded.'), { status: 400 });
     const excludeFilename = (req.body && req.body.excludeFilename) || null;
     const excludeToken = excludeFilename ? mods.pendingExcludeToken(req.params.id, excludeFilename) : null;
     try {
@@ -2409,7 +2432,7 @@ router.post(
   zipImportUpload.single('file'),
   asyncHandler(async (req, res, next) => {
     requireServer(req.params.id);
-    if (!req.file) throw Object.assign(new Error('No file uploaded'), { status: 400 });
+    if (!req.file) throw Object.assign(new Error('No file uploaded.'), { status: 400 });
     let preview;
     try {
       preview = await contentZip.previewForServer(req.params.id, req.file.path);
@@ -2493,10 +2516,10 @@ router.get(
   asyncHandler(async (req, res, next) => {
     const event = eventsService.getEvent(Number(req.params.id));
     if (!event || (event.server_id && !permissions.can(req.user, event.server_id, 'view'))) {
-      throw Object.assign(new Error('Event not found'), { status: 404 });
+      throw Object.assign(new Error('Event not found.'), { status: 404 });
     }
     const text = await eventsService.readExcerpt(event);
-    if (text == null) throw Object.assign(new Error('No captured log for this event'), { status: 404 });
+    if (text == null) throw Object.assign(new Error('No captured log for this event.'), { status: 404 });
     res.type('text/plain').send(text);
   })
 );
@@ -2549,7 +2572,7 @@ router.get(
     requireServer(req.params.id);
     const file = archivedFileSchema.parse(req.params.file);
     const abs = dataPath('logs', req.params.id, 'events', file);
-    if (!fs.existsSync(abs)) throw Object.assign(new Error('Archived log not found'), { status: 404 });
+    if (!fs.existsSync(abs)) throw Object.assign(new Error('Archived log not found.'), { status: 404 });
     res.download(abs, file);
   })
 );
@@ -2590,7 +2613,7 @@ router.get(
     requireServer(req.params.id);
     const file = gameLogFileSchema.parse(req.params.file);
     const abs = dataPath('servers', req.params.id, 'logs', file);
-    if (!fs.existsSync(abs)) throw Object.assign(new Error('Log file not found'), { status: 404 });
+    if (!fs.existsSync(abs)) throw Object.assign(new Error('Log file not found.'), { status: 404 });
     res.download(abs, file);
   })
 );
@@ -2605,7 +2628,7 @@ router.get(
     const server = requireServer(req.params.id);
     const dir = dataPath('servers', req.params.id, 'logs');
     const list = await listGameLogs(req.params.id);
-    if (!list.length) throw Object.assign(new Error('This server has no log files yet'), { status: 404 });
+    if (!list.length) throw Object.assign(new Error('This server has no log files yet.'), { status: 404 });
     const total = list.reduce((n, f) => n + f.size, 0);
     if (total > LOG_BUNDLE_MAX_BYTES) {
       throw Object.assign(new Error('The log folder is too large to bundle. Download individual files instead.'), {
@@ -2651,7 +2674,7 @@ router.post('/servers/:id/icon', requireCap('settings'), iconUpload.single('icon
     if (req.file.mimetype === 'image/svg+xml') {
       const clean = sanitizeSvg(await fsp.readFile(req.file.path, 'utf8'));
       if (!/<svg[\s>]/i.test(clean)) {
-        throw Object.assign(new Error('That SVG could not be processed safely'), { status: 400 });
+        throw Object.assign(new Error('That SVG could not be processed safely.'), { status: 400 });
       }
       await fsp.writeFile(req.file.path, clean, 'utf8');
     } else {
@@ -2719,7 +2742,7 @@ router.get(
       .regex(/^srv_[\w-]+\.(png|svg|jpg|webp)$/, 'Invalid icon file.')
       .parse(req.params.file);
     const abs = dataPath('library', 'icons', 'custom', file);
-    if (!fs.existsSync(abs)) throw Object.assign(new Error('Icon not found'), { status: 404 });
+    if (!fs.existsSync(abs)) throw Object.assign(new Error('Icon not found.'), { status: 404 });
     // Custom icons may be user-uploaded SVGs (not sanitized). Serve them under a
     // locked-down, sandboxed CSP so a <script> embedded in the SVG can't execute
     // if the file is opened directly, and block content-type sniffing.
@@ -2740,7 +2763,7 @@ router.get(
       .regex(/^usr_[\w-]+\.(png|svg|jpg|webp)$/, 'Invalid avatar file.')
       .parse(req.params.file);
     const abs = dataPath('library', 'icons', 'users', file);
-    if (!fs.existsSync(abs)) throw Object.assign(new Error('Avatar not found'), { status: 404 });
+    if (!fs.existsSync(abs)) throw Object.assign(new Error('Avatar not found.'), { status: 404 });
     res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.sendFile(abs);
@@ -2799,7 +2822,7 @@ router.post(
         all: boolish.optional(),
       })
       .parse(req.body || {});
-    if (!all && !username) throw Object.assign(new Error('Pass a username, or all:true'), { status: 400 });
+    if (!all && !username) throw Object.assign(new Error('Pass a username, or all:true.'), { status: 400 });
     const removed = authMw.clearLockouts({ username, ip, all: Boolean(all) });
     eventsService.recordEvent({
       actor: req.user.username,
@@ -3128,7 +3151,7 @@ router.post(
   '/mods/zip-preview',
   zipImportUpload.single('file'),
   asyncHandler(async (req, res, next) => {
-    if (!req.file) throw Object.assign(new Error('No file uploaded'), { status: 400 });
+    if (!req.file) throw Object.assign(new Error('No file uploaded.'), { status: 400 });
     let preview;
     try {
       preview = await contentZip.previewStandalone(req.file.path);

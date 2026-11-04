@@ -9,6 +9,7 @@ const fs = require('node:fs');
 const fsp = fs.promises;
 const { nanoid } = require('nanoid');
 const db = require('../db');
+const httpError = require('../utils/httpError');
 const { dataPath } = require('../storage/pathGuard');
 const { recordEvent } = require('../events');
 const logger = require('../logger')('crashes');
@@ -335,9 +336,7 @@ function getCrash(crashId) {
 async function getCrashText(serverId, filename) {
   const row = db.get('SELECT id FROM crash_reports WHERE server_id = ? AND filename = ?', serverId, filename);
   if (!row) {
-    const err = new Error('Crash report not found');
-    err.status = 404;
-    throw err;
+    throw httpError(404, 'Crash report not found.');
   }
   // Reports are 100KB+ - read async so a view never blocks the event loop.
   return fsp.readFile(absPathFor(serverId, filename), 'utf8');
@@ -355,9 +354,7 @@ function markViewed(crashId) {
 async function shareCrash(crashId, { actor = 'system' } = {}) {
   const row = getCrash(crashId);
   if (!row) {
-    const err = new Error('Crash report not found');
-    err.status = 404;
-    throw err;
+    throw httpError(404, 'Crash report not found.');
   }
   if (row.mclogs_url) return { id: row.mclogs_id, url: row.mclogs_url, alreadyShared: true };
   const text = await fsp.readFile(absPathFor(row.server_id, row.filename), 'utf8');
@@ -382,9 +379,7 @@ async function shareCrash(crashId, { actor = 'system' } = {}) {
 async function crashInsights(crashId, { actor = 'system' } = {}) {
   const row = getCrash(crashId);
   if (!row) {
-    const err = new Error('Crash report not found');
-    err.status = 404;
-    throw err;
+    throw httpError(404, 'Crash report not found.');
   }
   const share = row.mclogs_id ? { id: row.mclogs_id, url: row.mclogs_url } : await shareCrash(crashId, { actor });
   const insights = await require('../integrations/mclogs').getInsights(share.id);
@@ -392,26 +387,30 @@ async function crashInsights(crashId, { actor = 'system' } = {}) {
 }
 
 /** Delete a report: unlink the file + remove the row + record the event. */
-function deleteCrash(crashId, { actor = 'system' } = {}) {
+function deleteCrash(crashId, { actor = 'system', quiet = false } = {}) {
   const row = getCrash(crashId);
   if (!row) {
-    const err = new Error('Crash report not found');
-    err.status = 404;
-    throw err;
+    throw httpError(404, 'Crash report not found.');
   }
   try {
     fs.unlinkSync(absPathFor(row.server_id, row.filename));
-  } catch {
-    /* file already gone - still drop the row */
+  } catch (err) {
+    // Gone already is fine. Anything else (a file the server container owns
+    // and the panel may not delete) must keep the row: dropping it while the
+    // file stays would make the next scan re-index it as a brand-new crash.
+    if (!err || err.code !== 'ENOENT') {
+      throw httpError(409, 'That crash report file could not be deleted. Check the data folder permissions.');
+    }
   }
   db.run('DELETE FROM crash_reports WHERE id = ?', crashId);
-  recordEvent({
-    serverId: row.server_id,
-    type: 'crash-report-deleted',
-    actor,
-    summary: `Deleted crash report: ${row.filename}.`,
-    details: { crashId, filename: row.filename, freedBytes: row.size_bytes },
-  });
+  if (!quiet)
+    recordEvent({
+      serverId: row.server_id,
+      type: 'crash-report-deleted',
+      actor,
+      summary: `Deleted crash report: ${row.filename}.`,
+      details: { crashId, filename: row.filename, freedBytes: row.size_bytes },
+    });
   return { freedBytes: row.size_bytes };
 }
 
@@ -420,13 +419,49 @@ function deleteOlderThan(serverId, days, { actor = 'system' } = {}) {
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
   const rows = db.all('SELECT id FROM crash_reports WHERE server_id = ? AND file_mtime < ?', serverId, cutoff);
   let freedBytes = 0;
+  let deleted = 0;
   for (const { id } of rows) {
-    freedBytes += deleteCrash(id, { actor }).freedBytes;
+    try {
+      freedBytes += deleteCrash(id, { actor }).freedBytes;
+      deleted += 1;
+    } catch {
+      /* a file the panel may not delete keeps its row; keep clearing the rest */
+    }
   }
-  return { deleted: rows.length, freedBytes };
+  return { deleted, freedBytes };
+}
+
+/** Clear every report for a server (the "Clear All" button). */
+function deleteAll(serverId, { actor = 'system' } = {}) {
+  const rows = db.all('SELECT id FROM crash_reports WHERE server_id = ?', serverId);
+  let freedBytes = 0;
+  let deleted = 0;
+  let failed = 0;
+  for (const { id } of rows) {
+    try {
+      freedBytes += deleteCrash(id, { actor, quiet: true }).freedBytes;
+      deleted += 1;
+    } catch {
+      failed += 1; // keep clearing the rest, reported below
+    }
+  }
+  if (failed) logger.warn('Some crash report files could not be deleted.', { serverId, failed });
+  if (deleted) {
+    // One history line for the whole clear instead of one per report.
+    recordEvent({
+      serverId,
+      type: 'crash-report-deleted',
+      actor,
+      summary: `Cleared ${deleted} crash ${deleted === 1 ? 'report' : 'reports'}.`,
+      details: { deleted, failed, freedBytes },
+    });
+    logger.info('Cleared crash reports.', { serverId, deleted, failed });
+  }
+  return { deleted, failed, freedBytes };
 }
 
 module.exports = {
+  deleteAll,
   scanServer,
   scanAll,
   startCrashWatcher,
