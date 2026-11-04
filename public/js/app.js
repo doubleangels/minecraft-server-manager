@@ -15,6 +15,7 @@ import './lib/taskTray.js';
 import './lib/seg.js';
 import './lib/twoFactor.js';
 import './lib/avatar.js';
+import './lib/pwa.js';
 
 // Expose for inline handlers and future page scripts.
 window.CD = { toast, openModal, confirmDialog, setBusy, withBusy };
@@ -79,6 +80,10 @@ for (const el of document.querySelectorAll('[data-ts], [data-ts-ago]')) {
     document.querySelectorAll('[data-theme-icon]').forEach((el) => {
       el.classList.toggle('hidden', el.dataset.themeIcon !== theme);
     });
+    // The installed app's status bar follows the theme (see layouts/main.hbs).
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', theme === 'light' ? '#ffffff' : '#16191c');
   };
   btn?.addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
@@ -506,3 +511,44 @@ document.addEventListener('click', async (e) => {
   }
   setTimeout(tick, 8000);
 })();
+
+// ---- Server sections reopen on the sub-page you last used ----
+// Leaving Content from Worlds and coming back lands on Worlds, not Mods. Only
+// pages the section lists for this user are ever used (data-nav-tabs).
+(() => {
+  const links = document.querySelectorAll('[data-nav-group]');
+  if (!links.length) return;
+  const m = location.pathname.match(/^\/servers\/([^/]+)\/([^/]+)/);
+  const store = (k, v) => {
+    try {
+      if (v === undefined) return localStorage.getItem(k);
+      localStorage.setItem(k, v);
+    } catch {
+      return null;
+    }
+  };
+  for (const a of links) {
+    const tabs = (a.dataset.navTabs || '').split(',').filter(Boolean);
+    const key = `msm-subtab-${a.dataset.navGroup}`;
+    if (a.getAttribute('aria-current') === 'page' && m && tabs.includes(m[2])) store(key, m[2]);
+    else {
+      const last = store(key);
+      if (last && tabs.includes(last)) a.href = a.href.replace(/[^/]+$/, last);
+    }
+  }
+})();
+
+// ---- "/" jumps to the page's search box ----
+document.addEventListener('keydown', (e) => {
+  if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+  const t = e.target;
+  if (t && (t.isContentEditable || /^(input|textarea|select)$/i.test(t.tagName))) return;
+  if (document.querySelector('[role="dialog"]:not(.hidden), dialog[open]')) return;
+  const box = [...document.querySelectorAll('main input[type="search"], main input[placeholder^="Search"]')].find(
+    (el) => el.offsetParent !== null && !el.disabled
+  );
+  if (!box) return;
+  e.preventDefault();
+  box.focus();
+  box.select?.();
+});

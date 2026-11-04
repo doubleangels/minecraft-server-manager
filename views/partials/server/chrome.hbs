@@ -64,7 +64,7 @@
       button grid, which reads as unstructured noise instead of a tab bar. }}
   <nav class="flex flex-nowrap items-center gap-0.5 overflow-x-auto border-t border-line px-2">
     {{#each nav.groups}}
-      <a href="{{href}}"
+      <a href="{{href}}" data-nav-group="{{key}}" data-nav-tabs="{{tabs}}"{{#if active}} aria-current="page"{{/if}}
          class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition
            {{#if active}}border-grass-500 text-ink{{else}}border-transparent text-ink-faint hover:text-ink{{/if}}">
         {{{icon icon 'size-4'}}} {{label}}

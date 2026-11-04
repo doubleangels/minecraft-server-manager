@@ -43,6 +43,27 @@ The top bar has the **Create a Server** button, a **theme toggle** (dark/light),
 
 Every page is laid out for a narrow screen first and widens from there: the sidebar tucks away behind the menu button, data tables stack into cards, toolbars wrap, and the world-controls rail collapses to a card you open when you need it. Buttons and chips have a real touch target size. Nothing is desktop-only.
 
+### Install it as an app
+
+The panel installs like an app on phones, tablets and desktops: its own icon, full screen with no browser bars, and shortcuts to Servers, Health, Backups and Activity on a long press of the icon.
+
+- **Android, Chrome or Edge on a computer:** open your account menu (top right) and choose **Install App**, or use the browser's own install button.
+- **iPhone and iPad:** open the panel in Safari, choose **Install App** in the account menu for the steps, or tap **Share** and then **Add to Home Screen**.
+
+Installing needs the panel to be served over HTTPS (or opened as `localhost`). Browsers refuse to install a site over plain HTTP, so on a LAN address without HTTPS the menu item does not appear.
+
+Once installed:
+
+- **Notify Me When Tasks Finish** in the account menu sends a system notification when a backup, restore, update or other background task finishes while the panel isn't on screen.
+- The app icon shows a badge with the number of unread [health alerts](dashboard.md), where the system supports badges.
+- If the panel can't be reached, you get a clear offline screen with a **Try Again** button instead of a browser error. Nothing is cached that could show you out-of-date server data: every page and number still comes live from the panel.
+
+### Small shortcuts
+
+- Press <kbd>/</kbd> to jump to the search box on any page that has one.
+- Each server section reopens on the sub-tab you last used: leave **Content** from **Worlds**, and **Content** brings you back to **Worlds**.
+- While a background task runs, the browser tab's title starts with how many are running, for example "(1) Backups".
+
 <p align="center">
   <img src="images/mobile/dashboard.png" alt="Dashboard on a phone" width="180">
   <img src="images/mobile/server-overview.png" alt="Server overview on a phone" width="180">

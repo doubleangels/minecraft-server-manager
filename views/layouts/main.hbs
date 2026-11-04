@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{{title}} · Minecraft Server Manager</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   {{! "Add to Home Screen" on iOS/Android - manifest.json covers Android/Chrome;
@@ -10,7 +10,7 @@
       and apple-mobile-web-app-* tags to behave like an installed app. }}
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-  <meta name="theme-color" content="#2f8520">
+  <meta name="theme-color" content="#16191c">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,10 +22,13 @@
       var t = localStorage.getItem('msm-theme');
       if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
       document.documentElement.dataset.theme = t;
+      // The installed app's status bar follows the theme's surface color.
+      var m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.setAttribute('content', t === 'light' ? '#ffffff' : '#16191c');
     } catch (e) {}
   </script>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen" data-health-count="{{healthCount}}">
   <div class="flex min-h-screen">
     {{> sidebar}}
 

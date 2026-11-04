@@ -1030,8 +1030,9 @@ function scanHtml(source, name, { lineBase = 0, colBase = 0 } = {}) {
       if (!stripDyn(text)) return;
       universal(name, line, col, text);
       if (attr === 'placeholder' && inMonoTag(index)) return;
-      // A <meta content> is only copy for a description; skip theme colors etc.
-      if (attr === 'content' && !/\s/.test(text)) return;
+      // A <meta content> is only copy for a description; skip theme colors and
+      // key=value lists (the viewport's "width=device-width, …").
+      if (attr === 'content' && (!/\s/.test(text) || /^[\w-]+=/.test(text))) return;
       sentence(name, line, col, text, { ...tail(text), kind });
     });
   }

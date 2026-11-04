@@ -116,19 +116,24 @@ const CONDITIONAL_TABS = { updates: (opts) => opts.modServer !== false };
 function buildNav(id, tab, server, { isAdmin = false, perms = null, modServer = true } = {}) {
   const crashes = server && server.crashesUnread;
   const group = TAB_GROUPS.find((g) => g.tabs.includes(tab)) || TAB_GROUPS[0];
-  const groups = TAB_GROUPS.map((g) => ({
-    label: g.label,
-    icon: g.icon,
-    href: `/servers/${id}/${g.tabs[0]}`,
-    active: g.key === group.key,
-    badge: g.tabs.includes('history') && crashes ? crashes : null,
-  }));
-  const visibleSubTabs = group.tabs.filter(
-    (t) =>
-      (isAdmin || !ADMIN_ONLY_TABS.has(t)) &&
-      (!perms || !CAP_TABS[t] || perms[CAP_TABS[t]]) &&
-      (!CONDITIONAL_TABS[t] || CONDITIONAL_TABS[t]({ modServer }))
-  );
+  const visible = (t) =>
+    (isAdmin || !ADMIN_ONLY_TABS.has(t)) &&
+    (!perms || !CAP_TABS[t] || perms[CAP_TABS[t]]) &&
+    (!CONDITIONAL_TABS[t] || CONDITIONAL_TABS[t]({ modServer }));
+  const groups = TAB_GROUPS.map((g) => {
+    const tabs = g.tabs.filter(visible);
+    return {
+      key: g.key,
+      // The sub-pages this section may reopen on (app.js remembers the last one).
+      tabs: tabs.join(','),
+      label: g.label,
+      icon: g.icon,
+      href: `/servers/${id}/${tabs[0] || g.tabs[0]}`,
+      active: g.key === group.key,
+      badge: g.tabs.includes('history') && crashes ? crashes : null,
+    };
+  });
+  const visibleSubTabs = group.tabs.filter(visible);
   const sub =
     visibleSubTabs.length > 1
       ? visibleSubTabs.map((t) => ({
