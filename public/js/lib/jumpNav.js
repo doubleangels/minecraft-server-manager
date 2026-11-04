@@ -12,8 +12,15 @@ export function initJumpNav(root = document) {
       a.classList.toggle('active', on);
       if (on) {
         a.setAttribute('aria-current', 'true');
-        // Keep the active chip visible in the phone's scrolling row.
-        if (jump.scrollWidth > jump.clientWidth) a.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        // Keep the active chip visible in the phone's scrolling row. Scroll
+        // only the row itself: scrollIntoView would also scroll the PAGE back
+        // up to the bar, yanking the reader to the top on every section change.
+        if (jump.scrollWidth > jump.clientWidth) {
+          const left = a.offsetLeft - jump.offsetLeft;
+          const right = left + a.offsetWidth;
+          if (left < jump.scrollLeft) jump.scrollLeft = left;
+          else if (right > jump.scrollLeft + jump.clientWidth) jump.scrollLeft = right - jump.clientWidth;
+        }
       } else a.removeAttribute('aria-current');
     }
   };
