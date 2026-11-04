@@ -3,6 +3,7 @@
 // per-action modal. Polls /api/tasks; hidden when idle.
 import { toast } from './toast.js';
 import { notify } from './pwa.js';
+import { setRunningTasks } from './title.js';
 
 const mount = document.getElementById('task-tray');
 if (mount) init();
@@ -14,7 +15,6 @@ function init() {
   const panel = mount.querySelector('[data-task-panel]');
   const list = mount.querySelector('[data-task-list]');
   const known = new Map(); // id -> last seen state (for completion toasts)
-  const baseTitle = document.title;
   let open = false;
 
   const setOpen = (v) => {
@@ -69,7 +69,7 @@ function init() {
 
     mount.classList.toggle('hidden', tasks.length === 0);
     // "(2) Backups · …" while tasks run, so a background tab shows progress.
-    document.title = (running.length ? `(${running.length}) ` : '') + baseTitle;
+    setRunningTasks(running.length);
     badge.textContent = String(running.length || tasks.length);
     // Swap the background explicitly - stacking bg-ok onto the baked-in
     // bg-inset leaves the winner to stylesheet order, not intent.

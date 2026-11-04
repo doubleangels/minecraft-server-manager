@@ -16,6 +16,9 @@ import './lib/seg.js';
 import './lib/twoFactor.js';
 import './lib/avatar.js';
 import './lib/pwa.js';
+import './lib/serverPins.js';
+import './lib/dirtyGuard.js';
+import { setBaseTitle } from './lib/title.js';
 
 // Expose for inline handlers and future page scripts.
 window.CD = { toast, openModal, confirmDialog, setBusy, withBusy };
@@ -285,6 +288,14 @@ document.addEventListener('click', async (e) => {
     });
     if (!ok) return;
   }
+  // Players online: offer to warn them in game first. Nobody on: no question.
+  let warnSeconds = 0;
+  const online = Number(btn.dataset.playersOnline) || 0;
+  if ((action === 'restart' || action === 'stop') && online > 0) {
+    const choice = await askWarning({ action, name, online });
+    if (choice === null) return;
+    warnSeconds = choice;
+  }
   // Spinner + label on the clicked control; freeze every other lifecycle
   // button for this server so Start/Stop can't be raced.
   const restore = setBusy(btn, labels[action]);
@@ -294,8 +305,20 @@ document.addEventListener('click', async (e) => {
   siblings.forEach((b) => {
     b.disabled = true;
   });
-  if (action === 'stop') toast('Stopping. The world saves first…', { kind: 'info' });
-  const res = await api(`/api/servers/${id}/${action}`, 'POST');
+  if (action === 'stop' && !warnSeconds) toast('Stopping. The world saves first…', { kind: 'info' });
+  const res = await api(`/api/servers/${id}/${action}`, 'POST', warnSeconds ? { warnSeconds } : undefined);
+  if (res.ok && warnSeconds) {
+    // The countdown runs on the panel; the task tray follows it from any page.
+    restore();
+    siblings.forEach((b) => {
+      b.disabled = false;
+    });
+    toast(`Warning the players. ${name} ${action === 'stop' ? 'stops' : 'restarts'} in ${spellSeconds(warnSeconds)}.`, {
+      kind: 'info',
+      timeout: 7000,
+    });
+    return;
+  }
   if (res.ok) {
     const done = {
       start: 'started',
@@ -333,6 +356,8 @@ async function api(url, method = 'GET', body) {
   }
 }
 window.CD.api = api;
+// Shared with the dashboard's bulk Restart/Stop (defined below, hoisted).
+window.CD.askWarning = (opts) => askWarning(opts);
 
 // ---- Delete confirmation: requires typing the server name. Files and backups
 // are KEPT on disk by default; a danger checkbox opts in to permanently
@@ -503,6 +528,9 @@ document.addEventListener('click', async (e) => {
           el.classList.toggle('hidden', !phase);
         }
         document.dispatchEvent(new CustomEvent('msm:servers-live', { detail: data }));
+        const head = document.querySelector('[data-server-title]');
+        const me = head && data.servers[head.dataset.serverTitle];
+        if (me) setServerTitle(head, me.status);
       }
     } catch {
       /* transient */
@@ -552,3 +580,82 @@ document.addEventListener('keydown', (e) => {
   box.focus();
   box.select?.();
 });
+
+/** "5 minutes", "1 minute", "30 seconds". */
+function spellSeconds(s) {
+  if (s >= 60 && s % 60 === 0) return `${s / 60} ${s === 60 ? 'minute' : 'minutes'}`;
+  return `${s} seconds`;
+}
+
+/**
+ * Restart/Stop with players online: warn them first? Resolves the countdown
+ * in seconds (0 = right away), or null when cancelled.
+ */
+function askWarning({ action, name, online }) {
+  return new Promise((resolve) => {
+    let picked = null;
+    const verb = action === 'stop' ? 'Stop' : 'Restart';
+    const content = document.createElement('div');
+    content.className = 'space-y-3 text-sm';
+    const p = document.createElement('p');
+    p.textContent = `${online} ${online === 1 ? 'player is' : 'players are'} online. A countdown in the game chat gives them time to finish up and find a safe spot.`;
+    const label = document.createElement('label');
+    label.className = 'label';
+    label.setAttribute('for', 'warn-seconds');
+    label.textContent = 'Warn players first';
+    const sel = document.createElement('select');
+    sel.className = 'input';
+    sel.id = 'warn-seconds';
+    for (const [v, t] of [
+      [60, '1 Minute'],
+      [120, '2 Minutes'],
+      [300, '5 Minutes'],
+      [600, '10 Minutes'],
+      [0, 'No Warning'],
+    ]) {
+      const o = document.createElement('option');
+      o.value = String(v);
+      o.textContent = t;
+      if (v === 60) o.selected = true;
+      sel.append(o);
+    }
+    content.append(p, label, sel);
+    openModal({
+      title: `${verb} ${name}?`,
+      content,
+      onClose: () => resolve(picked),
+      actions: [
+        { label: 'Cancel', kind: 'ghost' },
+        {
+          label: verb,
+          kind: action === 'stop' ? 'danger' : 'primary',
+          onClick: () => {
+            picked = Number(sel.value) || 0;
+          },
+        },
+      ],
+    });
+  });
+}
+
+// ---- Server pages: live status in the tab / app title ----
+// "🟢 Alpha Survival (Running) · MSM": a start, stop or crash shows in the tab
+// strip and the app switcher without opening the page. Updated by the shared
+// live poll above.
+const STATUS_TITLE = {
+  running: ['🟢', 'Running'],
+  starting: ['🟡', 'Starting'],
+  unhealthy: ['🟡', 'Unhealthy'],
+  updating: ['🔵', 'Updating'],
+  stalled: ['🔴', 'Stalled'],
+  crashed: ['🔴', 'Crashed'],
+  stopped: ['⚪', 'Stopped'],
+};
+function setServerTitle(head, status) {
+  const [dot, label] = STATUS_TITLE[status] || ['⚪', status];
+  setBaseTitle(`${dot} ${head.dataset.serverName} (${label}) · MSM`);
+}
+{
+  const head = document.querySelector('[data-server-title]');
+  if (head) setServerTitle(head, head.dataset.serverStatus);
+}

@@ -8,6 +8,7 @@
 
 const httpError = require('../utils/httpError');
 const fs = require('node:fs');
+const db = require('../db');
 const { dataPath } = require('../storage/pathGuard');
 const { recordEvent } = require('../events');
 const { execCapture } = require('../docker/containers');
@@ -242,6 +243,7 @@ function listPlayers(serverId, onlineNames = []) {
         banSource: null,
         banExpires: null,
         lastSeen: null,
+        lastSeenApprox: false,
       };
       entries.push(entry);
     }
@@ -257,8 +259,35 @@ function listPlayers(serverId, onlineNames = []) {
     Object.assign(entry, patch);
   };
 
+  // Last seen: the end of the player's latest play session the panel logged
+  // (one indexed GROUP BY). For names from before the panel watched this
+  // server, fall back to the user cache: its expiresOn is one month after the
+  // name was last seen, so subtract the month (marked approximate).
+  const seen = new Map();
+  for (const r of db.all(
+    `SELECT player, MAX(COALESCE(ended_at, started_at)) AS last
+       FROM player_sessions WHERE server_id = ? GROUP BY player`,
+    serverId
+  )) {
+    seen.set(String(r.player).toLowerCase(), r.last);
+  }
   for (const e of readJson(serverId, 'usercache.json')) {
-    upsert(e.name, e.uuid, { lastSeen: e.expiresOn || null });
+    const exact = e.name ? seen.get(e.name.toLowerCase()) : null;
+    let approx = null;
+    if (!exact && e.expiresOn) {
+      const t = Date.parse(
+        String(e.expiresOn)
+          .replace(' ', 'T')
+          .replace(' +', '+')
+          .replace(/ ?\+0000$/, 'Z')
+      );
+      if (Number.isFinite(t)) approx = new Date(t - 30 * 24 * 3600 * 1000).toISOString();
+    }
+    upsert(e.name, e.uuid, { lastSeen: exact || approx || null, lastSeenApprox: !exact && Boolean(approx) });
+  }
+  for (const [name, last] of seen) {
+    const entry = byName.get(name);
+    if (entry && !entry.lastSeen) Object.assign(entry, { lastSeen: last, lastSeenApprox: false });
   }
   for (const e of readJson(serverId, 'whitelist.json')) {
     upsert(e.name, e.uuid, { whitelisted: true });

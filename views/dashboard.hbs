@@ -89,7 +89,10 @@
     <option value="started" {{#if (eq sort 'started')}}selected{{/if}}>Last Started</option>
     <option value="created" {{#if (eq sort 'created')}}selected{{/if}}>Created</option>
   </select>
-  <div class="seg ml-auto" role="group" aria-label="View">
+  {{#unless (eq user.role 'viewer')}}
+    <button class="btn btn-sm ml-auto" id="bulk-toggle" aria-pressed="false" data-tip="Pick several servers, then start, stop, restart or back them up together.">{{{icon 'list-checks' 'size-3.5'}}} Select</button>
+  {{/unless}}
+  <div class="seg {{#if (eq user.role 'viewer')}}ml-auto{{/if}}" role="group" aria-label="View">
     <button class="seg-btn" id="view-grid" aria-pressed="false" data-tip="Grid view.">{{{icon 'layout-grid' 'size-4'}}}</button>
     <button class="seg-btn" id="view-list" aria-pressed="false" data-tip="List view.">{{{icon 'list' 'size-4'}}}</button>
   </div>
@@ -151,6 +154,17 @@
         <li class="p-8 text-center text-sm text-ink-faint">No activity yet. Actions on your servers will show up here.</li>
       {{/each}}
     </ol>
+  </div>
+</div>
+{{! Bulk action bar: appears in Select mode, pinned to the bottom of the
+    screen. z-10: inside the page, below the topbar (20). }}
+<div id="bulk-bar" class="sticky bottom-0 z-10 -mx-4 mt-4 hidden border-t border-line bg-canvas/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+  <div class="flex flex-wrap items-center gap-2">
+    <span class="mr-auto text-sm"><b data-bulk-count>0</b> selected <button type="button" class="ml-2 text-xs text-link hover:underline" data-bulk-all>Select All</button></span>
+    <button class="btn btn-sm" data-bulk="start" disabled>{{{icon 'play' 'size-3.5'}}} Start</button>
+    <button class="btn btn-sm" data-bulk="restart" disabled>{{{icon 'rotate-cw' 'size-3.5'}}} Restart</button>
+    <button class="btn btn-sm btn-danger" data-bulk="stop" disabled>{{{icon 'square' 'size-3.5'}}} Stop</button>
+    <button class="btn btn-sm" data-bulk="backup" disabled>{{{icon 'save' 'size-3.5'}}} Back Up</button>
   </div>
 </div>
 <script type="module" src="/js/pages/dashboard.js"></script>

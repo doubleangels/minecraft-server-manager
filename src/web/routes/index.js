@@ -797,6 +797,7 @@ router.get(
         .listEvents({ serverId: row.id, type: 'chat-command', limit: 10, forUser: req.user })
         .map((e) => ({ ts: e.created_at, summary: e.summary, failed: e.details && e.details.success === false }));
     } else if (tab === 'console') {
+      context.quickCommands = require('../../services/settings').get(`console-quick:${row.id}`, []);
       const { stripAnsi } = require('../../utils/ansi');
       const raw = await fetchLogs(row.id, { tail: 300 }).catch(() => '');
       context.consoleLines = raw
@@ -954,7 +955,14 @@ router.get('/schedules', (req, res) => {
     schedules: scheduler
       .listSchedules()
       .filter((j) => !j.serverId || res.locals.visibleServerIds.has(j.serverId))
-      .filter((j) => !focus || j.serverId === focus.id),
+      .filter((j) => !focus || j.serverId === focus.id)
+      .map((j) => ({
+        ...j,
+        warnLabel:
+          j.payload && j.payload.warnSeconds
+            ? require('../../services/shutdownWarning').spell(Number(j.payload.warnSeconds))
+            : null,
+      })),
     focusServer: focus ? { id: focus.id, name: focus.name } : null,
     taskTypes: Object.entries(scheduler.TASK_TYPES)
       .filter(([, t]) => !t.adminOnly || (req.user && req.user.role === 'admin'))

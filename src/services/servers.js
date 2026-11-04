@@ -1166,6 +1166,7 @@ async function deleteServerImpl(id, { actor = 'system', keepWorld = true, keepBa
     // Added: these were previously leaked on delete (no FK cascade).
     db.run('DELETE FROM chat_commands WHERE server_id = ?', id);
     db.run('DELETE FROM chat_command_settings WHERE server_id = ?', id);
+    db.run('DELETE FROM settings WHERE key = ?', `console-quick:${id}`);
     // Escaped: server ids can contain `_`, a LIKE wildcard, so an unescaped
     // pattern could also drop another server's cached sizes.
     db.run(

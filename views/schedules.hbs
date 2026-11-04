@@ -17,7 +17,7 @@
         <tr data-schedule-row data-schedule-id="{{id}}" data-server-id="{{serverId}}" data-task-type="{{taskType}}" data-task="{{task}}" data-cron="{{cron}}" data-payload="{{jsonAttr payload}}">
           {{! Global rows are faint by the serverId FACT, not by matching the display string. }}
           <td data-th="Server" class="{{#unless serverId}}text-ink-faint{{/unless}}">{{server}}</td>
-          <td data-th="Task" class="font-medium">{{task}}</td>
+          <td data-th="Task" class="font-medium">{{task}}{{#if warnLabel}}<span class="block text-xs font-normal text-ink-faint">Warns players {{warnLabel}} ahead.</span>{{/if}}</td>
           <td data-th="Cron" class="font-mono text-xs text-ink-faint">{{cron}}</td>
           {{! nextMs + the panel-TZ hydrator: the table used to show UTC while
               the modal preview showed panel time for the SAME schedule. }}

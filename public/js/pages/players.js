@@ -5,10 +5,12 @@ import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { openModal } from '../lib/modal.js';
 import { confirmDialog } from '../lib/confirm.js';
+import { undoableDelete } from '../lib/undo.js';
 import { withBusy } from '../lib/loading.js';
 import { PLAYER_NAME_RE } from '../lib/playerName.js';
 import { escapeHtml as esc } from '../lib/format.js';
 import { renderPlayerHead } from '../lib/playerHead.js';
+import { timeAgo, formatDateTime } from '../lib/datetime.js';
 
 const root = document.querySelector('[data-players-root]');
 if (root) init(root);
@@ -108,11 +110,15 @@ function init(root) {
       }
       append(hint);
     }
-    if (d.lastSeen) {
+    if (d.lastSeen && d.online !== '1') {
+      const approx = d.lastSeenApprox === '1';
       const seen = document.createElement('div');
       seen.className = 'mt-0.5 text-[11px] leading-tight text-ink-faint';
-      seen.dataset.tip = "The last time this name was seen in the server's cache.";
-      seen.textContent = `seen ~${d.lastSeen}`;
+      seen.dataset.tip = approx
+        ? "Estimated from the server's own name cache, from before the panel logged this player."
+        : 'When this player last left the server.';
+      seen.title = formatDateTime(d.lastSeen);
+      seen.textContent = `Last seen ${approx ? 'about ' : ''}${timeAgo(d.lastSeen) || formatDateTime(d.lastSeen)}`;
       append(seen);
     }
   }
@@ -315,25 +321,31 @@ function init(root) {
       });
     } else if (act.dataset.act === 'pardon-ip') {
       const ip = act.dataset.ip;
-      confirmDialog({
-        title: `Unban ${ip}?`,
-        message: 'This IP address will be able to connect to the server again.',
-        confirmLabel: 'Unban',
-      }).then(async (ok) => {
-        if (!ok) return;
-        try {
-          await withBusy(act, async () => {
-            await api('/pardon-ip', { ip });
-            root.querySelector(`[data-banip-row="${CSS.escape(ip)}"]`)?.remove();
-            if (!root.querySelector('[data-banip-row]')) {
-              document.getElementById('banip-table')?.classList.add('hidden');
-              document.getElementById('banip-empty')?.classList.remove('hidden');
-            }
-            toast(`IP ${ip} unbanned.`);
-          });
-        } catch (err) {
-          fail(err);
-        }
+      const row = root.querySelector(`[data-banip-row="${CSS.escape(ip)}"]`);
+      const syncEmpty = () => {
+        const left = [...root.querySelectorAll('[data-banip-row]')].some((r) => !r.classList.contains('hidden'));
+        document.getElementById('banip-table')?.classList.toggle('hidden', !left);
+        document.getElementById('banip-empty')?.classList.toggle('hidden', left);
+      };
+      undoableDelete({
+        message: `Unbanned ${ip}.`,
+        hide: () => {
+          row?.classList.add('hidden');
+          syncEmpty();
+        },
+        restore: () => {
+          row?.classList.remove('hidden');
+          syncEmpty();
+        },
+        commit: (opts) =>
+          fetch(`/api/servers/${serverId}/players/pardon-ip`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ip }),
+            ...opts,
+          }),
+        failed: 'unban that address',
+        onCommitted: () => row?.remove(),
       });
     }
   });

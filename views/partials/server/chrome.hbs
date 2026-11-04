@@ -1,6 +1,6 @@
 {{! Crashed, or holding unread crash reports: a redstone edge and outline in
     place of the accent, matching the server card on the dashboard. }}
-<div class="card mb-6 overflow-hidden{{#if (or (eq server.status 'crashed') server.crashesUnread)}} border-danger/50{{/if}}" style="border-top: 3px solid {{#if (or (eq server.status 'crashed') server.crashesUnread)}}var(--color-redstone-500){{else}}{{server.accent}}{{/if}}">
+<div data-server-title="{{server.id}}" data-server-name="{{server.name}}" data-server-status="{{server.status}}" class="card mb-6 overflow-hidden{{#if (or (eq server.status 'crashed') server.crashesUnread)}} border-danger/50{{/if}}" style="border-top: 3px solid {{#if (or (eq server.status 'crashed') server.crashesUnread)}}var(--color-redstone-500){{else}}{{server.accent}}{{/if}}">
   {{! icon+name grouped into ONE flex item, separate from the actions column,
       using flex-auto (basis: auto) rather than flex-1 (basis: 0%). That's
       the actual fix, not just the grouping: flex-wrap decides whether to
@@ -46,8 +46,8 @@
     {{! Phone: one row of equal-width buttons under the name; sm+: natural width. }}
     <div class="flex w-full flex-wrap gap-2 sm:w-auto{{#unless perms.power}} hidden{{/unless}}">
       {{#if (or (eq server.status 'running') (eq server.status 'starting') (eq server.status 'unhealthy') (eq server.status 'stalled'))}}
-        <button class="btn flex-1 sm:flex-none" data-server-action="restart" data-server-id="{{server.id}}" data-server-name="{{server.name}}">{{{icon 'rotate-cw' 'size-4'}}} Restart</button>
-        <button class="btn btn-danger flex-1 sm:flex-none" data-server-action="stop" data-server-id="{{server.id}}" data-server-name="{{server.name}}">{{{icon 'square' 'size-4'}}} Stop</button>
+        <button class="btn flex-1 sm:flex-none" data-server-action="restart" data-server-id="{{server.id}}" data-server-name="{{server.name}}" data-players-online="{{server.players.online}}">{{{icon 'rotate-cw' 'size-4'}}} Restart</button>
+        <button class="btn btn-danger flex-1 sm:flex-none" data-server-action="stop" data-server-id="{{server.id}}" data-server-name="{{server.name}}" data-players-online="{{server.players.online}}">{{{icon 'square' 'size-4'}}} Stop</button>
         <button class="btn btn-ghost" data-server-action="kill" data-server-id="{{server.id}}" data-server-name="{{server.name}}" aria-label="Force Stop" data-tip="Force stop. Skips the world save; use only if the server is frozen.">{{{icon 'zap' 'size-4'}}}</button>
       {{else}}
         <button class="btn btn-primary flex-1 sm:flex-none" data-server-action="start" data-server-id="{{server.id}}" data-server-name="{{server.name}}">{{{icon 'play' 'size-4'}}} Start</button>

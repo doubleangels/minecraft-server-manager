@@ -41,7 +41,7 @@
               data-whitelisted="{{#if whitelisted}}1{{else}}0{{/if}}"
               data-op="{{#if op}}1{{else}}0{{/if}}"
               data-banned="{{#if banned}}1{{else}}0{{/if}}"
-              data-last-seen="{{lastSeen}}">
+              data-last-seen="{{lastSeen}}" data-last-seen-approx="{{#if lastSeenApprox}}1{{/if}}">
             <td data-th="">
               <a href="/servers/{{../server.id}}/players/{{name}}" class="group flex items-center gap-2.5" data-tip="Open {{name}}'s page: roles, teleport, and inventory.">
                 <span class="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded bg-inset text-xs font-bold">
@@ -72,7 +72,7 @@
                   <div class="mt-0.5 text-[11px] leading-tight text-ink-faint">Not whitelisted</div>
                 {{/if}}
               {{/if}}
-              {{#if lastSeen}}<div class="mt-0.5 text-[11px] leading-tight text-ink-faint" data-tip="The last time this name was seen in the server's cache.">seen ~{{lastSeen}}</div>{{/if}}
+              {{#unless online}}{{#if lastSeen}}<div class="mt-0.5 text-[11px] leading-tight text-ink-faint" data-tip="{{#if lastSeenApprox}}Estimated from the server's own name cache, from before the panel logged this player.{{else}}When this player last left the server.{{/if}}">Last seen {{#if lastSeenApprox}}about {{/if}}<span data-ts-ago="{{lastSeen}}">{{lastSeen}}</span></div>{{/if}}{{/unless}}
             </td>
             {{! Off-state chips keep full opacity - dimming reads as disabled,
                 and genuinely disabled composers already use opacity for that. }}

@@ -6,8 +6,9 @@
       {{/settings/card}}
 
     Params: heading, desc (optional sub-line), wide (span both columns at lg),
-    id (optional element id). --}}
-<section class="card p-4 sm:p-5{{#if wide}} lg:col-span-2{{/if}}"{{#if id}} id="{{id}}"{{/if}}>
+    id (optional element id), guard (optional: what the unsaved-changes
+    warning calls this section, see public/js/lib/dirtyGuard.js). --}}
+<section class="card p-4 sm:p-5{{#if wide}} lg:col-span-2{{/if}}"{{#if id}} id="{{id}}"{{/if}}{{#if guard}} data-dirty-group="{{guard}}"{{/if}}>
   <div class="mb-4">
     <h3 class="font-semibold text-ink">{{heading}}</h3>
     {{#if desc}}<p class="help">{{desc}}</p>{{/if}}

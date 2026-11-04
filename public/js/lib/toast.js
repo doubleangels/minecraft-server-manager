@@ -1,5 +1,7 @@
 // Toast notifications. One host, stacked, auto-dismiss, screen-reader friendly.
 // Usage: toast('Saved'); toast('Boom', { kind: 'error', timeout: 8000 });
+//        toast('Deleted.', { action: { label: 'Undo', onClick }, onDismiss(reason) {} })
+// onDismiss gets 'action' when the action button was used, else 'closed'.
 
 let host;
 
@@ -40,7 +42,7 @@ const KIND = {
   },
 };
 
-export function toast(message, { kind = 'success', timeout = 4500 } = {}) {
+export function toast(message, { kind = 'success', timeout = 4500, action = null, onDismiss = null } = {}) {
   const h = ensureHost();
   const meta = KIND[kind] || KIND.success;
 
@@ -51,21 +53,42 @@ export function toast(message, { kind = 'success', timeout = 4500 } = {}) {
       <svg class="icon size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>`;
   el.querySelector('span').textContent = message;
+  if (action) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn btn-sm -my-1 shrink-0';
+    b.textContent = action.label;
+    b.addEventListener('click', () => {
+      action.onClick?.();
+      dismiss('action');
+    });
+    el.querySelector('span').after(b);
+  }
 
   let timer;
-  const dismiss = () => {
+  let gone = false;
+  const dismiss = (reason = 'closed') => {
+    if (gone) return;
+    gone = true;
+    if (onDismiss) onDismiss(reason);
     clearTimeout(timer);
     el.style.transition = 'opacity .15s, transform .15s';
     el.style.opacity = '0';
     el.style.transform = 'translateX(8px)';
     setTimeout(() => el.remove(), 150);
   };
-  el.querySelector('button').addEventListener('click', dismiss);
-  if (timeout > 0) timer = setTimeout(dismiss, timeout);
+  el.querySelector('button[aria-label="Dismiss"]').addEventListener('click', () => dismiss());
+  if (timeout > 0) timer = setTimeout(() => dismiss(), timeout);
+  el._dismiss = dismiss;
 
   h.appendChild(el);
   // Cap the stack: a burst of completions must not pile toasts past the viewport.
-  while (h.children.length > 4) h.firstElementChild.remove();
+  // Dismissed, not just removed, so a pending undo still finishes its work.
+  while (h.children.length > 4) {
+    const old = h.firstElementChild;
+    if (old._dismiss) old._dismiss();
+    old.remove();
+  }
   return dismiss;
 }
 

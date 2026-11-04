@@ -51,7 +51,7 @@ async function displayVersion(server) {
  */
 function sidebarServerVMs() {
   const rows = db.all(
-    'SELECT id, display_name, icon, accent, status, type, disk_quota_bytes FROM servers WHERE deleted_at IS NULL ORDER BY created_at'
+    'SELECT id, display_name, icon, accent, status, type, disk_quota_bytes, port_game FROM servers WHERE deleted_at IS NULL ORDER BY created_at'
   );
   // Fetch only the exact per-server size rows (servers/<id>). A bare
   // `LIKE 'servers/%'` sweep would also return every depth-≤3 nested path the
@@ -67,9 +67,11 @@ function sidebarServerVMs() {
     ))
       sizes.set(r.rel_path, r.size_bytes);
   }
+  const { connectAddress } = require('../services/settings');
   return rows.map((s) => ({
     id: s.id,
     name: s.display_name,
+    address: connectAddress(s.port_game),
     icon: s.icon,
     accent: s.accent,
     status: s.status,
@@ -143,6 +145,8 @@ async function serverVM(s, { withLive = true, ctx = null } = {}) {
       rcon: s.port_rcon,
       bedrock: s.port_bedrock,
     },
+    // What players type to connect: the public domain when set, else the LAN IP.
+    address: require('../services/settings').connectAddress(s.port_game),
     resources: {
       heapMb: s.heap_mb,
       // The starting heap (INIT_MEMORY) in MB, or null when Java gets the whole heap up front.

@@ -70,6 +70,22 @@ function publicAddress(port) {
   return h ? `${h}:${port}` : null;
 }
 
+/**
+ * The one address to hand players: the public domain when one is set,
+ * otherwise this machine's first LAN IPv4, otherwise localhost.
+ * @param {number} port
+ */
+function connectAddress(port) {
+  const pub = publicAddress(port);
+  if (pub) return pub;
+  for (const nics of Object.values(require('node:os').networkInterfaces())) {
+    for (const nic of nics || []) {
+      if (nic.family === 'IPv4' && !nic.internal) return `${nic.address}:${port}`;
+    }
+  }
+  return `localhost:${port}`;
+}
+
 // ---------------------------------------------------------------------------
 // Localization: timezone + country. Both default to "auto" - detected from the
 // host OS via Intl - so timelines and dates read in the operator's local time
@@ -278,6 +294,7 @@ module.exports = {
   getPublicHost,
   setPublicHost,
   publicAddress,
+  connectAddress,
   normalizeHost,
   isPublicApiEnabled,
   setPublicApiEnabled,

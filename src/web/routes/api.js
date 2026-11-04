@@ -154,6 +154,7 @@ const serverPatchSchema = z
 const { serverScope, requireCap, requireCapForWrites, backupServerId } = require('../middleware/serverAccess');
 router.use('/servers/:id', serverScope);
 
+const shutdownWarning = require('../../services/shutdownWarning');
 const POWER_TITLES = {
   start: 'Starting',
   stop: 'Stopping',
@@ -168,6 +169,23 @@ for (const action of Object.keys(POWER_TITLES)) {
     asyncHandler(async (req, res, next) => {
       const actor = req.user.username;
       const name = requireServer(req.params.id).display_name;
+      // Restart and Stop can warn the players in game first. That countdown
+      // runs for minutes, so the request answers at once (202 + taskId) and
+      // the task tray follows it, instead of a request a proxy would time out.
+      const warnSeconds =
+        action === 'restart' || action === 'stop'
+          ? z.coerce.number().int().min(0).max(shutdownWarning.MAX_WARN_SECONDS).catch(0).parse(req.body?.warnSeconds)
+          : 0;
+      if (warnSeconds > 0) {
+        const taskId = tasks.run(`${POWER_TITLES[action]} ${name}…`, { serverId: req.params.id, actor }, async (t) => {
+          const w = await shutdownWarning.warnBeforeShutdown(req.params.id, { action, seconds: warnSeconds, task: t });
+          if (w.cancelled) return { ok: true, skipped: true };
+          t.step(`${POWER_TITLES[action]}…`);
+          await servers[`${action}Server`](req.params.id, { actor });
+          return { ok: true };
+        });
+        return res.status(202).json({ ok: true, taskId, warnSeconds });
+      }
       await tasks.track(`${POWER_TITLES[action]} ${name}…`, { serverId: req.params.id, actor }, () =>
         servers[`${action}Server`](req.params.id, { actor })
       );
@@ -343,6 +361,35 @@ router.get(
     // and this endpoint is just the "recent output" snapshot.
     const tail = Math.max(1, Math.min(Number(req.query.tail) || 500, 2000));
     res.type('text/plain; charset=utf-8').send(await fetchLogs(req.params.id, { tail }));
+  })
+);
+
+// The console's custom quick buttons for one server, shared by every admin.
+router.put(
+  '/servers/:id/console-quick',
+  requireCap('console'),
+  asyncHandler((req, res, next) => {
+    requireServer(req.params.id);
+    const { commands } = z
+      .object({
+        commands: z
+          .array(
+            z.object({
+              label: z.string().trim().min(1, 'Give the button a name.').max(32, 'Keep the name under 32 characters.'),
+              command: z
+                .string()
+                .trim()
+                .min(1, 'Enter the command to run.')
+                .max(256, 'Keep the command under 256 characters.')
+                .regex(/^[^\r\n]+$/, 'Use a single-line command.'),
+            })
+          )
+          .max(20, 'A server can have up to 20 quick buttons.'),
+      })
+      .parse(req.body);
+    const clean = commands.map((c) => ({ label: c.label, command: c.command.replace(/^\//, '') }));
+    require('../../services/settings').set(`console-quick:${req.params.id}`, clean);
+    res.json({ ok: true, commands: clean });
   })
 );
 

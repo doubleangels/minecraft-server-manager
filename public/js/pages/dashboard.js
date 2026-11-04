@@ -1,6 +1,10 @@
 // Dashboard: live card hydration (/api/servers/live), Docker status, sort
-// (server-side via ?sort=), grid/list view toggle, and the create-tile fix for
+// (server-side via ?sort=), grid/list view toggle, bulk actions (Select
+// mode), and the create-tile fix for
 // the text filter.
+
+import { toast } from '../lib/toast.js';
+import { friendlyError } from '../lib/errors.js';
 
 const grid = document.getElementById('server-grid');
 const sortSel = document.getElementById('server-sort');
@@ -50,6 +54,8 @@ function init() {
       grid.querySelector('a[href="/servers/new"]')?.classList.remove('hidden');
     }
   });
+
+  initBulk();
 
   // ---- Live stats hydration ----
   // First paint fetches directly; after that we piggyback on app.js's shared
@@ -316,4 +322,123 @@ function fmtUptime(ms) {
   const hours = Math.floor(mins / 60);
   if (hours < 48) return `${hours}h ${mins % 60}m`;
   return `${Math.floor(hours / 24)}d ${hours % 24}h`;
+}
+
+// ---- Bulk actions: Select mode ----
+// Cards become toggles instead of links; the bar runs one action across every
+// selected server. Each server goes through the same route as its own button,
+// so permissions, locks and the task tray all behave as usual. Two run at a
+// time, so a fleet start does not hit Docker all at once.
+function initBulk() {
+  const toggle = document.getElementById('bulk-toggle');
+  const bar = document.getElementById('bulk-bar');
+  if (!toggle || !bar) return;
+  const count = bar.querySelector('[data-bulk-count]');
+  const selected = new Set();
+  let on = false;
+  const cards = () => [...grid.querySelectorAll('[data-server-card]')];
+
+  const render = () => {
+    for (const card of cards()) {
+      const picked = selected.has(card.dataset.serverCard);
+      const mark = card.querySelector('[data-select-mark]');
+      mark?.classList.toggle('hidden', !on);
+      mark?.classList.toggle('grid', on);
+      mark?.classList.toggle('bg-ok', picked);
+      mark?.classList.toggle('border-ok', picked);
+      card.classList.toggle('ring-2', on && picked);
+      card.classList.toggle('ring-ok', on && picked);
+      card.setAttribute('aria-pressed', on ? String(picked) : '');
+      if (!on) card.removeAttribute('aria-pressed');
+    }
+    count.textContent = String(selected.size);
+    for (const b of bar.querySelectorAll('[data-bulk]')) b.disabled = selected.size === 0;
+    bar.classList.toggle('hidden', !on);
+    toggle.setAttribute('aria-pressed', String(on));
+    toggle.lastChild.textContent = on ? ' Done' : ' Select';
+  };
+
+  toggle.addEventListener('click', () => {
+    on = !on;
+    if (!on) selected.clear();
+    render();
+  });
+  // Capture: in Select mode a card click picks it instead of opening it.
+  grid.addEventListener(
+    'click',
+    (e) => {
+      if (!on) return;
+      const card = e.target.closest('[data-server-card]');
+      if (!card) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const id = card.dataset.serverCard;
+      if (selected.has(id)) selected.delete(id);
+      else selected.add(id);
+      render();
+    },
+    true
+  );
+  bar.querySelector('[data-bulk-all]').addEventListener('click', () => {
+    const visible = cards().filter((c) => !c.classList.contains('hidden'));
+    const all = visible.every((c) => selected.has(c.dataset.serverCard));
+    for (const c of visible) {
+      if (all) selected.delete(c.dataset.serverCard);
+      else selected.add(c.dataset.serverCard);
+    }
+    render();
+  });
+
+  bar.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-bulk]');
+    if (!btn || !selected.size) return;
+    const action = btn.dataset.bulk;
+    const targets = cards().filter((c) => selected.has(c.dataset.serverCard));
+    let warnSeconds = 0;
+    if (action === 'restart' || action === 'stop') {
+      const online = targets.reduce((n, c) => n + (Number(c.dataset.playersOnline) || 0), 0);
+      if (online > 0) {
+        const choice = await window.CD.askWarning({
+          action,
+          name: `${targets.length} ${targets.length === 1 ? 'server' : 'servers'}`,
+          online,
+        });
+        if (choice === null) return;
+        warnSeconds = choice;
+      }
+    }
+    const verb = { start: 'Starting', stop: 'Stopping', restart: 'Restarting', backup: 'Backing up' }[action];
+    toast(`${verb} ${targets.length} ${targets.length === 1 ? 'server' : 'servers'}. Follow along in the task tray.`, {
+      kind: 'info',
+    });
+    on = false;
+    selected.clear();
+    render();
+    const failed = [];
+    const run = async (card) => {
+      const id = card.dataset.serverCard;
+      const url = action === 'backup' ? `/api/servers/${id}/backups` : `/api/servers/${id}/${action}`;
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(warnSeconds ? { warnSeconds } : {}),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false)
+          failed.push(`${card.dataset.serverName}: ${data.error || friendlyError(res)}`);
+      } catch {
+        failed.push(`${card.dataset.serverName}: ${friendlyError()}`);
+      }
+    };
+    const queue = [...targets];
+    await Promise.all(
+      [0, 1].map(async () => {
+        while (queue.length) await run(queue.shift());
+      })
+    );
+    if (failed.length)
+      toast(`Some servers could not be handled. ${failed.join(' ')}`, { kind: 'error', timeout: 12000 });
+    else if (!warnSeconds && action !== 'backup') setTimeout(() => location.reload(), 600);
+  });
 }

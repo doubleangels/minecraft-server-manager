@@ -194,14 +194,22 @@ async function backupAllServers({ actor, task, shrink = false }) {
   );
 }
 
-async function restartRunningServers({ actor, task }) {
+async function restartRunningServers({ actor, task, warnSeconds = 0 }) {
   const servers = require('./servers');
-  await forEachServer(
-    'Restarting',
-    servers.listServers().filter((s) => FLEET_RESTART_STATUSES.has(s.status)),
-    (server) => servers.restartServer(server.id, { actor }),
-    task
-  );
+  const targets = servers.listServers().filter((s) => FLEET_RESTART_STATUSES.has(s.status));
+  // Every server's players hear the same countdown at the same time, then the
+  // restarts run one by one as before. A failed warning never blocks a restart.
+  if (warnSeconds > 0) {
+    const { warnBeforeShutdown } = require('./shutdownWarning');
+    await Promise.all(
+      targets.map((s) => warnBeforeShutdown(s.id, { action: 'restart', seconds: warnSeconds }).catch(() => null))
+    );
+    if (task) task.step('Restarting…');
+  }
+  // Re-check after a countdown: a server someone stopped meanwhile stays stopped.
+  const still =
+    warnSeconds > 0 ? targets.filter((s) => FLEET_RESTART_STATUSES.has(servers.getServer(s.id)?.status)) : targets;
+  await forEachServer('Restarting', still, (server) => servers.restartServer(server.id, { actor }), task);
 }
 
 async function runTask(schedule, task = null) {
@@ -210,11 +218,19 @@ async function runTask(schedule, task = null) {
   const servers = require('./servers');
   switch (schedule.task_type) {
     case 'restart':
-      await servers.restartServer(schedule.server_id, { actor });
+    case 'stop': {
+      // Optional per schedule: warn the players in game first.
+      const w = await require('./shutdownWarning').warnBeforeShutdown(schedule.server_id, {
+        action: schedule.task_type,
+        seconds: payload.warnSeconds,
+        task,
+      });
+      if (w.cancelled) break; // stopped by someone during the countdown
+      if (task && w.warned) task.step(schedule.task_type === 'stop' ? 'Stopping…' : 'Restarting…');
+      if (schedule.task_type === 'stop') await servers.stopServer(schedule.server_id, { actor });
+      else await servers.restartServer(schedule.server_id, { actor });
       break;
-    case 'stop':
-      await servers.stopServer(schedule.server_id, { actor });
-      break;
+    }
     case 'start':
       await servers.startServer(schedule.server_id, { actor });
       break;
@@ -243,7 +259,7 @@ async function runTask(schedule, task = null) {
       await backupAllServers({ actor, task, shrink: Boolean(payload.shrink) });
       break;
     case 'restart-all':
-      await restartRunningServers({ actor, task });
+      await restartRunningServers({ actor, task, warnSeconds: payload.warnSeconds });
       break;
     case 'rcon': {
       const { execCapture } = require('../docker/containers');

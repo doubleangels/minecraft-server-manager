@@ -2,11 +2,10 @@
 // enable/disable toggle, delete, and edit (= delete + recreate, labeled).
 
 import { toast } from '../lib/toast.js';
+import { undoableDelete } from '../lib/undo.js';
 import { friendlyError } from '../lib/errors.js';
 import { openModal } from '../lib/modal.js';
-import { confirmDialog } from '../lib/confirm.js';
 import { enhanceAll } from '../lib/select.js';
-import { withBusy } from '../lib/loading.js';
 import { formatDateTime } from '../lib/datetime.js';
 import { escapeHtml } from '../lib/format.js';
 
@@ -37,24 +36,19 @@ function init() {
 
     const delBtn = e.target.closest('[data-schedule-delete]');
     if (delBtn) {
-      const ok = await confirmDialog({
-        title: 'Delete this schedule?',
-        message: `${row.dataset.task} (${row.dataset.cron}) stops running immediately.`,
-        confirmLabel: 'Delete',
-        danger: true,
-      });
-      if (!ok) return;
-      await withBusy(delBtn, async () => {
-        const res = await fetch(`/api/schedules/${row.dataset.scheduleId}`, { method: 'DELETE' });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && data.ok !== false) {
-          toast('Schedule deleted.');
-          const tbody = row.closest('tbody');
+      // Undo instead of an "are you sure?": the row goes now, the delete ten
+      // seconds later unless Undo is pressed.
+      const tbody = row.closest('tbody');
+      undoableDelete({
+        message: `Deleted the ${row.dataset.task} schedule.`,
+        hide: () => row.classList.add('hidden'),
+        restore: () => row.classList.remove('hidden'),
+        commit: (opts) => fetch(`/api/schedules/${row.dataset.scheduleId}`, { method: 'DELETE', ...opts }),
+        failed: 'delete that schedule',
+        onCommitted: () => {
           row.remove();
           if (tbody && !tbody.querySelector('[data-schedule-row]')) setTimeout(() => location.reload(), 600);
-        } else {
-          toast(data.error || friendlyError(res, { action: 'delete that schedule' }), { kind: 'error' });
-        }
+        },
       });
     } else if (e.target.closest('[data-schedule-edit]')) {
       let payload = {};
@@ -101,6 +95,18 @@ function init() {
   });
 }
 
+// Common timings, one click instead of writing cron by hand (it stays editable).
+const CRON_PRESETS = [
+  { label: 'Every Night at 4 AM', cron: '0 4 * * *' },
+  { label: 'Every 6 Hours', cron: '0 */6 * * *' },
+  { label: 'Every 12 Hours', cron: '0 */12 * * *' },
+  { label: 'Every Hour', cron: '0 * * * *' },
+  { label: 'Every Sunday at 4 AM', cron: '0 4 * * 0' },
+  { label: 'Weekdays at 6 AM', cron: '0 6 * * 1-5' },
+];
+// Tasks that take a server down, so they can warn the players first.
+const WARNABLE = new Set(['restart', 'stop', 'restart-all']);
+
 function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
   const content = document.createElement('div');
   content.innerHTML = `
@@ -120,8 +126,24 @@ function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
     <div class="mt-3 hidden" data-sc-shrinkwrap>
       <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="msm-check" data-sc-shrink> Shrink the World After Each Backup <span class="text-xs text-ink-faint">(removes rarely-visited chunks; only runs while the server is stopped)</span></label>
     </div>
-    <label class="label mt-3">Cron expression</label>
-    <input class="input font-mono" data-sc-cron placeholder="0 4 * * *" autocomplete="off" spellcheck="false">
+    <div class="mt-3 hidden" data-sc-warnwrap>
+      <label class="label" for="sc-warn">Warn players first</label>
+      <select class="input" id="sc-warn" data-sc-warn data-label="Warn players first">
+        <option value="0">No Warning</option>
+        <option value="60">1 Minute</option>
+        <option value="120">2 Minutes</option>
+        <option value="300">5 Minutes</option>
+        <option value="600">10 Minutes</option>
+        <option value="900">15 Minutes</option>
+      </select>
+      <p class="help">A countdown in the game chat, skipped when nobody is online.</p>
+    </div>
+    <span class="label mt-3">When</span>
+    <div class="flex flex-wrap gap-1.5" data-sc-presets>
+      ${CRON_PRESETS.map((p) => `<button type="button" class="chip" data-cron="${escapeHtml(p.cron)}">${escapeHtml(p.label)}</button>`).join('')}
+    </div>
+    <label class="label mt-3" for="sc-cron">Cron expression</label>
+    <input class="input font-mono" id="sc-cron" data-sc-cron placeholder="0 4 * * *" autocomplete="off" spellcheck="false">
     <p class="help">Five fields: minute hour day-of-month month day-of-week. Example: <b class="font-mono">0 4 * * *</b> = daily at 04:00.</p>
     <div class="mt-2 rounded-md border border-line bg-raised p-2.5 text-xs" data-sc-preview>
       <span class="text-ink-faint">Type a cron expression to preview the next runs.</span>
@@ -136,6 +158,19 @@ function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
   const shrinkInput = content.querySelector('[data-sc-shrink]');
   const cronInput = content.querySelector('[data-sc-cron]');
   const preview = content.querySelector('[data-sc-preview]');
+  const warnWrap = content.querySelector('[data-sc-warnwrap]');
+  const warnSel = content.querySelector('[data-sc-warn]');
+  const presetRow = content.querySelector('[data-sc-presets]');
+  const markPreset = () => {
+    for (const b of presetRow.querySelectorAll('[data-cron]'))
+      b.setAttribute('aria-pressed', String(b.dataset.cron === cronInput.value.trim()));
+  };
+  presetRow.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-cron]');
+    if (!b) return;
+    cronInput.value = b.dataset.cron;
+    cronInput.dispatchEvent(new Event('input'));
+  });
 
   if (!edit && preset && preset.serverId) serverSel.value = preset.serverId;
   if (edit) {
@@ -145,11 +180,15 @@ function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
     if (edit.payload && edit.payload.command) cmdInput.value = edit.payload.command;
     if (edit.payload && edit.payload.shrink) shrinkInput.checked = true;
   }
+  // A new restart or stop warns for 5 minutes unless changed; an existing one
+  // keeps exactly what it had (none, for schedules made before this option).
+  warnSel.value = String(edit ? (edit.payload && edit.payload.warnSeconds) || 0 : 300);
 
   const typeMeta = () => taskTypes.find((t) => t.value === typeSel.value) || {};
   const syncTypeUi = () => {
     cmdWrap.classList.toggle('hidden', typeSel.value !== 'rcon');
     shrinkWrap.classList.toggle('hidden', typeSel.value !== 'backup' && typeSel.value !== 'backup-all');
+    warnWrap.classList.toggle('hidden', !WARNABLE.has(typeSel.value));
     // Panel-wide tasks ignore the server - disable the picker instead of
     // silently discarding whatever was selected in it.
     const scoped = Boolean(typeMeta().serverScoped);
@@ -181,10 +220,12 @@ function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
     }
   };
   cronInput.addEventListener('input', () => {
+    markPreset();
     clearTimeout(previewTimer);
     previewTimer = setTimeout(renderPreview, 300);
   });
   if (edit) renderPreview();
+  markPreset();
 
   openModal({
     title: edit ? `Edit Schedule: ${edit.taskType}` : 'New Scheduled Task',
@@ -218,6 +259,7 @@ function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
           }
           if ((typeSel.value === 'backup' || typeSel.value === 'backup-all') && shrinkInput.checked)
             payload.shrink = true;
+          if (WARNABLE.has(typeSel.value) && Number(warnSel.value) > 0) payload.warnSeconds = Number(warnSel.value);
           const body = {
             serverId: meta.serverScoped ? serverId : null,
             taskType: typeSel.value,

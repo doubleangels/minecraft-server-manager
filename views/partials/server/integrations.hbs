@@ -2,7 +2,7 @@
 
   {{#if (eq sub 'chatbot')}}
   {{#if integrations.wizard}}
-  <div class="card p-4 lg:col-span-2" id="ig-wizard">
+  <div class="card p-4 lg:col-span-2" id="ig-wizard" data-dirty-group="the chatbot settings">
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div>
         <h3 class="flex items-center gap-2 font-semibold">{{{icon 'sparkles' 'size-4 text-link'}}} Chatbot Settings</h3>
@@ -136,7 +136,7 @@
     </div>
 
     <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-      <button class="btn btn-primary" id="ig-wz-save">Save Chatbot</button>
+      <button data-dirty-save class="btn btn-primary" id="ig-wz-save">Save Chatbot</button>
       <button class="btn" id="ig-wz-test">Test Connection</button>
       <button class="btn" id="ig-wz-transcripts">Refresh This Server's Transcripts</button>
       <button class="btn" id="ig-wz-power-audit">Refresh Power Audit</button>
@@ -154,7 +154,7 @@
   {{/if}}
 
   {{#if (eq sub 'discord')}}
-  <div class="card p-4 lg:col-span-2">
+  <div class="card p-4 lg:col-span-2" data-dirty-group="the Discord settings">
     <div class="mb-4 flex items-center justify-between gap-3">
       <h3 class="flex items-center gap-2 font-semibold">{{{icon 'webhook' 'size-4 text-link'}}} Discord Notifications</h3>
       <span class="msm-toggle"><input type="checkbox" id="ig-dc-enabled" {{#if integrations.discord.enabled}}checked{{/if}}><span></span></span>
@@ -183,7 +183,7 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button class="btn btn-primary" id="ig-dc-save">Save</button>
+        <button data-dirty-save class="btn btn-primary" id="ig-dc-save">Save</button>
         {{#if integrations.discord.hasWebhook}}
           <button class="btn" id="ig-dc-test">{{{icon 'send' 'size-4'}}} Send Test</button>
         {{else}}
@@ -197,7 +197,7 @@
   {{/if}}
 
   {{#if (eq sub 'status-page')}}
-  <div class="card p-4 lg:col-span-2">
+  <div class="card p-4 lg:col-span-2" data-dirty-group="the status page settings">
     <div class="mb-4 flex items-center justify-between gap-3">
       <h3 class="flex items-center gap-2 font-semibold">{{{icon 'globe' 'size-4 text-ok'}}} Public Status Page</h3>
       <span class="msm-toggle"><input type="checkbox" id="ig-sp-enabled" {{#if integrations.statusPage.enabled}}checked{{/if}}><span></span></span>
@@ -214,7 +214,7 @@
         <p class="help">Anyone with the link sees the name, MOTD, version, player count, and uptime, and nothing else. There is no way into the panel from it. Off by default.</p>
       </div>
       <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-        <button class="btn btn-primary" id="ig-sp-save">Save</button>
+        <button data-dirty-save class="btn btn-primary" id="ig-sp-save">Save</button>
         {{#if (and integrations.statusPage.enabled integrations.statusPage.path)}}
           <a class="btn" href="{{integrations.statusPage.path}}" target="_blank" rel="noopener" id="ig-sp-link">{{{icon 'link' 'size-4'}}} Open Page</a>
           <button class="btn btn-ghost" id="ig-sp-copy">{{{icon 'copy' 'size-4'}}} Copy Link</button>

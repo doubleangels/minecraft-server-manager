@@ -3,6 +3,8 @@ import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { setBusy, withBusy } from '../lib/loading.js';
 import { fmtBytes, escapeHtml } from '../lib/format.js';
+import { openModal } from '../lib/modal.js';
+import { undoableDelete } from '../lib/undo.js';
 
 const log = document.getElementById('console-log');
 const input = document.getElementById('console-input');
@@ -419,7 +421,127 @@ function init(serverId) {
         input.value = '';
       }
     });
-  document.querySelectorAll('[data-quick-cmd]').forEach((chip) => {
-    chip.addEventListener('click', () => send(chip.dataset.quickCmd, chip));
+  // Built-in and custom chips alike: one delegated handler (custom ones are
+  // re-rendered after every edit).
+  document.addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-quick-cmd]');
+    if (chip && !e.target.closest('[data-quick-remove]')) send(chip.dataset.quickCmd, chip);
   });
+  initCustomQuick();
+}
+
+// ---- Custom quick buttons (per server, shared by every admin) ----
+function initCustomQuick() {
+  const host = document.querySelector('[data-quick-custom]');
+  const addBtn = document.querySelector('[data-quick-add]');
+  if (!host || !addBtn) return;
+  const serverId = host.dataset.serverId;
+  let list = [];
+  try {
+    list = JSON.parse(host.dataset.quick || '[]') || [];
+  } catch {
+    list = [];
+  }
+
+  const render = () => {
+    host.replaceChildren(
+      ...list.map((c, i) => {
+        const chip = document.createElement('span');
+        chip.className = 'chip cursor-pointer gap-1 pr-1';
+        chip.dataset.quickCmd = c.command;
+        chip.setAttribute('role', 'button');
+        chip.tabIndex = 0;
+        chip.dataset.tip = `Runs: ${c.command}`;
+        const label = document.createElement('span');
+        label.textContent = c.label;
+        const x = document.createElement('button');
+        x.type = 'button';
+        x.className = 'grid size-5 place-items-center rounded-sm text-ink-faint hover:text-danger';
+        x.dataset.quickRemove = String(i);
+        x.setAttribute('aria-label', `Remove ${c.label}`);
+        x.textContent = '×';
+        chip.append(label, x);
+        chip.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            chip.click();
+          }
+        });
+        return chip;
+      })
+    );
+  };
+  const save = (next, opts = {}) =>
+    fetch(`/api/servers/${encodeURIComponent(serverId)}/console-quick`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commands: next }),
+      ...opts,
+    });
+
+  host.addEventListener('click', (e) => {
+    const x = e.target.closest('[data-quick-remove]');
+    if (!x) return;
+    e.stopPropagation();
+    const i = Number(x.dataset.quickRemove);
+    const before = list.slice();
+    const removed = list[i];
+    undoableDelete({
+      message: `Removed the ${removed.label} button.`,
+      hide: () => {
+        list = before.filter((_, j) => j !== i);
+        render();
+      },
+      restore: () => {
+        list = before;
+        render();
+      },
+      commit: (opts) => save(list, opts),
+      failed: 'remove that button',
+    });
+  });
+
+  addBtn.addEventListener('click', () => {
+    const content = document.createElement('div');
+    content.className = 'space-y-3';
+    content.innerHTML = `
+      <div><label class="label" for="qb-label">Button name</label>
+        <input class="input" id="qb-label" maxlength="32" placeholder="Night vision for everyone" autocomplete="off"></div>
+      <div><label class="label" for="qb-cmd">Command</label>
+        <input class="input font-mono" id="qb-cmd" maxlength="256" placeholder="effect give @a night_vision 600" autocomplete="off" spellcheck="false">
+        <p class="help">Runs on the server console, exactly as if typed above. No leading slash needed.</p></div>`;
+    openModal({
+      title: 'Add a Quick Button',
+      content,
+      actions: [
+        { label: 'Cancel', kind: 'ghost' },
+        {
+          label: 'Add Button',
+          kind: 'primary',
+          busyLabel: 'Adding…',
+          onClick: async () => {
+            const label = content.querySelector('#qb-label').value.trim();
+            const command = content.querySelector('#qb-cmd').value.trim();
+            if (!label || !command) {
+              toast('Give the button a name and a command.', { kind: 'error' });
+              return false;
+            }
+            const next = [...list, { label, command }];
+            const res = await save(next).catch(() => null);
+            const data = res ? await res.json().catch(() => ({})) : {};
+            if (!res || !res.ok || data.ok === false) {
+              toast(data.error || friendlyError(res, { action: 'add that button' }), { kind: 'error' });
+              return false;
+            }
+            list = data.commands;
+            render();
+            toast(`Added the ${label} button.`);
+          },
+        },
+      ],
+    });
+    setTimeout(() => content.querySelector('#qb-label')?.focus(), 50);
+  });
+
+  render();
 }

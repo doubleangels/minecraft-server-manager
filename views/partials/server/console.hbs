@@ -61,6 +61,9 @@
     <button class="chip" data-quick-cmd="save-all">{{{icon 'save' 'size-3.5'}}} save-all</button>
     <button class="chip" data-quick-cmd="whitelist list">{{{icon 'clipboard-copy' 'size-3.5'}}} whitelist list</button>
     <button class="chip" data-quick-cmd="list">{{{icon 'users' 'size-3.5'}}} list</button>
+    {{! This server's own buttons, rendered by console.js (shared by every admin). }}
+    <span class="contents" data-quick-custom data-quick="{{jsonAttr quickCommands}}" data-server-id="{{server.id}}"></span>
+    <button class="chip border-dashed" data-quick-add data-tip="Add a button for a command you run often on this server.">{{{icon 'plus' 'size-3.5'}}} Add Button</button>
   </div>
 </div>
 <script type="module" src="/js/pages/console.js"></script>

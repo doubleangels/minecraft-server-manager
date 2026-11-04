@@ -4,7 +4,7 @@
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { openModal } from '../lib/modal.js';
-import { confirmDialog } from '../lib/confirm.js';
+import { undoableDelete } from '../lib/undo.js';
 import { withBusy } from '../lib/loading.js';
 import { PLAYER_NAME_RE } from '../lib/playerName.js';
 import { escapeHtml as esc } from '../lib/format.js';
@@ -394,23 +394,18 @@ function init(root) {
     if (e.target.closest('[data-cc-edit]')) {
       commandModal(cmd);
     } else if (e.target.closest('[data-cc-delete]')) {
-      const ok = await confirmDialog({
-        title: `Delete ${prefix}${cmd.trigger}?`,
-        message: 'Players will no longer be able to use it. This cannot be undone.',
-        confirmLabel: 'Delete',
-      });
-      if (!ok) return;
-      try {
-        await withBusy(e.target.closest('[data-cc-delete]'), async () => {
-          await api('DELETE', `/${cmd.id}`);
+      undoableDelete({
+        message: `Deleted ${prefix}${cmd.trigger}.`,
+        hide: () => row.classList.add('hidden'),
+        restore: () => row.classList.remove('hidden'),
+        commit: (opts) => fetch(`/api/servers/${serverId}/chat-commands/${cmd.id}`, { method: 'DELETE', ...opts }),
+        failed: 'delete that command',
+        onCommitted: () => {
           commands = commands.filter((c) => c.id !== cmd.id);
-          if (!commands.length) return refresh(`${prefix}${cmd.trigger} deleted.`); // re-render shows the empty state
           row.remove();
-          toast(`${prefix}${cmd.trigger} deleted.`);
-        });
-      } catch (err) {
-        fail(err);
-      }
+          if (!commands.length) setTimeout(() => location.reload(), 400); // the empty state
+        },
+      });
     } else if (e.target.closest('[data-cc-test]')) {
       testModal(cmd);
     }
