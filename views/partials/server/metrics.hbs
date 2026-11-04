@@ -55,23 +55,23 @@
   </div>
 
   {{! ---- Charts ---- }}
-  <div class="mt-4 grid gap-4 lg:grid-cols-2">
+  <div class="mt-4 grid gap-4 lg:grid-cols-2 [&>*]:min-w-0">
     <div class="card p-4">
       <h3 class="mb-2 font-semibold">CPU <span class="text-xs font-normal text-ink-faint">vs limit</span></h3>
-      <canvas data-chart="cpu" height="140"></canvas>
+      <canvas class="max-w-full" data-chart="cpu" height="140"></canvas>
     </div>
     <div class="card p-4">
       <h3 class="mb-2 font-semibold">Memory <span class="text-xs font-normal text-ink-faint">vs container limit</span></h3>
-      <canvas data-chart="memory" height="140"></canvas>
+      <canvas class="max-w-full" data-chart="memory" height="140"></canvas>
       {{#if server.memory.note}}<p class="mt-2 text-xs text-ink-faint">{{server.memory.note}}</p>{{/if}}
     </div>
     <div class="card p-4">
       <h3 class="mb-2 font-semibold">Network</h3>
-      <canvas data-chart="network" height="140"></canvas>
+      <canvas class="max-w-full" data-chart="network" height="140"></canvas>
     </div>
     <div class="card p-4" data-tps-card {{#unless server.stats.perfSupported}}hidden{{/unless}}>
       <h3 class="mb-2 font-semibold">Tick Rate <span class="text-xs font-normal text-ink-faint">TPS &amp; ms per tick</span></h3>
-      <canvas data-chart="tps" height="140"></canvas>
+      <canvas class="max-w-full" data-chart="tps" height="140"></canvas>
       <p class="help">20 TPS is a healthy server. A lasting drop means the server can't keep up with what's happening in the world.</p>
     </div>
   </div>

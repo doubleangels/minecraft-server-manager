@@ -4,7 +4,7 @@
     scrolling chip row on a phone, a sticky list on desktop) reaches each
     section, and Save stays pinned to the bottom of the screen. }}
 <div class="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-6" data-settings-server="{{server.id}}" data-settings-icon="{{server.icon}}" data-settings-accent="{{server.accent}}" data-settings-tags="{{jsonAttr server.tags}}" data-settings-env="{{settingsEnv}}" data-settings-docker-name="{{server.containerName}}" data-settings-docker-network="{{server.networkName}}" data-settings-docker-ports="{{jsonAttr server.extraPorts}}" data-settings-docker-binds="{{jsonAttr server.extraBinds}}">
-  <nav class="-mx-1 mb-4 flex gap-1 overflow-x-auto px-1 pb-1 lg:sticky lg:top-24 lg:mx-0 lg:mb-0 lg:flex-col lg:self-start lg:overflow-visible lg:px-0" aria-label="Settings sections" data-settings-jump>
+  <nav class="mb-4 flex flex-wrap gap-1 lg:sticky lg:top-24 lg:mx-0 lg:mb-0 lg:flex-col lg:self-start lg:overflow-visible lg:px-0" aria-label="Settings sections" data-settings-jump>
     <a class="subtab shrink-0" href="#sec-general" data-jump="sec-general">General</a>
     <a class="subtab shrink-0" href="#sec-startup" data-jump="sec-startup">Startup &amp; Updates</a>
     <a class="subtab shrink-0" href="#sec-resources" data-jump="sec-resources">Resources</a>

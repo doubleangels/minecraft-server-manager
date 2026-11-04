@@ -22,14 +22,14 @@
     <tbody>
       {{#each backups}}
         <tr data-backup-row data-backup-id="{{id}}" data-server-id="{{serverId}}" data-server-name="{{server}}" data-file="{{file}}" data-size="{{size}}" data-reason="{{reason}}">
-          <td data-th="Server" class="whitespace-nowrap"><a class="text-link hover:underline" href="/servers/{{serverId}}/backups">{{server}}</a></td>
+          <td data-th="Server" class="sm:whitespace-nowrap"><a class="text-right text-link hover:underline sm:text-left" href="/servers/{{serverId}}/backups">{{server}}</a></td>
           {{! w-full + max-w-0 (sm+ only) so long archive names truncate instead of pushing Actions off-screen. }}
           <td data-th="Archive" class="sm:w-full sm:max-w-0"><span class="block truncate font-mono text-xs" title="{{file}}">{{file}}</span></td>
           <td data-th="Reason"><span class="badge {{#if (eq reason 'pre-update')}}badge-warn{{/if}}">{{reason}}</span></td>
           <td data-th="Size" class="whitespace-nowrap text-right text-ink-faint">{{bytes size}}</td>
           <td data-th="Created" class="whitespace-nowrap text-right text-ink-faint" data-ts="{{ts}}">{{ts}}</td>
           <td data-th="" class="text-right"><div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap">
-            <button class="btn btn-ghost btn-sm text-warn" data-backup-action="restore" data-tip="Restore (stops the server, safety backup taken first).">{{{icon 'undo-2' 'size-3.5'}}}</button>
+            <button class="btn btn-ghost btn-sm text-warn" data-backup-action="restore" data-tip="Restore (stops the server, safety backup taken first)." aria-label="Restore {{file}}">{{{icon 'undo-2' 'size-3.5'}}}</button>
             <button class="btn btn-ghost btn-sm" data-backup-action="verify" data-tip="Check that the archive is readable and undamaged." aria-label="Verify {{file}}">{{{icon 'shield-check' 'size-3.5'}}}</button>
             <button class="btn btn-ghost btn-sm" data-backup-action="download" data-tip="Download this archive.">{{{icon 'download' 'size-3.5'}}}</button>
             <button class="btn btn-ghost btn-sm" data-backup-action="rename" data-tip="Rename this archive." aria-label="Rename {{file}}">{{{icon 'square-pen' 'size-3.5'}}}</button>

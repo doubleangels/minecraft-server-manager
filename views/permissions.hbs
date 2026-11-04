@@ -40,7 +40,7 @@
           <tbody>
             {{#each matrix.rows}}
               <tr data-user-id="{{user.id}}" data-username="{{user.username}}" data-role="{{user.role}}">
-                <td data-th="User" class="whitespace-nowrap font-medium">
+                <td data-th="User" class="font-medium sm:whitespace-nowrap">
                   {{user.username}}
                   <span class="badge ml-1">{{capitalize user.role}}</span>
                 </td>

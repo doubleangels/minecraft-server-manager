@@ -658,6 +658,13 @@
      the label and let its buttons sit on their own line. Keep the usual
      overflow-x-auto wrapper for the sm-and-up table. */
   @media (width < 40rem) {
+    /* The table and its body size to the card, not to their widest content:
+       as a table they'd grow to fit the longest file or mod name and run off
+       the right edge of the screen. */
+    .table-stack,
+    .table-stack tbody {
+      @apply block w-full;
+    }
     .table-stack thead {
       @apply sr-only;
     }
@@ -668,11 +675,19 @@
       @apply mt-2;
     }
     .table-stack td {
-      @apply flex items-baseline justify-between gap-4 border-0 px-0 py-1 text-sm;
+      @apply flex min-w-0 items-baseline justify-between gap-4 border-0 px-0 py-1 text-sm;
+      overflow-wrap: anywhere;
+    }
+    /* A value may shrink (truncate, or wrap a long unbroken name) instead of
+       pushing the row past the card. */
+    .table-stack td > * {
+      @apply min-w-0 max-w-full;
     }
     .table-stack td::before {
       content: attr(data-th);
-      @apply shrink-0 text-xs font-semibold uppercase tracking-wider text-ink-faint;
+      /* Long labels (a server name heading a permissions column) wrap within
+         about half the row instead of pushing the value off-screen. */
+      @apply max-w-[55%] shrink-0 text-xs font-semibold uppercase tracking-wider text-ink-faint;
     }
     .table-stack td[data-th='']::before {
       content: none;
