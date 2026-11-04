@@ -515,7 +515,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
       if (!data.ok) {
         const p = document.createElement('p');
         p.className = 'p-6 text-center text-sm text-danger';
-        p.textContent = data.error || 'Search failed'; // upstream text — never innerHTML
+        p.textContent = data.error || 'Search failed.'; // upstream text, never innerHTML
         results.replaceChildren(p);
         return;
       }

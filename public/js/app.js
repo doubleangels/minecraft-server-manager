@@ -535,9 +535,22 @@ document.addEventListener('click', async (e) => {
     } catch {
       /* transient */
     }
-    setTimeout(tick, 8000);
+    schedule();
   }
-  setTimeout(tick, 8000);
+  // A hidden tab (or a backgrounded app) only needs to catch up eventually:
+  // 30 s instead of 8 s, and an immediate refresh when it comes back.
+  let timer;
+  const schedule = () => {
+    clearTimeout(timer);
+    timer = setTimeout(tick, document.visibilityState === 'hidden' ? 30000 : 8000);
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      clearTimeout(timer);
+      tick();
+    }
+  });
+  schedule();
 })();
 
 // ---- Server sections reopen on the sub-page you last used ----

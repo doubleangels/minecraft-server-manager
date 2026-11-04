@@ -70,20 +70,38 @@ function publicAddress(port) {
   return h ? `${h}:${port}` : null;
 }
 
-/**
- * The one address to hand players: the public domain when one is set,
- * otherwise this machine's first LAN IPv4, otherwise localhost.
- * @param {number} port
- */
-function connectAddress(port) {
-  const pub = publicAddress(port);
-  if (pub) return pub;
-  for (const nics of Object.values(require('node:os').networkInterfaces())) {
+// This machine's first LAN IPv4, looked up at most every 30 seconds: the
+// sidebar asks once per server on every page load.
+let lanCache = { at: 0, host: 'localhost' };
+function lanHost() {
+  if (Date.now() - lanCache.at < 30_000) return lanCache.host;
+  let host = 'localhost';
+  outer: for (const nics of Object.values(require('node:os').networkInterfaces())) {
     for (const nic of nics || []) {
-      if (nic.family === 'IPv4' && !nic.internal) return `${nic.address}:${port}`;
+      if (nic.family === 'IPv4' && !nic.internal) {
+        host = nic.address;
+        break outer;
+      }
     }
   }
-  return `localhost:${port}`;
+  lanCache = { at: Date.now(), host };
+  return host;
+}
+
+/** The host players connect to: the public domain when set, else the LAN IP. */
+function connectHost() {
+  return getPublicHost() || lanHost();
+}
+
+/**
+ * The one address to hand players: the public domain when one is set,
+ * otherwise this machine's first LAN IPv4, otherwise localhost. Pass `host`
+ * (from connectHost) when building many at once.
+ * @param {number} port
+ * @param {string} [host]
+ */
+function connectAddress(port, host = connectHost()) {
+  return `${host}:${port}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -295,6 +313,7 @@ module.exports = {
   setPublicHost,
   publicAddress,
   connectAddress,
+  connectHost,
   normalizeHost,
   isPublicApiEnabled,
   setPublicApiEnabled,

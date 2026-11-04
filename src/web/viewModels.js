@@ -67,11 +67,12 @@ function sidebarServerVMs() {
     ))
       sizes.set(r.rel_path, r.size_bytes);
   }
-  const { connectAddress } = require('../services/settings');
+  const { connectAddress, connectHost } = require('../services/settings');
+  const host = connectHost(); // once per render, not once per server
   return rows.map((s) => ({
     id: s.id,
     name: s.display_name,
-    address: connectAddress(s.port_game),
+    address: connectAddress(s.port_game, host),
     icon: s.icon,
     accent: s.accent,
     status: s.status,

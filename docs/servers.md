@@ -61,6 +61,20 @@ The **World Controls** rail rides along on every tab: the in-game clock, weather
 
 ![Live monitoring](images/monitoring-live.png)
 
+### Warning players before a restart or stop
+
+When players are online, **Restart** and **Stop** ask whether to warn them first, with a countdown of 1 to 10 minutes. The countdown goes out in the game chat ("Restarting the server in 5 minutes. Find a safe spot."), then again at 2 minutes, 1 minute, 30 seconds, 10 seconds and each of the last 5 seconds, and the action runs when it reaches zero. It follows along in the task tray, so you can leave the page. If the server is stopped some other way during the countdown, nothing more happens.
+
+Scheduled restarts and stops (and **Restart all running servers**) have the same choice in the schedule: **Warn players first**, 5 minutes by default for new schedules. Nobody online means no countdown and no wait.
+
+### Console quick buttons
+
+Under the console's command box sit one-click buttons for common commands. **Add Button** saves your own for this server (a name and a command, up to 20), shared with every admin who can use the console. The × on a button removes it, with **Undo** for ten seconds.
+
+### Last seen
+
+The **Roster** shows when each offline player last left the server, from the panel's own record of play sessions. A player from before the panel watched this server shows an estimate from the server's own name cache, marked "about".
+
 ## Server settings
 
 **Settings → Configuration** is the full configuration surface: name, description, MOTD, icon, color and tags, resources, the game port, update policy, start on panel boot and auto-restart on crash, every environment variable the server image supports, the advanced Docker settings, and blueprint export, clone, rebuild, and delete. Changes that only take effect once the server is rebuilt are saved right away and wait: an **Apply Changes** button appears in the server's header, and they are also applied the next time the server starts.
