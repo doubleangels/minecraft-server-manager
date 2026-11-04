@@ -164,9 +164,16 @@ function init(root) {
       );
       cell.innerHTML = `
         <span data-slot-abbrev>${esc(abbrev(item.id))}</span>
-        ${item.count > 1 ? `<span class="absolute bottom-0 right-0.5 text-[9px] font-bold">${esc(item.count)}</span>` : ''}
-        ${enchanted ? '<span class="absolute left-0.5 top-0 text-[9px]">*</span>' : ''}
-        ${hasNested ? '<span class="absolute left-0.5 bottom-0.5 size-1.5 rounded-full bg-grass-400" aria-hidden="true"></span>' : ''}`;
+        ${
+          // z-10: the item image is appended after these and would cover them.
+          // White with a hard shadow, like the game's own stack counts, so it
+          // reads on any icon in either theme.
+          item.count > 1
+            ? `<span class="pointer-events-none absolute bottom-0 right-0.5 z-10 text-[10px] font-bold leading-none text-white [text-shadow:1px_1px_0_#000,0_0_2px_#000]">${esc(item.count)}</span>`
+            : ''
+        }
+        ${enchanted ? '<span class="pointer-events-none absolute left-0.5 top-0 z-10 text-[10px] font-bold text-link [text-shadow:1px_1px_0_#000]">*</span>' : ''}
+        ${hasNested ? '<span class="pointer-events-none absolute bottom-0.5 left-0.5 z-10 size-1.5 rounded-full bg-grass-400 ring-1 ring-black/60" aria-hidden="true"></span>' : ''}`;
       // The bundled icon set only covers vanilla - modded items (and the rare
       // vanilla id it's missing) just keep the text abbreviation as-is.
       if (iconBase && item.id.startsWith('minecraft:')) {
