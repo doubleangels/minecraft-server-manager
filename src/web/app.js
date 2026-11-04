@@ -13,6 +13,44 @@ const { avatarSrc } = require('../config/avatars');
 const { marked } = require('marked');
 const sanitizeHtml = require('sanitize-html');
 const logger = require('../logger')('web');
+
+/**
+ * True when any client source file is newer than the built bundle: the code was
+ * updated (a git pull, a copied release) without `pnpm run build`. Serving that
+ * bundle would quietly run the previous version's scripts, fixed bugs and all,
+ * so the raw source (always current) is served instead.
+ * @param {string} srcDir public/js
+ * @param {string} distDir public/dist/js
+ */
+function jsBundleIsStale(srcDir, distDir) {
+  const newest = (dir) => {
+    let max = 0;
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, ent.name);
+      if (ent.isDirectory()) max = Math.max(max, newest(p));
+      else if (ent.name.endsWith('.js')) max = Math.max(max, fs.statSync(p).mtimeMs);
+    }
+    return max;
+  };
+  try {
+    const src = newest(srcDir);
+    // The OLDEST built file: a partial or interrupted build must count as stale too.
+    let built = Infinity;
+    for (const name of fs.readdirSync(path.join(distDir, 'pages'))) {
+      if (name.endsWith('.js')) built = Math.min(built, fs.statSync(path.join(distDir, 'pages', name)).mtimeMs);
+    }
+    if (src > built) {
+      logger.warn('Serving the client script source because the built bundle is older than it.', {
+        distDir,
+        fix: 'pnpm run build',
+      });
+      return true;
+    }
+    return false;
+  } catch {
+    return false; // unreadable layout: keep the old behavior (serve the bundle if present)
+  }
+}
 const { captureError } = require('../instrument');
 const { serializeError } = require('../utils/logSanitize');
 
@@ -242,8 +280,8 @@ function createApp() {
   //    9.5 MB) are content-stable - their bytes never change without a new
   //    filename - so cache them hard and skip the conditional-GET storm those
   //    directories otherwise trigger on every page load.
-  //  - app-owned css/js still only gets a 1-hour max-age (not `immutable`), so a
-  //    deploy is picked up within the hour even before the hashed-bundle step.
+  //  - app-owned css/js revalidates on every load (cheap 304s), so a deploy is
+  //    live on the next page view.
   const ONE_YEAR = 31536000;
 
   // Serve the minified esbuild bundles from public/dist/js in place of the raw
@@ -251,7 +289,8 @@ function createApp() {
   // (fresh `pnpm start`, or `pnpm dev`) -> this falls straight through to the
   // raw source below, so nothing breaks without a build step.
   const DIST_JS_DIR = path.join(config.root, 'public', 'dist', 'js');
-  const hasJsBundle = fs.existsSync(DIST_JS_DIR);
+  const hasJsBundle =
+    fs.existsSync(DIST_JS_DIR) && !jsBundleIsStale(path.join(config.root, 'public', 'js'), DIST_JS_DIR);
   if (hasJsBundle) {
     app.use('/js', (req, res, next) => {
       if (req.method !== 'GET' && req.method !== 'HEAD') return next();
@@ -267,7 +306,9 @@ function createApp() {
       fs.access(built, fs.constants.R_OK, (err) => {
         if (err) return next();
         res.type('application/javascript');
-        res.setHeader('Cache-Control', 'public, max-age=3600');
+        // Revalidate every load (a 304 when unchanged): an hour of max-age kept
+        // running a fixed bug's old script long after an update.
+        res.setHeader('Cache-Control', 'no-cache');
         res.sendFile(built);
       });
     });
@@ -282,10 +323,15 @@ function createApp() {
   //    deploy is picked up within the hour even before the hashed-bundle step.
   app.use(
     express.static(path.join(config.root, 'public'), {
-      maxAge: '1h',
       setHeaders(res, filePath) {
         if (/[\\/](fonts|icons)[\\/]/.test(filePath)) {
           res.setHeader('Cache-Control', `public, max-age=${ONE_YEAR}, immutable`);
+        } else if (/\.(js|css|mjs)$/.test(filePath)) {
+          // App code and styles revalidate on every load (304 when unchanged),
+          // so an update is live on the next page view, never an hour later.
+          res.setHeader('Cache-Control', 'no-cache');
+        } else {
+          res.setHeader('Cache-Control', 'public, max-age=3600');
         }
       },
     })
@@ -435,4 +481,4 @@ function createApp() {
   return app;
 }
 
-module.exports = { createApp, jsonScript, jsonAttr, orHelper, andHelper };
+module.exports = { createApp, jsonScript, jsonAttr, orHelper, andHelper, jsBundleIsStale };
