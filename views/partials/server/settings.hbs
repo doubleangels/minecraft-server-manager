@@ -74,7 +74,7 @@
           <label class="label" for="st-tag-input">Tags</label>
           {{! Chips are rendered by server-settings.js from data-settings-tags - no server copy, or they double up. }}
           <div class="flex flex-wrap items-center gap-1.5" id="st-tags">
-            <input class="input w-28" id="st-tag-input" placeholder="add tag…">
+            <input class="input w-28" id="st-tag-input" placeholder="Add a tag…">
           </div>
         </div>
         <div>
@@ -101,9 +101,9 @@
       <div class="mt-4 border-t border-line pt-4">
         <span class="label">Update policy</span>
         <div class="space-y-2 text-sm">
-          <label class="flex items-center gap-2.5"><input type="radio" name="up" value="manual" class="msm-radio" {{#if (eq server.updatePolicy 'manual')}}checked{{/if}}> Manual Only <span class="text-xs text-ink-faint">(never changes anything, and no update badges for this server)</span></label>
-          <label class="flex items-center gap-2.5"><input type="radio" name="up" value="notify" class="msm-radio" {{#if (eq server.updatePolicy 'notify')}}checked{{/if}}> Notify Me <span class="text-xs text-ink-faint">(show a badge when updates exist; you apply them)</span></label>
-          <label class="flex items-center gap-2.5"><input type="radio" name="up" value="auto" class="msm-radio" {{#if (eq server.updatePolicy 'auto')}}checked{{/if}}> Auto-Update <span class="text-xs text-ink-faint">(applies pack updates after the daily check: pre-update backup, health check, automatic rollback on failure, but never across Minecraft versions.)</span></label>
+          <label class="flex items-start gap-2.5"><input type="radio" name="up" value="manual" class="msm-radio mt-0.5" {{#if (eq server.updatePolicy 'manual')}}checked{{/if}}> <span><span class="font-medium">Manual Only</span><span class="block text-xs text-ink-faint">Never changes anything, and shows no update badges for this server.</span></span></label>
+        <label class="flex items-start gap-2.5"><input type="radio" name="up" value="notify" class="msm-radio mt-0.5" {{#if (eq server.updatePolicy 'notify')}}checked{{/if}}> <span><span class="font-medium">Notify Me</span><span class="block text-xs text-ink-faint">Shows a badge when updates exist. You apply them.</span></span></label>
+        <label class="flex items-start gap-2.5"><input type="radio" name="up" value="auto" class="msm-radio mt-0.5" {{#if (eq server.updatePolicy 'auto')}}checked{{/if}}> <span><span class="font-medium">Auto-Update</span><span class="block text-xs text-ink-faint">Applies pack updates after the daily check, with a pre-update backup, a health check and automatic rollback on failure. Never crosses Minecraft versions.</span></span></label>
         </div>
       </div>
   {{#if server.packUnpinned}}

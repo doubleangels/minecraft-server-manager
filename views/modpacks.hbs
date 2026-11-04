@@ -11,7 +11,7 @@
       {{! Honest label + weight: this button focuses the search field, it doesn't install anything. }}
       <button class="btn" id="packs-install-btn">{{{icon 'search' 'size-4'}}} Search Packs</button>
       {{#if (eq user.role 'admin')}}
-        <a href="/settings" class="btn">{{{icon 'key' 'size-4'}}} API Keys</a>
+        <a href="/settings#sec-keys" class="btn" data-tip="The CurseForge key that automatic CurseForge packs need.">{{{icon 'key' 'size-4'}}} Mod Site Keys</a>
       {{/if}}
     </div>
   </div>
@@ -42,7 +42,7 @@
             <div class="text-xs text-ink-faint">{{platformName pack.platform}} · on <a href="/servers/{{id}}" class="text-link hover:underline">{{name}}</a></div>
           </div>
           {{! CurseForge version names run long - truncate the chip, never the layout. }}
-          <span class="chip max-w-40 shrink-0" title="pinned @ {{pack.version}}"><span class="truncate">pinned @ {{pack.version}}</span></span>
+          <span class="chip max-w-40 shrink-0" title="Pinned at {{pack.version}}."><span class="truncate">pinned @ {{pack.version}}</span></span>
         </div>
         <div class="mt-3 flex items-center gap-2 border-t border-line pt-3 text-sm">
           {{#if updateAvailable}}

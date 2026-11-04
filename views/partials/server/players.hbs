@@ -137,10 +137,10 @@
   <div class="card mt-6 p-4">
     <div class="mb-3 flex flex-wrap items-end gap-2">
       <h3 class="w-full font-semibold">Banned IPs</h3>
-      <div class="ml-auto flex flex-wrap items-end justify-end gap-2">
-        <input class="input w-40 max-w-full" placeholder="IP address" id="banip-ip">
-        <input class="input w-48 max-w-full" placeholder="Reason (optional)" id="banip-reason">
-        <input class="input w-36 max-w-full" placeholder="Linked player" id="banip-player" list="banip-player-list" autocomplete="off" data-tip="Optional. Tags this ban with the player it belongs to, shown in the Player column below.">
+      <div class="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
+        <input class="input col-span-2 sm:w-40" placeholder="IP address" id="banip-ip" aria-label="IP address">
+        <input class="input col-span-2 sm:w-48" placeholder="Reason (optional)" id="banip-reason" aria-label="Reason">
+        <input class="input min-w-0 sm:w-36" placeholder="Linked player" id="banip-player" list="banip-player-list" autocomplete="off" data-tip="Optional. Tags this ban with the player it belongs to, shown in the Player column below.">
         <datalist id="banip-player-list">
           {{#each players}}<option value="{{name}}">{{/each}}
         </datalist>
@@ -152,7 +152,7 @@
           <option value="604800000">7 Days</option>
           <option value="2592000000">30 Days</option>
         </select>
-        <button class="btn btn-sm" id="banip-add">{{{icon 'ban' 'size-3.5'}}} Ban IP</button>
+        <button class="btn btn-sm col-span-2 sm:col-span-1" id="banip-add">{{{icon 'ban' 'size-3.5'}}} Ban IP</button>
       </div>
     </div>
     {{! Both branches stay in the DOM so bans/pardons can swap them in place. }}

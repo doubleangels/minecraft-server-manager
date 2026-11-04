@@ -1,6 +1,8 @@
-<a href="/servers/{{id}}" class="card group relative block overflow-hidden transition hover:border-line-strong hover:shadow-raised"
+{{! A crashed server, or one with unread crash reports, trades its accent edge
+    for redstone and a red outline, so it stands out in a full grid. }}
+<a href="/servers/{{id}}" class="card group relative block overflow-hidden transition hover:border-line-strong hover:shadow-raised{{#if (or (eq status 'crashed') crashesUnread)}} border-danger/50 bg-danger/5{{/if}}"
    data-filter="{{name}} {{flavor}} {{mcVersion}}{{#each tags}} {{this}}{{/each}}"
-   style="border-top: 3px solid {{accent}}">
+   style="border-top: 3px solid {{#if (or (eq status 'crashed') crashesUnread)}}var(--color-redstone-500){{else}}{{accent}}{{/if}}">
   <div class="p-4">
     <div class="flex items-start gap-3">
       <img src="{{iconSrc this.icon}}" alt="" class="size-11 shrink-0 rounded-md" style="background: {{accent}}" data-fallback-icon="/icons/servers/grass.svg">

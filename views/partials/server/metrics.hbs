@@ -103,13 +103,13 @@
     <div class="card p-4">
       <div class="mb-3 flex items-center justify-between gap-2">
         <h3 class="font-semibold">Recent Activity</h3>
-        <a class="text-xs text-link hover:underline" href="/servers/{{server.id}}/history">Full History →</a>
+        <a class="text-sm text-link hover:underline" href="/servers/{{server.id}}/history">View All →</a>
       </div>
       {{#if recentEvents.length}}
         <ul class="space-y-2 text-sm">
           {{#each recentEvents}}
             <li class="flex items-baseline justify-between gap-3">
-              <span class="min-w-0"><span class="truncate">{{summary}}</span> <span class="text-xs text-ink-faint">· {{actor}}</span></span>
+              <span class="min-w-0 break-words">{{summary}} <span class="whitespace-nowrap text-xs text-ink-faint">· {{actor}}</span></span>
               <span class="shrink-0 text-xs text-ink-faint" data-ts="{{ts}}">{{ts}}</span>
             </li>
           {{/each}}
@@ -118,7 +118,7 @@
         <p class="text-sm text-ink-faint">Nothing logged for this server yet.</p>
       {{/if}}
       {{#if server.crashesUnread}}
-        <p class="mt-3 border-t border-line pt-3 text-sm text-danger">{{server.crashesUnread}} unread {{plural server.crashesUnread 'crash report' 'crash reports'}}. See the Activity tab.</p>
+        <a class="mt-3 flex items-center gap-1.5 border-t border-line pt-3 text-sm font-medium text-danger hover:underline" href="/servers/{{server.id}}/history">{{{icon 'flame' 'size-4'}}} {{server.crashesUnread}} unread {{plural server.crashesUnread 'crash report' 'crash reports'}}. Open Activity →</a>
       {{/if}}
     </div>
   </div>

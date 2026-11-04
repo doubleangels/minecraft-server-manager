@@ -54,3 +54,21 @@ test('schedules can be narrowed to one server', async () => {
   assert.match(page, new RegExp(`data-focus-server="${SID}"`));
   assert.match(page, /Show All Schedules/);
 });
+
+test('a server with unread crash reports is marked red on its page, its card and the status row', async () => {
+  const db = require('../src/db');
+  db.run(
+    `INSERT INTO crash_reports (id, server_id, filename, file_mtime, size_bytes, summary)
+     VALUES ('cr_navred', ?, 'crash-red.txt', ?, 10, 'Ticking entity.')`,
+    SID,
+    new Date().toISOString()
+  );
+  const page = await html(`/servers/${SID}`);
+  assert.match(page, /card mb-6 overflow-hidden border-danger\/50" style="border-top: 3px solid var\(--color-redstone-500\)"/);
+  assert.match(page, /badge badge-danger">1 new crash</);
+  const dash = await html('/');
+  assert.match(dash, /border-danger\/50 bg-danger\/5"/);
+  assert.match(dash, /Servers by Status/);
+  db.run("UPDATE servers SET status = 'crashed' WHERE id = ?", SID);
+  assert.match(await html('/'), /font-semibold text-danger"><span class="status-dot bg-redstone-500"><\/span>1 Crashed/);
+});

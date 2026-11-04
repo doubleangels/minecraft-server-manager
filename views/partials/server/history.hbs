@@ -3,8 +3,10 @@
 {{! Phone: search on its own row, then both filters + Export share one row. }}
 <div class="mb-4 flex flex-wrap items-center gap-2">
   <input class="input w-full sm:w-auto sm:max-w-xs sm:flex-1" id="hist-search" type="search" placeholder="Search events…" aria-label="Search events">
-  <select class="input min-w-0 flex-1 sm:w-auto sm:flex-none" id="hist-type" data-label="Filter by type"><option value="">All Types</option></select>
-  <select class="input min-w-0 flex-1 sm:w-auto sm:flex-none" id="hist-actor" data-label="Filter by actor"><option value="">All Actors</option></select>
+  <div class="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:flex sm:flex-none">
+    <select class="input w-full sm:w-auto" id="hist-type" data-label="Filter by type"><option value="">All Types</option></select>
+    <select class="input w-full sm:w-auto" id="hist-actor" data-label="Filter by actor"><option value="">All Actors</option></select>
+  </div>
   <button class="btn btn-sm shrink-0 sm:ml-auto" data-menu="hist-export-menu">{{{icon 'download' 'size-3.5'}}} Export</button>
   <template id="hist-export-menu">
     <a href="/api/servers/{{server.id}}/events/export?format=json" target="_blank" rel="noopener">{{{icon 'file-text' 'size-3.5'}}} Export as JSON</a>

@@ -3,14 +3,17 @@
 {{#if (or events.length (or filters.q (or filters.server filters.type)))}}
 <form class="mb-4 flex flex-wrap items-center gap-2" method="get" action="/activity" id="activity-filters">
   <input class="input w-full sm:w-auto sm:max-w-xs sm:flex-1" type="search" aria-label="Search events" name="q" value="{{filters.q}}" placeholder="Search events…" autocomplete="off">
-  <select class="input min-w-0 flex-1 sm:w-auto sm:flex-none" name="server" data-label="Filter by server">
+  {{! Phone: both filters share one row; sm+: they sit inline at natural width. }}
+  <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+  <select class="input w-full sm:w-auto" name="server" data-label="Filter by server">
     <option value="">All Servers</option>
     {{#each servers}}<option value="{{id}}" {{#if (eq id ../filters.server)}}selected{{/if}}>{{name}}</option>{{/each}}
   </select>
-  <select class="input min-w-0 flex-1 sm:w-auto sm:flex-none" name="type" data-label="Filter by type">
+  <select class="input w-full sm:w-auto" name="type" data-label="Filter by type">
     <option value="">All Types</option>
     {{#each types}}<option value="{{this}}" {{#if (eq this ../filters.type)}}selected{{/if}}>{{this}}</option>{{/each}}
   </select>
+  </div>
   <button class="btn btn-sm" type="submit">{{{icon 'search' 'size-3.5'}}} Apply Filters</button>
   <div class="ml-auto flex gap-1">
     <a class="btn btn-sm" href="/api/events/export?format=csv{{exportQs}}" data-tip="Export the filtered events as CSV.">{{{icon 'download' 'size-3.5'}}} CSV</a>

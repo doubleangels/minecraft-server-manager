@@ -6,7 +6,7 @@
   <h2 class="pt-2 font-semibold">Server Permissions</h2>
   <p class="-mt-3 max-w-prose text-sm text-ink-faint">A role sets the default everywhere; a cell here overrides it for one server.</p>
   <section class="card p-4 sm:p-5">
-    <h3 class="text-sm font-semibold text-ink">How It Works</h3>
+    <h3 class="font-semibold text-ink">How It Works</h3>
     <ul class="mt-2 grid gap-1.5 text-xs leading-relaxed text-ink-faint sm:grid-cols-2">
       <li><b class="text-ink-soft">Admins</b> always have every permission on every server, so they are not listed here.</li>
       <li><b class="text-ink-soft">Operators</b> start with every permission on every server. <b class="text-ink-soft">Viewers</b> start with view only.</li>
@@ -60,11 +60,11 @@
       {{> empty-state iconName='server' title='No Servers Yet' message='Create a server first. Its column appears here as soon as it exists.' ctaHref='/servers/new' ctaLabel='Create a Server'}}
     {{/if}}
   {{else}}
-    {{> empty-state iconName='users' title='No Operators or Viewers Yet' message='Admins always have every permission. Add an operator or viewer account under Settings to give them access to specific servers.' ctaHref='/settings' ctaLabel='Manage Users'}}
+    {{> empty-state iconName='users' title='No Operators or Viewers Yet' message='Admins always have every permission. Add an operator or viewer account in Users above, then pick what they may do on each server here.' ctaHref='#users-card' ctaLabel='Add a User'}}
   {{/if}}
 
   <section class="card p-4 sm:p-5" id="permissions-reference">
-    <h3 class="text-sm font-semibold text-ink">What Each Permission Covers</h3>
+    <h3 class="font-semibold text-ink">What Each Permission Covers</h3>
     <p class="mt-1 max-w-prose text-xs leading-relaxed text-ink-faint">Open a permission to see what it lets a person do on a server, what people often expect but is a different permission, and the exact panel routes it unlocks. The last list is checked against the running code by the test suite, so it never drifts.</p>
     <div class="mt-4 divide-y divide-line">
       {{#each matrix.capabilities}}

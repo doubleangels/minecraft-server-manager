@@ -5,7 +5,7 @@
   <h1 class="min-w-0 flex-1 truncate text-lg font-semibold">{{title}}</h1>
   <div class="ml-auto flex shrink-0 items-center gap-2">
     <div id="task-tray" class="relative hidden">
-      <button class="btn btn-ghost btn-sm relative" aria-label="Background tasks" data-tip="Background tasks">
+      <button class="btn btn-ghost btn-sm relative" aria-label="Background tasks" data-tip="Background tasks in progress and just finished.">
         {{! The list icon stays put; the round ring around it spins only while something
             runs (a square ring would swing its corners as it turned). Reduced motion
             gets a still, full ring instead of a frozen arc. }}
@@ -28,7 +28,7 @@
         phone (hamburger + title + this + theme + avatar); aria-label keeps it
         announced to screen readers regardless of which span is visible. }}
     <a href="/servers/new" class="btn btn-primary btn-sm" aria-label="Create a Server" data-tip="Create a new server.">{{{icon 'plus' 'size-3.5'}}} <span class="hidden sm:inline">Create a Server</span></a>
-    <button id="theme-toggle" class="btn btn-ghost btn-sm" aria-label="Toggle theme" data-tip="Switch theme">
+    <button id="theme-toggle" class="btn btn-ghost btn-sm" aria-label="Toggle theme" data-tip="Switch between the dark and light theme.">
       <span data-theme-icon="dark">{{{icon 'moon' 'size-4'}}}</span><span data-theme-icon="light" class="hidden">{{{icon 'sun' 'size-4'}}}</span>
     </button>
     {{! rounded-md, not a circle - the only fully-round control would break the

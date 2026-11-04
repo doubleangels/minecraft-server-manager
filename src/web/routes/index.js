@@ -841,7 +841,7 @@ router.get(
 router.get('/wizard-transcripts', requireRole('admin'), (req, res) => {
   const wizard = require('../../services/wizard');
   res.render('wizard-transcripts', {
-    title: 'Chatbot transcripts',
+    title: 'Chatbot Transcripts',
     active: 'activity',
     transcripts: wizard.listTranscripts({ limit: 1000 }),
   });

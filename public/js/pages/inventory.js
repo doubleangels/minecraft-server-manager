@@ -387,7 +387,7 @@ function init(root) {
              <div class="font-mono text-xs text-ink-faint">${esc(picked.id)} → ${esc(slotName(at.container, at.slot))}</div>
            </div>`
         : `<div>
-             <label class="label">Item id</label>
+             <label class="label">Item ID</label>
              <input class="input font-mono" data-f="item" placeholder="minecraft:diamond" maxlength="130" autocomplete="off" spellcheck="false">
            </div>`;
       countDialog({
@@ -845,7 +845,7 @@ function init(root) {
            <div class="font-mono text-xs text-ink-faint">${esc(item.id)} → first free slot of ${esc(currentPlayerName() || currentUuid)}</div>
          </div>`
       : `<div>
-           <label class="label">Item id</label>
+           <label class="label">Item ID</label>
            <input class="input font-mono" data-f="item" placeholder="minecraft:diamond" maxlength="130" autocomplete="off" spellcheck="false">
          </div>`;
     countDialog({
@@ -887,7 +887,7 @@ function init(root) {
         </div>`
           : `
         <div>
-          <label class="label">Item id</label>
+          <label class="label">Item ID</label>
           <input class="input font-mono" data-f="item" placeholder="minecraft:diamond" maxlength="130" autocomplete="off" spellcheck="false">
         </div>`
       }
@@ -952,7 +952,7 @@ function init(root) {
         <input class="input" data-f="player" maxlength="16" value="${esc(currentPlayerName())}" autocomplete="off" spellcheck="false">
       </div>
       <div>
-        <label class="label">Item id (leave empty to clear everything)</label>
+        <label class="label">Item ID (leave empty to clear everything)</label>
         <input class="input font-mono" data-f="item" placeholder="minecraft:tnt" maxlength="130" autocomplete="off" spellcheck="false">
       </div>`;
     openModal({

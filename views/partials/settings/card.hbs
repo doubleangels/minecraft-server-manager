@@ -9,8 +9,8 @@
     id (optional element id). --}}
 <section class="card p-4 sm:p-5{{#if wide}} lg:col-span-2{{/if}}"{{#if id}} id="{{id}}"{{/if}}>
   <div class="mb-4">
-    <h3 class="text-sm font-semibold text-ink">{{heading}}</h3>
-    {{#if desc}}<p class="mt-1 max-w-prose text-xs leading-relaxed text-ink-faint">{{desc}}</p>{{/if}}
+    <h3 class="font-semibold text-ink">{{heading}}</h3>
+    {{#if desc}}<p class="help">{{desc}}</p>{{/if}}
   </div>
   {{> @partial-block}}
 </section>

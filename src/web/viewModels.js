@@ -413,7 +413,7 @@ function eventVMWithServer(e, server) {
     id: e.id,
     // Deleted servers keep their name in history but must not be linked (404).
     serverId: server && !server.deleted_at ? e.server_id : null,
-    server: server ? server.display_name + (server.deleted_at ? ' (deleted)' : '') : '- panel -',
+    server: server ? server.display_name + (server.deleted_at ? ' (deleted)' : '') : 'Panel',
     type: e.type,
     actor: e.actor,
     ts: e.created_at,

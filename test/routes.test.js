@@ -175,8 +175,8 @@ test('dashboard renders the combined resource overview', async () => {
   // The "At a glance" band (memory, storage, health, updates) renders.
   assert.match(r.text, /Memory allotted/);
   assert.match(r.text, /Storage used/);
-  // The per-status breakdown is folded into the Servers online tile.
-  assert.match(r.text, /\d+ stopped/);
+  // The per-status breakdown row (crashed servers in red).
+  assert.match(r.text, /Servers by Status/);
   // A stopped server produces no live breakdown, so the fallback copy shows.
   assert.match(r.text, /No servers are running right now\./);
 });

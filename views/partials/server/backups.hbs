@@ -51,8 +51,8 @@
                 identically to the harmless Download beside it. }}
             <button class="btn btn-ghost btn-sm text-warn" data-backup-restore data-tip="Stops the server and restores this archive. Start it again when the restore finishes.">{{{icon 'undo-2' 'size-3.5'}}} Restore</button>
             <button class="btn btn-ghost btn-sm" data-backup-verify data-tip="Check that the archive is readable and undamaged." aria-label="Verify {{file}}">{{{icon 'shield-check' 'size-3.5'}}}</button>
-            <a class="btn btn-ghost btn-sm" href="/api/backups/{{id}}/download" data-tip="Download archive" aria-label="Download {{file}}">{{{icon 'download' 'size-3.5'}}}</a>
-            <button class="btn btn-ghost btn-sm" data-backup-rename data-tip="Rename archive" aria-label="Rename {{file}}">{{{icon 'square-pen' 'size-3.5'}}}</button>
+            <a class="btn btn-ghost btn-sm" href="/api/backups/{{id}}/download" data-tip="Download this archive." aria-label="Download {{file}}">{{{icon 'download' 'size-3.5'}}}</a>
+            <button class="btn btn-ghost btn-sm" data-backup-rename data-tip="Rename this archive." aria-label="Rename {{file}}">{{{icon 'square-pen' 'size-3.5'}}}</button>
             <button class="btn btn-ghost btn-sm text-danger" data-backup-delete data-tip="Delete ({{bytes size}} freed)." aria-label="Delete {{file}}">{{{icon 'trash-2' 'size-3.5'}}}</button>
           </div></td>
         </tr>

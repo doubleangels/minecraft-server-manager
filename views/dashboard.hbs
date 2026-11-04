@@ -16,15 +16,6 @@
     <div class="text-xs text-ink-faint">Servers online</div>
     {{! Green only when something IS online - 0/3 in success green lied. }}
     <div class="mt-1 text-2xl font-bold tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-faint"> / {{totals.total}}</span></div>
-    {{! The status breakdown, folded in here instead of its own row. }}
-    <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-faint">
-      {{#if overview.byStatus.starting}}<span class="flex items-center gap-1"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.starting}} starting</span>{{/if}}
-      {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.unhealthy}} unhealthy</span>{{/if}}
-      {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.stalled}} stalled</span>{{/if}}
-      {{#if overview.byStatus.updating}}<span class="flex items-center gap-1"><span class="status-dot bg-diamond-500"></span>{{overview.byStatus.updating}} updating</span>{{/if}}
-      {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.crashed}} crashed</span>{{/if}}
-      {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1"><span class="status-dot bg-stone-500"></span>{{overview.byStatus.stopped}} stopped</span>{{/if}}
-    </div>
   </div>
   <div class="card p-4">
     <div class="text-xs text-ink-faint">Players connected</div>
@@ -68,6 +59,21 @@
 
 
 
+
+{{#unless serversOnly}}
+<div class="mb-6 {{#if noServers}}hidden{{/if}}">
+  <h2 class="mb-3 font-semibold">Servers by Status</h2>
+  <div class="card flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm">
+    {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot bg-grass-500"></span>{{overview.byStatus.running}} Running</span>{{/if}}
+    {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
+    {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5 text-warn"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
+    {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
+    {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot bg-diamond-500"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
+    {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
+    {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot bg-stone-500"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
+  </div>
+</div>
+{{/unless}}
 
 {{#unless noServers}}
 {{#unless serversOnly}}<h2 class="mb-3 font-semibold">Servers</h2>{{/unless}}

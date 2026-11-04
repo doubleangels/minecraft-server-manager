@@ -77,7 +77,7 @@
     {{! Shortcuts to the things people do most, each gated like its tab. }}
     <div class="card p-4">
       <h3 class="mb-3 font-semibold">Quick Actions</h3>
-      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
         {{#if perms.console}}<a class="btn justify-start" href="/servers/{{server.id}}/console">{{{icon 'terminal' 'size-4'}}} Run a Command</a>{{/if}}
         {{#if perms.backups}}<a class="btn justify-start" href="/servers/{{server.id}}/backups">{{{icon 'save' 'size-4'}}} Take a Backup</a>{{/if}}
         <a class="btn justify-start" href="/servers/{{server.id}}/invites">{{{icon 'send' 'size-4'}}} Invite Players</a>
