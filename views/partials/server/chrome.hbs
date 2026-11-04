@@ -54,7 +54,7 @@
         {{#if (eq server.status 'crashed')}}<a class="btn flex-1 sm:flex-none" href="/servers/{{server.id}}/history">{{{icon 'flame' 'size-4'}}} Latest Crash</a>{{/if}}
       {{/if}}
       {{#if server.pendingRecreate}}
-        <button class="btn flex-1 sm:flex-none" data-server-action="recreate" data-server-id="{{server.id}}" data-server-name="{{server.name}}" data-tip="Settings changed. Rebuild the container to apply them.">{{{icon 'wrench' 'size-4'}}} Apply Changes</button>
+        <button class="btn flex-1 sm:flex-none" data-server-action="recreate" data-server-id="{{server.id}}" data-server-name="{{server.name}}" data-players-online="{{server.players.online}}" data-tip="Settings changed. Rebuild the server to apply them.">{{{icon 'wrench' 'size-4'}}} Apply Changes</button>
       {{/if}}
     </div>
   </div>

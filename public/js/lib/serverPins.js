@@ -55,12 +55,18 @@ export function applyPins() {
   if (sideFirst) float(sideFirst.parentNode, ':scope > [data-sidebar-server]', (el) => el.dataset.sidebarServer);
 }
 
-// Buttons inside a card or sidebar link (pin, copy): act, never also navigate.
+// Buttons inside a card or sidebar link (pin, copy, open map): act, never also navigate.
 document.addEventListener(
   'click',
   (e) => {
-    const inner = e.target.closest('a [data-pin-server], a [data-copy]');
+    const inner = e.target.closest('a [data-pin-server], a [data-copy], a [data-open-href]');
     if (inner) e.preventDefault();
+    const open = e.target.closest('[data-open-href]');
+    if (open) {
+      e.stopPropagation();
+      window.open(open.dataset.openHref, '_blank', 'noopener');
+      return;
+    }
     const pin = e.target.closest('[data-pin-server]');
     if (!pin) return;
     e.stopPropagation();

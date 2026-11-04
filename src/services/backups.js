@@ -460,6 +460,25 @@ async function renameBackup(backupId, newName, { actor = 'system' } = {}) {
   return updated;
 }
 
+/** Set (or clear, with '') a backup's note. Returns the updated row. */
+function setBackupNote(backupId, note, { actor = 'system' } = {}) {
+  const backup = db.get('SELECT * FROM backups WHERE id = ?', backupId);
+  if (!backup) throw httpError(404, 'Backup not found.');
+  const clean = String(note || '')
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .trim()
+    .slice(0, 200);
+  if (clean === (backup.note || '')) return backup;
+  db.run('UPDATE backups SET note = ? WHERE id = ?', clean, backupId);
+  recordEvent({
+    serverId: backup.server_id,
+    actor,
+    type: 'backup-renamed',
+    summary: clean ? `Backup note set on ${backup.filename}.` : `Backup note cleared on ${backup.filename}.`,
+  });
+  return db.get('SELECT * FROM backups WHERE id = ?', backupId);
+}
+
 /**
  * Which backups retention would delete for one server under `cfg`, in order,
  * without deleting anything. Keeps the newest N per reason; 'pre-restore'
@@ -839,6 +858,7 @@ function sleep(ms) {
 // extra backup rather than a skipped one.
 const NON_DATA_EVENT_TYPES = [
   'schedule-fired',
+  'schedule-run-now',
   'schedule-failed',
   'schedule-created',
   'schedule-toggled',
@@ -913,6 +933,7 @@ async function isScheduledBackupRedundant(serverId) {
 }
 
 module.exports = {
+  setBackupNote,
   isScheduledBackupRedundant,
   createBackup,
   createBackupUnguarded: createBackupImpl,

@@ -11,10 +11,10 @@
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { confirmDialog } from '../lib/confirm.js';
-import { openModal } from '../lib/modal.js';
 import { fmtBytes } from '../lib/format.js';
 import { runTask } from '../lib/progress.js';
 import { setBusy } from '../lib/loading.js';
+import { openBackupEditor } from '../lib/backupEdit.js';
 
 document.addEventListener('click', async (e) => {
   const createBtn = e.target.closest('[data-backup-create]');
@@ -50,55 +50,9 @@ document.addEventListener('click', async (e) => {
   }
 
   if (action === 'rename') {
-    const content = document.createElement('div');
-    const label = document.createElement('label');
-    label.className = 'label';
-    label.setAttribute('for', 'bk-rename-name');
-    label.textContent = 'Archive name';
-    const input = document.createElement('input');
-    input.className = 'input font-mono';
-    input.id = 'bk-rename-name';
-    input.maxLength = 120;
-    input.value = file;
-    const help = document.createElement('p');
-    help.className = 'help';
-    help.textContent = 'Changes the displayed name and the file you download. Restore and retention are unaffected.';
-    content.append(label, input, help);
-    openModal({
-      title: 'Rename Backup',
-      content,
-      actions: [
-        { label: 'Cancel', kind: 'ghost' },
-        {
-          label: 'Rename',
-          kind: 'primary',
-          busyLabel: 'Renaming…',
-          onClick: async () => {
-            const name = input.value.trim();
-            if (!name) {
-              toast('Enter a name first.', { kind: 'error' });
-              return false;
-            }
-            try {
-              const res = await talk(`/api/backups/${encodeURIComponent(backupId)}`, 'PATCH', { filename: name });
-              row.dataset.file = res.backup.filename;
-              const text = row.querySelector('.truncate.font-mono');
-              if (text) {
-                text.textContent = res.backup.filename;
-                text.title = res.backup.filename;
-              }
-              toast('Backup renamed.');
-            } catch (err) {
-              toast(err.message || 'That backup could not be renamed.', { kind: 'error', timeout: 8000 });
-              return false;
-            }
-          },
-        },
-      ],
-    });
+    openBackupEditor(row);
     return;
   }
-
   if (action === 'restore') {
     const ok = await confirmDialog({
       title: `Restore this backup?`,

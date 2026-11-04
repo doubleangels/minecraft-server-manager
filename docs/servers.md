@@ -67,9 +67,21 @@ When players are online, **Restart** and **Stop** ask whether to warn them first
 
 Scheduled restarts and stops (and **Restart all running servers**) have the same choice in the schedule: **Warn players first**, 5 minutes by default for new schedules. Nobody online means no countdown and no wait.
 
+### Applying waiting changes
+
+Some settings only take effect once the server is rebuilt (memory limits, Docker options, image settings). After you save one, a **Changes are waiting** banner appears on every tab of that server with **Apply Changes**. On a running server that restarts it, so with players online it asks whether to warn them first, like Restart. The changes also apply on the server's next start.
+
 ### Console quick buttons
 
 Under the console's command box sit one-click buttons for common commands. **Add Button** saves your own for this server (a name and a command, up to 20), shared with every admin who can use the console. The × on a button removes it, with **Undo** for ten seconds.
+
+### Copying from the console
+
+Click a console line to copy it. To copy several lines, select them as usual; a click that ends a selection copies nothing extra.
+
+### Adding players
+
+**Add Players** on the Roster takes one name or many (one per line, or separated by commas or spaces, up to 100 at once), then whitelists and/or ops each of them. Duplicates are ignored, and a summary lists anyone who could not be added and why.
 
 ### Last seen
 

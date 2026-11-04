@@ -34,6 +34,22 @@ function init() {
     const row = e.target.closest('[data-schedule-row]');
     if (!row) return;
 
+    const runBtn = e.target.closest('[data-schedule-run]');
+    if (runBtn) {
+      runBtn.disabled = true;
+      try {
+        const res = await fetch(`/api/schedules/${row.dataset.scheduleId}/run`, { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false)
+          throw new Error(data.error || friendlyError(res, { action: 'run that task' }));
+        toast(`${row.dataset.task} is running. Follow it in the task tray.`, { kind: 'info' });
+      } catch (err) {
+        toast(err.message, { kind: 'error' });
+      } finally {
+        setTimeout(() => (runBtn.disabled = false), 1500);
+      }
+      return;
+    }
     const delBtn = e.target.closest('[data-schedule-delete]');
     if (delBtn) {
       // Undo instead of an "are you sure?": the row goes now, the delete ten
@@ -112,7 +128,7 @@ function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
   content.innerHTML = `
     <label class="label">Runs on</label>
     <select class="input" data-sc-server data-label="Runs on">
-      <option value="">Global (the panel itself)</option>
+      <option value="">Panel-Wide (No Server)</option>
       ${servers.map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`).join('')}
     </select>
     <label class="label mt-3">Task</label>

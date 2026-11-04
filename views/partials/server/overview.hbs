@@ -37,6 +37,8 @@
       <div><dt class="text-xs text-ink-faint">Start on Boot</dt><dd class="font-medium">{{#if server.autoStart}}Yes{{else}}No{{/if}}</dd></div>
       <div><dt class="text-xs text-ink-faint">Game Port</dt><dd class="font-medium">{{server.ports.game}}{{#if perms.settings}} <a class="ml-1 text-xs font-normal text-link hover:underline" href="/servers/{{server.id}}/settings#port">Change</a>{{/if}}</dd></div>
       <div><dt class="text-xs text-ink-faint">RCON Port</dt><dd class="font-medium">{{server.ports.rcon}}</dd></div>
+      <div><dt class="text-xs text-ink-faint">Next Backup</dt><dd class="font-medium">{{#if nextBackupMs}}<span data-ts-in="{{nextBackupMs}}">{{nextBackupMs}}</span>{{else}}<span class="text-warn">Not scheduled</span> <a class="ml-1 text-xs font-normal text-link hover:underline" href="/schedules?server={{server.id}}">Schedule</a>{{/if}}</dd></div>
+      <div><dt class="text-xs text-ink-faint">Next Restart</dt><dd class="font-medium">{{#if nextRestartMs}}<span data-ts-in="{{nextRestartMs}}">{{nextRestartMs}}</span>{{else}}<span class="text-ink-faint">Not scheduled</span>{{/if}}</dd></div>
     </dl>
     {{#if server.pack}}
       <div class="mt-4 rounded-md border border-line bg-raised p-3 text-sm">
@@ -81,6 +83,7 @@
         {{#if perms.console}}<a class="btn justify-start" href="/servers/{{server.id}}/console">{{{icon 'terminal' 'size-4'}}} Run a Command</a>{{/if}}
         {{#if perms.backups}}<a class="btn justify-start" href="/servers/{{server.id}}/backups">{{{icon 'save' 'size-4'}}} Take a Backup</a>{{/if}}
         <a class="btn justify-start" href="/servers/{{server.id}}/invites">{{{icon 'send' 'size-4'}}} Invite Players</a>
+        {{#if server.mapEnabled}}<a class="btn justify-start" href="/map/{{server.id}}/" target="_blank" rel="noopener">{{{icon 'map' 'size-4'}}} Open Live Map</a>{{/if}}
         {{#if perms.content}}<a class="btn justify-start" href="/servers/{{server.id}}/mods">{{{icon 'puzzle' 'size-4'}}} Add Mods</a>{{/if}}
         {{#if perms.files}}<a class="btn justify-start" href="/servers/{{server.id}}/files">{{{icon 'folder' 'size-4'}}} Edit Files</a>{{/if}}
         {{#if perms.settings}}<a class="btn justify-start" href="/servers/{{server.id}}/settings">{{{icon 'settings' 'size-4'}}} Change Settings</a>{{/if}}

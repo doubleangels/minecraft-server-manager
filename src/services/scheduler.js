@@ -403,7 +403,7 @@ function seedGlobalDefaults() {
 }
 
 function createSchedule({ serverId = null, taskType, cron, payload = {}, enabled = true }, { actor = 'system' } = {}) {
-  if (!TASK_TYPES[taskType]) throw httpError(400, `Unknown task type ${taskType}`);
+  if (!TASK_TYPES[taskType]) throw httpError(400, `Unknown task type ${taskType}.`);
   try {
     new Cron(cron, { timezone: getTimezone() }); // validates; throws on a bad expression
   } catch {
@@ -489,7 +489,7 @@ function listSchedules() {
       serverId: s.server_id,
       // serverNames maps id -> display name. A schedule whose server row is gone
       // shows its id, not "global", so it is not mistaken for a panel-wide one.
-      server: s.server_id ? (server ?? s.server_id) : '- global -',
+      server: s.server_id ? (server ?? s.server_id) : 'Panel-wide',
       task: TASK_TYPES[s.task_type]?.label || s.task_type,
       taskType: s.task_type,
       cron: s.cron,
@@ -503,7 +503,31 @@ function listSchedules() {
   });
 }
 
+/**
+ * Run a schedule's task now, outside its timing ("Run Now"). The same path as
+ * a timed firing: history event, task tray, busy retries, the restart/stop
+ * warning. Answers at once; the run continues in the background.
+ * @param {string} id
+ * @param {{ actor?: string }} [opts]
+ */
+function runNow(id, { actor = 'system' } = {}) {
+  const job = db.get('SELECT * FROM schedules WHERE id = ?', id);
+  if (!job) throw httpError(404, 'Schedule not found.');
+  if (waitingToRetry.has(job.id)) {
+    throw httpError(409, 'This schedule is already waiting to run. Try again when it has finished.');
+  }
+  recordEvent({
+    serverId: job.server_id || null,
+    actor,
+    type: 'schedule-run-now',
+    summary: `Ran a scheduled task now: ${TASK_TYPES[job.task_type]?.label || job.task_type}.`,
+  });
+  logger.info('Ran a scheduled task now.', { scheduleId: job.id, taskType: job.task_type, actor });
+  fireJob(job).catch(() => {}); // fireJob records and logs its own failure
+}
+
 module.exports = {
+  runNow,
   startScheduler,
   createSchedule,
   setEnabled,

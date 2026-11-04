@@ -428,6 +428,7 @@ function init(serverId) {
     if (chip && !e.target.closest('[data-quick-remove]')) send(chip.dataset.quickCmd, chip);
   });
   initCustomQuick();
+  initLineCopy();
 }
 
 // ---- Custom quick buttons (per server, shared by every admin) ----
@@ -544,4 +545,25 @@ function initCustomQuick() {
   });
 
   render();
+}
+
+// ---- Click a console line to copy it ----
+// A plain click copies that one line. Selecting text (to copy several lines)
+// works as before: a click that ends a selection copies nothing.
+function initLineCopy() {
+  if (!log) return;
+  log.title = 'Click a line to copy it. Select text to copy several lines.';
+  log.addEventListener('click', async (e) => {
+    const sel = window.getSelection();
+    if (sel && sel.toString().trim()) return;
+    const line = e.target.closest('#console-log > [data-level], #console-log > div:not([data-console-empty])');
+    if (!line || line.parentElement !== log || line.matches('[data-console-empty]')) return;
+    const text = line.textContent.trim();
+    if (!text) return;
+    if (await window.CD.copyText(text)) {
+      line.classList.add('bg-white/10');
+      setTimeout(() => line.classList.remove('bg-white/10'), 600);
+      toast('Line copied.');
+    }
+  });
 }

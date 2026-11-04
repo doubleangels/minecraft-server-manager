@@ -769,6 +769,13 @@
     @apply rounded-md border border-line bg-stone-950 p-3 font-mono text-[13px] leading-6 text-stone-200;
     box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.35);
   }
+  /* Live console lines copy on click (console.js): show which line a click
+     would take, with a mouse. */
+  @media (hover: hover) {
+    #console-log > [data-level]:hover {
+      @apply -mx-1 cursor-copy rounded-sm bg-white/5 px-1;
+    }
+  }
 
   /* Collapsible catalog sections (<details class="card">): the summary row is
      a control - show it on hover. */

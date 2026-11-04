@@ -55,6 +55,19 @@ export function timeAgo(v) {
   return formatDate(d);
 }
 
+// Compact time until a future moment ("in 12m", "in 3h", "in 2d", else a date).
+export function timeUntil(v) {
+  const d = toDate(v);
+  if (isNaN(d.getTime())) return '';
+  const secs = Math.round((d.getTime() - Date.now()) / 1000);
+  if (secs <= 0) return 'now';
+  if (secs < 60) return 'in under a minute';
+  if (secs < 3600) return `in ${Math.round(secs / 60)}m`;
+  if (secs < 86400) return `in ${Math.round(secs / 3600)}h`;
+  if (secs < 7 * 86400) return `in ${Math.round(secs / 86400)}d`;
+  return formatDate(d);
+}
+
 export function panelTimezone() {
   const m = (typeof window !== 'undefined' && window.MSM) || {};
   return m.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;

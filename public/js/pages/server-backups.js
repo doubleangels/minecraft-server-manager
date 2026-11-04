@@ -1,13 +1,13 @@
 // Server Backups tab: create (with real task progress), verify, restore,
-// download (plain link in the partial), rename, delete.
+// download (plain link in the partial), edit name/note, delete.
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { confirmDialog } from '../lib/confirm.js';
-import { openModal } from '../lib/modal.js';
 import { runTask } from '../lib/progress.js';
 import { setBusy } from '../lib/loading.js';
 import { fmtBytes } from '../lib/format.js';
 import { initRetentionForm } from '../lib/retention.js';
+import { openBackupEditor } from '../lib/backupEdit.js';
 
 const root = document.querySelector('[data-backups-server]');
 if (root) init(root.dataset.backupsServer);
@@ -104,59 +104,7 @@ function init(serverId) {
         });
       }
     } else if (e.target.closest('[data-backup-rename]')) {
-      const content = document.createElement('div');
-      const label = document.createElement('label');
-      label.className = 'label';
-      label.setAttribute('for', 'bk-rename-name');
-      label.textContent = 'Archive name';
-      const input = document.createElement('input');
-      input.className = 'input font-mono';
-      input.id = 'bk-rename-name';
-      input.maxLength = 120;
-      input.value = file;
-      const help = document.createElement('p');
-      help.className = 'help';
-      help.textContent = 'Changes the displayed name and the file you download. Restore and retention are unaffected.';
-      content.append(label, input, help);
-      openModal({
-        title: 'Rename Backup',
-        content,
-        actions: [
-          { label: 'Cancel', kind: 'ghost' },
-          {
-            label: 'Rename',
-            kind: 'primary',
-            busyLabel: 'Renaming…',
-            onClick: async () => {
-              const name = input.value.trim();
-              if (!name) {
-                toast('Enter a name first.', { kind: 'error' });
-                return false;
-              }
-              try {
-                const res = await fetch(`/api/backups/${encodeURIComponent(backupId)}`, {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ filename: name }),
-                });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok || data.ok === false)
-                  throw new Error(data.error || friendlyError(res, { action: 'rename that backup' }));
-                row.dataset.file = data.backup.filename;
-                const text = row.querySelector('.truncate.font-mono');
-                if (text) {
-                  text.textContent = data.backup.filename;
-                  text.title = data.backup.filename;
-                }
-                toast('Backup renamed.');
-              } catch (err) {
-                toast(err.message || 'That backup could not be renamed.', { kind: 'error', timeout: 8000 });
-                return false;
-              }
-            },
-          },
-        ],
-      });
+      openBackupEditor(row);
     } else if (e.target.closest('[data-backup-delete]')) {
       const btn = e.target.closest('[data-backup-delete]');
       const ok = await confirmDialog({

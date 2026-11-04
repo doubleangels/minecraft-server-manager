@@ -358,14 +358,14 @@ function init(root) {
       content.className = 'space-y-3 text-sm';
       content.innerHTML = `
       <div>
-        <label class="label">Player name</label>
-        <input class="input" data-f="name" placeholder="Notch" autocomplete="off" spellcheck="false" maxlength="16">
-        <p class="mt-1 text-xs text-ink-faint">The name is looked up with Mojang, so the player never needs to have joined before.</p>
+        <label class="label" for="pa-names">Player names</label>
+        <textarea class="input font-mono" id="pa-names" data-f="name" rows="3" placeholder="Notch&#10;jeb_&#10;Dinnerbone" autocomplete="off" spellcheck="false"></textarea>
+        <p class="mt-1 text-xs text-ink-faint">One name, or many: one per line, or separated by commas or spaces. Each is looked up with Mojang, so they never need to have joined before.</p>
       </div>
       <label class="flex cursor-pointer items-center gap-2"><input type="checkbox" class="msm-check" data-f="whitelist" checked> Add to Whitelist</label>
       <label class="flex cursor-pointer items-center gap-2"><input type="checkbox" class="msm-check" data-f="op"> Make Operator (level 4)</label>`;
       openModal({
-        title: 'Add Player',
+        title: 'Add Players',
         content,
         actions: [
           { label: 'Cancel', kind: 'ghost' },
@@ -374,25 +374,62 @@ function init(root) {
             kind: 'primary',
             busyLabel: 'Adding…',
             onClick: async ({ body }) => {
-              const name = body.querySelector('[data-f="name"]').value.trim();
+              const raw = body.querySelector('[data-f="name"]').value;
               const wl = body.querySelector('[data-f="whitelist"]').checked;
               const op = body.querySelector('[data-f="op"]').checked;
-              if (!PLAYER_NAME_RE.test(name)) {
-                toast('Enter a valid player name.', { kind: 'error' });
+              // Unique names, in the order given, case-insensitively.
+              const seen = new Set();
+              const names = raw
+                .split(/[\s,;]+/)
+                .map((n) => n.trim())
+                .filter((n) => n && !seen.has(n.toLowerCase()) && seen.add(n.toLowerCase()));
+              const invalid = names.filter((n) => !PLAYER_NAME_RE.test(n));
+              if (!names.length) {
+                toast('Enter at least one player name.', { kind: 'error' });
+                return false;
+              }
+              if (invalid.length) {
+                toast(
+                  `${invalid.slice(0, 5).join(', ')} ${invalid.length === 1 ? "isn't a valid name" : "aren't valid names"}. Names are up to 16 letters, numbers or underscores.`,
+                  {
+                    kind: 'error',
+                    timeout: 8000,
+                  }
+                );
+                return false;
+              }
+              if (names.length > 100) {
+                toast('Add up to 100 players at a time.', { kind: 'error' });
                 return false;
               }
               if (!wl && !op) {
                 toast('Pick at least one role to grant.', { kind: 'error' });
                 return false;
               }
-              try {
-                if (wl) await api('/whitelist', { name, on: true });
-                if (op) await api('/op', { name, on: true });
-                refresh(`${name} added.`);
-              } catch (err) {
-                fail(err);
+              const added = [];
+              const failed = [];
+              for (const name of names) {
+                try {
+                  if (wl) await api('/whitelist', { name, on: true });
+                  if (op) await api('/op', { name, on: true });
+                  added.push(name);
+                } catch (err) {
+                  failed.push(`${name} (${String(err.message || 'failed').replace(/[.!?]+$/, '')})`);
+                }
+              }
+              if (!added.length) {
+                toast(`No players were added. ${failed.join('; ')}.`, { kind: 'error', timeout: 12000 });
                 return false;
               }
+              if (failed.length) {
+                toast(`Added ${added.length} of ${names.length}. Not added: ${failed.join('; ')}.`, {
+                  kind: 'warn',
+                  timeout: 12000,
+                });
+                setTimeout(() => location.reload(), 2500);
+                return;
+              }
+              refresh(added.length === 1 ? `${added[0]} added.` : `${added.length} players added.`);
             },
           },
         ],

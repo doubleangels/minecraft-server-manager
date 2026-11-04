@@ -148,6 +148,10 @@ async function serverVM(s, { withLive = true, ctx = null } = {}) {
     },
     // What players type to connect: the public domain when set, else the LAN IP.
     address: require('../services/settings').connectAddress(s.port_game),
+    // The live map is on: cards and Overview link straight to it.
+    mapEnabled: Boolean(
+      db.get("SELECT 1 AS on_ FROM integrations WHERE server_id = ? AND kind = 'bluemap' AND enabled = 1", s.id)
+    ),
     resources: {
       heapMb: s.heap_mb,
       // The starting heap (INIT_MEMORY) in MB, or null when Java gets the whole heap up front.

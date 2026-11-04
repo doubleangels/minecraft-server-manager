@@ -524,6 +524,20 @@ router.get(
       }
       addrs.push(`localhost:${row.port_game}`);
       context.addresses = [...new Set(addrs)];
+      // The soonest scheduled backup and restart that will reach this server,
+      // its own or a fleet-wide one, so it is plain whether it is covered.
+      const schedules = require('../../services/scheduler').listSchedules(); // once, not per lookup
+      const soonest = (own, fleet) =>
+        schedules
+          .filter(
+            (j) =>
+              j.enabled &&
+              j.nextMs &&
+              ((j.serverId === row.id && j.taskType === own) || (!j.serverId && j.taskType === fleet))
+          )
+          .reduce((min, j) => (min === null || j.nextMs < min ? j.nextMs : min), null);
+      context.nextBackupMs = soonest('backup', 'backup-all');
+      context.nextRestartMs = soonest('restart', 'restart-all');
       // Overview owns Activity now: a short preview, the full list one tab over.
       context.recentEvents = eventsVM(eventsService.listEvents({ serverId: row.id, limit: 5, forUser: req.user }));
     } else if (tab === 'chat') {
@@ -816,7 +830,14 @@ router.get(
     } else if (tab === 'backups') {
       context.backups = db
         .all('SELECT * FROM backups WHERE server_id = ? ORDER BY created_at DESC LIMIT 50', row.id)
-        .map((b) => ({ id: b.id, file: b.filename, size: b.size_bytes, reason: b.reason, ts: b.created_at }));
+        .map((b) => ({
+          id: b.id,
+          file: b.filename,
+          note: b.note || '',
+          size: b.size_bytes,
+          reason: b.reason,
+          ts: b.created_at,
+        }));
       context.backupStats = db.get(
         'SELECT COUNT(*) AS count, COALESCE(SUM(size_bytes), 0) AS bytes FROM backups WHERE server_id = ?',
         row.id
@@ -932,6 +953,7 @@ router.get('/backups', (req, res) => {
       serverId: b.server_id,
       server: b.display_name,
       file: b.filename,
+      note: b.note || '',
       size: b.size_bytes,
       reason: b.reason,
       ts: b.created_at,

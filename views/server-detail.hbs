@@ -1,5 +1,18 @@
 {{> server/chrome}}
 
+{{! Saved settings that only take effect after a rebuild: say so plainly,
+    with the action right there (the header button alone was easy to miss). }}
+{{#if server.pendingRecreate}}{{#if perms.power}}
+  <div class="notice notice-warn -mt-2 mb-4 flex-wrap items-center">
+    {{{icon 'wrench' 'size-4 mt-0.5 shrink-0 text-warn'}}}
+    <div class="min-w-0 flex-1">
+      <span class="font-semibold">Changes are waiting.</span>
+      Some saved settings only take effect after the server is rebuilt{{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}, which restarts it{{/if}}. They also apply on its next start.
+    </div>
+    <button class="btn btn-sm" data-server-action="recreate" data-server-id="{{server.id}}" data-server-name="{{server.name}}" data-players-online="{{server.players.online}}">{{{icon 'wrench' 'size-3.5'}}} Apply Changes</button>
+  </div>
+{{/if}}{{/if}}
+
 {{! World controls ride along on every tab as a right rail (stacks below on
     smaller screens) - always within reach while managing players/files/etc. }}
 <div class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">

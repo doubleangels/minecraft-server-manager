@@ -172,13 +172,18 @@ for (const action of Object.keys(POWER_TITLES)) {
       // Restart and Stop can warn the players in game first. That countdown
       // runs for minutes, so the request answers at once (202 + taskId) and
       // the task tray follows it, instead of a request a proxy would time out.
+      // Applying changes (recreate) restarts a running server too, so it warns the same way.
       const warnSeconds =
-        action === 'restart' || action === 'stop'
+        action === 'restart' || action === 'stop' || action === 'recreate'
           ? z.coerce.number().int().min(0).max(shutdownWarning.MAX_WARN_SECONDS).catch(0).parse(req.body?.warnSeconds)
           : 0;
       if (warnSeconds > 0) {
         const taskId = tasks.run(`${POWER_TITLES[action]} ${name}…`, { serverId: req.params.id, actor }, async (t) => {
-          const w = await shutdownWarning.warnBeforeShutdown(req.params.id, { action, seconds: warnSeconds, task: t });
+          const w = await shutdownWarning.warnBeforeShutdown(req.params.id, {
+            action: action === 'stop' ? 'stop' : 'restart',
+            seconds: warnSeconds,
+            task: t,
+          });
           if (w.cancelled) return { ok: true, skipped: true };
           t.step(`${POWER_TITLES[action]}…`);
           await servers[`${action}Server`](req.params.id, { actor });
@@ -1559,6 +1564,18 @@ router.post(
   })
 );
 
+// Run a schedule's task now (202: it continues in the background and in the task tray).
+router.post(
+  '/schedules/:id/run',
+  asyncHandler((req, res, next) => {
+    const job = db.get('SELECT server_id, task_type FROM schedules WHERE id = ?', req.params.id);
+    if (!job) throw httpError(404, 'Schedule not found.');
+    requireScheduleAccess(req, job.server_id, job.task_type);
+    scheduler.runNow(req.params.id, { actor: req.user.username });
+    res.status(202).json({ ok: true });
+  })
+);
+
 router.delete(
   '/schedules/:id',
   asyncHandler((req, res, next) => {
@@ -1697,18 +1714,29 @@ router.delete(
   })
 );
 
-// Rename a backup archive (display + on-disk filename). Admin/operator only.
+// Rename a backup archive (display + on-disk filename) and/or edit its note.
 router.patch(
   '/backups/:backupId',
   requireCap('backups', { resolve: backupServerId }),
   asyncHandler(async (req, res, next) => {
-    const { filename } = z.object({ filename: z.string().trim().max(120) }).parse(req.body);
-    const updated = await backups.renameBackup(req.params.backupId, filename, { actor: req.user.username });
+    const { filename, note } = z
+      .object({
+        filename: z.string().trim().max(120).optional(),
+        note: z.string().trim().max(200, 'Keep the note under 200 characters.').optional(),
+      })
+      .parse(req.body);
+    let updated = null;
+    if (filename !== undefined) {
+      updated = await backups.renameBackup(req.params.backupId, filename, { actor: req.user.username });
+    }
+    if (note !== undefined) updated = backups.setBackupNote(req.params.backupId, note, { actor: req.user.username });
+    if (!updated) throw httpError(400, 'Nothing to change.');
     res.json({
       ok: true,
       backup: {
         id: updated.id,
         filename: updated.filename,
+        note: updated.note || '',
         size_bytes: updated.size_bytes,
         reason: updated.reason,
         created_at: updated.created_at,

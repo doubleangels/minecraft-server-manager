@@ -7,7 +7,7 @@ import { openModal } from './lib/modal.js';
 import { confirmDialog } from './lib/confirm.js';
 import { enhanceAll } from './lib/select.js';
 import { setBusy, withBusy } from './lib/loading.js';
-import { formatDateTime, timeAgo } from './lib/datetime.js';
+import { formatDateTime, timeAgo, timeUntil } from './lib/datetime.js';
 import { escapeHtml } from './lib/format.js';
 import './lib/tooltip.js';
 import './lib/dropdown.js';
@@ -66,9 +66,9 @@ document.addEventListener(
 // ---- Timestamps: raw UTC DB strings → the panel's timezone + locale ----
 // Views render <span data-ts="…">raw</span> (absolute) or data-ts-ago
 // (relative); the raw value stays as the no-JS fallback and the hover title.
-for (const el of document.querySelectorAll('[data-ts], [data-ts-ago]')) {
-  const raw = el.dataset.ts || el.dataset.tsAgo;
-  const pretty = el.dataset.ts ? formatDateTime(raw) : timeAgo(raw);
+for (const el of document.querySelectorAll('[data-ts], [data-ts-ago], [data-ts-in]')) {
+  const raw = el.dataset.ts || el.dataset.tsAgo || el.dataset.tsIn;
+  const pretty = el.dataset.ts ? formatDateTime(raw) : el.dataset.tsIn ? timeUntil(raw) : timeAgo(raw);
   if (pretty) {
     el.title = formatDateTime(raw);
     el.textContent = pretty;
@@ -291,7 +291,7 @@ document.addEventListener('click', async (e) => {
   // Players online: offer to warn them in game first. Nobody on: no question.
   let warnSeconds = 0;
   const online = Number(btn.dataset.playersOnline) || 0;
-  if ((action === 'restart' || action === 'stop') && online > 0) {
+  if ((action === 'restart' || action === 'stop' || action === 'recreate') && online > 0) {
     const choice = await askWarning({ action, name, online });
     if (choice === null) return;
     warnSeconds = choice;
@@ -607,7 +607,7 @@ function spellSeconds(s) {
 function askWarning({ action, name, online }) {
   return new Promise((resolve) => {
     let picked = null;
-    const verb = action === 'stop' ? 'Stop' : 'Restart';
+    const verb = action === 'stop' ? 'Stop' : action === 'recreate' ? 'Apply Changes to' : 'Restart';
     const content = document.createElement('div');
     content.className = 'space-y-3 text-sm';
     const p = document.createElement('p');
@@ -640,7 +640,7 @@ function askWarning({ action, name, online }) {
       actions: [
         { label: 'Cancel', kind: 'ghost' },
         {
-          label: verb,
+          label: action === 'recreate' ? 'Apply Changes' : verb,
           kind: action === 'stop' ? 'danger' : 'primary',
           onClick: () => {
             picked = Number(sel.value) || 0;

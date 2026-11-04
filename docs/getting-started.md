@@ -67,6 +67,10 @@ Once installed:
 - The **star** on a server card pins it to the top of the dashboard, the server list and the sidebar (pins are kept per browser).
 - The **address** on each server card, and the copy button beside each server in the sidebar, copy what players type to connect: your public domain when one is set (**Panel Settings → General**), otherwise this machine's LAN address.
 - **Select** on the dashboard or server list picks several servers at once, then **Start**, **Restart**, **Stop** or **Back Up** runs on all of them.
+- **Run Now** (the play button on a schedule) runs that task immediately, with the same warning and task tray as a timed run.
+- A server's **Overview** shows when its next backup and next restart are due, counting panel-wide schedules too, and says plainly when no backup is scheduled.
+- Backups can carry a **note** ("Before the 1.21 upgrade"): edit it with the pencil on a backup, and it shows under the archive name.
+- A server with the live map on has a **Map** button on its card and **Open Live Map** in its Quick Actions.
 - Deleting a schedule, a chat command, an IP ban or a console quick button shows **Undo** for ten seconds instead of asking "are you sure?" first.
 - Leaving Discord, Status Page, Chatbot or a Panel Settings section with unsaved edits asks before the edits are lost.
 
