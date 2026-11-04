@@ -49,20 +49,19 @@
     <div class="grid gap-6 lg:grid-cols-[minmax(0,auto)_1fr]">
       <div class="card p-4">
         <h3 class="mb-3 flex items-center gap-2 font-semibold">{{{icon 'backpack' 'size-4'}}} Inventory</h3>
-        {{! The 9-wide slot grids are ~392px min - wider than a phone. Scroll
-            them inside the card instead of widening the page (same pattern as
-            every data table). }}
+        {{! Phone: slots shrink so all 9 columns fit the card (a sideways scroll
+            here hid the right-hand columns). sm+: fixed-size slots. }}
         <div class="mb-1 eyebrow">Main</div>
-        <div class="overflow-x-auto"><div class="grid w-max grid-cols-9 gap-1" id="inv-grid-main"></div></div>
+        <div class="grid w-full grid-cols-9 gap-1 sm:w-max" id="inv-grid-main"></div>
         <div class="mb-1 mt-3 eyebrow">Hotbar</div>
-        <div class="overflow-x-auto"><div class="grid w-max grid-cols-9 gap-1" id="inv-grid-hotbar"></div></div>
+        <div class="grid w-full grid-cols-9 gap-1 sm:w-max" id="inv-grid-hotbar"></div>
         <div class="mb-1 mt-3 eyebrow">Armor &amp; Offhand</div>
-        <div class="overflow-x-auto"><div class="grid w-max grid-cols-5 gap-1" id="inv-grid-armor"></div></div>
+        <div class="grid w-full max-w-[18rem] grid-cols-5 gap-1 sm:w-max sm:max-w-none" id="inv-grid-armor"></div>
       </div>
 
       <div class="card h-max p-4">
         <h3 class="mb-3 flex items-center gap-2 font-semibold">{{{icon 'box' 'size-4'}}} Ender Chest</h3>
-        <div class="overflow-x-auto"><div class="grid w-max grid-cols-9 gap-1" id="inv-grid-ender"></div></div>
+        <div class="grid w-full grid-cols-9 gap-1 sm:w-max" id="inv-grid-ender"></div>
       </div>
     </div>
   </div>

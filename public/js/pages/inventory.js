@@ -120,7 +120,9 @@ function init(root) {
     // (delete, move) can spin the on-page cell while the request runs.
     if (at) cell.dataset.slotKey = `${at.container}:${at.slot}`;
     cell.className =
-      'relative grid size-12 sm:size-14 place-items-center rounded border text-[11px] font-semibold select-none ' +
+      // Phone: a square that fills its grid column (9 across fit any phone);
+      // sm+: the fixed 56px slot.
+      'relative grid aspect-square w-full sm:size-14 place-items-center rounded border text-[11px] font-semibold select-none ' +
       (editable
         ? 'cursor-pointer transition hover:ring-2 hover:ring-diamond-400/60 focus-visible:ring-2 focus-visible:ring-diamond-400 '
         : '');
@@ -275,7 +277,7 @@ function init(root) {
 
   function itemHeader(item, where) {
     return `
-      <div class="rounded-md border border-line bg-inset/50 p-3">
+      <div class="min-w-0 rounded-md border border-line bg-inset/50 p-3 [overflow-wrap:anywhere]">
         <div class="font-semibold ${item.displayName ? 'text-warn' : ''}">${esc(item.displayName || prettyId(item.id))}</div>
         <div class="font-mono text-xs text-ink-faint">${esc(item.id)} · ×${esc(item.count)} · ${esc(where)}</div>
         ${item.enchants && item.enchants.length ? `<div class="mt-1 text-xs text-link">${esc(item.enchants.map(prettyEnchant).join(', '))}</div>` : ''}
@@ -430,12 +432,6 @@ function init(root) {
     openItemBrowser({ serverId, onPick: ask, onManual: () => ask(null) });
   }
 
-  /** Phone: a picker cell fills its grid column (square) instead of a fixed 48px. */
-  function fitCell(cell) {
-    cell.classList.remove('size-12');
-    cell.classList.add('aspect-square', 'w-full', 'sm:w-auto');
-  }
-
   /** Move/swap target picker: every container rendered as a clickable mini-grid. */
   function openMoveModal(from, item) {
     const content = document.createElement('div');
@@ -485,7 +481,6 @@ function init(root) {
             : () => doMove({ container, slot: i }),
         });
         if (isSource) cell.classList.add('ring-2', 'ring-gold-500');
-        fitCell(cell);
         grid.appendChild(cell);
       }
       scroller.appendChild(grid);
@@ -517,7 +512,6 @@ function init(root) {
           : () => doMove({ container: 'offhand', slot: 0 }),
     });
     if (from.container === 'offhand') offCell.classList.add('ring-2', 'ring-gold-500');
-    fitCell(offCell);
     armorRow.querySelector('.grid').appendChild(offCell);
     grids.appendChild(armorRow);
     content.appendChild(grids);
@@ -536,7 +530,7 @@ function init(root) {
       );
     }
     const grid = document.createElement('div');
-    grid.className = 'grid w-max max-w-full grid-cols-9 gap-1';
+    grid.className = 'grid w-full grid-cols-9 gap-1 sm:w-max';
     const modal = openModal({ title: sub.label, content, size: 'md' });
     for (const entry of sub.items) {
       if (!entry.id) {
@@ -773,7 +767,7 @@ function init(root) {
         Comparing <b class="text-ink-soft">${esc(when(diff.a.ts))}</b> (${esc(diff.a.reason)})
         &rarr; <b class="text-ink-soft">${esc(when(diff.b.ts))}</b> (${esc(diff.b.reason)}). Counts are pooled across inventory, armor, offhand, and ender chest.
       </div>
-      <div class="grid gap-3 md:grid-cols-3">
+      <div class="grid gap-3 md:grid-cols-3 [&>*]:min-w-0">
         ${section('Added', 'text-ok', diff.added, 'added')}
         ${section('Removed', 'text-danger', diff.removed, 'removed')}
         ${section('Changed', 'text-warn', diff.changed, 'changed')}

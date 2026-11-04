@@ -158,10 +158,10 @@ function init(serverId) {
     badge.className = `badge shrink-0 ${BADGE[evt.type] || 'bg-inset text-ink-soft'}`;
     badge.textContent = evt.type;
     const player = document.createElement('span');
-    player.className = 'shrink-0 font-medium';
+    player.className = 'min-w-0 font-medium [overflow-wrap:anywhere]';
     player.textContent = evt.player;
     const message = document.createElement('span');
-    message.className = 'min-w-0 flex-1 break-words text-ink-soft';
+    message.className = 'min-w-0 flex-1 text-ink-soft [overflow-wrap:anywhere]';
     if (evt.type === 'death') {
       // Death message already includes the player name.
       player.textContent = '';

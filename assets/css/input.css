@@ -283,6 +283,14 @@
   body {
     @apply font-sans text-[0.9375rem] leading-relaxed overflow-x-clip;
   }
+  /* Grid items default to min-width: auto, so one long unbroken word (an item
+     id, a file or server name, a chat line) widens its whole column past the
+     screen, where overflow-x-clip above silently cuts it off. Let every grid
+     item shrink; :where() keeps this at zero specificity, so any min-w-*
+     utility still wins. */
+  :where(.grid) > * {
+    min-width: 0;
+  }
   h1,
   h2,
   h3 {
@@ -433,7 +441,7 @@
      common short/icon segs, and safe with seg.js's pill (it positions off
      offsetLeft/offsetTop, unaffected by scroll position). */
   .seg {
-    @apply relative inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-md border border-line bg-inset/40 p-0.5;
+    @apply relative inline-flex max-w-full flex-wrap items-center gap-1 rounded-md border border-line bg-inset/40 p-0.5;
   }
   /* Sliding pill (injected by lib/seg.js): the raised key GLIDES between
      segments instead of teleporting. It carries the exact selected-state
