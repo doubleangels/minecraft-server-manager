@@ -1,5 +1,16 @@
+{{#if server.crashesUnread}}
+  <a href="/servers/{{server.id}}/history" class="notice notice-danger mb-4 transition hover:border-danger">
+    {{{icon 'flame' 'size-4 mt-0.5 shrink-0 text-danger'}}}
+    <div class="min-w-0 flex-1">
+      <span class="font-semibold text-danger">{{server.crashesUnread}} new {{plural server.crashesUnread 'crash report' 'crash reports'}}.</span>
+      <span>Open Activity to read, analyze or clear {{plural server.crashesUnread 'it' 'them'}}.</span>
+    </div>
+    {{{icon 'arrow-right' 'size-4 mt-0.5 shrink-0'}}}
+  </a>
+{{/if}}
 <div class="grid gap-4 lg:grid-cols-3">
-  <div class="card p-4 lg:col-span-2">
+  <div class="min-w-0 space-y-4 lg:col-span-2">
+  <div class="card p-4">
     {{#if addresses.length}}
       <div class="mb-4 border-b border-line pb-4">
         <label class="label" for="ov-address">Server address <span class="text-xs font-normal text-ink-faint">(share this with players on your network)</span></label>
@@ -14,7 +25,7 @@
           {{/if}}
           <button class="btn" data-copy-from="#ov-address">{{{icon 'copy' 'size-4'}}} Copy Address</button>
         </div>
-        <p class="help">Playing from the internet? Set up port forwarding or grab the full invite from the Invites tab (under Settings).</p>
+        <p class="help">Playing from the internet? Set up port forwarding, or send the full invite from <a class="text-link hover:underline" href="/servers/{{server.id}}/invites">Players → Invites</a>.</p>
       </div>
     {{/if}}
     <h3 class="mb-3 font-semibold">About</h3>
@@ -41,7 +52,40 @@
     {{/if}}
   </div>
 
+  <div class="card">
+    <div class="flex items-center justify-between border-b border-line px-4 py-3">
+      <h3 class="font-semibold">Recent Activity</h3>
+      <a href="/servers/{{server.id}}/history" class="text-sm text-link hover:underline">View All →</a>
+    </div>
+    {{#if recentEvents.length}}
+      <ol class="divide-y divide-line">
+        {{#each recentEvents}}
+          <li class="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2.5 text-sm">
+            <span class="badge shrink-0">{{type}}</span>
+            <span class="min-w-[12rem] flex-1 break-words">{{summary}}</span>
+            <span class="whitespace-nowrap text-xs text-ink-faint">{{actor}} · <span data-ts-ago="{{ts}}">{{ts}}</span></span>
+          </li>
+        {{/each}}
+      </ol>
+    {{else}}
+      <p class="p-4 text-sm text-ink-faint">Nothing has happened on this server yet.</p>
+    {{/if}}
+  </div>
+  </div>
+
   <div class="space-y-4">
+    {{! Shortcuts to the things people do most, each gated like its tab. }}
+    <div class="card p-4">
+      <h3 class="mb-3 font-semibold">Quick Actions</h3>
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+        {{#if perms.console}}<a class="btn justify-start" href="/servers/{{server.id}}/console">{{{icon 'terminal' 'size-4'}}} Run a Command</a>{{/if}}
+        {{#if perms.backups}}<a class="btn justify-start" href="/servers/{{server.id}}/backups">{{{icon 'save' 'size-4'}}} Take a Backup</a>{{/if}}
+        <a class="btn justify-start" href="/servers/{{server.id}}/invites">{{{icon 'send' 'size-4'}}} Invite Players</a>
+        {{#if perms.content}}<a class="btn justify-start" href="/servers/{{server.id}}/mods">{{{icon 'puzzle' 'size-4'}}} Add Mods</a>{{/if}}
+        {{#if perms.files}}<a class="btn justify-start" href="/servers/{{server.id}}/files">{{{icon 'folder' 'size-4'}}} Edit Files</a>{{/if}}
+        {{#if perms.settings}}<a class="btn justify-start" href="/servers/{{server.id}}/settings">{{{icon 'settings' 'size-4'}}} Change Settings</a>{{/if}}
+      </div>
+    </div>
     <div class="card p-4" data-ov-live="{{server.id}}"
          data-running="{{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}1{{/if}}"
          data-mem-limit="{{server.resources.containerMemoryMb}}" data-cpus="{{server.resources.cpus}}">

@@ -4,13 +4,18 @@
       {{> brand-lockup size='size-9' textSize='text-[11px]'}}
     </a>
 
-    <nav class="flex-1 space-y-0.5 overflow-y-auto p-3">
+    {{! Grouped by intent: your servers first, then what you install from
+        (Library), the recurring care every server needs (Maintenance), and
+        what happened and what it costs (Insights). }}
+    <nav class="flex-1 space-y-0.5 overflow-y-auto p-3" aria-label="Main">
       <a class="nav-item {{#if (eq active 'dashboard')}}active{{/if}}" href="/">
         {{{icon 'house' 'size-4'}}} Dashboard
       </a>
       <a class="nav-item {{#if (eq active 'servers')}}active{{/if}}" href="/servers">
         {{{icon 'server' 'size-4'}}} Servers
       </a>
+
+      <div class="pt-3 pb-1 pl-3 eyebrow">Library</div>
       <a class="nav-item {{#if (eq active 'modpacks')}}active{{/if}}" href="/modpacks">
         {{{icon 'package' 'size-4'}}} Modpacks
       </a>
@@ -20,13 +25,11 @@
       <a class="nav-item {{#if (eq active 'blueprints')}}active{{/if}}" href="/blueprints">
         {{{icon 'drafting-compass' 'size-4'}}} Blueprints
       </a>
+
+      <div class="pt-3 pb-1 pl-3 eyebrow">Maintenance</div>
       <a class="nav-item {{#if (eq active 'updates')}}active{{/if}}" href="/updates">
         {{{icon 'circle-arrow-up' 'size-4'}}} Updates
         {{#if updatesCount}}<span class="badge badge-warn ml-auto">{{updatesCount}}</span>{{/if}}
-      </a>
-      <a class="nav-item {{#if (eq active 'health')}}active{{/if}}" href="/health">
-        {{{icon 'activity' 'size-4'}}} Health
-        {{#if healthCount}}<span class="badge badge-danger ml-auto">{{healthCount}}</span>{{/if}}
       </a>
       <a class="nav-item {{#if (eq active 'backups')}}active{{/if}}" href="/backups">
         {{{icon 'archive' 'size-4'}}} Backups
@@ -34,17 +37,23 @@
       <a class="nav-item {{#if (eq active 'schedules')}}active{{/if}}" href="/schedules">
         {{{icon 'calendar-clock' 'size-4'}}} Schedules
       </a>
-      <a class="nav-item {{#if (eq active 'storage')}}active{{/if}}" href="/storage">
-        {{{icon 'hard-drive' 'size-4'}}} Storage
+
+      <div class="pt-3 pb-1 pl-3 eyebrow">Insights</div>
+      <a class="nav-item {{#if (eq active 'health')}}active{{/if}}" href="/health">
+        {{{icon 'activity' 'size-4'}}} Health
+        {{#if healthCount}}<span class="badge badge-danger ml-auto">{{healthCount}}</span>{{/if}}
       </a>
       <a class="nav-item {{#if (eq active 'activity')}}active{{/if}}" href="/activity">
         {{{icon 'history' 'size-4'}}} Activity
       </a>
+      <a class="nav-item {{#if (eq active 'storage')}}active{{/if}}" href="/storage">
+        {{{icon 'hard-drive' 'size-4'}}} Storage
+      </a>
 
       {{#if servers.length}}
-        <div class="pt-3 pb-1 pl-3 eyebrow">Servers</div>
+        <div class="pt-3 pb-1 pl-3 eyebrow">Jump to a Server</div>
         {{#each servers}}
-          <a class="nav-item" href="/servers/{{id}}">
+          <a class="nav-item {{#if (eq id @root.server.id)}}active{{/if}}" href="/servers/{{id}}"{{#if (eq id @root.server.id)}} aria-current="page"{{/if}}>
             <img src="{{iconSrc this.icon}}" alt="" class="size-5 rounded-sm" style="background: {{this.accent}}" data-fallback-icon="/icons/servers/grass.svg">
             <span class="truncate" title="{{name}}">{{name}}</span>
             <span class="status-dot relative ml-auto shrink-0 {{statusDot status}} {{#if (statusPulse status)}}pulse{{/if}}" title="{{statusLabel status}}"></span>
@@ -55,11 +64,11 @@
 
     {{#if (eq user.role 'admin')}}
       <div class="space-y-0.5 border-t border-line p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <a href="/settings/permissions" class="nav-item {{#if (eq active 'permissions')}}active{{/if}}">
-          {{{icon 'shield-check' 'size-4'}}} Permissions
-        </a>
         <a href="/settings" class="nav-item {{#if (eq active 'settings')}}active{{/if}}">
-          {{{icon 'settings' 'size-4'}}} Settings
+          {{{icon 'settings' 'size-4'}}} Panel Settings
+        </a>
+        <a href="/settings/permissions" class="nav-item {{#if (eq active 'permissions')}}active{{/if}}">
+          {{{icon 'shield-check' 'size-4'}}} Users &amp; Permissions
         </a>
       </div>
     {{/if}}

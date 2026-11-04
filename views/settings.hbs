@@ -1,33 +1,20 @@
-{{> page-header heading="SETTINGS" sub="Panel settings, connection keys, and user accounts."}}
+{{> page-header heading="PANEL SETTINGS" sub="How the panel itself behaves: its address and clock, what new servers start with, how long backups are kept, and the outside services it talks to."}}
 
-{{! [&>*]:min-w-0 - grid items default to min-width:auto, so without it a card
-    containing a wrapping flex row (the API-key/domain inputs) is sized off that
-    row's UNWRAPPED max-content width and drags the whole grid (and page) wider
-    than the viewport on mobile, even though the row itself wraps correctly. }}
-<div class="grid gap-5 lg:grid-cols-2 [&>*]:min-w-0" id="settings-page">
+{{! One ordered column with a jump bar, the same layout as a server's
+    Configuration page. User accounts, sign-in security and per-server access
+    live together on Users & Permissions. }}
+<div class="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-6" id="settings-page">
+  <nav class="-mx-1 mb-4 flex gap-1 overflow-x-auto px-1 pb-1 lg:sticky lg:top-24 lg:mx-0 lg:mb-0 lg:flex-col lg:self-start lg:overflow-visible lg:px-0" aria-label="Settings sections" data-settings-jump>
+    <a class="subtab shrink-0" href="#sec-panel" data-jump="sec-panel">General</a>
+    <a class="subtab shrink-0" href="#sec-defaults" data-jump="sec-defaults">New Server Defaults</a>
+    <a class="subtab shrink-0" href="#retention-card" data-jump="retention-card">Backups</a>
+    <a class="subtab shrink-0" href="#sec-keys" data-jump="sec-keys">Mod Site Keys</a>
+    <a class="subtab shrink-0" href="#api-tokens-card" data-jump="api-tokens-card">Public API</a>
+    <a class="subtab shrink-0" href="/settings/permissions">{{{icon 'shield-check' 'size-3.5'}}} Users</a>
+  </nav>
 
-  {{#> settings/card heading="API Keys" desc="Keys the panel uses to reach mod sites on your behalf. Stored encrypted."}}
-    <div class="space-y-5">
-      <div>
-        <label class="label" for="set-cf-key">CurseForge API key</label>
-        {{! min-w-0 + flex-wrap: the monospace placeholder would otherwise refuse
-            to shrink and push the page wider than a narrow screen; wrapping lets
-            the buttons drop to their own row. }}
-        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
-          <input class="input min-w-0 flex-1 font-mono" id="set-cf-key" type="password" placeholder="{{#if cfKeyMasked}}{{cfKeyMasked}} (stored){{else}}paste your key from console.curseforge.com{{/if}}" autocomplete="off">
-          <button class="btn" id="set-cf-save">Save Key</button>
-          <button class="btn btn-ghost" id="set-cf-test" data-tip="Test the stored key against CurseForge.">Test Key</button>
-        </div>
-        <p class="help">Needed for automatic CurseForge modpacks and CurseForge mod downloads. New keys are checked against CurseForge before they're saved.</p>
-      </div>
-      <div>
-        <span class="label">Modrinth</span>
-        <p class="help">No key needed. Modrinth's public API is used directly.</p>
-      </div>
-    </div>
-  {{/settings/card}}
-
-  {{#> settings/card heading="Panel"}}
+  <div class="min-w-0 space-y-5 [&>*]:min-w-0 [&>section]:scroll-mt-32">
+  {{#> settings/card heading="General" id="sec-panel" desc="The address players see, the panel's clock, and its version."}}
     <div class="space-y-5">
       <div>
         <label class="label" for="set-domain">Public domain</label>
@@ -62,15 +49,6 @@
       </div>
 
       <div class="border-t border-line pt-4">
-        <span class="label">Bind address &amp; port</span>
-        <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-          <div><dt class="text-xs text-ink-faint">Bind Address</dt><dd class="font-mono font-medium">{{panel.host}}</dd></div>
-          <div><dt class="text-xs text-ink-faint">Port</dt><dd class="font-mono font-medium">{{panel.port}}</dd></div>
-        </dl>
-        <p class="help">Set these in <span class="font-mono">.env</span> (PANEL_HOST and PANEL_PORT). A restart applies the changes. Theme is per-browser, set with the topbar toggle.</p>
-      </div>
-
-      <div class="border-t border-line pt-4">
         <span class="label">Panel version</span>
         <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
           <span class="font-mono text-sm">v{{panel.version}}</span>
@@ -81,7 +59,17 @@
       </div>
 
       <div class="border-t border-line pt-4">
-        <span class="label">Defaults for new servers</span>
+        <span class="label">Bind address &amp; port</span>
+        <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+          <div><dt class="text-xs text-ink-faint">Bind Address</dt><dd class="font-mono font-medium">{{panel.host}}</dd></div>
+          <div><dt class="text-xs text-ink-faint">Port</dt><dd class="font-mono font-medium">{{panel.port}}</dd></div>
+        </dl>
+        <p class="help">Set these in <span class="font-mono">.env</span> (PANEL_HOST and PANEL_PORT). A restart applies the changes. Theme is per-browser, set with the topbar toggle.</p>
+      </div>
+    </div>
+  {{/settings/card}}
+
+  {{#> settings/card heading="New Server Defaults" id="sec-defaults" desc="These pre-fill the create wizard, apply when a server is created via the API or a blueprint, and drive the quota-bar colors on the dashboard."}}
         <div class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
           <div>
             <label class="label" for="dflt-heap">Java heap (MB)</label>
@@ -116,9 +104,6 @@
           <button class="btn btn-ghost" id="dflt-restore">Restore Built-ins</button>
           <span class="help mt-0" id="dflt-note"></span>
         </div>
-        <p class="help">These pre-fill the create-wizard, apply when a server is created via the API or a blueprint, and drive the quota-bar colors on the dashboard.</p>
-      </div>
-    </div>
   {{/settings/card}}
 
   {{#> settings/card heading="Backup Retention" id="retention-card" desc="How many backups each server keeps of each kind, plus optional age and size limits. A server trims its older backups each time it makes a new one, and can set any of these differently on its Backups tab."}}
@@ -133,76 +118,28 @@
     </div>
   {{/settings/card}}
 
-  {{#> settings/card heading="Users" wide=true}}
-    <div class="overflow-x-auto">
-      <table class="table-base table-stack" id="users-table">
-        <thead><tr><th>User</th><th>Role</th><th>2FA</th><th>Created</th><th class="text-right">Actions</th></tr></thead>
-        <tbody>
-          {{#each users}}
-            <tr data-user-id="{{id}}" data-username="{{username}}">
-              <td data-th="User" class="font-medium">
-                <div class="flex items-center gap-2">
-                  <span class="grid size-6 shrink-0 place-items-center overflow-hidden rounded-md bg-diamond-700 text-[10px] font-bold text-white">
-                    {{#if (avatarSrc avatar)}}
-                      <img src="{{avatarSrc avatar}}" alt="" class="size-full object-contain">
-                    {{else}}
-                      {{initial username}}
-                    {{/if}}
-                  </span>
-                  {{username}}{{#if (eq id ../user.id)}} <span class="badge">you</span>{{/if}}
-                </div>
-              </td>
-              <td data-th="Role">
-                <select class="input w-auto" data-user-role data-prev-role="{{role}}" data-label="Role for {{username}}">
-                  <option value="admin" {{#if (eq role 'admin')}}selected{{/if}}>Admin</option>
-                  <option value="operator" {{#if (eq role 'operator')}}selected{{/if}}>Operator</option>
-                  <option value="viewer" {{#if (eq role 'viewer')}}selected{{/if}}>Viewer</option>
-                </select>
-              </td>
-              <td data-th="2FA">
-                {{#if totpEnabled}}
-                  <span class="badge badge-ok">On</span>
-                {{else}}
-                  <span class="text-xs text-ink-faint">Off</span>
-                {{/if}}
-              </td>
-              <td data-th="Created" class="whitespace-nowrap text-xs text-ink-faint" data-ts="{{createdAt}}">{{createdAt}}</td>
-              <td data-th="" class="text-right">
-                <button class="btn btn-ghost btn-sm" data-menu="user-menu-{{@index}}" data-tip="Actions for {{username}}." aria-label="Actions for {{username}}">{{{icon 'ellipsis' 'size-3.5'}}}</button>
-                <template id="user-menu-{{@index}}">
-                  <button data-user-password data-user-id="{{id}}" data-username="{{username}}">{{{icon 'key' 'size-3.5'}}} Set Password</button>
-                  {{! Your own row: self-service, same modal as the topbar user menu -
-                      2FA can only ever be set up on the device you're enrolling, so
-                      there's nothing an admin can do here for someone ELSE's row. }}
-                  {{#if (eq id ../user.id)}}
-                    <button data-open-2fa>{{{icon 'shield-check' 'size-3.5'}}} {{#if totpEnabled}}Manage 2FA{{else}}Set Up 2FA{{/if}}</button>
-                  {{else if totpEnabled}}
-                    <button data-user-totp-reset data-user-id="{{id}}" data-username="{{username}}">{{{icon 'shield-check' 'size-3.5'}}} Reset 2FA</button>
-                  {{/if}}
-                  {{! No self-delete affordance - deleting your own account mid-session is a trap, not a feature. }}
-                  {{#unless (eq id ../user.id)}}
-                    <button class="btn btn-ghost btn-sm text-danger" data-user-delete data-user-id="{{id}}" data-username="{{username}}">{{{icon 'trash-2' 'size-3.5'}}} Delete User</button>
-                  {{/unless}}
-                </template>
-              </td>
-            </tr>
-          {{/each}}
-        </tbody>
-      </table>
+  {{#> settings/card heading="Mod Site Keys" id="sec-keys" desc="Keys the panel uses to reach mod sites on your behalf. Stored encrypted."}}
+    <div class="space-y-5">
+      <div>
+        <label class="label" for="set-cf-key">CurseForge API key</label>
+        {{! min-w-0 + flex-wrap: the monospace placeholder would otherwise refuse
+            to shrink and push the page wider than a narrow screen; wrapping lets
+            the buttons drop to their own row. }}
+        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+          <input class="input min-w-0 flex-1 font-mono" id="set-cf-key" type="password" placeholder="{{#if cfKeyMasked}}{{cfKeyMasked}} (stored){{else}}paste your key from console.curseforge.com{{/if}}" autocomplete="off">
+          <button class="btn" id="set-cf-save">Save Key</button>
+          <button class="btn btn-ghost" id="set-cf-test" data-tip="Test the stored key against CurseForge.">Test Key</button>
+        </div>
+        <p class="help">Needed for automatic CurseForge modpacks and CurseForge mod downloads. New keys are checked against CurseForge before they're saved.</p>
+      </div>
+      <div>
+        <span class="label">Modrinth</span>
+        <p class="help">No key needed. Modrinth's public API is used directly.</p>
+      </div>
     </div>
-    <div class="mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-2">
-      <button class="btn btn-primary btn-sm" id="user-add">{{{icon 'plus' 'size-3.5'}}} Add User</button>
-      <a class="btn btn-sm" href="/settings/permissions">{{{icon 'shield-check' 'size-3.5'}}} Server Permissions</a>
-    </div>
-    <p class="help mt-2 max-w-prose">Roles: <b>Admin</b> can do everything. <b>Operator</b> can manage servers, but not storage, users, or update policies. <b>Viewer</b> is read-only. Server Permissions lets you change what an operator or viewer may do on each server.</p>
   {{/settings/card}}
 
-  {{#> settings/card heading="Sign-in Security" id="lockouts-card" wide=true desc="Accounts and addresses currently blocked from signing in after too many failed attempts. Locks clear on their own after the cooldown; unlock one here to end it early."}}
-    <div id="lockouts-body" class="text-sm text-ink-faint">Checking…</div>
-    <button class="btn btn-sm mt-4 hidden w-full sm:w-auto" id="lockouts-clear-all">{{{icon 'lock-open' 'size-3.5'}}} Clear All Locks</button>
-  {{/settings/card}}
-
-  {{#> settings/card heading="Public API" id="api-tokens-card" wide=true desc="Let another app or website read your servers' status, like a live status page, an uptime monitor, or a Discord bot. It is read-only: nothing outside can start, stop, or change anything."}}
+  {{#> settings/card heading="Public API" id="api-tokens-card" desc="Let another app or website read your servers' status, like a live status page, an uptime monitor, or a Discord bot. It is read-only: nothing outside can start, stop, or change anything."}}
     {{> settings/toggle-row
         label="Let Outside Apps Read Status"
         help="Switches on by itself when you make your first key below. Turn it off any time to pause outside access without losing your keys."
@@ -240,6 +177,15 @@
       <script type="application/json" id="api-token-servers">{{jsonScript serverOptions}}</script>
     </div>
   {{/settings/card}}
+
+  <section class="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:p-5">
+    <div class="min-w-0 flex-1">
+      <h3 class="text-sm font-semibold text-ink">Users &amp; Permissions</h3>
+      <p class="mt-1 text-xs text-ink-faint">Accounts, roles, two-factor sign-in, sign-in lockouts and what each user may do on each server are managed in one place.</p>
+    </div>
+    <a class="btn shrink-0" href="/settings/permissions">{{{icon 'shield-check' 'size-4'}}} Open Users &amp; Permissions</a>
+  </section>
+  </div>
 </div>
 <script type="application/json" id="settings-self">{{jsonScript selfUserId}}</script>
 <script type="module" src="/js/pages/settings.js"></script>

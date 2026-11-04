@@ -28,13 +28,14 @@ If [two-factor authentication](two-factor-authentication.md) is enabled on your 
 
 Everything hangs off the left sidebar:
 
-- **Dashboard**: every server at a glance ([details](dashboard.md)).
-- **Servers**, **Modpacks**, **Worlds**, **Blueprints**: create and manage servers and their content.
-- **Updates**, **Backups**, **Schedules**, **Storage**, **Activity**: the operational side: what's out of date, your snapshots, automation, disk usage, and the audit log.
-- **Permissions** (bottom, admins only): what each user may do on each server ([details](users-and-roles.md#per-server-permissions)).
-- **Settings** (bottom, admins only): API keys, panel configuration, defaults for new servers, [backup retention](backups.md#retention), users, sign-in security, and the public API.
+- **Dashboard** and **Servers**: every server at a glance ([details](dashboard.md)).
+- **Library** (**Modpacks**, **Worlds**, **Blueprints**): what you install servers and content from.
+- **Maintenance** (**Updates**, **Backups**, **Schedules**): the recurring care every server needs.
+- **Insights** (**Health**, **Activity**, **Storage**): what happened, and what it costs in disk.
+- **Panel Settings** (bottom, admins only): the public domain, time zone, defaults for new servers, [backup retention](backups.md#retention), mod site keys, and the public API.
+- **Users & Permissions** (bottom, admins only): accounts and roles, two-factor resets, sign-in lockouts, and what each user may do on each server ([details](users-and-roles.md#per-server-permissions)).
 
-Below those, the sidebar lists your servers. Opening one shows its own tabs: **Overview**, **Console**, **Players**, **Mods**, **World**, **Backups**, **Monitoring**, and **Settings**, most with related sub-tabs (for example, **Settings → Configuration** holds the server's settings and its game port). See [A single server](servers.md#a-single-server).
+Below those, **Jump to a Server** lists your servers. Opening one shows six sections: **Overview**, **Console**, **Players**, **Content**, **Data**, and **Settings**, most with related sub-tabs (for example, **Data → Backups** and **Settings → Configuration**). See [A single server](servers.md#a-single-server).
 
 The top bar has the **Create a Server** button, a **theme toggle** (dark/light), and your **account menu**, where you can change your profile picture, manage [two-factor authentication](two-factor-authentication.md), or sign out.
 

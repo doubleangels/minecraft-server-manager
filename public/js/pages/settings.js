@@ -1,4 +1,5 @@
-// Settings page: API key save/test + localization + users CRUD + backup retention.
+// Panel Settings (API keys, localization, defaults, backup retention, public
+// API) and the Users section of Users & Permissions (accounts, lockouts).
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { openModal } from '../lib/modal.js';
@@ -6,11 +7,15 @@ import { confirmDialog } from '../lib/confirm.js';
 import { withBusy } from '../lib/loading.js';
 import { fillTimezoneSelect, fillCountrySelect } from '../lib/tzPicker.js';
 import { initRetentionForm } from '../lib/retention.js';
+import { initJumpNav } from '../lib/jumpNav.js';
 
-const page = document.getElementById('settings-page');
+// Panel Settings and Users & Permissions both load this file; each section
+// below binds only when its markup is on the page.
+const page = document.getElementById('settings-page') || document.getElementById('users-card');
 const selfEl = document.getElementById('settings-self');
 const selfUserId = selfEl ? JSON.parse(selfEl.textContent) : null;
 if (page) init();
+initJumpNav();
 
 function init() {
   // ---- CurseForge key ----

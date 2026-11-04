@@ -48,7 +48,7 @@ Both re-check your current password first.
 
 ## Lost your phone _and_ your backup codes?
 
-An **admin** can reset another user's 2FA from **Settings → Users** (**Reset 2FA** in that user's actions menu). That clears 2FA for the account so the user can sign in with just their password and set it up fresh. Admins can't password-lessly reset their _own_ 2FA. They go through the normal password-gated disable, so a hijacked admin session can't strip its own second factor.
+An **admin** can reset another user's 2FA from **Users & Permissions** (**Reset 2FA** in that user's actions menu). That clears 2FA for the account so the user can sign in with just their password and set it up fresh. Admins can't password-lessly reset their _own_ 2FA. They go through the normal password-gated disable, so a hijacked admin session can't strip its own second factor.
 
 ## Good to know
 

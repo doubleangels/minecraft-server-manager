@@ -1,4 +1,4 @@
-// Integrations pages (under Settings): Discord webhook config, invite helper,
+// Integration pages (Settings → Discord / Status Page, Players → Invites, Console → Chatbot): Discord webhook config, invite helper,
 // public status page, and chatbot settings. Each renders as its own page now,
 // so every DOM lookup below is guarded - a section that isn't on the current
 // page simply gets no handlers wired.

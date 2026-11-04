@@ -63,46 +63,45 @@ const SERVER_TABS = [
   'chatbot',
 ];
 
-// Two-level information architecture: the tabs are grouped into a handful of
-// domain sections (top nav), each with a sub-nav of related sections. Grouped by
-// user intent: Console is everything you say to / automate on the running
-// server; Players is only about people; World is world-scoped; Settings holds
-// the per-integration pages. All existing routes still work (see the
-// /integrations redirect below); only the navigation is reorganized.
+// Two-level information architecture: six sections grouped by what a person
+// is trying to do, each with a sub-nav of related pages.
+//   Overview  - is it healthy? (summary, live performance, activity + crashes)
+//   Console   - talk to the running server (console, chat, chat commands, chatbot)
+//   Players   - the people (roster, inventories, stats, invites to join)
+//   Content   - what the server runs (mods, version upgrades, worlds, live map);
+//               matches the `content` capability that guards all four
+//   Data      - what is on disk (backups, the file browser)
+//   Settings  - how it is configured and announced (configuration, Discord, status page)
+// Every page keeps its URL; only the navigation is regrouped.
 const TAB_GROUPS = [
-  { key: 'overview', label: 'Overview', icon: 'layout-dashboard', tabs: ['overview'] },
-  { key: 'console', label: 'Console', icon: 'terminal', tabs: ['console', 'chat', 'commands'] },
-  { key: 'players', label: 'Players', icon: 'users', tabs: ['players', 'inventory', 'analytics'] },
-  { key: 'mods', label: 'Mods', icon: 'puzzle', tabs: ['mods', 'updates'] },
-  { key: 'world', label: 'World', icon: 'earth', tabs: ['worlds', 'map', 'files'] },
-  { key: 'backups', label: 'Backups', icon: 'archive', tabs: ['backups'] },
-  { key: 'monitoring', label: 'Monitoring', icon: 'activity', tabs: ['history', 'metrics'] },
-  {
-    key: 'settings',
-    label: 'Settings',
-    icon: 'settings',
-    tabs: ['settings', 'discord', 'status-page', 'invites', 'chatbot'],
-  },
+  { key: 'overview', label: 'Overview', icon: 'layout-dashboard', tabs: ['overview', 'metrics', 'history'] },
+  { key: 'console', label: 'Console', icon: 'terminal', tabs: ['console', 'chat', 'commands', 'chatbot'] },
+  { key: 'players', label: 'Players', icon: 'users', tabs: ['players', 'inventory', 'analytics', 'invites'] },
+  { key: 'content', label: 'Content', icon: 'puzzle', tabs: ['mods', 'updates', 'worlds', 'map'] },
+  { key: 'data', label: 'Data', icon: 'database', tabs: ['backups', 'files'] },
+  { key: 'settings', label: 'Settings', icon: 'settings', tabs: ['settings', 'discord', 'status-page'] },
 ];
 const SUB_LABELS = {
+  overview: 'Summary',
+  metrics: 'Performance',
+  history: 'Activity',
   console: 'Console',
   chat: 'Chat',
-  commands: 'Commands',
+  commands: 'Chat Commands',
+  chatbot: 'Chatbot',
   players: 'Roster',
   inventory: 'Inventory',
   analytics: 'Stats',
-  worlds: 'Worlds',
+  invites: 'Invites',
   mods: 'Mods',
   updates: 'Versions',
-  map: 'Map',
+  worlds: 'Worlds',
+  map: 'Live Map',
+  backups: 'Backups',
   files: 'Files',
-  metrics: 'Live',
-  history: 'History',
   settings: 'Configuration',
   discord: 'Discord',
   'status-page': 'Status Page',
-  invites: 'Invites',
-  chatbot: 'Chatbot',
 };
 // Sub-nav entries only shown to admins (the API 403s these for other roles).
 const ADMIN_ONLY_TABS = new Set(['chatbot']);
@@ -520,6 +519,8 @@ router.get(
       }
       addrs.push(`localhost:${row.port_game}`);
       context.addresses = [...new Set(addrs)];
+      // Overview owns Activity now: a short preview, the full list one tab over.
+      context.recentEvents = eventsVM(eventsService.listEvents({ serverId: row.id, limit: 5, forUser: req.user }));
     } else if (tab === 'chat') {
       const live = require('../../services/liveCache').get(row.id);
       context.onlinePlayers = (live && live.players && live.players.names) || [];
@@ -939,10 +940,17 @@ router.get('/backups', (req, res) => {
 
 router.get('/schedules', (req, res) => {
   const scheduler = require('../../services/scheduler');
+  // ?server=<id> narrows the list to one server (linked from its tabs) and
+  // pre-selects it in New Task. An unknown or hidden id is ignored.
+  const focus = (res.locals.servers || []).find((s) => s.id === req.query.server) || null;
   res.render('schedules', {
     title: 'Schedules',
     active: 'schedules',
-    schedules: scheduler.listSchedules().filter((j) => !j.serverId || res.locals.visibleServerIds.has(j.serverId)),
+    schedules: scheduler
+      .listSchedules()
+      .filter((j) => !j.serverId || res.locals.visibleServerIds.has(j.serverId))
+      .filter((j) => !focus || j.serverId === focus.id),
+    focusServer: focus ? { id: focus.id, name: focus.name } : null,
     taskTypes: Object.entries(scheduler.TASK_TYPES)
       .filter(([, t]) => !t.adminOnly || (req.user && req.user.role === 'admin'))
       .map(([value, t]) => ({
@@ -1136,9 +1144,11 @@ router.get(
 
 router.get('/settings/permissions', requireRole('admin'), (req, res) => {
   res.render('permissions', {
-    title: 'Permissions',
+    title: 'Users & Permissions',
     active: 'permissions',
     matrix: permissions.listMatrix(),
+    users: require('../../services/auth').listUsers(),
+    selfUserId: req.user.id,
   });
 });
 
@@ -1148,7 +1158,7 @@ router.get('/settings', requireRole('admin'), (req, res) => {
   const settings = require('../../services/settings');
   const publicHost = settings.getPublicHost();
   res.render('settings', {
-    title: 'Settings',
+    title: 'Panel Settings',
     active: 'settings',
     cfKeyMasked: apiKeys.maskedKey('curseforge'),
     publicHost,

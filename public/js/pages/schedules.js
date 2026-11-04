@@ -26,7 +26,10 @@ function init() {
   const servers = readJson('servers');
   const taskTypes = readJson('taskTypes');
 
-  document.getElementById('schedule-new')?.addEventListener('click', () => scheduleModal({ servers, taskTypes }));
+  const newBtn = document.getElementById('schedule-new');
+  newBtn?.addEventListener('click', () =>
+    scheduleModal({ servers, taskTypes, preset: { serverId: newBtn.dataset.focusServer || '' } })
+  );
 
   table?.addEventListener('click', async (e) => {
     const row = e.target.closest('[data-schedule-row]');
@@ -98,7 +101,7 @@ function init() {
   });
 }
 
-function scheduleModal({ servers, taskTypes, edit = null }) {
+function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
   const content = document.createElement('div');
   content.innerHTML = `
     <label class="label">Runs on</label>
@@ -134,6 +137,7 @@ function scheduleModal({ servers, taskTypes, edit = null }) {
   const cronInput = content.querySelector('[data-sc-cron]');
   const preview = content.querySelector('[data-sc-preview]');
 
+  if (!edit && preset && preset.serverId) serverSel.value = preset.serverId;
   if (edit) {
     serverSel.value = edit.serverId || '';
     typeSel.value = edit.taskType;

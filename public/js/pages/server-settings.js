@@ -1,5 +1,6 @@
 // Server Settings tab: collect fields, PATCH the server, surface recreate flag,
 // live heap/container headroom feedback, blueprint export/clone, icon upload.
+import { initJumpNav } from '../lib/jumpNav.js';
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { openModal } from '../lib/modal.js';
@@ -45,8 +46,13 @@ function init(serverId) {
   // ---- dirty tracking: Save always works, but Discard/leave now warn instead
   // of silently dropping edits ----
   let dirty = false;
-  const markDirty = () => {
+  const dirtyNote = document.querySelector('[data-dirty-note]');
+  const markDirty = (e) => {
+    // The game port saves on its own button, so typing there is not a
+    // pending change for the page-wide Save.
+    if (e && e.target && e.target.closest && e.target.closest('[data-port-card]')) return;
     dirty = true;
+    dirtyNote?.classList.remove('hidden');
   };
   root.addEventListener('input', markDirty);
   root.addEventListener('change', markDirty);
@@ -539,6 +545,7 @@ function init(serverId) {
       if (!ok) return;
     }
     dirty = false;
+    dirtyNote?.classList.add('hidden');
     location.reload();
   });
 
@@ -742,6 +749,7 @@ function init(serverId) {
           : 'Saved.'
       );
       dirty = false; // saved - leaving must not warn
+      dirtyNote?.classList.add('hidden');
       setTimeout(() => location.reload(), 900);
     } catch {
       toast(friendlyError(null, { action: 'save your settings' }), { kind: 'error' });
@@ -750,3 +758,5 @@ function init(serverId) {
     }
   });
 }
+
+initJumpNav();

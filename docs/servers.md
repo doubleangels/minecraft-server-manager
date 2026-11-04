@@ -38,14 +38,16 @@ The **Servers** page lists your whole fleet with status and quick stats.
 
 Opening a server gives you a tabbed workspace:
 
-- **Overview**: the address to share with players, the description, live usage, and who's online.
-- **Console**: the live log stream and command input, in-game chat, and [chat commands](console-and-chat.md).
-- **Players**: the roster, plus inventory and statistics.
-- **Mods**: the installed mod list, the [mod browser](modpacks.md), and content updates. On a modded server, its **Versions** sub-tab checks which future Minecraft versions your mods have builds for ([updates](updates.md#minecraft-version-compatibility)).
-- **World**: [worlds, the live map, and the file manager](worlds-and-files.md).
-- **Backups**: [snapshots and restore](backups.md) for this server.
-- **Monitoring**: per-server history and live metrics, including crash reports (see below).
-- **Settings**: **Configuration** (everything about how the server runs), plus the [integrations](integrations.md) (Discord, Status Page, Invites, and, for admins, Chatbot).
+Six sections, each grouped by what you came to do:
+
+- **Overview**: is it healthy? **Summary** (the address to share, a crash callout, quick actions, recent activity, live usage, who's online), **Performance** (live metrics), and **Activity** (the server's history, including crash reports, see below).
+- **Console**: talk to the running server. The live log stream and command input, in-game **Chat**, [**Chat Commands**](console-and-chat.md), and, for admins, the **Chatbot**.
+- **Players**: the people. The **Roster**, **Inventory**, **Stats**, and **Invites** for getting friends in.
+- **Content**: what the server runs. **Mods** (the installed list, the [mod browser](modpacks.md), content updates), **Versions** on a modded server ([which future Minecraft versions your mods support](updates.md#minecraft-version-compatibility)), **Worlds** and the **Live Map** ([worlds and files](worlds-and-files.md)).
+- **Data**: what is on disk. [**Backups**](backups.md) and the **Files** browser.
+- **Settings**: **Configuration** (everything about how the server runs), plus the [integrations](integrations.md) that announce it: **Discord** and the **Status Page**.
+
+**Configuration** is one page with a jump bar (a scrolling row on a phone, a list on the left on desktop): **General**, **Startup & Updates**, **Resources**, **Game Port**, **Server Options** (every image setting), **Docker** (admins), and **Maintenance**, with **Delete Server** in its own danger zone at the end. **Save Changes** stays pinned to the bottom of the screen.
 
 The start, stop, and restart controls sit in the header above every tab. What you can do on each tab depends on your [permissions on that server](users-and-roles.md#per-server-permissions): for example, the **Files** sub-tab needs the Files permission, and sending console commands needs Console.
 
@@ -55,7 +57,7 @@ The **World Controls** rail rides along on every tab: the in-game clock, weather
 
 ![World controls](images/world-controls.png)
 
-**Monitoring → Live** shows TPS and milliseconds per tick, a health and stability card with crashes (last 24 h and 7 d), out-of-memory kills, and auto-restarts, and per-world sizes.
+**Overview → Performance** shows TPS and milliseconds per tick, a health and stability card with crashes (last 24 h and 7 d), out-of-memory kills, and auto-restarts, and per-world sizes.
 
 ![Live monitoring](images/monitoring-live.png)
 
@@ -83,7 +85,7 @@ The **Game Port** card on **Settings → Configuration** moves a server to anoth
 
 ## Crash reports & mclo.gs analysis
 
-Crash reports (`crash-reports/*.txt` and JVM `hs_err_pid*.log` files) are picked up automatically, parsed into a one-line summary with the exception and suspected mods, and listed under **Monitoring → History**:
+Crash reports (`crash-reports/*.txt` and JVM `hs_err_pid*.log` files) are picked up automatically, parsed into a one-line summary with the exception and suspected mods, and listed under **Overview → Activity**, where each one can be cleared on its own or all at once with **Clear All**:
 
 ![Crash report card](images/crash-mclogs-card.png)
 

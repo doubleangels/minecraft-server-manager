@@ -306,7 +306,8 @@ test('server icons are original SVGs in their own directory, distinct artwork fr
 });
 
 test('role names render capitalized in the UI, but the stored/submitted value stays lowercase', async () => {
-  const page = await app.req('GET', '/settings', { cookie: adminCookie });
+  // The user table lives on Users & Permissions.
+  const page = await app.req('GET', '/settings/permissions', { cookie: adminCookie });
   assert.equal(page.status, 200);
   assert.match(page.text, /<option value="admin"[^>]*>Admin<\/option>/);
   assert.match(page.text, /<option value="operator"[^>]*>Operator<\/option>/);

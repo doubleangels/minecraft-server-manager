@@ -452,7 +452,11 @@ test('the Permissions page and API are admin-only', async () => {
   assert.equal(page.status, 200);
   assert.ok(page.text.includes('Alpha Server') && page.text.includes('Bravo Server'));
   assert.ok(page.text.includes('viewer_p') && page.text.includes('operator_p'));
-  assert.ok(!page.text.includes('data-username="admin"'), 'admins are not listed in the matrix');
+  // The page now also carries the user accounts table; only the matrix after
+  // the Server Permissions heading must leave admins out.
+  const matrixHtml = page.text.split('Server Permissions</h2>')[1] || '';
+  assert.ok(matrixHtml.includes('viewer_p'), 'the matrix follows the heading');
+  assert.ok(!matrixHtml.includes('data-username="admin"'), 'admins are not listed in the matrix');
   const matrix = await app.req('GET', '/api/permissions', { cookie: adminCookie });
   assert.equal(matrix.status, 200);
   assert.equal(matrix.json.capabilities.length, 9);

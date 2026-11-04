@@ -1,5 +1,14 @@
 {{#unless serversOnly}}{{> page-header heading="DASHBOARD" sub="Every server at a glance: status, resource use, and the latest activity across the panel."}}{{/unless}}
 
+{{! Blocking problems first: nothing below works without Docker. }}
+<div id="docker-warning" class="notice notice-danger mb-4 hidden">
+  {{{icon 'triangle-alert' 'size-4 mt-0.5 shrink-0 text-danger'}}}
+  <div>
+    <span class="font-semibold text-danger">Docker isn't reachable.</span>
+    <span id="docker-warning-reason">Start Docker, then refresh. Creating or starting servers needs Docker running.</span>
+  </div>
+</div>
+
 {{! Update counts live in the Updates card below (with the mod/server split),
     so this row is just people + infrastructure. }}
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 {{#if serversOnly}}hidden{{/if}}">
@@ -7,6 +16,15 @@
     <div class="text-xs text-ink-faint">Servers online</div>
     {{! Green only when something IS online - 0/3 in success green lied. }}
     <div class="mt-1 text-2xl font-bold tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-faint"> / {{totals.total}}</span></div>
+    {{! The status breakdown, folded in here instead of its own row. }}
+    <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-faint">
+      {{#if overview.byStatus.starting}}<span class="flex items-center gap-1"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.starting}} starting</span>{{/if}}
+      {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.unhealthy}} unhealthy</span>{{/if}}
+      {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.stalled}} stalled</span>{{/if}}
+      {{#if overview.byStatus.updating}}<span class="flex items-center gap-1"><span class="status-dot bg-diamond-500"></span>{{overview.byStatus.updating}} updating</span>{{/if}}
+      {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.crashed}} crashed</span>{{/if}}
+      {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1"><span class="status-dot bg-stone-500"></span>{{overview.byStatus.stopped}} stopped</span>{{/if}}
+    </div>
   </div>
   <div class="card p-4">
     <div class="text-xs text-ink-faint">Players connected</div>
@@ -48,41 +66,11 @@
 </div>
 {{/unless}}
 
-{{#unless serversOnly}}
-<div class="mb-6 {{#if noServers}}hidden{{/if}}">
-  <h2 class="mb-3 font-semibold">Servers by Status</h2>
-  <div class="card flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm">
-    {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot bg-grass-500"></span>{{overview.byStatus.running}} Running</span>{{/if}}
-    {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
-    {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
-    {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
-    {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot bg-diamond-500"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
-    {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5"><span class="status-dot bg-redstone-500"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
-    {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot bg-stone-500"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
-  </div>
-</div>
-{{/unless}}
 
-<div id="docker-warning" class="notice notice-danger mb-4 hidden">
-  {{{icon 'triangle-alert' 'size-4 mt-0.5 shrink-0 text-danger'}}}
-  <div>
-    <span class="font-semibold text-danger">Docker isn't reachable.</span>
-    <span id="docker-warning-reason">Start Docker, then refresh. Creating or starting servers needs Docker running.</span>
-  </div>
-</div>
 
-{{#unless serversOnly}}
-<div class="mb-6 {{#if noServers}}hidden{{/if}}" id="combined-overview">
-  <div class="mb-3 flex items-center justify-between">
-    <h2 class="font-semibold">Resource Overview</h2>
-  </div>
-  <div data-combined-root>
-    {{> combined-graphs}}
-  </div>
-</div>
-{{/unless}}
 
 {{#unless noServers}}
+{{#unless serversOnly}}<h2 class="mb-3 font-semibold">Servers</h2>{{/unless}}
 <div class="mb-4 flex flex-wrap items-center gap-2">
   <input class="input w-full sm:w-auto sm:max-w-xs sm:flex-1" type="search" placeholder="Search servers, tags…" aria-label="Search servers" id="server-filter">
   {{! Visible "Sort" label: only the first option carried a "Sort:" prefix, so
@@ -120,6 +108,19 @@
   </a>
 </div>
 {{/if}}
+
+{{! Fleet resource charts sit after the servers themselves: the servers are
+    what people come here for, the combined graph is context. }}
+{{#unless serversOnly}}
+<div class="mt-8 {{#if noServers}}hidden{{/if}}" id="combined-overview">
+  <div class="mb-3 flex items-center justify-between">
+    <h2 class="font-semibold">Resource Overview</h2>
+  </div>
+  <div data-combined-root>
+    {{> combined-graphs}}
+  </div>
+</div>
+{{/unless}}
 
 <div class="mt-8 {{#if serversOnly}}hidden{{/if}}">
   <div class="mb-3 flex items-center justify-between">

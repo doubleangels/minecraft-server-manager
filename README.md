@@ -295,7 +295,7 @@ Not affiliated with any of them.
   automatic pre-update backup → graceful stop → re-pin → rebuild → health monitoring → **one-click
   rollback** if it doesn't come up. The Updates page also checks Docker-image staleness and, for
   servers with no managed pack, explicit Minecraft-version / loader-build pins.
-- **Version compatibility before a version update**: a mod-loader server's **Mods → Versions** tab checks every installed
+- **Version compatibility before a version update**: a mod-loader server's **Content → Versions** tab checks every installed
   mod against Modrinth and CurseForge and reports the highest Minecraft version they all have a
   build for, plus a per-version breakdown of what would be left behind. A newer Minecraft version is
   only offered once that check backs it, and never while a jar cannot be identified.
@@ -320,7 +320,7 @@ Not affiliated with any of them.
   the server.
 - **Crash analysis via mclo.gs**: one click shares a crash report as an mclo.gs paste (always behind
   an explicit confirm, since it's public) and runs mclo.gs's automated insights: known problems with
-  suggested fixes, rendered right in the History tab.
+  suggested fixes, rendered right in the server's Activity tab.
 - **Console, logs & RCON**: live console over WebSocket, ANSI rendering, search/level filters, a
   command bar with history, and a player list with quick actions. Every server gets a generated,
   encrypted RCON password injected automatically.

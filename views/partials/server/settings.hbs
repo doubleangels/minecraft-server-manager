@@ -1,70 +1,93 @@
-<div class="grid gap-4 lg:grid-cols-2" data-settings-server="{{server.id}}" data-settings-icon="{{server.icon}}" data-settings-accent="{{server.accent}}" data-settings-tags="{{jsonAttr server.tags}}" data-settings-env="{{settingsEnv}}" data-settings-docker-name="{{server.containerName}}" data-settings-docker-network="{{server.networkName}}" data-settings-docker-ports="{{jsonAttr server.extraPorts}}" data-settings-docker-binds="{{jsonAttr server.extraBinds}}">
-  <div class="card p-4">
-    <h3 class="mb-4 font-semibold">Identity</h3>
-    <div class="space-y-4">
-      <div>
-        <label class="label" for="st-name">Display name</label>
-        <input class="input" id="st-name" value="{{server.name}}">
-        <p class="help">Rename it freely. Folders, container names, and history all stay keyed to the internal ID.</p>
-      </div>
-      <div>
-        <label class="label" for="st-desc">Description</label>
-        <textarea class="input" id="st-desc" rows="3">{{server.description}}</textarea>
-        <p class="help">Markdown supported; shown on the Overview tab.</p>
-      </div>
-      <div>
-        <label class="label" for="st-motd">MOTD <span class="text-xs font-normal text-ink-faint">(shown in every player's server list)</span></label>
-        <input class="input font-mono" id="st-motd" value="{{motd}}" autocomplete="off">
-        <div class="console mt-2 py-2 text-sm" id="st-motd-preview"></div>
-        <p class="help">Applies on the next restart.</p>
-      </div>
-      {{! Both pickers use ONE selection language: aria-pressed + the theme-aware
-          .swatch ring (the old white ring was invisible on the light theme, and
-          the icon picker used a different green-border treatment one row over).
-          The current stock icon is marked in place - no duplicate "current" tile. }}
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+{{! Configuration, ordered like a person thinks about a server: what it is,
+    how it runs day to day, what it may use, how players reach it, every
+    image option, then the rare and destructive actions last. A jump bar (a
+    scrolling chip row on a phone, a sticky list on desktop) reaches each
+    section, and Save stays pinned to the bottom of the screen. }}
+<div class="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-6" data-settings-server="{{server.id}}" data-settings-icon="{{server.icon}}" data-settings-accent="{{server.accent}}" data-settings-tags="{{jsonAttr server.tags}}" data-settings-env="{{settingsEnv}}" data-settings-docker-name="{{server.containerName}}" data-settings-docker-network="{{server.networkName}}" data-settings-docker-ports="{{jsonAttr server.extraPorts}}" data-settings-docker-binds="{{jsonAttr server.extraBinds}}">
+  <nav class="-mx-1 mb-4 flex gap-1 overflow-x-auto px-1 pb-1 lg:sticky lg:top-24 lg:mx-0 lg:mb-0 lg:flex-col lg:self-start lg:overflow-visible lg:px-0" aria-label="Settings sections" data-settings-jump>
+    <a class="subtab shrink-0" href="#sec-general" data-jump="sec-general">General</a>
+    <a class="subtab shrink-0" href="#sec-startup" data-jump="sec-startup">Startup &amp; Updates</a>
+    <a class="subtab shrink-0" href="#sec-resources" data-jump="sec-resources">Resources</a>
+    {{#if perms.settings}}<a class="subtab shrink-0" href="#port" data-jump="port">Game Port</a>{{/if}}
+    {{#if advancedSections.length}}<a class="subtab shrink-0" href="#sec-options" data-jump="sec-options">Server Options</a>{{/if}}
+    {{#if (eq user.role 'admin')}}<a class="subtab shrink-0" href="#sec-docker" data-jump="sec-docker">Docker</a>{{/if}}
+    <a class="subtab shrink-0" href="#sec-maintenance" data-jump="sec-maintenance">Maintenance</a>
+  </nav>
+
+  <div class="min-w-0 space-y-4">
+    <section class="card scroll-mt-32 p-4" id="sec-general">
+      <h3 class="font-semibold">General</h3>
+      <p class="help mt-1 mb-4">How this server is named and shown, in the panel and in every player's server list.</p>
+      <div class="space-y-4">
         <div>
-          <span class="label">Icon</span>
-          <div class="flex flex-wrap gap-1.5" id="st-icon-picker">
-            {{#if (startsWith server.icon 'custom:')}}
-              <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="{{server.icon}}" data-tip="Current custom icon." aria-pressed="true"><img src="{{iconSrc server.icon}}" alt="" class="size-full rounded-sm" data-fallback-icon="/icons/servers/grass.svg"></button>
-            {{/if}}
-            <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="grass" aria-pressed="{{eq server.icon 'grass'}}"><img src="/icons/servers/grass.svg" alt="Grass block" class="size-full rounded-sm"></button>
-            <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="creeper" aria-pressed="{{eq server.icon 'creeper'}}"><img src="/icons/servers/creeper.svg" alt="Creeper" class="size-full rounded-sm"></button>
-            <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="diamond" aria-pressed="{{eq server.icon 'diamond'}}"><img src="/icons/servers/diamond.svg" alt="Diamond" class="size-full rounded-sm"></button>
-            <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="portal" aria-pressed="{{eq server.icon 'portal'}}"><img src="/icons/servers/portal.svg" alt="Nether portal" class="size-full rounded-sm"></button>
-            <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="chest" aria-pressed="{{eq server.icon 'chest'}}"><img src="/icons/servers/chest.svg" alt="Chest" class="size-full rounded-sm"></button>
-            <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="sword" aria-pressed="{{eq server.icon 'sword'}}"><img src="/icons/servers/sword.svg" alt="Sword" class="size-full rounded-sm"></button>
-            <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="potion" aria-pressed="{{eq server.icon 'potion'}}"><img src="/icons/servers/potion.svg" alt="Potion" class="size-full rounded-sm"></button>
-            <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="tnt" aria-pressed="{{eq server.icon 'tnt'}}"><img src="/icons/servers/tnt.svg" alt="TNT" class="size-full rounded-sm"></button>
-            <button class="grid size-9 place-items-center rounded-sm border border-dashed border-line-strong text-ink-faint transition hover:border-stone-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400" id="st-icon-upload" data-tip="Upload a custom icon (PNG/SVG).">{{{icon 'upload' 'size-4'}}}</button>
+          <label class="label" for="st-name">Display name</label>
+          <input class="input" id="st-name" value="{{server.name}}">
+          <p class="help">Rename it freely. Folders, container names, and history all stay keyed to the internal ID.</p>
+        </div>
+        <div>
+          <label class="label" for="st-desc">Description</label>
+          <textarea class="input" id="st-desc" rows="3">{{server.description}}</textarea>
+          <p class="help">Markdown supported; shown on the Overview tab.</p>
+        </div>
+        <div>
+          <label class="label" for="st-motd">MOTD <span class="text-xs font-normal text-ink-faint">(shown in every player's server list)</span></label>
+          <input class="input font-mono" id="st-motd" value="{{motd}}" autocomplete="off">
+          <div class="console mt-2 py-2 text-sm" id="st-motd-preview"></div>
+          <p class="help">Applies on the next restart.</p>
+        </div>
+        {{! Both pickers use ONE selection language: aria-pressed + the theme-aware
+            .swatch ring (the old white ring was invisible on the light theme, and
+            the icon picker used a different green-border treatment one row over).
+            The current stock icon is marked in place - no duplicate "current" tile. }}
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <span class="label">Icon</span>
+            <div class="flex flex-wrap gap-1.5" id="st-icon-picker">
+              {{#if (startsWith server.icon 'custom:')}}
+                <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="{{server.icon}}" data-tip="Current custom icon." aria-pressed="true"><img src="{{iconSrc server.icon}}" alt="" class="size-full rounded-sm" data-fallback-icon="/icons/servers/grass.svg"></button>
+              {{/if}}
+              <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="grass" aria-pressed="{{eq server.icon 'grass'}}"><img src="/icons/servers/grass.svg" alt="Grass block" class="size-full rounded-sm"></button>
+              <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="creeper" aria-pressed="{{eq server.icon 'creeper'}}"><img src="/icons/servers/creeper.svg" alt="Creeper" class="size-full rounded-sm"></button>
+              <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="diamond" aria-pressed="{{eq server.icon 'diamond'}}"><img src="/icons/servers/diamond.svg" alt="Diamond" class="size-full rounded-sm"></button>
+              <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="portal" aria-pressed="{{eq server.icon 'portal'}}"><img src="/icons/servers/portal.svg" alt="Nether portal" class="size-full rounded-sm"></button>
+              <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="chest" aria-pressed="{{eq server.icon 'chest'}}"><img src="/icons/servers/chest.svg" alt="Chest" class="size-full rounded-sm"></button>
+              <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="sword" aria-pressed="{{eq server.icon 'sword'}}"><img src="/icons/servers/sword.svg" alt="Sword" class="size-full rounded-sm"></button>
+              <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="potion" aria-pressed="{{eq server.icon 'potion'}}"><img src="/icons/servers/potion.svg" alt="Potion" class="size-full rounded-sm"></button>
+              <button class="swatch grid size-9 place-items-center p-1" style="background: {{server.accent}}" data-pick-icon="tnt" aria-pressed="{{eq server.icon 'tnt'}}"><img src="/icons/servers/tnt.svg" alt="TNT" class="size-full rounded-sm"></button>
+              <button class="grid size-9 place-items-center rounded-sm border border-dashed border-line-strong text-ink-faint transition hover:border-stone-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400" id="st-icon-upload" data-tip="Upload a custom icon (PNG/SVG).">{{{icon 'upload' 'size-4'}}}</button>
+            </div>
+          </div>
+          <div>
+            <span class="label">Accent color</span>
+            {{! Amethyst is a deliberate off-ramp from the four semantic ramps -
+                it's identity decoration from Minecraft source material, not meaning. }}
+            <div class="flex flex-wrap items-center gap-1.5" id="st-accent-picker">
+              <button class="swatch size-9" style="background: #3fa62b" data-pick-accent="#3fa62b" data-tip="Grass" aria-pressed="false"></button>
+              <button class="swatch size-9" style="background: #21a7ab" data-pick-accent="#21a7ab" data-tip="Diamond" aria-pressed="false"></button>
+              <button class="swatch size-9" style="background: #e5484d" data-pick-accent="#e5484d" data-tip="Redstone" aria-pressed="false"></button>
+              <button class="swatch size-9" style="background: #e99417" data-pick-accent="#e99417" data-tip="Gold" aria-pressed="false"></button>
+              <button class="swatch size-9" style="background: #9a5cc6" data-pick-accent="#9a5cc6" data-tip="Amethyst" aria-pressed="false"></button>
+            </div>
           </div>
         </div>
         <div>
-          <span class="label">Accent color</span>
-          {{! Amethyst is a deliberate off-ramp from the four semantic ramps -
-              it's identity decoration from Minecraft source material, not meaning. }}
-          <div class="flex flex-wrap items-center gap-1.5" id="st-accent-picker">
-            <button class="swatch size-9" style="background: #3fa62b" data-pick-accent="#3fa62b" data-tip="Grass" aria-pressed="false"></button>
-            <button class="swatch size-9" style="background: #21a7ab" data-pick-accent="#21a7ab" data-tip="Diamond" aria-pressed="false"></button>
-            <button class="swatch size-9" style="background: #e5484d" data-pick-accent="#e5484d" data-tip="Redstone" aria-pressed="false"></button>
-            <button class="swatch size-9" style="background: #e99417" data-pick-accent="#e99417" data-tip="Gold" aria-pressed="false"></button>
-            <button class="swatch size-9" style="background: #9a5cc6" data-pick-accent="#9a5cc6" data-tip="Amethyst" aria-pressed="false"></button>
+          <label class="label" for="st-tag-input">Tags</label>
+          {{! Chips are rendered by server-settings.js from data-settings-tags - no server copy, or they double up. }}
+          <div class="flex flex-wrap items-center gap-1.5" id="st-tags">
+            <input class="input w-28" id="st-tag-input" placeholder="add tag…">
           </div>
         </div>
-      </div>
-      <div>
-        <label class="label" for="st-tag-input">Tags</label>
-        {{! Chips are rendered by server-settings.js from data-settings-tags - no server copy, or they double up. }}
-        <div class="flex flex-wrap items-center gap-1.5" id="st-tags">
-          <input class="input w-28" id="st-tag-input" placeholder="add tag…">
+        <div>
+          <label class="label" for="st-notes">Private notes <span class="badge ml-1">admin only</span></label>
+          <textarea class="input font-mono text-xs" id="st-notes" rows="2" placeholder="Scratchpad, never shown to viewers">{{server.notes}}</textarea>
         </div>
       </div>
-      <div>
-        <label class="label" for="st-notes">Private notes <span class="badge ml-1">admin only</span></label>
-        <textarea class="input font-mono text-xs" id="st-notes" rows="2" placeholder="Scratchpad, never shown to viewers">{{server.notes}}</textarea>
-      </div>
-      <div class="space-y-2.5 border-t border-line pt-3">
+    </section>
+
+    <section class="card scroll-mt-32 p-4" id="sec-startup">
+      <h3 class="font-semibold">Startup &amp; Updates</h3>
+      <p class="help mt-1 mb-4">When the server starts on its own, what happens after a crash, and how updates reach it.</p>
+      <div class="space-y-2.5">
         <label class="flex items-center justify-between gap-3 text-sm">
           <span>Start on Panel Boot</span>
           <span class="msm-toggle"><input type="checkbox" id="st-autostart" {{#if server.autoStart}}checked{{/if}}><span></span></span>
@@ -74,12 +97,27 @@
           <span class="msm-toggle"><input type="checkbox" id="st-autorestart" {{#if server.autoRestart}}checked{{/if}}><span></span></span>
         </label>
       </div>
-    </div>
-  </div>
+      <p class="help">Restarts, backups and commands at set times live in <a class="text-link hover:underline" href="/schedules?server={{server.id}}">this server's schedules</a>.</p>
+      <div class="mt-4 border-t border-line pt-4">
+        <span class="label">Update policy</span>
+        <div class="space-y-2 text-sm">
+          <label class="flex items-center gap-2.5"><input type="radio" name="up" value="manual" class="msm-radio" {{#if (eq server.updatePolicy 'manual')}}checked{{/if}}> Manual Only <span class="text-xs text-ink-faint">(never changes anything, and no update badges for this server)</span></label>
+          <label class="flex items-center gap-2.5"><input type="radio" name="up" value="notify" class="msm-radio" {{#if (eq server.updatePolicy 'notify')}}checked{{/if}}> Notify Me <span class="text-xs text-ink-faint">(show a badge when updates exist; you apply them)</span></label>
+          <label class="flex items-center gap-2.5"><input type="radio" name="up" value="auto" class="msm-radio" {{#if (eq server.updatePolicy 'auto')}}checked{{/if}}> Auto-Update <span class="text-xs text-ink-faint">(applies pack updates after the daily check: pre-update backup, health check, automatic rollback on failure, but never across Minecraft versions.)</span></label>
+        </div>
+      </div>
+  {{#if server.packUnpinned}}
+      <div class="notice notice-warn mt-4 max-w-prose text-sm">
+        <b>This modpack has no pinned version.</b> The container downloads the newest pack version every time it
+        starts. That can silently change your mods and even your world's Minecraft version. Open the
+        <b>Modpack</b> section and pick the version you're running to lock it in.
+      </div>
+      {{/if}}
+    </section>
 
-  <div class="space-y-4">
-    <div class="card p-4">
-      <h3 class="mb-4 font-semibold">Resources</h3>
+    <section class="card scroll-mt-32 p-4" id="sec-resources">
+      <h3 class="font-semibold">Resources</h3>
+      <p class="help mt-1 mb-4">Memory, CPU and disk this server may use.</p>
       <div class="space-y-4">
         <div>
           <label class="label" for="st-heap">Java heap</label>
@@ -124,13 +162,13 @@
         </div>
         {{> settings/toggle-row label="Stop the Server When Over Quota" help="Strict mode: when the server's folder grows more than 10% past the quota, the panel stops the server and notes it in history. Has no effect while the quota is off." inputId="st-quota-strict" checked=server.resources.quotaStrict}}
       </div>
-    </div>
+    </section>
 
     {{! Its own Save: a port change restarts a running server, so it never rides
         along with the tab-wide Save. It applies at once: a running server is
         restarted on the new port, a stopped one gets a new container on it. }}
     {{#if perms.settings}}
-    <div class="card scroll-mt-20 p-4" id="port" data-port-card data-port-current="{{server.ports.game}}"{{#if (or (eq server.status 'running') (eq server.status 'starting') (eq server.status 'unhealthy') (eq server.status 'stalled'))}} data-port-running{{/if}}>
+    <div class="card scroll-mt-32 p-4" id="port" data-port-card data-port-current="{{server.ports.game}}"{{#if (or (eq server.status 'running') (eq server.status 'starting') (eq server.status 'unhealthy') (eq server.status 'stalled'))}} data-port-running{{/if}}>
       <h3 class="mb-4 font-semibold">Game Port</h3>
       <div class="space-y-3">
         <div>
@@ -152,28 +190,38 @@
     </div>
     {{/if}}
 
-    {{#if server.packUnpinned}}
-    <div class="notice notice-warn max-w-prose text-sm">
-      <b>This modpack has no pinned version.</b> The container downloads the newest pack version every time it
-      starts. That can silently change your mods and even your world's Minecraft version. Open the
-      <b>Modpack</b> section and pick the version you're running to lock it in.
-    </div>
-    {{/if}}
-
-    <div class="card p-4">
-      <h3 class="mb-3 font-semibold">Update Policy</h3>
-      <div class="space-y-2 text-sm">
-        <label class="flex items-center gap-2.5"><input type="radio" name="up" value="manual" class="msm-radio" {{#if (eq server.updatePolicy 'manual')}}checked{{/if}}> Manual Only <span class="text-xs text-ink-faint">(never changes anything, and no update badges for this server)</span></label>
-        <label class="flex items-center gap-2.5"><input type="radio" name="up" value="notify" class="msm-radio" {{#if (eq server.updatePolicy 'notify')}}checked{{/if}}> Notify Me <span class="text-xs text-ink-faint">(show a badge when updates exist; you apply them)</span></label>
-        <label class="flex items-center gap-2.5"><input type="radio" name="up" value="auto" class="msm-radio" {{#if (eq server.updatePolicy 'auto')}}checked{{/if}}> Auto-Update <span class="text-xs text-ink-faint">(applies pack updates after the daily check: pre-update backup, health check, automatic rollback on failure, but never across Minecraft versions.)</span></label>
+    {{#if advancedSections.length}}
+    <section class="scroll-mt-32 space-y-3" id="sec-options">
+      <div class="st-advanced-wrap space-y-3" id="st-advanced">
+        <div>
+          <h3 class="font-semibold">Server Options</h3>
+          <p class="help mt-1">Every environment variable this server's image supports, taken straight from its documentation. It's the same list as the create wizard's Advanced mode, pre-filled with what's currently set. Leave a field empty to use that variable's default; only values you change are sent. Takes effect after the container is rebuilt.</p>
+        </div>
+      {{#each advancedSections}}
+        <details class="card group">
+          <summary class="flex cursor-pointer items-center gap-2.5 p-4 font-semibold marker:content-none">
+            {{{icon icon 'size-4 text-ink-faint'}}} {{label}}
+            <span class="badge ml-1">{{fields.length}}</span>
+            <span class="ml-auto text-ink-faint transition group-open:rotate-180">{{{icon 'chevron-down' 'size-4'}}}</span>
+          </summary>
+          <div class="divide-y divide-line/60 border-t border-line px-4 pb-4">
+            {{#each fields}}
+              {{> catalog-field}}
+            {{/each}}
+          </div>
+        </details>
+      {{/each}}
       </div>
-    </div>
+    </section>
+    {{/if}}
 
     {{! Admin-only: same gate as the wizard's Advanced Docker settings - the
         API 403s these fields for other roles. }}
     {{#if (eq user.role 'admin')}}
-    <div class="card p-4">
-      <h3 class="mb-4 font-semibold">Advanced Docker Settings</h3>
+    <section class="card scroll-mt-32 p-4" id="sec-docker">
+      <h3 class="flex items-center gap-2 font-semibold">Docker</h3>
+      <span class="badge">admin only</span>
+      <p class="help mt-1 mb-4">Container name, network, extra ports and volume binds.</p>
       <div class="space-y-4">
         <div class="grid gap-4 sm:grid-cols-2">
           <div>
@@ -210,52 +258,37 @@
           <button type="button" class="btn shrink-0" id="st-docker-preview">{{{icon 'file-code' 'size-4'}}} Preview as YAML</button>
         </div>
       </div>
-    </div>
+    </section>
     {{/if}}
 
-    <div class="card p-4">
-      <h3 class="mb-3 font-semibold">Blueprint &amp; Maintenance</h3>
-      <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+    <section class="card scroll-mt-32 p-4" id="sec-maintenance">
+      <h3 class="font-semibold">Maintenance</h3>
+      <p class="help mt-1 mb-3">Copy this server, save it as a reusable blueprint, or rebuild its container to apply pending changes.</p>
+      <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <button class="btn" id="st-export-bp">{{{icon 'drafting-compass' 'size-4'}}} Export as Blueprint</button>
         <button class="btn" id="st-clone">{{{icon 'copy' 'size-4'}}} Clone Server</button>
         <button class="btn{{#unless perms.power}} hidden{{/unless}}" data-server-action="recreate" data-server-id="{{server.id}}" data-server-name="{{server.name}}" data-tip="Applies pending settings and resource changes.">{{{icon 'wrench' 'size-4'}}} Rebuild Container</button>
       </div>
-      {{! Destruction lives behind its own divider, never one accidental click
-          from the safe maintenance actions above. }}
-      <div class="mt-3 flex items-center justify-between gap-3 border-t border-line pt-3{{#unless perms.delete}} hidden{{/unless}}">
-        <p class="text-xs text-ink-faint">Removes the server from the panel. Files and backups are kept on disk by default; tick &quot;also delete files and backups&quot; in the confirmation to remove them.</p>
+    </section>
+
+    {{! Destruction lives in its own card, never one accidental click from the
+        safe maintenance actions above. }}
+    <section class="card border-danger/40 p-4{{#unless perms.delete}} hidden{{/unless}}">
+      <h3 class="font-semibold text-danger">Danger Zone</h3>
+      <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm text-ink-faint">Removes the server from the panel. Files and backups are kept on disk by default; tick &quot;also delete files and backups&quot; in the confirmation to remove them.</p>
         <button class="btn btn-danger shrink-0" data-server-action="delete" data-server-id="{{server.id}}" data-server-name="{{server.name}}">{{{icon 'trash-2' 'size-4'}}} Delete Server</button>
       </div>
+    </section>
+
+    {{! Pinned to the bottom of the screen so Save is always one tap away on
+        this long page. z-10: inside the page, below the topbar (20). }}
+    <div class="sticky bottom-0 z-10 -mx-4 flex items-center justify-end gap-2 border-t border-line bg-canvas/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:-mx-6 sm:px-6">
+      <span class="mr-auto hidden text-xs text-warn" data-dirty-note>{{{icon 'circle-dot' 'size-3.5'}}} Unsaved changes</span>
+      <button class="btn" id="st-discard">Discard</button>
+      <button class="btn btn-primary" id="st-save">{{{icon 'save' 'size-4'}}} Save Changes</button>
     </div>
   </div>
-
-  {{#if advancedSections.length}}
-  <div class="space-y-3 lg:col-span-2" id="st-advanced">
-    <div class="notice notice-info text-xs">
-      {{{icon 'info' 'size-3.5 mt-0.5 shrink-0'}}}
-      <div>Every environment variable this server's image supports, taken straight from its documentation. It's the same list as the create wizard's Advanced mode, pre-filled with what's currently set. Leave a field empty to use that variable's default; only values you change are sent. Takes effect after the container is rebuilt.</div>
-    </div>
-    {{#each advancedSections}}
-      <details class="card group">
-        <summary class="flex cursor-pointer items-center gap-2.5 p-4 font-semibold marker:content-none">
-          {{{icon icon 'size-4 text-ink-faint'}}} {{label}}
-          <span class="badge ml-1">{{fields.length}}</span>
-          <span class="ml-auto text-ink-faint transition group-open:rotate-180">{{{icon 'chevron-down' 'size-4'}}}</span>
-        </summary>
-        <div class="divide-y divide-line/60 border-t border-line px-4 pb-4">
-          {{#each fields}}
-            {{> catalog-field}}
-          {{/each}}
-        </div>
-      </details>
-    {{/each}}
-  </div>
-  {{/if}}
-</div>
-
-<div class="mt-4 flex justify-end gap-2">
-  <button class="btn" id="st-discard">Discard</button>
-  <button class="btn btn-primary" id="st-save">Save Changes</button>
 </div>
 
 <script type="module" src="/js/pages/server-settings.js"></script>

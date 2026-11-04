@@ -2,7 +2,7 @@
 
 [← Back to docs index](README.md)
 
-The panel is multi-user. Manage accounts under **Settings → Users**.
+The panel is multi-user. Manage accounts under **Users & Permissions** (bottom of the sidebar).
 
 ![Users](images/settings-users.png)
 
@@ -20,7 +20,7 @@ A role is the **default** for every server. To give someone different rights on 
 
 ## Per-server permissions
 
-The **Permissions** page (in the sidebar, or **Server Permissions** under **Settings → Users**) shows a grid: every operator and viewer down the side, every server across the top. Click a cell to decide what that user may do on that one server. Admins are not listed because they always have everything.
+The **Server Permissions** part of **Users & Permissions** shows a grid: every operator and viewer down the side, every server across the top. Click a cell to decide what that user may do on that one server. Admins are not listed because they always have everything.
 
 ![Permissions](images/settings-permissions.png)
 

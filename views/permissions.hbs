@@ -1,6 +1,10 @@
-{{> page-header heading="PERMISSIONS" sub="Decide what each user may do on each server. A role sets the default everywhere; a cell here overrides it for one server."}}
+{{> page-header heading="USERS & PERMISSIONS" sub="Who can sign in, their role across the panel, and what each one may do on each server."}}
 
 <div class="space-y-5" id="permissions-page">
+  {{> settings/users}}
+
+  <h2 class="pt-2 font-semibold">Server Permissions</h2>
+  <p class="-mt-3 max-w-prose text-sm text-ink-faint">A role sets the default everywhere; a cell here overrides it for one server.</p>
   <section class="card p-4 sm:p-5">
     <h3 class="text-sm font-semibold text-ink">How It Works</h3>
     <ul class="mt-2 grid gap-1.5 text-xs leading-relaxed text-ink-faint sm:grid-cols-2">
@@ -95,4 +99,6 @@
   </section>
 </div>
 <script type="application/json" id="permissions-capabilities">{{jsonScript matrix.capabilities}}</script>
+<script type="application/json" id="settings-self">{{jsonScript selfUserId}}</script>
 <script type="module" src="/js/pages/permissions.js"></script>
+<script type="module" src="/js/pages/settings.js"></script>

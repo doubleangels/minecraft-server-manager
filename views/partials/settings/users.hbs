@@ -1,0 +1,69 @@
+{{! User accounts + sign-in lockouts, shown on Users & Permissions. Wired by
+    public/js/pages/settings.js (it binds whatever of its sections a page has). }}
+  {{#> settings/card heading="Users" id="users-card" desc="Who can sign in, and their role across the whole panel."}}
+    <div class="overflow-x-auto">
+      <table class="table-base table-stack" id="users-table">
+        <thead><tr><th>User</th><th>Role</th><th>2FA</th><th>Created</th><th class="text-right">Actions</th></tr></thead>
+        <tbody>
+          {{#each users}}
+            <tr data-user-id="{{id}}" data-username="{{username}}">
+              <td data-th="User" class="font-medium">
+                <div class="flex items-center gap-2">
+                  <span class="grid size-6 shrink-0 place-items-center overflow-hidden rounded-md bg-diamond-700 text-[10px] font-bold text-white">
+                    {{#if (avatarSrc avatar)}}
+                      <img src="{{avatarSrc avatar}}" alt="" class="size-full object-contain">
+                    {{else}}
+                      {{initial username}}
+                    {{/if}}
+                  </span>
+                  {{username}}{{#if (eq id ../user.id)}} <span class="badge">you</span>{{/if}}
+                </div>
+              </td>
+              <td data-th="Role">
+                <select class="input w-auto" data-user-role data-prev-role="{{role}}" data-label="Role for {{username}}">
+                  <option value="admin" {{#if (eq role 'admin')}}selected{{/if}}>Admin</option>
+                  <option value="operator" {{#if (eq role 'operator')}}selected{{/if}}>Operator</option>
+                  <option value="viewer" {{#if (eq role 'viewer')}}selected{{/if}}>Viewer</option>
+                </select>
+              </td>
+              <td data-th="2FA">
+                {{#if totpEnabled}}
+                  <span class="badge badge-ok">On</span>
+                {{else}}
+                  <span class="text-xs text-ink-faint">Off</span>
+                {{/if}}
+              </td>
+              <td data-th="Created" class="whitespace-nowrap text-xs text-ink-faint" data-ts="{{createdAt}}">{{createdAt}}</td>
+              <td data-th="" class="text-right">
+                <button class="btn btn-ghost btn-sm" data-menu="user-menu-{{@index}}" data-tip="Actions for {{username}}." aria-label="Actions for {{username}}">{{{icon 'ellipsis' 'size-3.5'}}}</button>
+                <template id="user-menu-{{@index}}">
+                  <button data-user-password data-user-id="{{id}}" data-username="{{username}}">{{{icon 'key' 'size-3.5'}}} Set Password</button>
+                  {{! Your own row: self-service, same modal as the topbar user menu -
+                      2FA can only ever be set up on the device you're enrolling, so
+                      there's nothing an admin can do here for someone ELSE's row. }}
+                  {{#if (eq id ../user.id)}}
+                    <button data-open-2fa>{{{icon 'shield-check' 'size-3.5'}}} {{#if totpEnabled}}Manage 2FA{{else}}Set Up 2FA{{/if}}</button>
+                  {{else if totpEnabled}}
+                    <button data-user-totp-reset data-user-id="{{id}}" data-username="{{username}}">{{{icon 'shield-check' 'size-3.5'}}} Reset 2FA</button>
+                  {{/if}}
+                  {{! No self-delete affordance - deleting your own account mid-session is a trap, not a feature. }}
+                  {{#unless (eq id ../user.id)}}
+                    <button class="btn btn-ghost btn-sm text-danger" data-user-delete data-user-id="{{id}}" data-username="{{username}}">{{{icon 'trash-2' 'size-3.5'}}} Delete User</button>
+                  {{/unless}}
+                </template>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-2">
+      <button class="btn btn-primary btn-sm" id="user-add">{{{icon 'plus' 'size-3.5'}}} Add User</button>
+          </div>
+    <p class="help mt-2 max-w-prose">Roles: <b>Admin</b> can do everything. <b>Operator</b> can manage servers, but not storage, users, or update policies. <b>Viewer</b> is read-only. Server Permissions below changes what an operator or viewer may do on each server.</p>
+  {{/settings/card}}
+
+  {{#> settings/card heading="Sign-in Security" id="lockouts-card" desc="Accounts and addresses currently blocked from signing in after too many failed attempts. Locks clear on their own after the cooldown; unlock one here to end it early."}}
+    <div id="lockouts-body" class="text-sm text-ink-faint">Checking…</div>
+    <button class="btn btn-sm mt-4 hidden w-full sm:w-auto" id="lockouts-clear-all">{{{icon 'lock-open' 'size-3.5'}}} Clear All Locks</button>
+  {{/settings/card}}
