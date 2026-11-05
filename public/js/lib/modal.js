@@ -40,7 +40,7 @@ export function openModal({ title = '', content = '', actions = [], size = 'md',
   panel.setAttribute('aria-modal', 'true');
 
   panel.innerHTML = `
-    <div class="mx-auto mt-2 -mb-1 h-1 w-10 shrink-0 rounded-full bg-stone-500/40 sm:hidden" aria-hidden="true"></div>
+    <div class="mx-auto mt-2 -mb-1 h-1 w-10 shrink-0 rounded-full bg-line-strong sm:hidden" aria-hidden="true"></div>
     <div class="flex items-center gap-3 border-b border-line py-3 pl-5 pr-3">
       <h3 class="min-w-0 flex-1 truncate font-semibold"></h3>
       <button data-modal-x class="icon-btn" aria-label="Close">
