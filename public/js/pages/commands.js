@@ -192,7 +192,7 @@ function init(root) {
           <input class="input" data-f="msgSuccess" maxlength="200" placeholder="Teleported {player} to {x}, {z} ({distance} blocks away)" value="${esc(existing ? existing.msg_success : '')}">
         </div>
         <div>
-          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-redstone-500"></span> On failure</label>
+          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-danger"></span> On failure</label>
           <input class="input" data-f="msgFailure" maxlength="200" placeholder="Couldn't find a safe spot. Try again in a moment. ({error})" value="${esc(existing ? existing.msg_failure : '')}">
         </div>
         <p class="text-xs text-ink-faint" data-cc-placeholders></p>

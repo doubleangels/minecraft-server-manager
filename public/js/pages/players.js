@@ -69,7 +69,7 @@ function init(root) {
   const CHIP_ON = {
     whitelist: ['border-grass-700', 'bg-grass-500/15', 'text-ok'],
     op: ['border-diamond-700', 'bg-diamond-400/15', 'text-link'],
-    ban: ['border-danger/40', 'bg-redstone-500/15', 'text-danger'],
+    ban: ['border-danger/40', 'bg-danger/15', 'text-danger'],
   };
   const rowFor = (name) => root.querySelector(`[data-player-row][data-name="${CSS.escape(name)}"]`);
   const enforcedNow = () => document.getElementById('players-wl-enforce')?.checked === true;
@@ -94,7 +94,7 @@ function init(root) {
     if (d.online === '1') {
       append(label('Online', 'text-ok', 'bg-grass-500', true));
     } else if (d.banned === '1') {
-      append(label('Banned', 'text-danger', 'bg-redstone-500'));
+      append(label('Banned', 'text-danger', 'bg-danger'));
     } else if (d.whitelisted === '1') {
       append(label('Whitelisted', 'text-ok', 'bg-grass-700'));
     } else {

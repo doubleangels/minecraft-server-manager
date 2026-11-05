@@ -76,7 +76,7 @@ test('roster status column renders Joined / Whitelisted / Banned with enforcemen
   // (the "Online" row needs a live RCON list, so it is not exercised headless).
   assert.match(r.text, /status-dot bg-stone-500[^>]*><\/span> Joined<\/span>/);
   assert.match(r.text, /status-dot bg-grass-700[^>]*><\/span> Whitelisted<\/span>/);
-  assert.match(r.text, /status-dot bg-redstone-500[^>]*><\/span> Banned<\/span>/);
+  assert.match(r.text, /status-dot bg-danger[^>]*><\/span> Banned<\/span>/);
 
   // Enforcement is off, so the un-whitelisted player just reads "Not whitelisted",
   // never a blocked hint.

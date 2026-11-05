@@ -88,7 +88,7 @@ const STATUS_DOT = {
   grass: 'bg-grass-500',
   gold: 'bg-gold-500',
   diamond: 'bg-diamond-500',
-  redstone: 'bg-redstone-500',
+  redstone: 'bg-danger',
   stone: 'bg-stone-500',
 };
 
@@ -231,7 +231,7 @@ function createApp() {
           if (!total) return 'bg-diamond-400';
           const d = settings.getDefaults();
           const p = (used / total) * 100;
-          if (p >= d.quotaCriticalPct) return 'bg-redstone-500';
+          if (p >= d.quotaCriticalPct) return 'bg-danger';
           if (p >= d.quotaWarnPct) return 'bg-gold-400';
           return 'bg-grass-500';
         },

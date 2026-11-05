@@ -191,7 +191,7 @@ function init(serverId) {
     const pctAbove = heap ? Math.round(((cmem - heap) / heap) * 100) : 0;
     const base = 'rounded-md border p-2.5 text-xs ';
     if (cmem <= heap) {
-      headroomBox.className = base + 'border-danger/40 bg-redstone-500/10 text-danger';
+      headroomBox.className = base + 'border-danger/40 bg-danger/10 text-danger';
       headroomBox.textContent = `The container limit (${cmem} MB) is at or below the Java heap (${heap} MB). The server will be killed for running out of memory on start. Raise the limit or lower the heap.`;
     } else if (cmem < heap * 1.25) {
       headroomBox.className = base + 'border-warn/40 bg-gold-500/10 text-warn';

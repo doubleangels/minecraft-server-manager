@@ -58,7 +58,7 @@ function init(root) {
   const CHIP_ON = {
     whitelist: ['border-grass-700', 'bg-grass-500/15', 'text-ok'],
     op: ['border-diamond-700', 'bg-diamond-400/15', 'text-link'],
-    ban: ['border-danger/40', 'bg-redstone-500/15', 'text-danger'],
+    ban: ['border-danger/40', 'bg-danger/15', 'text-danger'],
   };
   function setChip(role, on, label) {
     const chip = root.querySelector(`[data-role-toggle="${role}"]`);

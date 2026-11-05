@@ -66,15 +66,12 @@ test('a server with unread crash reports is marked red on its page, its card and
   const page = await html(`/servers/${SID}`);
   assert.match(
     page,
-    /card mb-6 overflow-hidden border-danger\/50" style="border-top: 3px solid var\(--color-redstone-500\)"/
+    /card mb-6 overflow-hidden border-danger\/50" style="border-top: 3px solid var\(--color-danger\)"/
   );
   assert.match(page, /badge badge-danger">1 new crash</);
   const dash = await html('/');
-  assert.match(dash, /border-danger\/50 bg-danger\/5"/);
+  assert.match(dash, /border-danger\/50 bg-danger\/10"/);
   assert.match(dash, /Servers by Status/);
   db.run("UPDATE servers SET status = 'crashed' WHERE id = ?", SID);
-  assert.match(
-    await html('/'),
-    /font-semibold text-danger"><span class="status-dot bg-redstone-500"><\/span>1 Crashed/
-  );
+  assert.match(await html('/'), /font-semibold text-danger"><span class="status-dot bg-danger"><\/span>1 Crashed/);
 });

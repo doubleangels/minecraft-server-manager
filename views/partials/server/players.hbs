@@ -61,7 +61,7 @@
               {{#if online}}
                 <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot relative bg-grass-500 pulse"></span> Online</span>
               {{else if banned}}
-                <span class="flex items-center gap-1.5 text-xs font-medium text-danger"><span class="status-dot bg-redstone-500"></span> Banned</span>
+                <span class="flex items-center gap-1.5 text-xs font-medium text-danger"><span class="status-dot bg-danger"></span> Banned</span>
               {{else if whitelisted}}
                 <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot bg-grass-700"></span> Whitelisted</span>
               {{else}}
@@ -88,7 +88,7 @@
                         data-tip="{{#if op}}Remove operator status from this player.{{else}}Make this player an operator (level 4).{{/if}}">
                   {{{icon 'shield' 'size-3.5'}}} <span data-chip-label>Op{{#if op}} L{{opLevel}}{{/if}}</span>
                 </button>
-                <button class="chip {{#if banned}}border-danger/40 bg-redstone-500/15 text-danger{{/if}}"
+                <button class="chip {{#if banned}}border-danger/40 bg-danger/15 text-danger{{/if}}"
                         data-role-toggle="ban" data-name="{{name}}" data-on="{{#if banned}}1{{else}}0{{/if}}"
                         data-tip="{{#if banned}}Pardon this player.{{else}}Ban this player.{{/if}}">
                   {{{icon 'ban' 'size-3.5'}}} <span data-chip-label>{{#if banned}}Banned{{else}}Ban{{/if}}</span>

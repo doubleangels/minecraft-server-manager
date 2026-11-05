@@ -275,7 +275,7 @@ function init(serverId) {
     style.innerHTML = '<h4 class="mb-2 text-sm font-semibold">Playstyle</h4>';
     const styleColors = {
       miner: 'bg-diamond-400',
-      fighter: 'bg-redstone-500',
+      fighter: 'bg-danger',
       explorer: 'bg-grass-500',
       builder: 'bg-gold-400',
     };

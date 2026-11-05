@@ -205,7 +205,7 @@ async function hydrateDocker() {
       el.append(`Connected${d.version ? ` · v${d.version}` : ''}`);
     } else {
       el.className = 'mt-1 flex items-center gap-2 text-sm font-semibold text-danger';
-      el.innerHTML = '<span class="status-dot relative bg-redstone-500"></span> ';
+      el.innerHTML = '<span class="status-dot relative bg-danger"></span> ';
       el.append('Unreachable');
       el.title = d.error || 'Docker is not reachable. Is Docker running?';
       // Surface the fix inline, not just in a tooltip - the reason is visible.
@@ -235,12 +235,12 @@ async function hydrateDocker() {
 const STATUS_META = {
   running: { label: 'Running', dot: 'bg-grass-500', text: 'text-ok', pulse: true },
   starting: { label: 'Starting', dot: 'bg-gold-500', text: 'text-warn', pulse: true },
-  stalled: { label: 'Stalled', dot: 'bg-redstone-500', text: 'text-danger', pulse: false },
+  stalled: { label: 'Stalled', dot: 'bg-danger', text: 'text-danger', pulse: false },
   unhealthy: { label: 'Unhealthy', dot: 'bg-gold-500', text: 'text-warn', pulse: true },
   updating: { label: 'Updating', dot: 'bg-diamond-500', text: 'text-link', pulse: true },
   stopped: { label: 'Stopped', dot: 'bg-stone-500', text: 'text-ink-faint', pulse: false },
-  crashed: { label: 'Crashed', dot: 'bg-redstone-500', text: 'text-danger', pulse: false },
-  'over-quota': { label: 'Over Quota', dot: 'bg-redstone-500', text: 'text-danger', pulse: false },
+  crashed: { label: 'Crashed', dot: 'bg-danger', text: 'text-danger', pulse: false },
+  'over-quota': { label: 'Over Quota', dot: 'bg-danger', text: 'text-danger', pulse: false },
 };
 
 function applyStatus(card, status) {
