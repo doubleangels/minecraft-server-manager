@@ -336,8 +336,14 @@
       color 150ms;
   }
   [data-bottom-nav] > :is([aria-current='page'], .active) > svg {
-    background: color-mix(in oklab, var(--color-ok) 18%, transparent);
-    color: var(--color-ok);
+    @apply bg-grass-500/15 text-ok;
+  }
+}
+/* From sm up a server's section tabs sit in a row in the header card; the
+   active one is the same tinted pill as a sub-tab. */
+@media (width >= 40rem) {
+  [data-bottom-nav] > a[aria-current='page'] {
+    @apply bg-grass-500/15 text-ok;
   }
 }
 
@@ -838,9 +844,10 @@
       transition hover:bg-inset hover:text-ink focus-visible:outline-2
       focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
   }
+  /* The current page is a tinted pill, the one active marker used across
+     the panel (tabs, sub-tabs, phone tab bars); no accent line on an edge. */
   .nav-item.active {
     @apply bg-grass-600/15 text-ok;
-    box-shadow: inset 2px 0 0 var(--color-grass-500);
   }
 
   /* Meters read like the in-game XP bar: blocky, with a beveled trough and a
