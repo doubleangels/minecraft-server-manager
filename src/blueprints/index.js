@@ -674,6 +674,7 @@ async function deleteBlueprint(id, { actor = 'system' } = {}) {
     summary: `Blueprint deleted: ${row.name} (${(row.size_bytes / 1024 ** 2).toFixed(1)} MB freed).`,
     details: { id, filename: row.filename },
   });
+  indexer.rescanSoon();
   return { freedBytes: row.size_bytes };
 }
 

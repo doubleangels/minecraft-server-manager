@@ -1628,12 +1628,18 @@ router.post(
         dryRun: z.coerce.boolean().optional(),
       })
       .parse(req.body);
-    const run = () =>
-      storageCleanup.runCleanup(action, {
+    const run = async () => {
+      const result = await storageCleanup.runCleanup(action, {
         olderThanDays,
         dryRun: Boolean(dryRun),
         actor: req.user.username,
       });
+      // The Storage page reloads as soon as this answers: rescan first so it
+      // shows the freed space, not the totals from before the cleanup (a failed
+      // scan is logged by the indexer and never fails the cleanup).
+      if (!dryRun && result.removed > 0) await indexer.rescanNow();
+      return result;
+    };
     // A preview is a quick read; only a real cleanup shows in the task tray.
     const result = dryRun ? await run() : await tasks.track('Cleaning up storage…', { actor: req.user.username }, run);
     res.json({ ok: true, dryRun: Boolean(dryRun), ...result });

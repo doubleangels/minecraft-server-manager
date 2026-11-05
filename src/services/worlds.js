@@ -867,7 +867,7 @@ async function deleteServerWorldImpl(serverId, worldName, { actor = 'system' } =
     details: { worldName, freedBytes },
   });
   logger.info('Deleted a world from a server.', { serverId, actor, worldName, freedBytes });
-  indexer.scheduleScan();
+  indexer.rescanSoon();
   return { freedBytes };
 }
 

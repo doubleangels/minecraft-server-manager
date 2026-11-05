@@ -396,6 +396,7 @@ async function deleteBackup(backupId, { actor = 'system' } = {}) {
     type: 'backup-deleted',
     summary: `Backup deleted: ${backup.filename} (${(backup.size_bytes / 1024 ** 3).toFixed(2)} GB freed).`,
   });
+  indexer.rescanSoon();
   return { freedBytes: backup.size_bytes };
 }
 

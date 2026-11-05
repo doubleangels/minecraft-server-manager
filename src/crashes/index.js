@@ -411,6 +411,7 @@ function deleteCrash(crashId, { actor = 'system', quiet = false } = {}) {
       summary: `Deleted crash report: ${row.filename}.`,
       details: { crashId, filename: row.filename, freedBytes: row.size_bytes },
     });
+  require('../storage/indexer').rescanSoon(); // lazy: keeps crashes off the indexer load path
   return { freedBytes: row.size_bytes };
 }
 

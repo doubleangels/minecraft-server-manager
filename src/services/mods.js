@@ -931,6 +931,7 @@ async function removeContent(serverId, file, { actor = 'system' } = {}) {
     summary: `Removed ${file} (${(freed / 1024 / 1024).toFixed(1)} MB freed).`,
   });
   logger.info('Removed content from a server.', { serverId, actor, file, freedBytes: freed });
+  indexer.rescanSoon();
   return { freedBytes: freed };
 }
 
