@@ -13,8 +13,10 @@
   </div>
 {{/if}}{{/if}}
 
-{{! World controls ride along on every tab as a right rail (stacks below on
-    smaller screens) - always within reach while managing players/files/etc. }}
+{{! World controls sit beside the tabs about the running game (a right rail at
+    xl, a collapsed card below the tab on smaller screens). Other tabs get the
+    full width. }}
+{{#if showWorldControls}}
 <div class="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
   <div class="min-w-0">
     {{> (concat 'server/' tab)}}
@@ -23,3 +25,8 @@
     {{> server/world-controls-rail}}
   </aside>
 </div>
+{{else}}
+<div class="min-w-0">
+  {{> (concat 'server/' tab)}}
+</div>
+{{/if}}

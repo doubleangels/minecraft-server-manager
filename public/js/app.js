@@ -78,18 +78,20 @@ for (const el of document.querySelectorAll('[data-ts], [data-ts-ago], [data-ts-i
 
 // ---- Theme toggle (persisted; applied pre-paint by the inline layout script) ----
 (() => {
-  const btn = document.getElementById('theme-toggle');
   const sync = () => {
     const theme = document.documentElement.dataset.theme;
     document.querySelectorAll('[data-theme-icon]').forEach((el) => {
       el.classList.toggle('hidden', el.dataset.themeIcon !== theme);
     });
-    // The installed app's status bar follows the theme (see layouts/main.hbs).
+    // The installed app's status bar follows the theme (see partials/app-head.hbs).
     document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute('content', theme === 'light' ? '#ffffff' : '#16191c');
   };
-  btn?.addEventListener('click', () => {
+  // The topbar button, or the account menu's copy of it (the menu is cloned
+  // from a <template> on each open, so the click is delegated).
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest || !e.target.closest('#theme-toggle, [data-theme-toggle]')) return;
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
     try {

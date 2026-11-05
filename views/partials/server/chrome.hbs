@@ -3,7 +3,7 @@
 {{! Way back out of a server below lg, where the sidebar is tucked away and
     the phone's bottom bar belongs to this server's own sections. }}
 <a href="/servers" class="-mt-2 mb-3 inline-flex items-center gap-1 text-sm text-ink-faint hover:text-ink lg:hidden">{{{icon 'chevron-left' 'size-4'}}} All Servers</a>
-<div data-server-title="{{server.id}}" data-server-name="{{server.name}}" data-server-status="{{server.status}}" class="card mb-6 overflow-hidden{{#if (or (eq server.status 'crashed') server.crashesUnread)}} border-danger/50{{/if}}" style="border-top: 3px solid {{#if (or (eq server.status 'crashed') server.crashesUnread)}}var(--color-danger){{else}}{{server.accent}}{{/if}}">
+<div data-server-title="{{server.id}}" data-server-name="{{server.name}}" data-server-status="{{server.status}}" class="card mb-4 overflow-hidden sm:mb-6{{#if (or (eq server.status 'crashed') server.crashesUnread)}} border-danger/50{{/if}}" style="border-top: 3px solid {{#if (or (eq server.status 'crashed') server.crashesUnread)}}var(--color-danger){{else}}{{server.accent}}{{/if}}">
   {{! icon+name grouped into ONE flex item, separate from the actions column,
       using flex-auto (basis: auto) rather than flex-1 (basis: 0%). That's
       the actual fix, not just the grouping: flex-wrap decides whether to
@@ -14,21 +14,21 @@
       instead squeezes the name down to 0 post-hoc, wrapping a single-word
       name like "Skyblock" one letter per line. flex-auto's real content-based
       basis makes the wrap trigger correctly once both genuinely don't fit. }}
-  <div class="texture-top flex flex-wrap items-start justify-between gap-4 p-4 sm:p-5">
-    <div class="flex min-w-0 flex-auto items-center gap-4">
-      <img src="{{iconSrc server.icon}}" alt="" class="size-14 shrink-0 rounded-lg" style="background: {{server.accent}}" data-fallback-icon="/icons/servers/grass.svg">
+  <div class="texture-top flex flex-wrap items-start justify-between gap-3 p-4 sm:gap-4 sm:p-5">
+    <div class="flex min-w-0 flex-auto items-center gap-3 sm:gap-4">
+      <img src="{{iconSrc server.icon}}" alt="" class="size-12 shrink-0 rounded-lg sm:size-14" style="background: {{server.accent}}" data-fallback-icon="/icons/servers/grass.svg">
 
       <div class="min-w-0 flex-1">
         {{! Phone: the name takes its own line, status + badges flow after it at
             their natural width (a flex-col stretched every badge edge to edge). }}
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-          <h2 class="min-w-0 max-w-full basis-full break-words text-xl font-bold sm:basis-auto">{{server.name}}</h2>
+          <h2 class="min-w-0 max-w-full basis-full break-words text-lg font-bold sm:basis-auto sm:text-xl">{{server.name}}</h2>
           <span class="flex items-center gap-1.5 text-xs font-medium {{statusText server.status}}">
             <span class="status-dot relative {{statusDot server.status}} {{#if (statusPulse server.status)}}pulse{{/if}}"></span>
             {{statusLabel server.status}}
           </span>
           <span class="badge badge-warn {{#unless server.statusDetail}}hidden{{/unless}}" data-status-detail="{{server.id}}">{{server.statusDetail}}</span>
-          {{#if server.updateAvailable}}<span class="badge badge-warn">update available</span>{{/if}}
+          {{#if server.updateAvailable}}<span class="badge badge-warn">Update Available</span>{{/if}}
           {{#if server.crashesUnread}}<span class="badge badge-danger">{{server.crashesUnread}} new {{plural server.crashesUnread 'crash' 'crashes'}}</span>{{/if}}
         </div>
         <p class="mt-1 flex flex-wrap gap-x-3 text-xs text-ink-faint">

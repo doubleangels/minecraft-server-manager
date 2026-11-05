@@ -105,6 +105,8 @@ const SUB_LABELS = {
 };
 // Sub-nav entries only shown to admins (the API 403s these for other roles).
 const ADMIN_ONLY_TABS = new Set(['chatbot']);
+// Server tabs that carry the World Controls rail: the ones about the running game.
+const WORLD_CONTROL_TABS = new Set(['overview', 'console', 'players', 'chat', 'map']);
 
 /** Build the two-level nav (top groups + contextual sub-nav) for a given active tab. */
 // Sub-nav entries that need a per-server capability beyond `view`.
@@ -861,6 +863,9 @@ router.get(
       context.retentionGlobal = backupRetention.globalConfig();
     }
 
+    // World controls (time, weather, difficulty, game rules) belong beside the
+    // tabs about the running game, not under Settings, Files or Backups.
+    context.showWorldControls = WORLD_CONTROL_TABS.has(tab);
     res.render('server-detail', context);
   })
 );

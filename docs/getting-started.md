@@ -58,10 +58,11 @@ Made for thumbs:
 
 The panel installs like an app on phones, tablets and desktops: its own icon, full screen with no browser bars, and shortcuts to Servers, Health, Backups and Activity on a long press of the icon.
 
-- **Android, Chrome or Edge on a computer:** open your account menu (top right) and choose **Install App**, or use the browser's own install button.
-- **iPhone and iPad:** open the panel in Safari, choose **Install App** in the account menu for the steps, or tap **Share** and then **Add to Home Screen**.
+- **Android, and Chrome or Edge on a computer:** open your account menu (top right) and choose **Install App**, or use the browser's own install button.
+- **iPhone and iPad, in Safari or Chrome:** choose **Install App** in the account menu for the steps, or tap **Share** and then **Add to Home Screen**. The installed app opens on a launch screen and runs full screen, clear of the notch and the home indicator.
+- **Firefox on Android and other browsers:** **Install App** in the account menu shows where your browser keeps its install option.
 
-Installing needs the panel to be served over HTTPS (or opened as `localhost`). Browsers refuse to install a site over plain HTTP, so on a LAN address without HTTPS the menu item does not appear.
+Android and computers only install the panel when it is served over HTTPS (or opened as `localhost`). On a plain HTTP address, **Install App** explains this and how to fix it (see [the reverse proxy notes](../README.md)). iPhone and iPad install over plain HTTP too, though notifications still need HTTPS.
 
 Once installed:
 
