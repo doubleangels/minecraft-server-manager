@@ -67,8 +67,8 @@ function init(root) {
 
   // ------------------------------------------------- in-place row patching
   const CHIP_ON = {
-    whitelist: ['border-grass-700', 'bg-grass-500/15', 'text-ok'],
-    op: ['border-diamond-700', 'bg-diamond-400/15', 'text-link'],
+    whitelist: ['border-ok', 'bg-ok/15', 'text-ok'],
+    op: ['border-link', 'bg-link/15', 'text-link'],
     ban: ['border-danger/40', 'bg-danger/15', 'text-danger'],
   };
   const rowFor = (name) => root.querySelector(`[data-player-row][data-name="${CSS.escape(name)}"]`);
@@ -92,13 +92,13 @@ function init(root) {
     };
 
     if (d.online === '1') {
-      append(label('Online', 'text-ok', 'bg-grass-500', true));
+      append(label('Online', 'text-ok', 'bg-ok', true));
     } else if (d.banned === '1') {
       append(label('Banned', 'text-danger', 'bg-danger'));
     } else if (d.whitelisted === '1') {
-      append(label('Whitelisted', 'text-ok', 'bg-grass-700'));
+      append(label('Whitelisted', 'text-ok', 'bg-ok'));
     } else {
-      append(label('Joined', 'text-ink-soft', 'bg-stone-500'));
+      append(label('Joined', 'text-ink-soft', 'bg-ink-faint'));
       const hint = document.createElement('div');
       hint.className = 'mt-0.5 text-[11px] leading-tight ' + (enforcedNow() ? 'text-warn' : 'text-ink-faint');
       if (enforcedNow()) {

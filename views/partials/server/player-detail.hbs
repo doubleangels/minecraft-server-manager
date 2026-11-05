@@ -14,9 +14,9 @@
           {{#if player.bedrock}}<span class="chip shrink-0" data-tip="Joined from Bedrock Edition via Geyser/Floodgate.">{{{icon 'gamepad-2' 'size-3'}}} Bedrock</span>{{/if}}
           <span data-player-status>
             {{#if player.online}}
-              <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot relative bg-grass-500 pulse"></span> Online</span>
+              <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot relative bg-ok pulse"></span> Online</span>
             {{else}}
-              <span class="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><span class="status-dot bg-stone-500"></span> Offline</span>
+              <span class="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><span class="status-dot bg-ink-faint"></span> Offline</span>
             {{/if}}
           </span>
         </div>
@@ -24,10 +24,10 @@
         {{#if player.lastSeen}}<div class="text-xs text-ink-faint">seen ~{{player.lastSeen}}</div>{{/if}}
       </div>
       <div class="flex flex-wrap items-center gap-1.5">
-        <button class="chip {{#if player.whitelisted}}border-grass-700 bg-grass-500/15 text-ok{{/if}}"
+        <button class="chip {{#if player.whitelisted}}border-ok bg-ok/15 text-ok{{/if}}"
                 data-role-toggle="whitelist" data-on="{{#if player.whitelisted}}1{{else}}0{{/if}}"
                 data-tip="{{#if player.whitelisted}}Remove from whitelist.{{else}}Add to whitelist.{{/if}}">{{{icon 'shield-check' 'size-3.5'}}} <span data-chip-label>Whitelist</span></button>
-        <button class="chip {{#if player.op}}border-diamond-700 bg-diamond-400/15 text-link{{/if}}"
+        <button class="chip {{#if player.op}}border-link bg-link/15 text-link{{/if}}"
                 data-role-toggle="op" data-on="{{#if player.op}}1{{else}}0{{/if}}"
                 data-tip="{{#if player.op}}Remove operator status.{{else}}Make operator (level 4).{{/if}}">{{{icon 'shield' 'size-3.5'}}} <span data-chip-label>Op{{#if player.op}} L{{player.opLevel}}{{/if}}</span></button>
         <button class="chip {{#if player.banned}}border-danger/40 bg-danger/15 text-danger{{/if}}"

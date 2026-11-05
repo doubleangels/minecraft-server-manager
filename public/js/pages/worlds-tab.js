@@ -138,7 +138,7 @@ function init(serverId, serverName, serverStatus) {
         <input class="input" data-c-name value="${escapeHtml(world)}" autocomplete="off">
       </div>
       <p class="help">Works while this server is running. The panel takes a consistent snapshot, then installs it on the target through the library.</p>
-      <div class="mt-3 hidden" data-c-progress><div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div></div>`;
+      <div class="mt-3 hidden" data-c-progress><div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div></div>`;
 
     const mode = content.querySelector('[data-c-mode]');
     mode.addEventListener('change', () => {

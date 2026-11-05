@@ -194,10 +194,10 @@ function init(serverId) {
       headroomBox.className = base + 'border-danger/40 bg-danger/10 text-danger';
       headroomBox.textContent = `The container limit (${cmem} MB) is at or below the Java heap (${heap} MB). The server will be killed for running out of memory on start. Raise the limit or lower the heap.`;
     } else if (cmem < heap * 1.25) {
-      headroomBox.className = base + 'border-warn/40 bg-gold-500/10 text-warn';
+      headroomBox.className = base + 'border-warn/40 bg-warn/10 text-warn';
       headroomBox.textContent = `Tight headroom: the container limit is only ${pctAbove}% above the Java heap. Java needs extra room beyond the heap, so aim for 25% or more.`;
     } else {
-      headroomBox.className = base + 'border-ok/40 bg-grass-500/10 text-ok';
+      headroomBox.className = base + 'border-ok/40 bg-ok/10 text-ok';
       headroomBox.textContent = `Healthy headroom: the container limit is ${pctAbove}% above the Java heap.`;
     }
   }

@@ -56,8 +56,8 @@ function init(root) {
   // ---- in-place chip/banner patching (mirrors the roster page - same
   // action, same UI, no page flash and no silent success) ----
   const CHIP_ON = {
-    whitelist: ['border-grass-700', 'bg-grass-500/15', 'text-ok'],
-    op: ['border-diamond-700', 'bg-diamond-400/15', 'text-link'],
+    whitelist: ['border-ok', 'bg-ok/15', 'text-ok'],
+    op: ['border-link', 'bg-link/15', 'text-link'],
     ban: ['border-danger/40', 'bg-danger/15', 'text-danger'],
   };
   function setChip(role, on, label) {
@@ -92,7 +92,7 @@ function init(root) {
     const status = root.querySelector('[data-player-status]');
     if (status)
       status.innerHTML =
-        '<span class="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><span class="status-dot bg-stone-500"></span> Offline</span>';
+        '<span class="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><span class="status-dot bg-ink-faint"></span> Offline</span>';
     root.querySelector('[data-act="kick"]')?.remove();
   }
 

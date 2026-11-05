@@ -85,11 +85,11 @@ const STATUS_TEXT = {
 // produces a class the build never emits (bg-gold-500 was missing for exactly
 // this reason, rendering the Starting/Unhealthy dot invisible).
 const STATUS_DOT = {
-  grass: 'bg-grass-500',
-  gold: 'bg-gold-500',
-  diamond: 'bg-diamond-500',
+  grass: 'bg-ok',
+  gold: 'bg-warn',
+  diamond: 'bg-link',
   redstone: 'bg-danger',
-  stone: 'bg-stone-500',
+  stone: 'bg-ink-faint',
 };
 
 // The 8 icons bundled in public/icons/servers - original pixel-art SVGs drawn
@@ -228,12 +228,12 @@ function createApp() {
         statusText: (s) => STATUS_TEXT[(STATUS_META[s] || STATUS_META.stopped).color],
         // Quota bar color by usage percentage against the configured thresholds.
         meterColor: (used, total) => {
-          if (!total) return 'bg-diamond-400';
+          if (!total) return 'bg-link';
           const d = settings.getDefaults();
           const p = (used / total) * 100;
           if (p >= d.quotaCriticalPct) return 'bg-danger';
-          if (p >= d.quotaWarnPct) return 'bg-gold-400';
-          return 'bg-grass-500';
+          if (p >= d.quotaWarnPct) return 'bg-warn';
+          return 'bg-ok';
         },
         capitalize: (s) => (typeof s === 'string' && s ? s[0].toUpperCase() + s.slice(1) : s),
         short: (s, n) => (typeof s === 'string' ? s.replace(/^sha256:/, '').slice(0, Number(n) || 12) : s),

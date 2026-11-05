@@ -33,7 +33,7 @@
     {{#if storage.trend.length}}
       <div class="flex h-24 items-end gap-1">
         {{#each storage.trend}}
-          <div class="flex-1 rounded-t bg-diamond-500/70" style="height: {{this}}%" title="{{this}}% of the largest scan."></div>
+          <div class="flex-1 rounded-t bg-link/70" style="height: {{this}}%" title="{{this}}% of the largest scan."></div>
         {{/each}}
       </div>
       <p class="help">GB used over the last scans. Snapshots recorded on every scan.</p>
@@ -52,7 +52,7 @@
           {{#each storage.categories}}
             <tr>
               <td data-th="Category"><div class="font-medium">{{name}}</div><div class="break-all font-mono text-xs text-ink-faint">{{path}}</div></td>
-              <td data-th="Share" class="sm:w-40"><div class="meter"><div class="bg-diamond-400" style="width: {{pct size ../storage.totalUsed}}%"></div></div></td>
+              <td data-th="Share" class="sm:w-40"><div class="meter"><div class="bg-link" style="width: {{pct size ../storage.totalUsed}}%"></div></div></td>
               <td data-th="Size" class="text-ink-faint sm:w-24 sm:text-right">{{bytes size}}</td>
               <td data-th="" class="sm:w-28 sm:text-right"><a class="btn btn-ghost btn-sm whitespace-nowrap" href="{{link}}" data-tip="Open in the global file manager.">{{{icon 'folder-open' 'size-3.5'}}} Open Folder</a></td>
             </tr>

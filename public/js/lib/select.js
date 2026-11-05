@@ -107,7 +107,7 @@ function openPicker(select, btn) {
       row.id = `msm-opt-${i}`;
       row.className =
         'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition ' +
-        'hover:bg-inset disabled:opacity-40 aria-selected:bg-grass-600/15 aria-selected:text-ok';
+        'hover:bg-inset disabled:opacity-40 aria-selected:bg-ok/15 aria-selected:text-ok';
       row.setAttribute('role', 'option');
       if (opt.value === select.value) row.setAttribute('aria-selected', 'true');
       row.innerHTML = `

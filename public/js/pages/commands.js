@@ -184,11 +184,11 @@ function init(root) {
       <div class="rounded-md border border-line p-3 space-y-3">
         <div class="text-sm font-medium">Messages whispered to the player <span class="font-normal text-ink-faint">(optional)</span></div>
         <div>
-          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-gold-400"></span> While it runs</label>
+          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-warn"></span> While it runs</label>
           <input class="input" data-f="msgPending" maxlength="200" placeholder="Looking for a random location…" value="${esc(existing ? existing.msg_pending : '')}">
         </div>
         <div>
-          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-grass-500"></span> On success</label>
+          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-ok"></span> On success</label>
           <input class="input" data-f="msgSuccess" maxlength="200" placeholder="Teleported {player} to {x}, {z} ({distance} blocks away)" value="${esc(existing ? existing.msg_success : '')}">
         </div>
         <div>

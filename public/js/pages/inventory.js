@@ -124,7 +124,7 @@ function init(root) {
       // sm+: the fixed 56px slot.
       'relative grid aspect-square w-full sm:size-14 place-items-center rounded border text-[11px] font-semibold select-none ' +
       (editable
-        ? 'cursor-pointer transition hover:ring-2 hover:ring-diamond-400/60 focus-visible:ring-2 focus-visible:ring-diamond-400 '
+        ? 'cursor-pointer transition hover:ring-2 hover:ring-link/60 focus-visible:ring-2 focus-visible:ring-link '
         : '');
     const hasNested = Boolean(item && item.nested && item.nested.length);
     if (!item) {
@@ -145,9 +145,9 @@ function init(root) {
       const named = Boolean(item.displayName);
       const enchanted = Boolean(item.enchants && item.enchants.length);
       cell.className += named
-        ? 'border-gold-500 bg-gold-400/10 text-warn'
+        ? 'border-warn bg-warn/10 text-warn'
         : enchanted
-          ? 'border-diamond-700 bg-diamond-400/10 text-link'
+          ? 'border-link bg-link/10 text-link'
           : 'border-line-strong bg-inset text-ink';
       const where = label
         ? `${label} slot`
@@ -173,7 +173,7 @@ function init(root) {
             : ''
         }
         ${enchanted ? '<span class="pointer-events-none absolute left-0.5 top-0 z-10 text-[10px] font-bold text-link [text-shadow:1px_1px_0_#000]">*</span>' : ''}
-        ${hasNested ? '<span class="pointer-events-none absolute bottom-0.5 left-0.5 z-10 size-1.5 rounded-full bg-grass-400 ring-1 ring-black/60" aria-hidden="true"></span>' : ''}`;
+        ${hasNested ? '<span class="pointer-events-none absolute bottom-0.5 left-0.5 z-10 size-1.5 rounded-full bg-ok ring-1 ring-black/60" aria-hidden="true"></span>' : ''}`;
       // The bundled icon set only covers vanilla - modded items (and the rare
       // vanilla id it's missing) just keep the text abbreviation as-is.
       if (iconBase && item.id.startsWith('minecraft:')) {
@@ -487,7 +487,7 @@ function init(root) {
             ? () => toast("That's the source slot.", { kind: 'error' })
             : () => doMove({ container, slot: i }),
         });
-        if (isSource) cell.classList.add('ring-2', 'ring-gold-500');
+        if (isSource) cell.classList.add('ring-2', 'ring-warn');
         grid.appendChild(cell);
       }
       scroller.appendChild(grid);
@@ -518,7 +518,7 @@ function init(root) {
           ? () => toast("That's the source slot.", { kind: 'error' })
           : () => doMove({ container: 'offhand', slot: 0 }),
     });
-    if (from.container === 'offhand') offCell.classList.add('ring-2', 'ring-gold-500');
+    if (from.container === 'offhand') offCell.classList.add('ring-2', 'ring-warn');
     armorRow.querySelector('.grid').appendChild(offCell);
     grids.appendChild(armorRow);
     content.appendChild(grids);
@@ -533,7 +533,7 @@ function init(root) {
     if (!editable) {
       content.insertAdjacentHTML(
         'beforeend',
-        '<p class="rounded-md border border-gold-500/40 bg-gold-400/5 p-2.5 text-xs text-warn">Read-only while the player is online. Stop the server or kick the player to edit backpack contents.</p>'
+        '<p class="rounded-md border border-warn/40 bg-warn/5 p-2.5 text-xs text-warn">Read-only while the player is online. Stop the server or kick the player to edit backpack contents.</p>'
       );
     }
     const grid = document.createElement('div');

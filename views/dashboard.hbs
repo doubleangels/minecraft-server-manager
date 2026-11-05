@@ -24,7 +24,7 @@
   <div class="card col-span-2 p-4 sm:col-span-1">
     <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'box' 'size-3.5'}}} Docker</div>
     <div class="mt-1 flex items-center gap-2 text-sm font-semibold text-ink-faint" id="docker-status">
-      <span class="status-dot relative bg-stone-500"></span> Checking…
+      <span class="status-dot relative bg-ink-faint"></span> Checking…
     </div>
   </div>
 </div>
@@ -64,13 +64,13 @@
 <div class="mb-6 {{#if noServers}}hidden{{/if}}">
   <h2 class="mb-3 font-semibold">Servers by Status</h2>
   <div class="card flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm">
-    {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot bg-grass-500"></span>{{overview.byStatus.running}} Running</span>{{/if}}
-    {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
-    {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5 text-warn"><span class="status-dot bg-gold-500"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
+    {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot bg-ok"></span>{{overview.byStatus.running}} Running</span>{{/if}}
+    {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot bg-warn"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
+    {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5 text-warn"><span class="status-dot bg-warn"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
     {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
-    {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot bg-diamond-500"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
+    {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot bg-link"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
     {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
-    {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot bg-stone-500"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
+    {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot bg-ink-faint"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
   </div>
 </div>
 {{/unless}}
@@ -108,7 +108,7 @@
     {{> server-card}}
   {{/each}}
 
-  <a href="/servers/new" class="grid min-h-44 place-items-center rounded-lg border-2 border-dashed border-line text-ink-faint transition hover:border-grass-600 hover:text-ok">
+  <a href="/servers/new" class="grid min-h-44 place-items-center rounded-lg border-2 border-dashed border-line text-ink-faint transition hover:border-ok hover:text-ok">
     <div class="grid place-items-center text-center">
       {{{icon 'plus' 'size-8'}}}
       <div class="mt-2 text-sm font-medium">Create a Server</div>

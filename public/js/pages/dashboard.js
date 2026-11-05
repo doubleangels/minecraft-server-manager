@@ -201,7 +201,7 @@ async function hydrateDocker() {
     const d = data.docker || {};
     if (d.available) {
       el.className = 'mt-1 flex items-center gap-2 text-sm font-semibold text-ok';
-      el.innerHTML = '<span class="status-dot relative bg-grass-500 pulse"></span> ';
+      el.innerHTML = '<span class="status-dot relative bg-ok pulse"></span> ';
       el.append(`Connected${d.version ? ` · v${d.version}` : ''}`);
     } else {
       el.className = 'mt-1 flex items-center gap-2 text-sm font-semibold text-danger';
@@ -224,7 +224,7 @@ async function hydrateDocker() {
   } catch {
     // No eternal "Checking…" - say we don't know, and retry shortly.
     el.className = 'mt-1 flex items-center gap-2 text-sm font-semibold text-ink-faint';
-    el.innerHTML = '<span class="status-dot relative bg-stone-500"></span> ';
+    el.innerHTML = '<span class="status-dot relative bg-ink-faint"></span> ';
     el.append('Unknown, retrying…');
     setTimeout(hydrateDocker, 8000);
   }
@@ -233,12 +233,12 @@ async function hydrateDocker() {
 // Client-side mirror of the server's STATUS_META (src/web/app.js) so live
 // hydration can move the dot when a server crashes/stops between reloads.
 const STATUS_META = {
-  running: { label: 'Running', dot: 'bg-grass-500', text: 'text-ok', pulse: true },
-  starting: { label: 'Starting', dot: 'bg-gold-500', text: 'text-warn', pulse: true },
+  running: { label: 'Running', dot: 'bg-ok', text: 'text-ok', pulse: true },
+  starting: { label: 'Starting', dot: 'bg-warn', text: 'text-warn', pulse: true },
   stalled: { label: 'Stalled', dot: 'bg-danger', text: 'text-danger', pulse: false },
-  unhealthy: { label: 'Unhealthy', dot: 'bg-gold-500', text: 'text-warn', pulse: true },
-  updating: { label: 'Updating', dot: 'bg-diamond-500', text: 'text-link', pulse: true },
-  stopped: { label: 'Stopped', dot: 'bg-stone-500', text: 'text-ink-faint', pulse: false },
+  unhealthy: { label: 'Unhealthy', dot: 'bg-warn', text: 'text-warn', pulse: true },
+  updating: { label: 'Updating', dot: 'bg-link', text: 'text-link', pulse: true },
+  stopped: { label: 'Stopped', dot: 'bg-ink-faint', text: 'text-ink-faint', pulse: false },
   crashed: { label: 'Crashed', dot: 'bg-danger', text: 'text-danger', pulse: false },
   'over-quota': { label: 'Over Quota', dot: 'bg-danger', text: 'text-danger', pulse: false },
 };

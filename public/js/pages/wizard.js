@@ -328,7 +328,7 @@ function init() {
       title: `Creating ${name} from a blueprint…`,
       size: 'sm',
       content:
-        '<div class="space-y-3 text-sm"><p>Installing the blueprint: the pinned pack, custom mods (each hash-verified), and config files.</p><div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div><p class="text-xs text-ink-faint">Closing this window doesn\'t cancel the import. It keeps running in the background.</p></div>',
+        '<div class="space-y-3 text-sm"><p>Installing the blueprint: the pinned pack, custom mods (each hash-verified), and config files.</p><div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div><p class="text-xs text-ink-faint">Closing this window doesn\'t cancel the import. It keeps running in the background.</p></div>',
     });
     try {
       const res = await fetch('/api/blueprints/import', {
@@ -563,7 +563,7 @@ function init() {
       size: 'sm',
       content: `<div class="space-y-3 text-sm">
         <p>Downloading the server image if needed (the first time can take a few minutes), creating the container, and starting it.</p>
-        <div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div>
+        <div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div>
         <p class="text-xs text-ink-faint">Closing this window doesn't cancel the creation. It keeps running in the background.</p>
       </div>`,
     });
@@ -679,7 +679,7 @@ function initModBrowser() {
       refreshLoaderBuilds();
       if (q.value.trim()) search();
     },
-    ['border-grass-500', 'text-ok']
+    ['border-ok', 'text-ok']
   );
 
   function syncPlatformChips() {
@@ -1071,7 +1071,7 @@ function initZipUpload() {
 
     selectedEl.classList.remove('hidden');
     selectedEl.innerHTML = `
-      <div class="rounded-md border border-grass-700 bg-grass-600/10 p-3">
+      <div class="rounded-md border border-ok bg-ok/10 p-3">
         <div class="flex flex-wrap items-center gap-3">
           <div class="min-w-0 flex-1">
             <div class="truncate font-semibold" data-role="title"></div>

@@ -59,13 +59,13 @@
             </td>
             <td data-th="Status" data-player-status>
               {{#if online}}
-                <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot relative bg-grass-500 pulse"></span> Online</span>
+                <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot relative bg-ok pulse"></span> Online</span>
               {{else if banned}}
                 <span class="flex items-center gap-1.5 text-xs font-medium text-danger"><span class="status-dot bg-danger"></span> Banned</span>
               {{else if whitelisted}}
-                <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot bg-grass-700"></span> Whitelisted</span>
+                <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot bg-ok"></span> Whitelisted</span>
               {{else}}
-                <span class="flex items-center gap-1.5 text-xs font-medium text-ink-soft"><span class="status-dot bg-stone-500"></span> Joined</span>
+                <span class="flex items-center gap-1.5 text-xs font-medium text-ink-soft"><span class="status-dot bg-ink-faint"></span> Joined</span>
                 {{#if ../whitelistEnforced}}
                   <div class="mt-0.5 text-[11px] leading-tight text-warn" data-tip="Whitelist enforcement is on. This player has never been whitelisted, so they will be turned away when they try to join.">Not whitelisted, join blocked</div>
                 {{else}}
@@ -78,12 +78,12 @@
                 and genuinely disabled composers already use opacity for that. }}
             <td data-th="Roles">
               <div class="flex flex-wrap gap-1.5">
-                <button class="chip {{#if whitelisted}}border-grass-700 bg-grass-500/15 text-ok{{/if}}"
+                <button class="chip {{#if whitelisted}}border-ok bg-ok/15 text-ok{{/if}}"
                         data-role-toggle="whitelist" data-name="{{name}}" data-on="{{#if whitelisted}}1{{else}}0{{/if}}"
                         data-tip="{{#if whitelisted}}Remove this player from the whitelist.{{else}}Add this player to the whitelist.{{/if}}">
                   {{{icon 'shield-check' 'size-3.5'}}} <span data-chip-label>Whitelist</span>
                 </button>
-                <button class="chip {{#if op}}border-diamond-700 bg-diamond-400/15 text-link{{/if}}"
+                <button class="chip {{#if op}}border-link bg-link/15 text-link{{/if}}"
                         data-role-toggle="op" data-name="{{name}}" data-on="{{#if op}}1{{else}}0{{/if}}"
                         data-tip="{{#if op}}Remove operator status from this player.{{else}}Make this player an operator (level 4).{{/if}}">
                   {{{icon 'shield' 'size-3.5'}}} <span data-chip-label>Op{{#if op}} L{{opLevel}}{{/if}}</span>

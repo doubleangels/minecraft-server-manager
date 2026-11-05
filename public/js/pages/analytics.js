@@ -274,10 +274,10 @@ function init(serverId) {
     const style = document.createElement('div');
     style.innerHTML = '<h4 class="mb-2 text-sm font-semibold">Playstyle</h4>';
     const styleColors = {
-      miner: 'bg-diamond-400',
+      miner: 'bg-link',
       fighter: 'bg-danger',
-      explorer: 'bg-grass-500',
-      builder: 'bg-gold-400',
+      explorer: 'bg-ok',
+      builder: 'bg-warn',
     };
     for (const key of ['miner', 'fighter', 'explorer', 'builder']) {
       const pct = p.playstyle[key] || 0;

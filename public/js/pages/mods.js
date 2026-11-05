@@ -180,7 +180,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
              </label>`
           : ''
       }
-      <div class="mt-3 hidden" id="mod-url-progress"><div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div></div>`;
+      <div class="mt-3 hidden" id="mod-url-progress"><div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div></div>`;
     const modal = openModal({
       title: 'Add Mod by URL',
       content,
