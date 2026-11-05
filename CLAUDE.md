@@ -153,7 +153,8 @@ physically press on `:active`).
 - **Fixed component classes** (in `@layer components`): `.btn` + `.btn-primary` / `.btn-danger` /
   `.btn-ghost` / `.btn-sm`; `.card`; `.badge` + `.badge-ok/-warn/-danger/-info` (the _only_ badge
   colorways); `.chip`; `.notice` + `.notice-ok/-warn/-danger/-info` (the one inline callout — no
-  ad-hoc border/background pairs). Shared view partials: `page-header`, `brand-lockup`,
+  ad-hoc border/background pairs). `.action-bar` is the one sticky bottom bar for Save/Discard and bulk
+  actions (opaque, sits above the phone tab bar, never double-pads the safe area). Shared view partials: `page-header`, `brand-lockup`,
   `empty-state`, `settings/card`, `settings/toggle-row`.
 - **One z-index scale**, listed in `input.css`: topbar 20 · phone bottom tab bar 25 · sidebar
   backdrop 30 · sidebar 40 · modal 60 · toasts 65 · connection banner 66 · dropdowns 68 · tooltip 70. Anything new picks a slot there.

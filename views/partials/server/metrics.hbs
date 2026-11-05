@@ -34,9 +34,13 @@
       {{#if server.stats.perf}}
         <div class="mt-1 text-lg font-bold tabular-nums" data-metric="tps">{{server.stats.perf.tps1}}</div>
         <div class="text-xs text-ink-faint" data-metric="mspt">{{#if server.stats.perf.mspt}}{{server.stats.perf.mspt}} ms/tick{{else}}last 1&nbsp;min{{/if}}</div>
-      {{else if server.stats.perfSupported}}
+      {{else if (and server.stats.perfSupported (or (eq server.status 'running') (eq server.status 'starting') (eq server.status 'unhealthy')))}}
         <div class="mt-1 text-lg font-bold tabular-nums text-ink-faint" data-metric="tps">…</div>
         <div class="text-xs text-ink-faint">reading…</div>
+      {{else if server.stats.perfSupported}}
+        {{! Stopped: nothing to read, so no "reading…" that never resolves. }}
+        <div class="mt-1 text-lg font-bold tabular-nums text-ink-faint" data-metric="tps">-</div>
+        <div class="text-xs text-ink-faint">server not running</div>
       {{else}}
         <div class="mt-1 text-sm font-semibold text-ink-faint" data-metric="tps">Not reported</div>
         <div class="text-xs text-ink-faint">needs Paper, Spark, or Forge</div>
@@ -82,7 +86,7 @@
       <h3 class="mb-3 font-semibold">Health &amp; Stability</h3>
       <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
         <div><dt class="text-xs text-ink-faint">Container Health</dt><dd class="font-medium">{{#if health.health}}{{capitalize health.health}}{{else}}Unknown{{/if}}</dd></div>
-        <div><dt class="text-xs text-ink-faint">Boot Phase</dt><dd class="font-medium">{{default server.statusDetail "Running"}}</dd></div>
+        <div><dt class="text-xs text-ink-faint">Boot Phase</dt><dd class="font-medium">{{#if (or (eq server.status 'running') (eq server.status 'starting') (eq server.status 'unhealthy'))}}{{default server.statusDetail "Running"}}{{else}}Not running{{/if}}</dd></div>
         <div><dt class="text-xs text-ink-faint">Last Exit Code</dt><dd class="font-medium">{{#if health}}{{#if health.exitCode}}{{health.exitCode}}{{else}}0 / running{{/if}}{{else}}Unknown{{/if}}</dd></div>
         <div><dt class="text-xs text-ink-faint">Out-of-memory Kills</dt><dd class="font-medium">{{stability.oomKills}}{{#if stability.oomKills24h}} <span class="text-xs font-normal text-warn">· {{stability.oomKills24h}} / 24h</span>{{/if}}</dd></div>
         <div><dt class="text-xs text-ink-faint">Auto-restarts</dt><dd class="font-medium">{{stability.autoRestarts}}{{#if stability.autoRestarts24h}} <span class="text-xs font-normal text-warn">· {{stability.autoRestarts24h}} / 24h</span>{{/if}}</dd></div>

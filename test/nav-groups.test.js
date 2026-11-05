@@ -37,7 +37,7 @@ test('configuration has a jump bar and keeps Save pinned', async () => {
     assert.match(page, new RegExp(`data-jump="${id}"`));
     assert.match(page, new RegExp(`id="${id}"`));
   }
-  assert.match(page, /sticky bottom-\[var\(--bottom-nav,0px\)\][^"]*"[^>]*>[\s\S]*?id="st-save"/);
+  assert.match(page, /class="action-bar[^"]*"[^>]*>[\s\S]*?id="st-save"/);
 });
 
 test('user accounts live on Users & Permissions, and Panel Settings points there', async () => {

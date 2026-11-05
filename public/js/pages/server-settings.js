@@ -52,7 +52,7 @@ function init(serverId) {
     // pending change for the page-wide Save.
     if (e && e.target && e.target.closest && e.target.closest('[data-port-card]')) return;
     dirty = true;
-    dirtyNote?.classList.remove('hidden');
+    dirtyNote?.classList.replace('hidden', 'flex');
   };
   root.addEventListener('input', markDirty);
   root.addEventListener('change', markDirty);
@@ -545,7 +545,7 @@ function init(serverId) {
       if (!ok) return;
     }
     dirty = false;
-    dirtyNote?.classList.add('hidden');
+    dirtyNote?.classList.replace('flex', 'hidden');
     location.reload();
   });
 
@@ -749,7 +749,7 @@ function init(serverId) {
           : 'Saved.'
       );
       dirty = false; // saved - leaving must not warn
-      dirtyNote?.classList.add('hidden');
+      dirtyNote?.classList.replace('flex', 'hidden');
       setTimeout(() => location.reload(), 900);
     } catch {
       toast(friendlyError(null, { action: 'save your settings' }), { kind: 'error' });

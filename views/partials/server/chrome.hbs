@@ -62,7 +62,7 @@
   {{! Top-level sections. Phone: a tab bar fixed to the bottom edge, in thumb
       reach, all six side by side (z 25, see the scale in input.css; the page
       reserves room for it through --bottom-nav). sm+: one row in the card. }}
-  <nav data-bottom-nav class="fixed inset-x-0 bottom-0 z-[25] grid grid-cols-6 border-t border-line bg-canvas/95 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] backdrop-blur sm:static sm:z-auto sm:flex sm:flex-nowrap sm:items-center sm:gap-0.5 sm:overflow-x-auto sm:bg-transparent sm:p-0 sm:px-2 sm:backdrop-blur-none" aria-label="Server sections">
+  <nav data-bottom-nav class="fixed inset-x-0 bottom-0 z-[25] grid grid-cols-6 border-t border-line bg-canvas pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sm:static sm:z-auto sm:flex sm:flex-nowrap sm:items-center sm:gap-0.5 sm:overflow-x-auto sm:bg-transparent sm:p-0 sm:px-2" aria-label="Server sections">
     {{#each nav.groups}}
       <a href="{{href}}" data-nav-group="{{key}}" data-nav-tabs="{{tabs}}"{{#if active}} aria-current="page"{{/if}}
          class="relative flex min-w-0 shrink-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap border-t-2 px-0.5 pb-1.5 pt-2 text-[10px] font-medium transition sm:inline-flex sm:flex-row sm:justify-start sm:gap-1.5 sm:border-b-2 sm:border-t-0 sm:px-3 sm:py-2.5 sm:text-sm

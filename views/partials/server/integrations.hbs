@@ -78,8 +78,8 @@
           <textarea class="input min-h-24 max-h-72 resize-y text-xs" id="ig-wz-checkin-message" maxlength="400">{{integrations.wizard.checkinMessage}}</textarea>
           <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
             <span>Send privately after</span>
-            <input class="input w-24" type="number" id="ig-wz-checkin-minutes" min="0" max="1440" value="{{integrations.wizard.checkinMinutes}}">
-            <span class="text-ink-soft">minutes online</span>
+            {{! The number and its unit wrap together, never apart. }}
+            <span class="inline-flex items-center gap-2 whitespace-nowrap"><input class="input w-20" type="number" inputmode="numeric" id="ig-wz-checkin-minutes" min="0" max="1440" value="{{integrations.wizard.checkinMinutes}}"> <span class="text-ink-soft">minutes online</span></span>
           </div>
           <p class="help">Sent once per play session. Set 0 to disable. The message may also use <code class="code-inline">{minutes}</code>.</p>
         </div>
@@ -88,8 +88,8 @@
         <label class="label" for="ig-wz-conversation-minutes">Opt-in conversation mode</label>
         <div class="flex flex-wrap items-center gap-2 text-sm">
           <span>Keep listening for</span>
-          <input class="input w-24" type="number" id="ig-wz-conversation-minutes" min="0" max="60" value="{{integrations.wizard.conversationMinutes}}">
-          <span class="text-ink-soft">minutes after a player says <code class="code-inline">@{{integrations.wizard.invocationName}} chat</code></span>
+          <span class="inline-flex items-center gap-2 whitespace-nowrap"><input class="input w-20" type="number" inputmode="numeric" id="ig-wz-conversation-minutes" min="0" max="60" value="{{integrations.wizard.conversationMinutes}}"> <span class="text-ink-soft">minutes</span></span>
+          <span class="text-ink-soft">after a player says <code class="code-inline">@{{integrations.wizard.invocationName}} chat</code></span>
         </div>
         <p class="help">During this explicitly opened window, that player can reply without repeating the mention. <code class="code-inline">@{{integrations.wizard.invocationName}} bye</code>, leaving the server, or the timeout closes it. Messages beginning with <code class="code-inline">!</code>, <code class="code-inline">/</code>, or another <code class="code-inline">@</code> are ignored. Set 0 to disable.</p>
       </div>
@@ -182,13 +182,14 @@
           <label class="flex items-center gap-2" title="Out of memory, stalled boot, failed scheduled task, quota stop, health-check failure."><input type="checkbox" class="msm-check" data-dc-event="alerts" {{#if integrations.discord.events.alerts}}checked{{/if}}> Alerts</label>
         </div>
       </div>
-      <div class="flex items-center gap-2">
+      {{! Same footer as the Status Page card: stacked full width on a phone. }}
+      <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <button data-dirty-save class="btn btn-primary" id="ig-dc-save">Save</button>
         {{#if integrations.discord.hasWebhook}}
           <button class="btn" id="ig-dc-test">{{{icon 'send' 'size-4'}}} Send Test</button>
         {{else}}
           {{! Disabled controls swallow hover - the wrapper carries the "why". }}
-          <span data-tip="Save a webhook URL first."><button class="btn" id="ig-dc-test" disabled>{{{icon 'send' 'size-4'}}} Send Test</button></span>
+          <span class="grid sm:inline-grid" data-tip="Save a webhook URL first."><button class="btn" id="ig-dc-test" disabled>{{{icon 'send' 'size-4'}}} Send Test</button></span>
         {{/if}}
         <span class="hidden text-xs text-warn" data-ig-dirty="dc">Unsaved changes</span>
       </div>

@@ -326,6 +326,9 @@
 @media (width < 40rem) {
   body:has([data-bottom-nav]) {
     --bottom-nav: calc(3.5rem + env(safe-area-inset-bottom));
+    /* The tab bar already covers the home-indicator area, so a bar sitting
+       on top of it must not pad for it a second time. */
+    --bar-safe: 0px;
     padding-bottom: var(--bottom-nav);
   }
   body:has([data-bottom-nav]):has(
@@ -530,6 +533,16 @@
     @apply grid size-8 shrink-0 place-items-center rounded-md text-ink-faint transition-colors
       hover:bg-inset hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1
       focus-visible:outline-diamond-400;
+  }
+
+  /* Sticky bottom action bar (Save/Discard, bulk actions). Opaque, so page
+     content never bleeds through behind the buttons; above the phone tab bar
+     when there is one, otherwise clear of the home indicator. */
+  .action-bar {
+    @apply sticky z-10 border-t border-line bg-canvas px-4 pt-3;
+    bottom: var(--bottom-nav, 0px);
+    padding-bottom: calc(0.75rem + var(--bar-safe, env(safe-area-inset-bottom)));
+    box-shadow: 0 -10px 20px -14px rgb(0 0 0 / 0.55);
   }
 
   .card {
