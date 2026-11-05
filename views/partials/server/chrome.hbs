@@ -3,7 +3,7 @@
 {{! Way back out of a server below lg, where the sidebar is tucked away and
     the phone's bottom bar belongs to this server's own sections. }}
 <a href="/servers" class="-mt-2 mb-3 inline-flex items-center gap-1 text-sm text-ink-faint hover:text-ink lg:hidden">{{{icon 'chevron-left' 'size-4'}}} All Servers</a>
-<div data-server-title="{{server.id}}" data-server-name="{{server.name}}" data-server-status="{{server.status}}" class="card mb-6 overflow-hidden{{#if (or (eq server.status 'crashed') server.crashesUnread)}} border-danger/50{{/if}}" style="border-top: 3px solid {{#if (or (eq server.status 'crashed') server.crashesUnread)}}var(--color-redstone-500){{else}}{{server.accent}}{{/if}}">
+<div data-server-title="{{server.id}}" data-server-name="{{server.name}}" data-server-status="{{server.status}}" class="card mb-6 overflow-hidden{{#if (or (eq server.status 'crashed') server.crashesUnread)}} border-redstone-500/50{{/if}}" style="border-top: 3px solid {{#if (or (eq server.status 'crashed') server.crashesUnread)}}var(--color-redstone-500){{else}}{{server.accent}}{{/if}}">
   {{! icon+name grouped into ONE flex item, separate from the actions column,
       using flex-auto (basis: auto) rather than flex-1 (basis: 0%). That's
       the actual fix, not just the grouping: flex-wrap decides whether to

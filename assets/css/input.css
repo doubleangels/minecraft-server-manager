@@ -499,7 +499,8 @@
     .seg-btn,
     .tile,
     .swatch,
-    .icon-btn {
+    .icon-btn,
+    .subtab {
       min-height: 2.75rem;
       min-width: 2.75rem;
     }
@@ -831,8 +832,11 @@
   @media (width < 40rem) {
     /* The table and its body size to the card, not to their widest content:
        as a table they'd grow to fit the longest file or mod name and run off
-       the right edge of the screen. */
-    .table-stack,
+       the right edge of the screen. Gutter padding keeps stacked row cards
+       from crashing into the parent card's border. */
+    .table-stack {
+      @apply block w-full p-2.5 sm:p-0;
+    }
     .table-stack tbody {
       @apply block w-full;
     }
@@ -864,7 +868,7 @@
       content: none;
     }
     .table-stack td[data-th=''] {
-      @apply justify-start pt-2;
+      @apply justify-start border-t border-line/40 pt-2.5 mt-1.5;
     }
     .table-stack td:empty {
       @apply hidden;

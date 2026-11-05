@@ -1,6 +1,6 @@
 {{! A crashed server, or one with unread crash reports, trades its accent edge
     for redstone and a red outline, so it stands out in a full grid. }}
-<a href="/servers/{{id}}" data-server-card="{{id}}" data-server-name="{{name}}" data-server-status="{{status}}" data-players-online="{{players.online}}" class="card group relative block overflow-hidden transition hover:border-line-strong hover:shadow-raised{{#if (or (eq status 'crashed') crashesUnread)}} border-danger/50 bg-danger/5{{/if}}"
+<a href="/servers/{{id}}" data-server-card="{{id}}" data-server-name="{{name}}" data-server-status="{{status}}" data-players-online="{{players.online}}" class="card group relative block overflow-hidden transition hover:border-line-strong hover:shadow-raised{{#if (or (eq status 'crashed') crashesUnread)}} border-redstone-500/50 bg-redstone-500/10{{/if}}"
    data-filter="{{name}} {{flavor}} {{mcVersion}}{{#each tags}} {{this}}{{/each}}"
    style="border-top: 3px solid {{#if (or (eq status 'crashed') crashesUnread)}}var(--color-redstone-500){{else}}{{accent}}{{/if}}">
   <div class="p-4">

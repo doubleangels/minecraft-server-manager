@@ -164,6 +164,7 @@ for (const el of document.querySelectorAll('[data-ts], [data-ts-ago], [data-ts-i
   toggle.setAttribute('aria-expanded', 'false');
   toggle.setAttribute('aria-controls', 'sidebar');
   toggle.addEventListener('click', () => (isOpen() ? close() : open()));
+  document.getElementById('sidebar-close')?.addEventListener('click', close);
   // The phone tab bar's "More" opens the same drawer.
   document.querySelectorAll('[data-sidebar-open]').forEach((b) => b.addEventListener('click', () => open()));
   backdrop.addEventListener('click', close);

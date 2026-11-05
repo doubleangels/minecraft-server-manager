@@ -13,16 +13,16 @@
     so this row is just people + infrastructure. }}
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 {{#if serversOnly}}hidden{{/if}}">
   <div class="card p-4">
-    <div class="text-xs text-ink-faint">Servers online</div>
+    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'server' 'size-3.5'}}} Servers online</div>
     {{! Green only when something IS online - 0/3 in success green lied. }}
     <div class="mt-1 text-2xl font-bold tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-faint"> / {{totals.total}}</span></div>
   </div>
   <div class="card p-4">
-    <div class="text-xs text-ink-faint">Players connected</div>
+    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'users' 'size-3.5'}}} Players connected</div>
     <div class="mt-1 text-2xl font-bold tabular-nums">{{totals.players}}</div>
   </div>
   <div class="card col-span-2 p-4 sm:col-span-1">
-    <div class="text-xs text-ink-faint">Docker</div>
+    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'box' 'size-3.5'}}} Docker</div>
     <div class="mt-1 flex items-center gap-2 text-sm font-semibold text-ink-faint" id="docker-status">
       <span class="status-dot relative bg-stone-500"></span> Checking…
     </div>

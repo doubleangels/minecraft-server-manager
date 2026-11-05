@@ -39,7 +39,7 @@
             <tr data-file-row data-path="{{path}}" data-name="{{name}}" data-dir="{{dir}}" data-size="{{size}}">
               {{! w-full + max-w-0 (sm+ only): makes `truncate` actually engage in an
                   auto-layout table - long names no longer force horizontal scroll. }}
-              <td data-th="" class="sm:w-full sm:max-w-0">
+              <td data-th="Name" class="sm:w-full sm:max-w-0">
                 <div class="flex items-center gap-2">
                   {{#if dir}}
                     {{{icon 'folder' 'size-4 shrink-0 text-warn'}}}

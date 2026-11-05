@@ -40,7 +40,7 @@
           <tr class="{{#unless enabled}}opacity-60{{/unless}}" data-mod-row data-file="{{file}}" data-name="{{name}}" data-source="{{source}}" data-enabled="{{enabled}}">
             {{! w-full + max-w-0 (sm+ only) so `truncate` actually engages - long mod file
                 names were widening the table into horizontal scroll. }}
-            <td data-th="" class="sm:w-full sm:max-w-0">
+            <td data-th="Mod" class="sm:w-full sm:max-w-0">
               <div class="flex items-center gap-2.5">
                 {{#if iconUrl}}
                   <img src="{{iconUrl}}" alt="" loading="lazy" data-mod-icon class="size-8 shrink-0 rounded bg-inset object-cover">

@@ -14,7 +14,7 @@
       <tbody>
         {{#each worlds}}
           <tr data-world-row data-world="{{name}}" data-size="{{sizeBytes}}" data-active="{{active}}">
-            <td data-th="" class="sm:w-full sm:max-w-0">
+            <td data-th="World" class="sm:w-full sm:max-w-0">
               <div class="truncate font-medium" title="{{name}}">{{name}}</div>
               {{#if seed}}<div class="text-xs text-ink-faint">seed {{seed}}</div>{{/if}}
             </td>
