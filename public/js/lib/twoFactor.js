@@ -45,7 +45,7 @@ async function openEnrollModal(trigger) {
   content.querySelector('#tf-secret').value = setup.secret;
   content.querySelector('#tf-secret-copy').dataset.copy = setup.secret;
 
-  openModal({
+  const modal = openModal({
     title: 'Enable Two-Factor Authentication',
     content,
     actions: [
@@ -68,6 +68,25 @@ async function openEnrollModal(trigger) {
         },
       },
     ],
+  });
+  // A complete 6-digit code: confirm right away when the password is already
+  // in, otherwise move on to the password box (Enter there confirms).
+  const codeEl = content.querySelector('#tf-confirm-code');
+  const pwEl = content.querySelector('#tf-confirm-password');
+  const confirmBtn = () => modal.el.querySelector('.btn-primary');
+  let lastAuto = '';
+  codeEl.addEventListener('input', () => {
+    const v = codeEl.value.replace(/\s+/g, '');
+    if (!/^\d{6}$/.test(v) || v === lastAuto) return;
+    lastAuto = v;
+    if (pwEl.value) confirmBtn()?.click();
+    else pwEl.focus();
+  });
+  pwEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      confirmBtn()?.click();
+    }
   });
 }
 

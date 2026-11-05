@@ -235,6 +235,21 @@ document.addEventListener('submit', (e) => {
   if (btn) setBusy(btn);
 });
 
+// ---- Two-factor code fields: send as soon as the code is complete ----
+// A full 6-digit authenticator code, or a full backup code (xxxxx-xxxxx; its
+// dash sits where a 6th digit would, so a half-typed backup code never looks
+// like an authenticator code). Typing, pasting and autofill all count. Each
+// distinct value submits at most once, so a rejected code waits for an edit.
+document.addEventListener('input', (e) => {
+  const input = e.target.closest && e.target.closest('input[data-auto-submit-code]');
+  if (!input || !input.form) return;
+  const v = input.value.replace(/\s+/g, '');
+  const complete = /^\d{6}$/.test(v) || /^[0-9a-f]{5}-[0-9a-f]{5}$/i.test(v);
+  if (!complete || input.dataset.autoSubmitted === v) return;
+  input.dataset.autoSubmitted = v;
+  input.form.requestSubmit();
+});
+
 // (Console behavior lives in pages/console.js - no bindings here.)
 
 // ---- Range sliders: live value readout ----
