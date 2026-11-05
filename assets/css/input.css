@@ -323,6 +323,24 @@
    --bottom-nav so sticky save bars and toasts sit above it, not under it.
    While a text field has focus the on-screen keyboard is up, and a bar riding
    on top of it only eats space, so it steps aside until typing is done. */
+/* Phone tab bars: the active tab wears a tinted pill behind its icon, not a
+   green line along the bar's top edge. A Save bar sits right on that edge,
+   and a green line there read as the Save button bleeding through. */
+@media (width < 40rem) {
+  [data-bottom-nav] > :is(a, button) > svg {
+    box-sizing: content-box;
+    padding: 0.25rem 0.875rem;
+    border-radius: var(--radius-sm);
+    transition:
+      background-color 150ms,
+      color 150ms;
+  }
+  [data-bottom-nav] > :is([aria-current='page'], .active) > svg {
+    background: color-mix(in oklab, var(--color-ok) 18%, transparent);
+    color: var(--color-ok);
+  }
+}
+
 @media (width < 40rem) {
   body:has([data-bottom-nav]) {
     --bottom-nav: calc(3.5rem + env(safe-area-inset-bottom));
@@ -595,16 +613,16 @@
   }
 
   /* A tab in the phone's panel-wide bottom bar (partials/app-nav.hbs). Same
-     look as a server section tab on a phone: icon over label, green top edge
-     when active, painted over the bar's hairline. */
+     look as a server section tab on a phone: icon over label, the active one
+     marked by a tinted pill behind its icon (see the bottom-nav rules). */
   .app-tab {
-    @apply relative flex min-w-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap border-t-2 border-transparent px-0.5 pt-1 pb-1 text-[10px] font-medium text-ink-faint transition;
+    @apply relative flex min-w-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap px-0.5 pt-1 pb-1 text-[10px] font-medium text-ink-faint transition;
   }
   .app-tab > span:not(.badge) {
     @apply max-w-full truncate;
   }
   .app-tab.active {
-    @apply border-grass-500 text-ink;
+    @apply text-ink;
   }
 
   .card {
