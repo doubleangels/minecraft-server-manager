@@ -45,10 +45,12 @@ Every page is laid out for a narrow screen first and widens from there: the side
 
 Made for thumbs:
 
-- A server's six sections (**Overview**, **Console**, **Players**, **Content**, **Data**, **Settings**) sit in a tab bar along the bottom of the screen. It steps aside while you type.
+- A tab bar along the bottom of the screen: **Dashboard**, **Servers**, **Library**, **Activity** (with a red count when there are health alerts) and **More** (the full menu). Inside a server it switches to that server's six sections (**Overview**, **Console**, **Players**, **Content**, **Data**, **Settings**), and **All Servers** above the server's name leads back out. The bar steps aside while you type.
+- **Library** opens on **Modpacks**, with **Worlds** and **Blueprints** as tabs at the top; **Activity** has **Health** as a tab the same way.
+- The button that finishes a form stays pinned to the bottom of the screen: **Save Changes** on Configuration, **Create & Start** on Create Server, and **Save** on Discord, Status Page and Chatbot.
 - Dialogs open as sheets from the bottom edge with full-width buttons.
 - The keyboard doesn't capitalise or "correct" player names, commands, file names, addresses or searches, and its Enter key reads **Send** in the console and **Search** in search boxes.
-- The console fits the screen height, keeps the command box above the keyboard, and shows a **New Lines** button when output arrives while you're scrolled up. **Keep Screen On** stops the phone from locking while you watch it.
+- The console's command box and the chat message box stay pinned at the bottom of the screen, like a chat app, and the log fills the space above. The console's filters, Announce, Keep Screen On and Download fold under **Options**. The console keeps the command box above the keyboard, and shows a **New Lines** button when output arrives while you're scrolled up. **Keep Screen On** stops the phone from locking while you watch it.
 - **Share** next to **Copy Address** on a server's Overview, and next to **Copy Invite Text** on **Players → Invites**, opens the phone's share sheet.
 - If the panel stops answering (Wi-Fi drops, the panel restarts) a **Reconnecting…** banner says so, and goes away by itself once it answers again.
 

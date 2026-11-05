@@ -370,9 +370,11 @@
     {{/if}}
   </div>
 
-  <div class="mt-6 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
-    <a href="/" class="btn btn-ghost">Cancel</a>
-    <button class="btn btn-primary sm:ml-auto" id="wz-create" type="button">{{{icon 'pickaxe' 'size-4'}}} Create &amp; Start</button>
+  {{! Pinned, so Create & Start is in reach as soon as the name is in, not
+      only after scrolling past every section. }}
+  <div class="action-bar action-bar-card mt-6 flex items-center gap-2">
+    <a href="/" class="btn btn-ghost flex-1 sm:flex-none">Cancel</a>
+    <button class="btn btn-primary flex-[2] sm:ml-auto sm:flex-none" id="wz-create" type="button">{{{icon 'pickaxe' 'size-4'}}} Create &amp; Start</button>
   </div>
 </div>
 <script type="module" src="/js/pages/wizard.js"></script>

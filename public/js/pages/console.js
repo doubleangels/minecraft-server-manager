@@ -377,6 +377,16 @@ function init(serverId) {
 
   initWakeLock();
 
+  // Phone: the Options button shows or hides the folded toolbar.
+  const toolsBtn = document.querySelector('[data-console-tools-toggle]');
+  const tools = document.querySelector('[data-console-tools]');
+  toolsBtn?.addEventListener('click', () => {
+    const open = tools.classList.contains('hidden');
+    tools.classList.toggle('hidden', !open);
+    tools.classList.toggle('flex', open);
+    toolsBtn.setAttribute('aria-expanded', String(open));
+  });
+
   if (filterInput) filterInput.addEventListener('input', refilter);
   document.querySelectorAll('[data-level-filter]').forEach((cb) => {
     cb.addEventListener('change', () => {

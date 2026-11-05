@@ -259,7 +259,7 @@ function init(rootEl) {
         <span>${lineCount} line${lineCount === 1 ? '' : 's'} · ${fmtBytes(data.size)}</span>
         <label class="ml-auto flex cursor-pointer items-center gap-1.5"><input type="checkbox" class="msm-check" data-ed-wrap> Wrap</label>
       </div>
-      <textarea class="input h-96 w-full resize-y whitespace-pre font-mono text-xs leading-relaxed" spellcheck="false" wrap="off"></textarea>
+      <textarea class="input h-[45dvh] min-h-48 w-full resize-y whitespace-pre font-mono text-xs leading-relaxed sm:h-96" spellcheck="false" wrap="off" autocapitalize="off" autocorrect="off"></textarea>
       <p class="help mt-2">${escapeHtml(path)}. Tab inserts a tab; saves are written safely in one step.</p>`;
     const textarea = content.querySelector('textarea');
     textarea.value = data.content;

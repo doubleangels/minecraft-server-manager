@@ -1,0 +1,7 @@
+{{! The three Library pages as tabs, so the phone's Library tab reaches all of
+    them. Hidden from lg up, where the sidebar lists them side by side. }}
+<nav class="-mt-2 mb-5 flex flex-wrap gap-1 lg:hidden" aria-label="Library">
+  <a href="/modpacks" class="subtab {{#if (eq active 'modpacks')}}active{{/if}}">Modpacks</a>
+  <a href="/worlds" class="subtab {{#if (eq active 'worlds')}}active{{/if}}">Worlds</a>
+  <a href="/blueprints" class="subtab {{#if (eq active 'blueprints')}}active{{/if}}">Blueprints</a>
+</nav>

@@ -348,9 +348,18 @@
 }
 
 /* Toasts rise above a visible sticky action bar instead of covering its
-   Save button (the very button that just raised the toast). */
-body:has(.action-bar:not(.hidden)) #toasts {
-  bottom: calc(1rem + var(--bottom-nav, env(safe-area-inset-bottom)) + 5.5rem);
+   Save button (the very button that just raised the toast).
+   The console and chat message boxes are pinned bars only on a phone (an
+   ordinary row from sm up, marked sm:static), so they count only there. */
+@media (width < 40rem) {
+  body:has(.action-bar:not(.hidden)) #toasts {
+    bottom: calc(1rem + var(--bottom-nav, env(safe-area-inset-bottom)) + 5.5rem);
+  }
+}
+@media (width >= 40rem) {
+  body:has(.action-bar:not(.hidden, [class*='sm:static'])) #toasts {
+    bottom: calc(1rem + env(safe-area-inset-bottom) + 5.5rem);
+  }
 }
 
 @layer components {
@@ -559,6 +568,43 @@ body:has(.action-bar:not(.hidden)) #toasts {
     padding-top: 0.625rem;
     padding-bottom: calc(0.625rem + var(--bar-tuck, 0px) + var(--bar-safe, env(safe-area-inset-bottom)));
     box-shadow: 0 -10px 20px -14px rgb(0 0 0 / 0.55);
+  }
+
+  /* The action bar for a form inside a page column (Configuration, Create
+     Server, Discord, Status Page, Chatbot): edge to edge on a phone, a
+     floating card inside the column from sm up. */
+  .action-bar-card {
+    margin-inline: -1rem;
+    @variant sm {
+      bottom: 0.75rem;
+      margin-inline: 0;
+      border-width: 1px;
+      border-radius: var(--radius-lg);
+      padding-inline: 1rem;
+      padding-bottom: 0.625rem;
+    }
+  }
+
+  /* The action bar as a card's own footer (Discord, Status Page, Chatbot):
+     flush with the card's edges and bottom corners, pinned while the card
+     is longer than the screen. */
+  .action-bar-footer {
+    margin: 1rem -1rem -1rem;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+  }
+
+  /* A tab in the phone's panel-wide bottom bar (partials/app-nav.hbs). Same
+     look as a server section tab on a phone: icon over label, green top edge
+     when active, painted over the bar's hairline. */
+  .app-tab {
+    @apply relative flex min-w-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap border-t-2 border-transparent px-0.5 pt-1 pb-1 text-[10px] font-medium text-ink-faint transition;
+  }
+  .app-tab > span:not(.badge) {
+    @apply max-w-full truncate;
+  }
+  .app-tab.active {
+    @apply border-grass-500 text-ink;
   }
 
   .card {

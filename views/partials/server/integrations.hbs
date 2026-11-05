@@ -136,15 +136,18 @@
     </div>
 
     <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-      <button data-dirty-save class="btn btn-primary" id="ig-wz-save">Save Chatbot</button>
       <button class="btn" id="ig-wz-test">Test Connection</button>
       <button class="btn" id="ig-wz-transcripts">Refresh This Server's Transcripts</button>
       <button class="btn" id="ig-wz-power-audit">Refresh Power Audit</button>
       <a class="btn btn-ghost" href="/wizard-transcripts">All Transcript Archives</a>
-      <span class="hidden text-xs text-warn" data-ig-dirty="wz">Unsaved changes</span>
     </div>
     <div class="mt-4 hidden max-h-80 overflow-auto rounded-md border border-line bg-inset p-3 text-xs" id="ig-wz-transcript-list"></div>
     <div class="mt-4 hidden max-h-80 overflow-auto rounded-md border border-line bg-inset p-3 text-xs" id="ig-wz-power-audit-list"></div>
+  {{! Save pinned as the card's footer, so it stays in reach on a long card. }}
+  <div class="action-bar action-bar-footer flex flex-wrap items-center gap-2 sm:flex-nowrap">
+    <span class="hidden basis-full items-center gap-1.5 text-xs text-warn sm:mr-auto sm:basis-auto" data-ig-dirty="wz">{{{icon 'circle-dot' 'size-3.5'}}} Unsaved changes</span>
+    <button data-dirty-save class="btn btn-primary flex-1 sm:ml-auto sm:flex-none" id="ig-wz-save">{{{icon 'save' 'size-4'}}} Save Chatbot</button>
+  </div>
   </div>
   {{else}}
   <div class="card p-6 text-center text-sm text-ink-faint lg:col-span-2">
@@ -182,18 +185,20 @@
           <label class="flex items-center gap-2" title="Out of memory, stalled boot, failed scheduled task, quota stop, health-check failure."><input type="checkbox" class="msm-check" data-dc-event="alerts" {{#if integrations.discord.events.alerts}}checked{{/if}}> Alerts</label>
         </div>
       </div>
-      {{! Same footer as the Status Page card: stacked full width on a phone. }}
       <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <button data-dirty-save class="btn btn-primary" id="ig-dc-save">Save</button>
         {{#if integrations.discord.hasWebhook}}
           <button class="btn" id="ig-dc-test">{{{icon 'send' 'size-4'}}} Send Test</button>
         {{else}}
           {{! Disabled controls swallow hover - the wrapper carries the "why". }}
           <span class="grid sm:inline-grid" data-tip="Save a webhook URL first."><button class="btn" id="ig-dc-test" disabled>{{{icon 'send' 'size-4'}}} Send Test</button></span>
         {{/if}}
-        <span class="hidden text-xs text-warn" data-ig-dirty="dc">Unsaved changes</span>
       </div>
     </div>
+  {{! Save pinned as the card's footer, so it stays in reach on a long card. }}
+  <div class="action-bar action-bar-footer flex flex-wrap items-center gap-2 sm:flex-nowrap">
+    <span class="hidden basis-full items-center gap-1.5 text-xs text-warn sm:mr-auto sm:basis-auto" data-ig-dirty="dc">{{{icon 'circle-dot' 'size-3.5'}}} Unsaved changes</span>
+    <button data-dirty-save class="btn btn-primary flex-1 sm:ml-auto sm:flex-none" id="ig-dc-save">{{{icon 'save' 'size-4'}}} Save</button>
+  </div>
   </div>
   {{/if}}
 
@@ -214,15 +219,18 @@
         </div>
         <p class="help">Anyone with the link sees the name, MOTD, version, player count, and uptime, and nothing else. There is no way into the panel from it. Off by default.</p>
       </div>
-      <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
-        <button data-dirty-save class="btn btn-primary" id="ig-sp-save">Save</button>
-        {{#if (and integrations.statusPage.enabled integrations.statusPage.path)}}
+      {{#if (and integrations.statusPage.enabled integrations.statusPage.path)}}
+        <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
           <a class="btn" href="{{integrations.statusPage.path}}" target="_blank" rel="noopener" id="ig-sp-link">{{{icon 'link' 'size-4'}}} Open Page</a>
           <button class="btn btn-ghost" id="ig-sp-copy">{{{icon 'copy' 'size-4'}}} Copy Link</button>
-        {{/if}}
-        <span class="hidden text-xs text-warn" data-ig-dirty="sp">Unsaved changes</span>
-      </div>
+        </div>
+      {{/if}}
     </div>
+  {{! Save pinned as the card's footer, so it stays in reach on a long card. }}
+  <div class="action-bar action-bar-footer flex flex-wrap items-center gap-2 sm:flex-nowrap">
+    <span class="hidden basis-full items-center gap-1.5 text-xs text-warn sm:mr-auto sm:basis-auto" data-ig-dirty="sp">{{{icon 'circle-dot' 'size-3.5'}}} Unsaved changes</span>
+    <button data-dirty-save class="btn btn-primary flex-1 sm:ml-auto sm:flex-none" id="ig-sp-save">{{{icon 'save' 'size-4'}}} Save</button>
+  </div>
   </div>
   {{/if}}
 

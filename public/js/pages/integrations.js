@@ -18,8 +18,9 @@ function init() {
   function bindDirty(key, controls) {
     const hint = root.querySelector(`[data-ig-dirty="${key}"]`);
     if (!hint) return () => {};
-    for (const el of controls) el?.addEventListener('change', () => hint.classList.remove('hidden'));
-    return () => hint.classList.add('hidden');
+    // hidden <-> flex: the note is an icon + text row in the pinned Save bar.
+    for (const el of controls) el?.addEventListener('change', () => hint.classList.replace('hidden', 'flex'));
+    return () => hint.classList.replace('flex', 'hidden');
   }
   const cleanDc = bindDirty('dc', [
     document.getElementById('ig-dc-enabled'),

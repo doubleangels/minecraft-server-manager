@@ -1,4 +1,5 @@
 {{> page-header heading="ACTIVITY" sub="Every action across every server: who did what, when, with the details on record."}}
+{{> insight-tabs}}
 
 {{#if (or events.length (or filters.q (or filters.server filters.type)))}}
 <form class="mb-4 flex flex-wrap items-center gap-2" method="get" action="/activity" id="activity-filters">
