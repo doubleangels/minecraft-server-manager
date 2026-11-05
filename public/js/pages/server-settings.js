@@ -10,6 +10,7 @@ import { setBusy } from '../lib/loading.js';
 import { initDockerSettings } from '../lib/dockerSettings.js';
 import { wireCatalogConflicts } from '../lib/catalogConflicts.js';
 import { escapeHtml } from '../lib/format.js';
+import { trackDirty } from '../lib/dirtyState.js';
 
 const root = document.querySelector('[data-settings-server]');
 if (root) init(root.dataset.settingsServer);
@@ -45,17 +46,23 @@ function init(serverId) {
 
   // ---- dirty tracking: Save always works, but Discard/leave now warn instead
   // of silently dropping edits ----
+  // Dirty means a value really differs from the loaded one (see dirtyState.js),
+  // not that some input/change event fired.
   let dirty = false;
   const dirtyNote = document.querySelector('[data-dirty-note]');
-  const markDirty = (e) => {
-    // The game port saves on its own button, so typing there is not a
-    // pending change for the page-wide Save.
-    if (e && e.target && e.target.closest && e.target.closest('[data-port-card]')) return;
-    dirty = true;
-    dirtyNote?.classList.replace('hidden', 'flex');
-  };
-  root.addEventListener('input', markDirty);
-  root.addEventListener('change', markDirty);
+  const tracker = trackDirty(root, {
+    // The game port saves on its own button, so it is not a pending change
+    // for the page-wide Save.
+    skip: '[data-port-card]',
+    // The icon/accent pickers and tag chips keep their state outside the
+    // form controls.
+    extra: () => JSON.stringify([icon, accent, [...tags].sort()]),
+    onChange: (d) => {
+      dirty = d;
+      dirtyNote?.classList.replace(d ? 'hidden' : 'flex', d ? 'flex' : 'hidden');
+    },
+  });
+  const markDirty = () => tracker.refresh();
   window.addEventListener('beforeunload', (e) => {
     if (dirty) e.preventDefault(); // the browser's own unsaved-changes prompt
   });
@@ -175,6 +182,7 @@ function init(serverId) {
       tags.add(tagInput.value.trim().toLowerCase());
       tagInput.value = '';
       renderTags();
+      markDirty();
       e.preventDefault();
     }
   });
