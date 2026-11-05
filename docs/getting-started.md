@@ -45,7 +45,7 @@ Every page is laid out for a narrow screen first and widens from there: the side
 
 Made for thumbs:
 
-- A tab bar along the bottom of the screen: **Dashboard**, **Servers**, **Library**, **Activity** (with a red count when there are health alerts) and **More** (the full menu). Inside a server it switches to that server's six sections (**Overview**, **Console**, **Players**, **Content**, **Data**, **Settings**), and **All Servers** above the server's name leads back out. The bar steps aside while you type.
+- A tab bar along the bottom of the screen (on tablets too, anywhere the sidebar isn't always open): **Dashboard**, **Servers**, **Library**, **Activity** (with a red count when there are health alerts) and **More** (the full menu). Inside a server on a phone it switches to that server's six sections (**Overview**, **Console**, **Players**, **Content**, **Data**, **Settings**), and **All Servers** above the server's name leads back out. The bar steps aside while you type.
 - **Library** opens on **Modpacks**, with **Worlds** and **Blueprints** as tabs at the top; **Activity** has **Health** as a tab the same way.
 - The button that finishes a form stays pinned to the bottom of the screen: **Save Changes** on Configuration, **Create & Start** on Create Server, and **Save** on Discord, Status Page and Chatbot.
 - Dialogs open as sheets from the bottom edge with full-width buttons.

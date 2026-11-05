@@ -156,7 +156,7 @@ physically press on `:active`).
   ad-hoc border/background pairs). `.action-bar` is the one sticky bottom bar for Save/Discard and bulk
   actions (opaque, sits above the phone tab bar, never double-pads the safe area). Shared view partials: `page-header`, `brand-lockup`,
   `empty-state`, `settings/card`, `settings/toggle-row`.
-- **One z-index scale**, listed in `input.css`: topbar 20 · phone bottom tab bar 25 · sidebar
+- **One z-index scale**, listed in `input.css`: topbar 20 · bottom tab bars 25 · sidebar
   backdrop 30 · sidebar 40 · modal 60 · toasts 65 · connection banner 66 · dropdowns 68 · tooltip 70. Anything new picks a slot there.
 - **Write Tailwind classes as full literals** — the v4 scanner only emits utilities it sees
   verbatim. No `bg-${color}-500` assembly (that's why `STATUS_DOT` in `web/app.js` is a literal map).

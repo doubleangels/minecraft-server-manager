@@ -319,43 +319,36 @@
   }
 }
 
-/* Phone bottom tab bar (server pages): the page reserves its height through
-   --bottom-nav so sticky save bars and toasts sit above it, not under it.
-   While a text field has focus the on-screen keyboard is up, and a bar riding
-   on top of it only eats space, so it steps aside until typing is done. */
-/* Phone tab bars: the active tab wears a tinted pill behind its icon, not a
-   green line along the bar's top edge. A Save bar sits right on that edge,
-   and a green line there read as the Save button bleeding through. */
-@media (width < 40rem) {
-  [data-bottom-nav] > :is(a, button) > svg {
-    box-sizing: content-box;
-    padding: 0.25rem 0.875rem;
-    border-radius: var(--radius-sm);
-    transition:
-      background-color 150ms,
-      color 150ms;
-  }
-  [data-bottom-nav] > :is([aria-current='page'], .active) > svg {
-    @apply bg-grass-500/15 text-ok;
-  }
-}
-/* From sm up a server's section tabs sit in a row in the header card; the
-   active one is the same tinted pill as a sub-tab. */
-@media (width >= 40rem) {
-  [data-bottom-nav] > a[aria-current='page'] {
-    @apply bg-grass-500/15 text-ok;
-  }
-}
-
+/* Bottom tab bars. Two of them, never on the same page:
+     [data-bottom-nav='app']    the panel bar (partials/app-nav.hbs), fixed to
+                                the bottom below lg (phones and tablets, where
+                                the sidebar is tucked behind its menu button);
+     [data-bottom-nav='server'] a server's six sections (server/chrome.hbs),
+                                fixed below sm, a row in the header card above.
+   While a fixed bar is up, the page reserves its height through --bottom-nav
+   so sticky action bars and toasts sit on it, not under it; it covers the
+   home-indicator area (--bar-safe 0) and action bars tuck under it
+   (--bar-tuck, see .action-bar). While a text field has focus the on-screen
+   keyboard is up, and a bar riding on top of it only eats space, so it steps
+   aside until typing is done. */
 @media (width < 40rem) {
   body:has([data-bottom-nav]) {
     --bottom-nav: calc(3.5rem + env(safe-area-inset-bottom));
-    /* The tab bar already covers the home-indicator area, so a bar sitting
-       on top of it must not pad for it a second time. */
     --bar-safe: 0px;
     --bar-tuck: 0.75rem;
     padding-bottom: var(--bottom-nav);
   }
+}
+@media (40rem <= width < 64rem) {
+  body:has([data-bottom-nav='app']) {
+    --bottom-nav: calc(3.5rem + env(safe-area-inset-bottom));
+    --bar-safe: 0px;
+    --bar-tuck: 0.75rem;
+    --float-gap: -0.75rem;
+    padding-bottom: var(--bottom-nav);
+  }
+}
+@media (width < 64rem) {
   body:has([data-bottom-nav]):has(
       :is(
         input:not([type='checkbox'], [type='radio'], [type='range'], [type='button'], [type='submit']),
@@ -371,10 +364,46 @@
   }
 }
 
+/* While a tab bar is fixed to the bottom, the active tab wears a tinted pill
+   behind its icon, not a green line along the bar's top edge: a Save bar
+   sits right on that edge, and a line there read as the Save button's green
+   bleeding through. */
+[data-bottom-nav='app'] > :is(a, button) > svg {
+  box-sizing: content-box;
+  padding: 0.25rem 0.875rem;
+  border-radius: var(--radius-sm);
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+[data-bottom-nav='app'] > .active > svg {
+  @apply bg-grass-500/15 text-ok;
+}
+@media (width < 40rem) {
+  [data-bottom-nav='server'] > a > svg {
+    box-sizing: content-box;
+    padding: 0.25rem 0.875rem;
+    border-radius: var(--radius-sm);
+    transition:
+      background-color 150ms,
+      color 150ms;
+  }
+  [data-bottom-nav='server'] > a[aria-current='page'] > svg {
+    @apply bg-grass-500/15 text-ok;
+  }
+}
+/* From sm up a server's section tabs sit in a row in the header card; the
+   active one is the same tinted pill as a sub-tab. */
+@media (width >= 40rem) {
+  [data-bottom-nav='server'] > a[aria-current='page'] {
+    @apply bg-grass-500/15 text-ok;
+  }
+}
+
 /* Toasts rise above a visible sticky action bar instead of covering its
-   Save button (the very button that just raised the toast).
-   The console and chat message boxes are pinned bars only on a phone (an
-   ordinary row from sm up, marked sm:static), so they count only there. */
+   Save button (the very button that just raised the toast). The console and
+   chat message boxes are pinned bars only on a phone (an ordinary row from
+   sm up, marked sm:static), so from sm up they don't count. */
 @media (width < 40rem) {
   body:has(.action-bar:not(.hidden)) #toasts {
     bottom: calc(1rem + var(--bottom-nav, env(safe-area-inset-bottom)) + 5.5rem);
@@ -382,13 +411,13 @@
 }
 @media (width >= 40rem) {
   body:has(.action-bar:not(.hidden, [class*='sm:static'])) #toasts {
-    bottom: calc(1rem + env(safe-area-inset-bottom) + 5.5rem);
+    bottom: calc(1rem + var(--bottom-nav, env(safe-area-inset-bottom)) + 5.5rem);
   }
 }
 
 @layer components {
   /* ---- Stacking scale (the ONLY z values in the app) ----
-     topbar shell 20 · phone bottom tab bar 25 · sidebar backdrop 30 ·
+     topbar shell 20 · bottom tab bars 25 · sidebar backdrop 30 ·
      sidebar 40 · modal 60 · toasts 65 (above modals - errors fired from modal
      actions must be readable) · connection banner 66 · dropdown menus 68
      (they can open from inside a modal) · tooltip 70.
@@ -600,12 +629,15 @@
   .action-bar-card {
     margin-inline: -1rem;
     @variant sm {
-      bottom: 0.75rem;
+      /* Floats 0.75rem above the screen edge. With the panel tab bar fixed
+         (a tablet), --float-gap tucks it under the bar instead, like the
+         phone's bar, so no strip of page shows between card and tab bar. */
+      bottom: calc(var(--bottom-nav, 0px) + var(--float-gap, 0.75rem));
       margin-inline: 0;
       border-width: 1px;
       border-radius: var(--radius-lg);
       padding-inline: 1rem;
-      padding-bottom: 0.625rem;
+      padding-bottom: calc(0.625rem + var(--bar-tuck, 0px));
     }
   }
 
@@ -622,7 +654,7 @@
      look as a server section tab on a phone: icon over label, the active one
      marked by a tinted pill behind its icon (see the bottom-nav rules). */
   .app-tab {
-    @apply relative flex min-w-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap px-0.5 pt-1 pb-1 text-[10px] font-medium text-ink-faint transition;
+    @apply relative flex min-w-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap px-0.5 pt-1 pb-1 text-[10px] font-medium text-ink-faint transition sm:text-xs;
   }
   .app-tab > span:not(.badge) {
     @apply max-w-full truncate;
