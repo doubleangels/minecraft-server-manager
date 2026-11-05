@@ -329,6 +329,7 @@
     /* The tab bar already covers the home-indicator area, so a bar sitting
        on top of it must not pad for it a second time. */
     --bar-safe: 0px;
+    --bar-tuck: 0.75rem;
     padding-bottom: var(--bottom-nav);
   }
   body:has([data-bottom-nav]):has(
@@ -339,6 +340,7 @@
       ):focus
     ) {
     --bottom-nav: 0px;
+    --bar-tuck: 0px;
     & [data-bottom-nav] {
       display: none;
     }
@@ -546,13 +548,16 @@ body:has(.action-bar:not(.hidden)) #toasts {
      when there is one, otherwise clear of the home indicator. */
   .action-bar {
     @apply sticky z-10 border-t border-line bg-canvas px-4;
-    /* Tucked 1px under the phone tab bar (which stacks above it): the two
-       read as one dock with a single hairline between them, and sub-pixel
-       rounding can never open a sliver of page content in between. With no
-       tab bar the fallback cancels out to bottom: 0. */
-    bottom: calc(var(--bottom-nav, 1px) - 1px);
+    /* Tucked well under the phone tab bar (which stacks above it and hides
+       the tucked part), with matching extra padding so the buttons sit where
+       they would anyway. The tab bar is position: fixed and this bar is
+       sticky; mobile Chrome re-places the two slightly differently while its
+       address bar slides, and a 1px overlap still let a sliver of the page
+       show between them on real phones. 0.75rem of overlap absorbs that. With
+       no tab bar both vars fall back to 0 and this is a plain bottom: 0 bar. */
+    bottom: calc(var(--bottom-nav, 0px) - var(--bar-tuck, 0px));
     padding-top: 0.625rem;
-    padding-bottom: calc(0.625rem + var(--bar-safe, env(safe-area-inset-bottom)));
+    padding-bottom: calc(0.625rem + var(--bar-tuck, 0px) + var(--bar-safe, env(safe-area-inset-bottom)));
     box-shadow: 0 -10px 20px -14px rgb(0 0 0 / 0.55);
   }
 
