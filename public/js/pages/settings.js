@@ -136,7 +136,7 @@ function init() {
       <div><label class="label" for="at-label">Name</label>
         <input class="input" id="at-label" autocomplete="off" placeholder="e.g. Status page">
         <p class="help">Just so you can recognise this key in the list later.</p></div>
-      <div><span class="label">What it can see</span>
+      <div><span class="label">What It Can See</span>
         <label class="flex items-center gap-2 text-sm"><input type="radio" name="at-scope" value="all" checked> Every Server</label>
         <label class="flex items-center gap-2 text-sm"><input type="radio" name="at-scope" value="some"> Only the Ones I Pick</label>
       </div>
@@ -145,7 +145,7 @@ function init() {
           ${servers.map((s) => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}
         </select>
       </div>
-      <div><label class="label" for="at-expires">Stop working on (optional)</label>
+      <div><label class="label" for="at-expires">Expiry Date (Optional)</label>
         <input class="input" id="at-expires" type="datetime-local">
         <p class="help">Leave blank and the key works until you cancel it.</p></div>`;
     const scopeRadios = content.querySelectorAll('input[name="at-scope"]');
@@ -341,9 +341,9 @@ function init() {
       <div><label class="label">Password</label><input class="input" id="nu-pass" type="password" autocomplete="new-password"><p class="help">At least 8 characters.</p></div>
       <div><label class="label">Role</label>
         <select class="input" id="nu-role" data-label="Role">
-          <option value="viewer">Viewer (read-only)</option>
-          <option value="operator">Operator (manage servers)</option>
-          <option value="admin">Admin (full access)</option>
+          <option value="viewer">Viewer (Read-Only)</option>
+          <option value="operator">Operator (Manage Servers)</option>
+          <option value="admin">Admin (Full Access)</option>
         </select>
       </div>`;
     openModal({
@@ -377,7 +377,7 @@ function init() {
     const label = document.createElement('label');
     label.className = 'label';
     const isSelf = userId === selfUserId;
-    label.textContent = isSelf ? 'Set your new password' : `New password for ${username}`;
+    label.textContent = isSelf ? 'Set Your New Password' : `New Password for ${username}`;
     content.appendChild(label);
     content.insertAdjacentHTML(
       'beforeend',
@@ -388,7 +388,7 @@ function init() {
     // silently take over accounts / itself without knowing the real password.
     const curLabel = document.createElement('label');
     curLabel.className = 'label mt-3';
-    curLabel.textContent = 'Confirm with your current password';
+    curLabel.textContent = 'Confirm With Your Current Password';
     content.appendChild(curLabel);
     content.insertAdjacentHTML(
       'beforeend',
@@ -513,7 +513,7 @@ function init() {
       const customized = FIELDS.some(([, key]) => Number(inputs[key].value) !== Number(inputs[key].dataset.default));
       note.textContent = customized
         ? 'Custom defaults are set. The wizard and new servers use these.'
-        : 'Using the built-in defaults from .env and this machine.';
+        : 'Using the built-in defaults, sized for this machine.';
     };
     dfltSave.addEventListener('click', async (e) => {
       const btn = e.currentTarget;
@@ -530,7 +530,7 @@ function init() {
       const btn = e.currentTarget;
       const ok = await confirmDialog({
         title: 'Restore built-in defaults?',
-        message: 'Your custom values are discarded. Every field goes back to the .env / machine-detected default.',
+        message: 'Your custom values are discarded, and every field goes back to its built-in default.',
         confirmLabel: 'Restore',
         danger: true,
       });

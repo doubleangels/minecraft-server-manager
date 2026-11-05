@@ -715,7 +715,7 @@ function initModBrowser() {
 
   async function refreshLoaderBuilds() {
     if (!loaderVerSel) return;
-    loaderVerSel.innerHTML = '<option value="">Latest (recommended)</option>';
+    loaderVerSel.innerHTML = '<option value="">Latest (Recommended)</option>';
     loaderVerSel.dispatchEvent(new Event('change', { bubbles: true }));
     try {
       const res = await fetch(
@@ -883,7 +883,7 @@ function initModBrowser() {
   }
 
   function versionOptions(m) {
-    if (!m.versions || !m.versions.length) return '<option value="">(no compatible build)</option>';
+    if (!m.versions || !m.versions.length) return '<option value="">(No Compatible Build)</option>';
     return m.versions
       .map((v) => {
         const nonRelease = v.versionType && v.versionType !== 'release';
@@ -1162,13 +1162,13 @@ function initZipUpload() {
       const mcOptions = (p.inferred && p.inferred.mcVersionOptions) || [];
       pickers.innerHTML = `
         <div>
-          <label class="label">Mod loader ${state.loader ? '<span class="text-xs font-normal text-ink-faint">(auto-detected)</span>' : ''}</label>
+          <label class="label">Mod Loader ${state.loader ? '<span class="text-xs font-normal text-ink-faint">(auto-detected)</span>' : ''}</label>
           <select class="input" data-role="loader">
             ${loaders.map((l) => `<option value="${l}" ${l === state.loader ? 'selected' : ''}>${loaderLabels[l]}</option>`).join('')}
           </select>
         </div>
         <div>
-          <label class="label">Minecraft version ${state.mcVersion ? '<span class="text-xs font-normal text-ink-faint">(auto-detected)</span>' : ''}</label>
+          <label class="label">Minecraft Version ${state.mcVersion ? '<span class="text-xs font-normal text-ink-faint">(auto-detected)</span>' : ''}</label>
           ${
             mcOptions.length
               ? `<select class="input" data-role="mc">${mcOptions.map((v) => `<option value="${escapeHtml(v)}" ${v === state.mcVersion ? 'selected' : ''}>${escapeHtml(v)}</option>`).join('')}</select>`

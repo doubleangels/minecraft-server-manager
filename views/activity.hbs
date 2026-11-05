@@ -28,7 +28,7 @@
       {{! The summary keeps a readable minimum width; on a phone the server,
           actor and time drop to their own line instead of squeezing it. }}
       <li class="flex flex-wrap items-center gap-x-2 gap-y-1 p-3 text-sm">
-        <span class="badge shrink-0">{{type}}</span>
+        <span class="badge shrink-0">{{eventType type}}</span>
         <span class="min-w-[12rem] flex-1 break-words">{{summary}}</span>
         <span class="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 text-xs">
           {{#if serverId}}

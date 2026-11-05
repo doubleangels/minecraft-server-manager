@@ -1006,13 +1006,13 @@ router.get(
     const catNames = {
       servers: 'Servers',
       backups: 'Backups',
-      'library/worlds': 'Worlds library',
-      'library/mods': 'Mods and content library',
-      'library/modpacks': 'Modpacks library',
-      'library/icons': 'Icons library',
-      logs: 'Logs and event captures',
+      'library/worlds': 'Worlds Library',
+      'library/mods': 'Mods and Content Library',
+      'library/modpacks': 'Modpacks Library',
+      'library/icons': 'Icons Library',
+      logs: 'Logs and Event Captures',
       blueprints: 'Blueprints',
-      tmp: 'Temporary files',
+      tmp: 'Temporary Files',
     };
     const catKeys = Object.keys(catNames);
     const sizes = indexer.sizeOfMany([...catKeys, '', 'library']);
@@ -1038,7 +1038,7 @@ router.get(
       { label: 'Library', cls: 'bg-warn', size: sizes.get('library') || 0 },
     ];
     segs.push({
-      label: 'Logs, blueprints, temporary files',
+      label: 'Logs, Blueprints, Temporary Files',
       cls: 'bg-ink-faint',
       size: Math.max(0, totalUsed - segs.reduce((n, s) => n + s.size, 0)),
     });
@@ -1065,7 +1065,7 @@ router.get(
         totalUsed,
         diskFree: free,
         diskTotal: total,
-        lastScan: indexer.lastScan() || 'not yet',
+        lastScan: indexer.lastScan() || null,
         categories,
         breakdown,
         largestFiles: [],

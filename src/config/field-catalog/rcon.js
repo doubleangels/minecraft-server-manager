@@ -19,7 +19,7 @@ module.exports = [
   {
     key: 'RCON_PASSWORD',
     scope: 'env',
-    label: 'RCON password',
+    label: 'RCON Password',
     help: 'Authentication password for RCON. If unset, the image generates a new random one on every start, so the panel generates a secure password once and stores it itself.',
     type: 'password',
     mode: 'advanced',
@@ -30,7 +30,7 @@ module.exports = [
   {
     key: 'RCON_PORT',
     scope: 'env',
-    label: 'In-container RCON port',
+    label: 'In-Container RCON Port',
     help: 'Port the server listens on for RCON inside the container. The docs warn that changing it breaks the image’s graceful-stop and health checks, so the panel keeps it at 25575.',
     type: 'number',
     default: 25575,
@@ -54,7 +54,7 @@ module.exports = [
   {
     key: 'RCON_CMDS_STARTUP',
     scope: 'env',
-    label: 'Commands on server start',
+    label: 'Commands on Server Start',
     help: 'Console commands run automatically each time the server starts, one per line. Handy for setting gamerules. The leading / is optional.',
     type: 'list',
     mode: 'advanced',
@@ -64,7 +64,7 @@ module.exports = [
   {
     key: 'RCON_CMDS_ON_CONNECT',
     scope: 'env',
-    label: 'Commands when a player joins',
+    label: 'Commands When a Player Joins',
     help: 'Console commands run whenever any player connects, one per line. The hook doesn’t know who joined, so use selector-based commands like @a[team=] to target players.',
     type: 'list',
     mode: 'advanced',
@@ -74,7 +74,7 @@ module.exports = [
   {
     key: 'RCON_CMDS_FIRST_CONNECT',
     scope: 'env',
-    label: 'Commands when server becomes occupied',
+    label: 'Commands When Server Becomes Occupied',
     help: 'Console commands run when the first player joins an empty server. For example, pausing chunk pre-generation while people are online.',
     type: 'list',
     mode: 'advanced',
@@ -84,7 +84,7 @@ module.exports = [
   {
     key: 'RCON_CMDS_ON_DISCONNECT',
     scope: 'env',
-    label: 'Commands when a player leaves',
+    label: 'Commands When a Player Leaves',
     help: 'Console commands run whenever any player disconnects, one per line.',
     type: 'list',
     mode: 'advanced',
@@ -94,7 +94,7 @@ module.exports = [
   {
     key: 'RCON_CMDS_LAST_DISCONNECT',
     scope: 'env',
-    label: 'Commands when server becomes empty',
+    label: 'Commands When Server Becomes Empty',
     help: 'Console commands run when the last player leaves. For example, cleaning up dropped items or resuming chunk pre-generation.',
     type: 'list',
     mode: 'advanced',

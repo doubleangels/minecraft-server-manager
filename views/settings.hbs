@@ -17,7 +17,7 @@
   {{#> settings/card heading="General" id="sec-panel" desc="The address players see, the panel's clock, and its version."}}
     <div class="space-y-5">
       <div data-dirty-group="the public domain">
-        <label class="label" for="set-domain">Public domain</label>
+        <label class="label" for="set-domain">Public Domain</label>
         <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
           <input class="input min-w-0 flex-1" id="set-domain" placeholder="mc.example.com" value="{{publicHost}}" autocomplete="off" spellcheck="false">
           <button class="btn" data-dirty-save id="set-domain-save">Save Domain</button>
@@ -35,7 +35,7 @@
       </div>
 
       <div data-dirty-group="the time zone">
-        <span class="label">Time zone &amp; region</span>
+        <span class="label">Time Zone &amp; Region</span>
         {{! data-native only until tzPicker fills them - it enhances post-fill. }}
         <div class="grid gap-2 sm:grid-cols-2">
           <select class="input" id="set-tz" data-native aria-label="Time zone" data-label="Time zone"></select>
@@ -49,7 +49,7 @@
       </div>
 
       <div class="border-t border-line pt-4">
-        <span class="label">Panel version</span>
+        <span class="label">Panel Version</span>
         <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
           <span class="font-mono text-sm">v{{panel.version}}</span>
           <button class="btn" id="msm-update-btn">Check for Updates</button>
@@ -59,7 +59,7 @@
       </div>
 
       <div class="border-t border-line pt-4">
-        <span class="label">Bind address &amp; port</span>
+        <span class="label">Bind Address &amp; Port</span>
         <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
           <div><dt class="text-xs text-ink-faint">Bind Address</dt><dd class="font-mono font-medium">{{panel.host}}</dd></div>
           <div><dt class="text-xs text-ink-faint">Port</dt><dd class="font-mono font-medium">{{panel.port}}</dd></div>
@@ -72,36 +72,36 @@
   {{#> settings/card heading="New Server Defaults" id="sec-defaults" guard="the new server defaults" desc="These pre-fill the create wizard, apply when a server is created via the API or a blueprint, and drive the quota-bar colors on the dashboard."}}
         <div class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
           <div>
-            <label class="label" for="dflt-heap">Java heap (MB)</label>
+            <label class="label" for="dflt-heap">Java Heap (MB)</label>
             <input class="input" id="dflt-heap" type="number" inputmode="numeric" value="{{defaults.heapMb}}" data-default="{{defaultsBase.heapMb}}">
           </div>
           <div>
-            <label class="label" for="dflt-container">Container limit (MB)</label>
+            <label class="label" for="dflt-container">Container Limit (MB)</label>
             <input class="input" id="dflt-container" type="number" inputmode="numeric" value="{{defaults.containerMemoryMb}}" data-default="{{defaultsBase.containerMemoryMb}}">
             <p class="help">Usually 50% above the heap. Ignored when the wizard sets its own.</p>
           </div>
           <div>
-            <label class="label" for="dflt-cpus">CPU cores</label>
+            <label class="label" for="dflt-cpus">CPU Cores</label>
             <input class="input" id="dflt-cpus" type="number" inputmode="decimal" step="0.5" min="0" value="{{defaults.cpus}}" data-default="{{defaultsBase.cpus}}">
             <p class="help">0 = no limit on CPU usage.</p>
           </div>
           <div>
-            <label class="label" for="dflt-quota">Disk quota (GB)</label>
+            <label class="label" for="dflt-quota">Disk Quota (GB)</label>
             <input class="input" id="dflt-quota" type="number" inputmode="numeric" value="{{defaults.diskQuotaGb}}" data-default="{{defaultsBase.diskQuotaGb}}">
             <p class="help">0 = storage use is not limited.</p>
           </div>
           <div>
-            <label class="label" for="dflt-warnpct">Quota warn (%)</label>
+            <label class="label" for="dflt-warnpct">Quota Warn (%)</label>
             <input class="input" id="dflt-warnpct" type="number" inputmode="numeric" min="0" max="99" value="{{defaults.quotaWarnPct}}" data-default="{{defaultsBase.quotaWarnPct}}">
           </div>
           <div>
-            <label class="label" for="dflt-critpct">Quota critical (%)</label>
+            <label class="label" for="dflt-critpct">Quota Critical (%)</label>
             <input class="input" id="dflt-critpct" type="number" inputmode="numeric" min="1" max="100" value="{{defaults.quotaCriticalPct}}" data-default="{{defaultsBase.quotaCriticalPct}}">
           </div>
         </div>
         <div class="mt-2 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
           <button class="btn" data-dirty-save id="dflt-save">Save Defaults</button>
-          <button class="btn btn-ghost" id="dflt-restore">Restore Built-ins</button>
+          <button class="btn btn-ghost" id="dflt-restore">Restore Built-Ins</button>
           <span class="help mt-0" id="dflt-note"></span>
         </div>
   {{/settings/card}}
@@ -113,7 +113,7 @@
       </div>
       <div class="mt-3 flex flex-wrap items-center gap-2">
         <button class="btn" data-dirty-save data-retention-save>Save Retention</button>
-        <button class="btn btn-ghost" id="ret-builtins" data-values="{{jsonAttr retentionDefaults}}">Fill In Built-ins</button>
+        <button class="btn btn-ghost" id="ret-builtins" data-values="{{jsonAttr retentionDefaults}}">Fill In Built-Ins</button>
       </div>
     </div>
   {{/settings/card}}
@@ -121,7 +121,7 @@
   {{#> settings/card heading="Mod Site Keys" id="sec-keys" guard="the CurseForge key" desc="Keys the panel uses to reach mod sites on your behalf. Stored encrypted."}}
     <div class="space-y-5">
       <div>
-        <label class="label" for="set-cf-key">CurseForge API key</label>
+        <label class="label" for="set-cf-key">CurseForge API Key</label>
         {{! min-w-0 + flex-wrap: the monospace placeholder would otherwise refuse
             to shrink and push the page wider than a narrow screen; wrapping lets
             the buttons drop to their own row. }}
@@ -158,9 +158,9 @@
                 <td data-th="Key" class="font-mono text-xs">{{tokenPrefix}}&hellip;</td>
                 <td data-th="Can See">{{#if scope.all}}Every server{{else}}{{scope.serverIds.length}} server(s){{/if}}</td>
                 <td data-th="Created" class="whitespace-nowrap text-xs text-ink-faint" data-ts="{{createdAt}}">{{createdAt}}</td>
-                <td data-th="Last Used" class="whitespace-nowrap text-xs text-ink-faint">{{#if lastUsedAt}}<span data-ts="{{lastUsedAt}}">{{lastUsedAt}}</span>{{else}}never{{/if}}</td>
-                <td data-th="Expires" class="whitespace-nowrap text-xs text-ink-faint">{{#if expiresAt}}<span data-ts="{{expiresAt}}">{{expiresAt}}</span>{{else}}never{{/if}}</td>
-                <td data-th="Status">{{#if (eq status 'active')}}<span class="badge badge-ok">Active</span>{{else}}<span class="badge">{{status}}</span>{{/if}}</td>
+                <td data-th="Last Used" class="whitespace-nowrap text-xs text-ink-faint">{{#if lastUsedAt}}<span data-ts="{{lastUsedAt}}">{{lastUsedAt}}</span>{{else}}Never{{/if}}</td>
+                <td data-th="Expires" class="whitespace-nowrap text-xs text-ink-faint">{{#if expiresAt}}<span data-ts="{{expiresAt}}">{{expiresAt}}</span>{{else}}Never{{/if}}</td>
+                <td data-th="Status">{{#if (eq status 'active')}}<span class="badge badge-ok">Active</span>{{else}}<span class="badge">{{capitalize status}}</span>{{/if}}</td>
                 <td data-th="" class="text-right">
                   {{#unless revokedAt}}
                     <button class="btn btn-ghost btn-sm text-danger" data-token-revoke data-token-id="{{id}}" data-label="{{label}}">Cancel</button>

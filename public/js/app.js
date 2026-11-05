@@ -634,7 +634,7 @@ function askWarning({ action, name, online }) {
     const label = document.createElement('label');
     label.className = 'label';
     label.setAttribute('for', 'warn-seconds');
-    label.textContent = 'Warn players first';
+    label.textContent = 'Warn Players First';
     const sel = document.createElement('select');
     sel.className = 'input';
     sel.id = 'warn-seconds';

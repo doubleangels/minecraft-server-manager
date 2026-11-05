@@ -9,7 +9,7 @@ module.exports = [
   {
     key: 'CF_API_KEY',
     scope: 'env',
-    label: 'CurseForge API key',
+    label: 'CurseForge API Key',
     help: 'Personal API key from console.curseforge.com, required for automated CurseForge modpack installs. Stored once in the panel settings and injected automatically.',
     type: 'password',
     mode: 'advanced',
@@ -20,7 +20,7 @@ module.exports = [
   {
     key: 'CF_SLUG',
     scope: 'env',
-    label: 'CurseForge modpack slug',
+    label: 'CurseForge Modpack Slug',
     help: 'The modpack’s slug identifier (e.g. craftoria). Managed by the modpack installer UI.',
     type: 'text',
     mode: 'advanced',
@@ -32,7 +32,7 @@ module.exports = [
   {
     key: 'CF_PAGE_URL',
     scope: 'env',
-    label: 'CurseForge modpack page URL',
+    label: 'CurseForge Modpack Page URL',
     help: 'URL of the modpack page (or a specific file page) on curseforge.com. Managed by the modpack installer UI.',
     type: 'text',
     mode: 'advanced',
@@ -44,7 +44,7 @@ module.exports = [
   {
     key: 'CF_FILE_ID',
     scope: 'env',
-    label: 'CurseForge file ID',
+    label: 'CurseForge File ID',
     help: 'Numeric file ID that pins a specific modpack version instead of the latest. Managed by the modpack installer UI.',
     type: 'number',
     mode: 'advanced',
@@ -56,7 +56,7 @@ module.exports = [
   {
     key: 'CF_FILENAME_MATCHER',
     scope: 'env',
-    label: 'CurseForge filename matcher',
+    label: 'CurseForge Filename Matcher',
     help: 'Substring used to pick the desired modpack file by name. Managed by the modpack installer UI.',
     type: 'text',
     mode: 'advanced',
@@ -68,7 +68,7 @@ module.exports = [
   {
     key: 'CF_EXCLUDE_MODS',
     scope: 'env',
-    label: 'Exclude mods',
+    label: 'Exclude Mods',
     help: 'Mods (project slugs or IDs) to skip when installing the modpack. These are typically client-only mods that crash a dedicated server.',
     type: 'list',
     mode: 'advanced',
@@ -78,7 +78,7 @@ module.exports = [
   {
     key: 'CF_FORCE_INCLUDE_MODS',
     scope: 'env',
-    label: 'Force-include mods',
+    label: 'Force-Include Mods',
     help: 'Mods (slugs or IDs) to install even if an exclusion rule would normally skip them.',
     type: 'list',
     mode: 'advanced',
@@ -98,7 +98,7 @@ module.exports = [
   {
     key: 'CF_OVERRIDES_EXCLUSIONS',
     scope: 'env',
-    label: 'Exclude override files',
+    label: 'Exclude Override Files',
     help: 'Ant-style path patterns for files in the modpack’s overrides that should not be copied onto the server.',
     type: 'list',
     mode: 'advanced',
@@ -118,7 +118,7 @@ module.exports = [
   {
     key: 'CF_FORCE_SYNCHRONIZE',
     scope: 'env',
-    label: 'Re-apply Exclude/Include Rules',
+    label: 'Re-Apply Exclude/Include Rules',
     help: 'Forces the exclusion and inclusion rules to be re-evaluated on the next start. Use it after changing the lists above.',
     type: 'boolean',
     default: false,
@@ -129,7 +129,7 @@ module.exports = [
   {
     key: 'CF_PARALLEL_DOWNLOADS',
     scope: 'env',
-    label: 'Parallel mod downloads',
+    label: 'Parallel Mod Downloads',
     help: 'How many mod files are downloaded at the same time during a modpack install.',
     type: 'number',
     default: 4,
@@ -141,7 +141,7 @@ module.exports = [
   {
     key: 'CF_SET_LEVEL_FROM',
     scope: 'env',
-    label: 'Use modpack world',
+    label: 'Use Modpack World',
     help: 'Automatically points the server at world data shipped inside the modpack, either a bundled world file or the pack’s overrides folder.',
     type: 'enum',
     options: [
@@ -157,7 +157,7 @@ module.exports = [
   {
     key: 'MODRINTH_MODPACK',
     scope: 'env',
-    label: 'Modrinth modpack',
+    label: 'Modrinth Modpack',
     help: 'Modrinth project slug, ID, page URL, or .mrpack path/URL to install. Managed by the modpack installer UI.',
     type: 'text',
     mode: 'advanced',
@@ -169,7 +169,7 @@ module.exports = [
   {
     key: 'MODRINTH_VERSION',
     scope: 'env',
-    label: 'Modrinth modpack version',
+    label: 'Modrinth Modpack Version',
     help: 'Version ID or number that pins a specific modpack release. Managed by the modpack installer UI.',
     type: 'text',
     mode: 'advanced',
@@ -181,7 +181,7 @@ module.exports = [
   {
     key: 'MODRINTH_MODPACK_VERSION_TYPE',
     scope: 'env',
-    label: 'Modrinth release channel',
+    label: 'Modrinth Release Channel',
     help: 'Which release channel to accept when resolving the latest modpack version: stable releases only, or also beta/alpha builds.',
     type: 'enum',
     options: [
@@ -196,7 +196,7 @@ module.exports = [
   {
     key: 'MODRINTH_EXCLUDE_FILES',
     scope: 'env',
-    label: 'Exclude pack files',
+    label: 'Exclude Pack Files',
     help: 'Files from the Modrinth pack to skip installing. These are typically client-only mods that crash a dedicated server.',
     type: 'list',
     mode: 'advanced',
@@ -206,7 +206,7 @@ module.exports = [
   {
     key: 'MODRINTH_FORCE_INCLUDE_FILES',
     scope: 'env',
-    label: 'Force-include pack files',
+    label: 'Force-Include Pack Files',
     help: 'Files to install even if an exclusion rule would normally skip them.',
     type: 'list',
     mode: 'advanced',
@@ -226,7 +226,7 @@ module.exports = [
   {
     key: 'MODRINTH_FORCE_SYNCHRONIZE',
     scope: 'env',
-    label: 'Re-apply Exclude/Include Rules',
+    label: 'Re-Apply Exclude/Include Rules',
     help: 'Forces the Modrinth exclusion and inclusion rules to be re-evaluated on the next start.',
     type: 'boolean',
     mode: 'advanced',
@@ -248,7 +248,7 @@ module.exports = [
   {
     key: 'FTB_MODPACK_ID',
     scope: 'env',
-    label: 'FTB modpack ID',
+    label: 'FTB Modpack ID',
     help: 'Numeric Feed the Beast modpack ID. Managed by the modpack installer UI.',
     type: 'number',
     mode: 'advanced',
@@ -260,7 +260,7 @@ module.exports = [
   {
     key: 'FTB_MODPACK_VERSION_ID',
     scope: 'env',
-    label: 'FTB modpack version ID',
+    label: 'FTB Modpack Version ID',
     help: 'Pins a specific FTB pack version; latest when unset. Managed by the modpack installer UI.',
     type: 'number',
     mode: 'advanced',
@@ -274,7 +274,7 @@ module.exports = [
   {
     key: 'CURSEFORGE_FILES',
     scope: 'env',
-    label: 'Individual CurseForge files',
+    label: 'Individual CurseForge Files',
     help: 'Individual CurseForge mods or plugins to download outside a modpack, one reference per line. Requires the CurseForge API key.',
     type: 'list',
     mode: 'advanced',
@@ -284,7 +284,7 @@ module.exports = [
   {
     key: 'MODS',
     scope: 'env',
-    label: 'Mod downloads',
+    label: 'Mod Downloads',
     help: 'Mod jars to install: URLs, container paths, or directories of jars, one per line. Entries removed from this list are also removed from disk. An empty list deletes all managed mods.',
     type: 'list',
     mode: 'advanced',
@@ -294,7 +294,7 @@ module.exports = [
   {
     key: 'PLUGINS',
     scope: 'env',
-    label: 'Plugin downloads',
+    label: 'Plugin Downloads',
     help: 'Plugin jars to install on Paper/Spigot-family servers: URLs, container paths, or directories, one per line. Entries removed from the list are removed from disk too.',
     type: 'list',
     mode: 'advanced',
@@ -304,7 +304,7 @@ module.exports = [
   {
     key: 'MODS_FILE',
     scope: 'env',
-    label: 'Mods list file',
+    label: 'Mods List File',
     help: 'URL or container path of a text file listing one mod URL per line (# comments allowed). Useful for sharing one mod list across servers.',
     type: 'text',
     mode: 'advanced',
@@ -314,7 +314,7 @@ module.exports = [
   {
     key: 'SPIGET_RESOURCES',
     scope: 'env',
-    label: 'Spigot plugins (Spiget IDs)',
+    label: 'Spigot Plugins (Spiget IDs)',
     help: 'SpigotMC resource IDs to auto-download as plugins via the Spiget API. Only the numeric ID from the plugin’s page URL is needed.',
     type: 'list',
     mode: 'advanced',
@@ -326,7 +326,7 @@ module.exports = [
   {
     key: 'GENERIC_PACK',
     scope: 'env',
-    label: 'Generic content pack',
+    label: 'Generic Content Pack',
     help: 'URL or container path of a zip/tgz containing arbitrary server content (mods, plugins, configs) to unpack over the server folder. Also handy for CurseForge packs without an installer.',
     type: 'text',
     mode: 'advanced',
@@ -336,7 +336,7 @@ module.exports = [
   {
     key: 'GENERIC_PACKS',
     scope: 'env',
-    label: 'Generic content packs (multiple)',
+    label: 'Generic Content Packs (Multiple)',
     help: 'Several archives applied in order, comma separated. The prefix and suffix fields below are added around each entry. Useful for building CDN URLs.',
     type: 'list',
     mode: 'advanced',
@@ -346,7 +346,7 @@ module.exports = [
   {
     key: 'GENERIC_PACKS_PREFIX',
     scope: 'env',
-    label: 'Generic packs URL prefix',
+    label: 'Generic Packs URL Prefix',
     help: 'Text prepended to every entry in the generic packs list, e.g. a base URL.',
     type: 'text',
     mode: 'advanced',
@@ -356,7 +356,7 @@ module.exports = [
   {
     key: 'GENERIC_PACKS_SUFFIX',
     scope: 'env',
-    label: 'Generic packs URL suffix',
+    label: 'Generic Packs URL Suffix',
     help: 'Text appended to every entry in the generic packs list, e.g. ".zip".',
     type: 'text',
     mode: 'advanced',
@@ -376,7 +376,7 @@ module.exports = [
   {
     key: 'VANILLATWEAKS_SHARECODE',
     scope: 'env',
-    label: 'VanillaTweaks share codes',
+    label: 'VanillaTweaks Share Codes',
     help: 'Share codes from vanillatweaks.net whose datapacks and crafting tweaks are installed into the world automatically. Old versions are cleaned up on update.',
     type: 'list',
     mode: 'advanced',
@@ -386,7 +386,7 @@ module.exports = [
   {
     key: 'VANILLATWEAKS_FILE',
     scope: 'env',
-    label: 'VanillaTweaks spec file',
+    label: 'VanillaTweaks Spec File',
     help: 'Container path or URL of a VanillaTweaks JSON spec file, as an alternative to share codes.',
     type: 'text',
     mode: 'advanced',
@@ -398,7 +398,7 @@ module.exports = [
   {
     key: 'GTNH_PACK_VERSION',
     scope: 'env',
-    label: 'GTNH pack version',
+    label: 'GTNH Pack Version',
     help: 'The exact GT New Horizons release to install. Managed by the modpack installer. The panel always pins a concrete version so restarts never upgrade the pack behind your back.',
     type: 'text',
     mode: 'advanced',

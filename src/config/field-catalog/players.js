@@ -6,7 +6,7 @@ module.exports = [
   {
     key: 'WHITELIST',
     scope: 'env',
-    label: 'Whitelisted players',
+    label: 'Whitelisted Players',
     help: 'Player names (or UUIDs) allowed to join. Setting any names automatically turns whitelisting on; names are resolved to UUIDs via a player-lookup API at startup.',
     type: 'list',
     mode: 'simple',
@@ -16,7 +16,7 @@ module.exports = [
   {
     key: 'WHITELIST_FILE',
     scope: 'env',
-    label: 'Whitelist file URL / path',
+    label: 'Whitelist File URL / Path',
     help: 'URL or container path of a whitelist.json to install. Cannot be combined with the MERGE mode below; by default it replaces the existing file and then the player list above is merged in.',
     type: 'text',
     mode: 'advanced',
@@ -26,7 +26,7 @@ module.exports = [
   {
     key: 'EXISTING_WHITELIST_FILE',
     scope: 'env',
-    label: 'Existing whitelist handling',
+    label: 'Existing Whitelist Handling',
     help: 'What to do when a whitelist file already exists on the server: leave it alone, overwrite it to match your settings, or merge new players into it.',
     type: 'enum',
     default: 'SYNC_FILE_MERGE_LIST',
@@ -60,7 +60,7 @@ module.exports = [
     key: 'ENABLE_WHITELIST',
     scope: 'env',
     prop: 'white-list',
-    label: 'Whitelist on (manual file)',
+    label: 'Whitelist on (Manual File)',
     help: 'Turns whitelisting on when you manage the whitelist file yourself. Not needed if you list players above, which enables the whitelist automatically.',
     type: 'boolean',
     default: false,
@@ -71,7 +71,7 @@ module.exports = [
   {
     key: 'OPS',
     scope: 'env',
-    label: 'Operators (admins)',
+    label: 'Operators (Admins)',
     help: 'Player names (or UUIDs) given operator/admin rights at startup. Operators can run server commands in-game, so grant this sparingly.',
     type: 'list',
     mode: 'advanced',
@@ -81,7 +81,7 @@ module.exports = [
   {
     key: 'OPS_FILE',
     scope: 'env',
-    label: 'Ops file URL / path',
+    label: 'Ops File URL / Path',
     help: 'URL or container path of an ops.json to install into the standard location. Cannot be combined with the MERGE mode below.',
     type: 'text',
     mode: 'advanced',
@@ -91,7 +91,7 @@ module.exports = [
   {
     key: 'EXISTING_OPS_FILE',
     scope: 'env',
-    label: 'Existing ops handling',
+    label: 'Existing Ops Handling',
     help: 'What to do when an ops file already exists: leave it, overwrite it to match your settings (existing permission levels are kept), or merge new operators into it.',
     type: 'enum',
     default: 'SYNC_FILE_MERGE_LIST',

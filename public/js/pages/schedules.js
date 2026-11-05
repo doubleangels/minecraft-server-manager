@@ -136,14 +136,14 @@ function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
       ${taskTypes.map((t) => `<option value="${escapeHtml(t.value)}" data-desc="${t.serverScoped ? 'Needs a server' : 'Panel-wide'}">${escapeHtml(t.label)}</option>`).join('')}
     </select>
     <div class="mt-3 hidden" data-sc-cmdwrap>
-      <label class="label">RCON command</label>
+      <label class="label">RCON Command</label>
       <input class="input font-mono" data-sc-cmd placeholder="say Server restarts in 5 minutes" autocomplete="off">
     </div>
     <div class="mt-3 hidden" data-sc-shrinkwrap>
       <label class="flex items-center gap-2 text-sm"><input type="checkbox" class="msm-check" data-sc-shrink> Shrink the World After Each Backup <span class="text-xs text-ink-faint">(removes rarely-visited chunks; only runs while the server is stopped)</span></label>
     </div>
     <div class="mt-3 hidden" data-sc-warnwrap>
-      <label class="label" for="sc-warn">Warn players first</label>
+      <label class="label" for="sc-warn">Warn Players First</label>
       <select class="input" id="sc-warn" data-sc-warn data-label="Warn players first">
         <option value="0">No Warning</option>
         <option value="60">1 Minute</option>
@@ -158,7 +158,7 @@ function scheduleModal({ servers, taskTypes, edit = null, preset = null }) {
     <div class="flex flex-wrap gap-1.5" data-sc-presets>
       ${CRON_PRESETS.map((p) => `<button type="button" class="chip" data-cron="${escapeHtml(p.cron)}">${escapeHtml(p.label)}</button>`).join('')}
     </div>
-    <label class="label mt-3" for="sc-cron">Cron expression</label>
+    <label class="label mt-3" for="sc-cron">Cron Expression</label>
     <input class="input font-mono" id="sc-cron" data-sc-cron placeholder="0 4 * * *" autocomplete="off" spellcheck="false">
     <p class="help">Five fields: minute hour day-of-month month day-of-week. Example: <b class="font-mono">0 4 * * *</b> = daily at 04:00.</p>
     <div class="mt-2 rounded-md border border-line bg-raised p-2.5 text-xs" data-sc-preview>

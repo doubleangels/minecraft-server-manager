@@ -63,7 +63,7 @@ Dependencies flow in one direction:
 - **`services/`**: the heart of the app. Each service owns one domain and may depend on
   infrastructure and on other services.
 - **`docker/`**: dockerode wrappers: `connect` (endpoint detection + daemon health), `containers`
-  (create/start/stop/recreate with bind mounts, memory/CPU limits, and labels), `logs`, `stats`,
+  (create/start/stop/rebuild with bind mounts, memory/CPU limits, and labels), `logs`, `stats`,
   `images`, `networks` (host network discovery), `hostPath` (re-roots bind paths under
   `DATA_DIR_HOST`), and a `watcher` that turns Docker events into history + crash detection.
 - **`db/`**: the SQLite wrapper and migration runner.

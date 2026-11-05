@@ -148,8 +148,8 @@ function init(serverId, memLimitMb, cpuLimit) {
       if (tpsCard) tpsCard.hidden = true;
       const tpsEl = metricEl('tps');
       const msptEl = metricEl('mspt');
-      if (tpsEl && tpsEl.textContent === '…') tpsEl.textContent = 'n/a';
-      if (msptEl && /reading|min/.test(msptEl.textContent)) msptEl.textContent = 'not reported';
+      if (tpsEl && tpsEl.textContent === '…') tpsEl.textContent = 'N/A';
+      if (msptEl && /reading|min/.test(msptEl.textContent)) msptEl.textContent = 'Not reported';
       return;
     }
     if (supported === true && !perfSupported) {

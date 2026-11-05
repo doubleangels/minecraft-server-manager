@@ -160,12 +160,12 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
   document.getElementById('mods-add-url')?.addEventListener('click', () => {
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label">Mod URL or Modrinth slug</label>
+      <label class="label">Mod URL or Modrinth Slug</label>
       <input class="input font-mono" id="mod-url" placeholder="https://modrinth.com/mod/sodium" autocomplete="off">
       <p class="help">Paste almost any link: Modrinth, CurseForge, Hangar, or SpigotMC project pages, a GitHub repo or release ("owner/repo" works too), a Modrinth slug, or a direct .jar URL. The right build for this server's loader and MC version is picked automatically.</p>
-      <label class="label mt-3">Content type</label>
+      <label class="label mt-3">Content Type</label>
       <select class="input" id="mod-url-kind" data-label="Content type">
-        <option value="">Auto-detect</option>
+        <option value="">Auto-Detect</option>
         <option value="mod">Mod</option>
         <option value="plugin">Plugin</option>
         <option value="datapack">Datapack</option>

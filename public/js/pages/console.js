@@ -554,7 +554,7 @@ function initCustomQuick() {
     const content = document.createElement('div');
     content.className = 'space-y-3';
     content.innerHTML = `
-      <div><label class="label" for="qb-label">Button name</label>
+      <div><label class="label" for="qb-label">Button Name</label>
         <input class="input" id="qb-label" maxlength="32" placeholder="Night vision for everyone" autocomplete="off"></div>
       <div><label class="label" for="qb-cmd">Command</label>
         <input class="input font-mono" id="qb-cmd" maxlength="256" placeholder="effect give @a night_vision 600" autocomplete="off" spellcheck="false">

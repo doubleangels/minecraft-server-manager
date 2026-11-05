@@ -10,8 +10,8 @@
     <option value="">All Reasons</option>
     <option value="manual">Manual</option>
     <option value="scheduled">Scheduled</option>
-    <option value="pre-update">Pre-update</option>
-    <option value="pre-restore">Pre-restore</option>
+    <option value="pre-update">Pre-Update</option>
+    <option value="pre-restore">Pre-Restore</option>
   </select>
   <span class="ml-auto text-sm text-ink-faint" id="backups-total" data-count="{{totals.count}}" data-bytes="{{totals.bytes}}">Total: {{bytes totals.bytes}} in {{totals.count}} archive{{#if (ne totals.count 1)}}s{{/if}}</span>
 </div>
@@ -25,7 +25,7 @@
           <td data-th="Server" class="sm:whitespace-nowrap"><a class="text-right text-link hover:underline sm:text-left" href="/servers/{{serverId}}/backups">{{server}}</a></td>
           {{! w-full + max-w-0 (sm+ only) so long archive names truncate instead of pushing Actions off-screen. }}
           <td data-th="Archive" class="sm:w-full sm:max-w-0"><span class="block min-w-0"><span class="block truncate font-mono text-xs" title="{{file}}">{{file}}</span><span class="block text-xs text-ink-soft [overflow-wrap:anywhere] {{#unless note}}hidden{{/unless}}" data-backup-note>{{note}}</span></span></td>
-          <td data-th="Reason"><span class="badge {{#if (eq reason 'pre-update')}}badge-warn{{/if}}">{{reason}}</span></td>
+          <td data-th="Reason"><span class="badge {{#if (eq reason 'pre-update')}}badge-warn{{/if}}">{{titleCase reason}}</span></td>
           <td data-th="Size" class="whitespace-nowrap text-right text-ink-faint">{{bytes size}}</td>
           <td data-th="Created" class="whitespace-nowrap text-right text-ink-faint" data-ts="{{ts}}">{{ts}}</td>
           <td data-th="" class="text-right"><div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap">

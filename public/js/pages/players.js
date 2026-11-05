@@ -174,7 +174,7 @@ function init(root) {
           if (changes.banExpires) {
             const exp = document.createElement('div');
             exp.className = 'mt-0.5 text-warn';
-            exp.textContent = `expires ${changes.banExpires}`;
+            exp.textContent = `Expires ${changes.banExpires}`;
             details.appendChild(exp);
           }
         } else {
@@ -358,12 +358,12 @@ function init(root) {
       content.className = 'space-y-3 text-sm';
       content.innerHTML = `
       <div>
-        <label class="label" for="pa-names">Player names</label>
+        <label class="label" for="pa-names">Player Names</label>
         <textarea class="input font-mono" id="pa-names" data-f="name" rows="3" placeholder="Notch&#10;jeb_&#10;Dinnerbone" autocomplete="off" spellcheck="false"></textarea>
         <p class="mt-1 text-xs text-ink-faint">One name, or many: one per line, or separated by commas or spaces. Each is looked up with Mojang, so they never need to have joined before.</p>
       </div>
       <label class="flex cursor-pointer items-center gap-2"><input type="checkbox" class="msm-check" data-f="whitelist" checked> Add to Whitelist</label>
-      <label class="flex cursor-pointer items-center gap-2"><input type="checkbox" class="msm-check" data-f="op"> Make Operator (level 4)</label>`;
+      <label class="flex cursor-pointer items-center gap-2"><input type="checkbox" class="msm-check" data-f="op"> Make Operator (Level 4)</label>`;
       openModal({
         title: 'Add Players',
         content,
@@ -440,7 +440,7 @@ function init(root) {
   function kickModal(name) {
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label">Kick message (shown to the player)</label>
+      <label class="label">Kick Message (Shown to the Player)</label>
       <input class="input" data-f="message" placeholder="Kicked by an operator" maxlength="256">`;
     openModal({
       title: `Kick ${name}`,
@@ -480,7 +480,7 @@ function init(root) {
     content.className = 'space-y-3';
     content.innerHTML = `
       <div>
-        <label class="label">Ban reason (recorded in the ban list)</label>
+        <label class="label">Ban Reason (Recorded in the Ban List)</label>
         <input class="input" data-f="reason" placeholder="Banned by an operator" maxlength="256">
       </div>
       <div>
@@ -614,12 +614,12 @@ function init(root) {
   function opLevelModal(name) {
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label">Permission level</label>
+      <label class="label">Permission Level</label>
       <select class="input" data-f="level" data-label="Op permission level">
-        <option value="1">1 (bypass spawn protection)</option>
-        <option value="2">2 (command blocks and most commands)</option>
-        <option value="3">3 (player management: kick, ban, op)</option>
-        <option value="4" selected>4 (full access, including stop and save-all)</option>
+        <option value="1">1 (Bypass Spawn Protection)</option>
+        <option value="2">2 (Command Blocks and Most Commands)</option>
+        <option value="3">3 (Player Management: Kick, Ban, Op)</option>
+        <option value="4" selected>4 (Full Access, Including Stop and Save-All)</option>
       </select>
       <p class="mt-2 text-xs text-ink-faint">Levels below 4 take effect after the next restart of a running server.</p>`;
     openModal({
@@ -696,15 +696,15 @@ function init(root) {
 
       <div data-tp-panel="player" class="hidden space-y-3">
         <div>
-          <label class="label">Target player</label>
+          <label class="label">Target Player</label>
           <select class="input" data-f="target" data-label="Target player"></select>
         </div>
       </div>
 
       <div data-tp-panel="rtp" class="hidden space-y-3">
         <div class="grid grid-cols-2 gap-2">
-          <div><label class="label">Min distance</label><input class="input" type="number" data-f="minDistance" value="500" min="0"></div>
-          <div><label class="label">Max distance</label><input class="input" type="number" data-f="maxDistance" value="5000" min="16"></div>
+          <div><label class="label">Min Distance</label><input class="input" type="number" data-f="minDistance" value="500" min="0"></div>
+          <div><label class="label">Max Distance</label><input class="input" type="number" data-f="maxDistance" value="5000" min="16"></div>
         </div>
         <div>
           <label class="label">Around</label>
@@ -722,7 +722,7 @@ function init(root) {
           <select class="input" data-f="structure" data-label="Structure"><option value="">Loading structures…</option></select>
         </div>
         <div class="grid grid-cols-2 items-end gap-2">
-          <div><label class="label">Search radius</label><input class="input" type="number" data-f="structMaxDistance" value="5000" min="16"></div>
+          <div><label class="label">Search Radius</label><input class="input" type="number" data-f="structMaxDistance" value="5000" min="16"></div>
           <label class="flex items-center gap-2 pb-2 text-sm"><input type="checkbox" class="msm-check" data-f="structRandom" checked> Surprise Me (Random One, Not Nearest)</label>
         </div>
         <p class="text-xs text-ink-faint">"Surprise me" searches from a random point in the radius, so you get a different result every time. It lands safely on the surface next to the structure.</p>

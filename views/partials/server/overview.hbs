@@ -13,7 +13,7 @@
   <div class="card p-4">
     {{#if addresses.length}}
       <div class="mb-4 border-b border-line pb-4">
-        <label class="label" for="ov-address">Server address <span class="text-xs font-normal text-ink-faint">(share this with players on your network)</span></label>
+        <label class="label" for="ov-address">Server Address <span class="text-xs font-normal text-ink-faint">(share this with players on your network)</span></label>
         <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
           {{#if (gt addresses.length 1)}}
             <select class="input w-auto font-mono" id="ov-address" data-label="Server address">
@@ -65,7 +65,7 @@
       <ol class="divide-y divide-line">
         {{#each recentEvents}}
           <li class="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2.5 text-sm">
-            <span class="badge shrink-0">{{type}}</span>
+            <span class="badge shrink-0">{{eventType type}}</span>
             <span class="min-w-[12rem] flex-1 break-words">{{summary}}</span>
             <span class="whitespace-nowrap text-xs text-ink-faint">{{actor}} · <span data-ts-ago="{{ts}}">{{ts}}</span></span>
           </li>

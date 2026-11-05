@@ -172,7 +172,9 @@ validation and error messages, and the docs — follows one house style (full de
 
 - **Title Case:** buttons; short selectable choices (dropdown options, radio/checkbox labels, tabs,
   overflow-menu items, toggle chips); `<h2>` / `<h3>` section and card headings; table `<th>`;
-  non-progress `openModal` titles.
+  field captions (`.label`, `<dt>`, every field-catalog `label`); non-progress `openModal` titles.
+  Parentheticals and every hyphenated part included: "Viewer (Read-Only)", "Sign-In Security".
+  Show a stored id as a label through the `titleCase` / `eventType` template helpers.
 - **ALL CAPS:** only `page-header heading=`.
 - **Sentence case (a full sentence):** everything else — help, hints, tooltips, placeholders,
   empty-state bodies, toasts, confirm-dialog bodies _and_ titles, event and history summaries.

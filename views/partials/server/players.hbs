@@ -99,7 +99,7 @@
               {{#if banned}}
                 <div class="truncate text-danger sm:max-w-56" title="{{default banReason 'No reason recorded'}}">{{default banReason 'No reason recorded'}}</div>
                 {{#if banDate}}<div class="mt-0.5">{{banDate}}{{#if banSource}} · {{banSource}}{{/if}}</div>{{/if}}
-                {{#if banExpires}}<div class="mt-0.5 text-warn">expires {{banExpires}}</div>{{/if}}
+                {{#if banExpires}}<div class="mt-0.5 text-warn">Expires {{banExpires}}</div>{{/if}}
               {{else}}
                 -
               {{/if}}

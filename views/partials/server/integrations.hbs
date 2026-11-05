@@ -14,7 +14,7 @@
     <div class="grid gap-4 lg:grid-cols-2">
       <div class="space-y-4">
         <div>
-          <label class="label" for="ig-wz-name">Invocation name</label>
+          <label class="label" for="ig-wz-name">Invocation Name</label>
           <div class="flex items-center gap-1">
             <span class="font-mono text-sm text-ink-faint">@</span>
             <input class="input font-mono text-xs" id="ig-wz-name" maxlength="32" pattern="[A-Za-z][A-Za-z0-9_-]{0,31}" value="{{integrations.wizard.invocationName}}" placeholder="wizard">
@@ -22,7 +22,7 @@
           <p class="help">Players call the chatbot with this name, for example <code class="code-inline">@bubba</code>. It also becomes the chatbot's chat and transcript label.</p>
         </div>
         <div>
-          <label class="label" for="ig-wz-url">OpenAI-compatible base URL</label>
+          <label class="label" for="ig-wz-url">OpenAI-compatible Base URL</label>
           <input class="input font-mono text-xs" id="ig-wz-url" value="{{integrations.wizard.baseUrl}}" placeholder="http://192.168.1.50:11434">
           <p class="help">Ollama works with its host and port; <code class="code-inline">/v1</code> is added automatically. LAN/private addresses are supported.</p>
         </div>
@@ -36,14 +36,14 @@
           <p class="help">Discovery fills suggestions; free text always remains available.</p>
         </div>
         <div>
-          <label class="label" for="ig-wz-key">API key <span class="font-normal text-ink-faint">(optional)</span></label>
+          <label class="label" for="ig-wz-key">API Key <span class="font-normal text-ink-faint">(optional)</span></label>
           <input class="input font-mono text-xs" type="password" id="ig-wz-key" autocomplete="new-password" placeholder="{{#if integrations.wizard.hasApiKey}}Stored securely, leave blank to keep{{else}}Not required by default Ollama installs{{/if}}">
           {{#if integrations.wizard.hasApiKey}}
             <label class="mt-2 flex items-center gap-2 text-xs"><input type="checkbox" class="msm-check" id="ig-wz-key-clear"> Remove Stored Key on Save</label>
           {{/if}}
         </div>
         <div>
-          <label class="label" for="ig-wz-retention">Transcript retention</label>
+          <label class="label" for="ig-wz-retention">Transcript Retention</label>
           <div class="flex items-center gap-2">
             <input class="input w-28" type="number" id="ig-wz-retention" min="0" max="3650" value="{{integrations.wizard.retentionDays}}">
             <span class="text-sm text-ink-soft">days</span>
@@ -53,7 +53,7 @@
       </div>
 
       <div>
-        <label class="label" for="ig-wz-prompt">Chatbot persona and system prompt</label>
+        <label class="label" for="ig-wz-prompt">Chatbot Persona and System Prompt</label>
         <textarea class="input min-h-72 max-h-[60vh] resize-y font-mono text-xs leading-5" id="ig-wz-prompt" maxlength="12000">{{integrations.wizard.systemPrompt}}</textarea>
         <p class="help">This is sent as the system message for this server. Powers are exposed as fixed, validated tools, never raw console commands.</p>
       </div>
@@ -69,12 +69,12 @@
       </div>
       <div class="mt-4 grid gap-4 lg:grid-cols-2">
         <div>
-          <label class="label" for="ig-wz-welcome-message">Join greeting</label>
+          <label class="label" for="ig-wz-welcome-message">Join Greeting</label>
           <textarea class="input min-h-24 max-h-72 resize-y text-xs" id="ig-wz-welcome-message" maxlength="400">{{integrations.wizard.welcomeMessage}}</textarea>
           <p class="help">Broadcast once when a player joins. Variables: <code class="code-inline">{player}</code>, <code class="code-inline">{chatbot}</code>, and <code class="code-inline">{mention}</code>. The older <code class="code-inline">{wizard}</code> variable remains supported.</p>
         </div>
         <div>
-          <label class="label" for="ig-wz-checkin-message">Playtime check-in</label>
+          <label class="label" for="ig-wz-checkin-message">Playtime Check-In</label>
           <textarea class="input min-h-24 max-h-72 resize-y text-xs" id="ig-wz-checkin-message" maxlength="400">{{integrations.wizard.checkinMessage}}</textarea>
           <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
             <span>Send privately after</span>
@@ -85,7 +85,7 @@
         </div>
       </div>
       <div class="mt-4">
-        <label class="label" for="ig-wz-conversation-minutes">Opt-in conversation mode</label>
+        <label class="label" for="ig-wz-conversation-minutes">Opt-In Conversation Mode</label>
         <div class="flex flex-wrap items-center gap-2 text-sm">
           <span>Keep listening for</span>
           <span class="inline-flex items-center gap-2 whitespace-nowrap"><input class="input w-20" type="number" inputmode="numeric" id="ig-wz-conversation-minutes" min="0" max="60" value="{{integrations.wizard.conversationMinutes}}"> <span class="text-ink-soft">minutes</span></span>
@@ -105,24 +105,24 @@
       </div>
       <div class="mt-4 grid gap-4 lg:grid-cols-4">
         <div>
-          <label class="label" for="ig-wz-testers">Basic users</label>
+          <label class="label" for="ig-wz-testers">Basic Users</label>
           <textarea class="input min-h-28 max-h-72 resize-y font-mono text-xs" id="ig-wz-testers" placeholder="Gleep52&#10;PlayerA">{{{joinLines integrations.wizard.powerTesters}}}</textarea>
           <p class="help">One exact player name per line. Maximum 50.</p>
         </div>
         <div>
-          <label class="label" for="ig-wz-controllers">Power controllers</label>
+          <label class="label" for="ig-wz-controllers">Power Controllers</label>
           <textarea class="input min-h-28 max-h-72 resize-y font-mono text-xs" id="ig-wz-controllers" placeholder="Gleep52">{{{joinLines integrations.wizard.powerControllers}}}</textarea>
           <p class="help">Only these exact players may affect another online player. Their gifts may use any valid item ID, but still obey the quantity limit. Add them to Basic users too if they should retain self/world powers.</p>
         </div>
         <div>
-          <label class="label" for="ig-wz-gifts">Allowed gifts</label>
+          <label class="label" for="ig-wz-gifts">Allowed Gifts</label>
           <textarea class="input min-h-28 max-h-72 resize-y font-mono text-xs" id="ig-wz-gifts">{{{joinLines integrations.wizard.giftItems}}}</textarea>
           <p class="help">One namespaced item ID per line. Restricts gifts that Basic users give themselves; power controllers may give other players any valid vanilla or modded item.</p>
         </div>
         <div class="space-y-3">
-          <label class="flex items-center gap-2 text-sm"><input class="msm-check" type="checkbox" id="ig-wz-dry-run" {{#if integrations.wizard.powersDryRun}}checked{{/if}}> Dry Run (audit only; change nothing)</label>
-          <div><label class="label" for="ig-wz-gift-max">Maximum gift quantity</label><input class="input w-28" type="number" id="ig-wz-gift-max" min="1" max="16" value="{{integrations.wizard.giftMaxCount}}"></div>
-          <div><label class="label" for="ig-wz-power-cooldown">Per-player cooldown</label><div class="flex items-center gap-2"><input class="input w-28" type="number" id="ig-wz-power-cooldown" min="3" max="3600" value="{{integrations.wizard.powerCooldownSec}}"><span class="text-sm text-ink-soft">seconds</span></div></div>
+          <label class="flex items-center gap-2 text-sm"><input class="msm-check" type="checkbox" id="ig-wz-dry-run" {{#if integrations.wizard.powersDryRun}}checked{{/if}}> Dry Run (Audit Only; Change Nothing)</label>
+          <div><label class="label" for="ig-wz-gift-max">Maximum Gift Quantity</label><input class="input w-28" type="number" id="ig-wz-gift-max" min="1" max="16" value="{{integrations.wizard.giftMaxCount}}"></div>
+          <div><label class="label" for="ig-wz-power-cooldown">Per-Player Cooldown</label><div class="flex items-center gap-2"><input class="input w-28" type="number" id="ig-wz-power-cooldown" min="3" max="3600" value="{{integrations.wizard.powerCooldownSec}}"><span class="text-sm text-ink-soft">seconds</span></div></div>
         </div>
       </div>
       <div class="mt-4 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3 lg:grid-cols-6">
@@ -175,7 +175,7 @@
         {{/if}}
       </div>
       <div>
-        <span class="label">Send notifications for</span>
+        <span class="label">Send Notifications for</span>
         <div class="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
           <label class="flex items-center gap-2"><input type="checkbox" class="msm-check" data-dc-event="lifecycle" {{#if integrations.discord.events.lifecycle}}checked{{/if}}> Start / Stop</label>
           <label class="flex items-center gap-2"><input type="checkbox" class="msm-check" data-dc-event="crashes" {{#if integrations.discord.events.crashes}}checked{{/if}}> Crashes</label>
@@ -210,7 +210,7 @@
     </div>
     <div class="space-y-4">
       <div>
-        <label class="label" for="ig-sp-slug">Page address</label>
+        <label class="label" for="ig-sp-slug">Page Address</label>
         <div class="flex items-center gap-2">
           <span class="shrink-0 font-mono text-xs text-ink-faint">/status/</span>
           {{! min-w-0: see settings.hbs - an unconstrained flex-1 input refuses to
@@ -240,7 +240,7 @@
     <div class="grid gap-4 lg:grid-cols-2">
       <div class="space-y-4">
         <div>
-          <label class="label" for="ig-addr">Address to share</label>
+          <label class="label" for="ig-addr">Address to Share</label>
           <select class="input" id="ig-addr" data-label="Address to share">
             {{#each integrations.invite.candidates}}
               <option value="{{this}}" data-desc="Local network (LAN)">{{this}}</option>
@@ -253,7 +253,7 @@
           <input class="input mt-2 hidden font-mono text-xs" id="ig-host" placeholder="play.example.com:{{integrations.invite.port}}">
         </div>
         <div>
-          <span class="label">Invite text</span>
+          <span class="label">Invite Text</span>
           <pre class="max-h-44 overflow-auto whitespace-pre-wrap rounded-md border border-line bg-inset p-3 font-mono text-xs text-ink-soft" id="ig-invite-text">{{integrations.invite.inviteText}}</pre>
         </div>
         <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
@@ -286,7 +286,7 @@
           <div class="notice notice-warn text-xs">{{{icon 'triangle-alert' 'size-4 mt-0.5 shrink-0 text-warn'}}}<div>The whitelist is enforced. Add each friend on the Players tab before they join.</div></div>
         {{/if}}
         <details class="rounded-md border border-line bg-raised p-3 text-xs">
-          <summary class="cursor-pointer font-medium text-sm">Playing over the Internet (port forwarding)</summary>
+          <summary class="cursor-pointer font-medium text-sm">Playing over the Internet (Port Forwarding)</summary>
           <p class="mt-2 text-ink-soft">{{integrations.invite.portForwardGuidance}}</p>
           {{#if integrations.invite.publicIp}}
             <p class="mt-2">Detected public IP: <code class="code-inline">{{integrations.invite.publicIp}}</code></p>

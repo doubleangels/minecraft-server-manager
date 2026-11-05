@@ -124,17 +124,17 @@ function init(serverId, serverName, serverStatus) {
 
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label">Target server</label>
+      <label class="label">Target Server</label>
       <select class="input" data-c-target data-label="Copy world to server">
         ${targets.map((s) => `<option value="${escapeHtml(s.id)}" data-desc="${escapeHtml(s.flavor)} · ${escapeHtml(s.status)}">${escapeHtml(s.name)}</option>`).join('')}
       </select>
-      <label class="label mt-3">Install mode on the target</label>
+      <label class="label mt-3">Install Mode on the Target</label>
       <select class="input" data-c-mode data-label="Install mode">
         <option value="replace" data-desc="Target must be stopped. Its current world is backed up first.">Replace Target's World</option>
         <option value="alongside" data-desc="Adds it next to the target's worlds. Activate it later.">Install Alongside</option>
       </select>
       <div class="mt-3 hidden" data-c-namewrap>
-        <label class="label">World folder name on the target</label>
+        <label class="label">World Folder Name on the Target</label>
         <input class="input" data-c-name value="${escapeHtml(world)}" autocomplete="off">
       </div>
       <p class="help">Works while this server is running. The panel takes a consistent snapshot, then installs it on the target through the library.</p>
@@ -184,7 +184,7 @@ function init(serverId, serverName, serverStatus) {
   function renameModal(world) {
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label">New name for "${escapeHtml(world)}"</label>
+      <label class="label">New Name for "${escapeHtml(world)}"</label>
       <input class="input" data-r-name value="${escapeHtml(world)}" autocomplete="off">
       <p class="help">The server must be stopped. Every dimension folder is renamed too, and if this is the active world, the server is pointed at the new name.</p>`;
     const modal = openModal({
@@ -220,14 +220,14 @@ function init(serverId, serverName, serverStatus) {
         removed too.</p>
       <div class="mt-3 grid grid-cols-2 gap-3">
         <div>
-          <label class="label" for="sh-secs">Remove chunks visited under</label>
+          <label class="label" for="sh-secs">Remove Chunks Visited Under</label>
           <div class="flex items-center gap-1.5">
             <input class="input w-20" id="sh-secs" type="number" min="1" max="3600" value="30">
             <span class="text-sm text-ink-faint">seconds</span>
           </div>
         </div>
         <div>
-          <label class="label" for="sh-keep">Always keep spawn (chunks)</label>
+          <label class="label" for="sh-keep">Always Keep Spawn (Chunks)</label>
           <input class="input w-24" id="sh-keep" type="number" min="0" max="256" value="8">
         </div>
       </div>
@@ -320,18 +320,18 @@ function init(serverId, serverName, serverStatus) {
       <div>
         <label class="label" for="rw-seedmode">Seed</label>
         <select class="input" id="rw-seedmode" data-label="Seed">
-          <option value="random" selected>New Random Seed (re-roll)</option>
+          <option value="random" selected>New Random Seed (Re-Roll)</option>
           <option value="keep">Keep the Current Seed</option>
           <option value="custom">Custom seed…</option>
         </select>
       </div>
       <div class="hidden" id="rw-customwrap">
-        <label class="label" for="rw-seed">Custom seed</label>
+        <label class="label" for="rw-seed">Custom Seed</label>
         <input class="input font-mono" id="rw-seed" placeholder="e.g. 12345 or any text" autocomplete="off">
         <p class="help">Numbers and text both work. Minecraft converts text seeds to a number.</p>
       </div>
       <div>
-        <label class="label" for="rw-leveltype">World type</label>
+        <label class="label" for="rw-leveltype">World Type</label>
         <select class="input" id="rw-leveltype" data-label="World type">
           <option value="" selected>Keep Current</option>
           <option value="DEFAULT">Default</option>

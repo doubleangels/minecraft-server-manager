@@ -27,18 +27,18 @@ async function openEnrollModal(trigger) {
     <p class="text-sm text-ink-soft">Scan this with your authenticator app (Google Authenticator, Authy, 1Password, …), or enter the code manually.</p>
     <div class="flex justify-center"><img alt="2FA QR code" class="rounded-md border border-line" width="220" height="220"></div>
     <div>
-      <label class="label">Manual entry code</label>
+      <label class="label">Manual Entry Code</label>
       <div class="flex gap-2">
         <input class="input flex-1 font-mono text-xs" id="tf-secret" readonly>
         <button type="button" class="btn" id="tf-secret-copy">Copy</button>
       </div>
     </div>
     <div>
-      <label class="label" for="tf-confirm-code">Enter the 6-digit code from your app</label>
+      <label class="label" for="tf-confirm-code">Enter the 6-digit Code from Your App</label>
       <input class="input font-mono text-center text-lg tracking-[0.3em]" id="tf-confirm-code" inputmode="numeric" maxlength="6" placeholder="000000">
     </div>
     <div>
-      <label class="label" for="tf-confirm-password">Confirm your password</label>
+      <label class="label" for="tf-confirm-password">Confirm Your Password</label>
       <input class="input" id="tf-confirm-password" type="password" autocomplete="current-password" placeholder="Your account password">
     </div>`;
   content.querySelector('img').src = setup.qrDataUrl;
@@ -96,7 +96,7 @@ function openManageModal(trigger) {
   content.innerHTML = `
     <p class="text-sm text-ink-soft">Two-factor authentication is enabled on your account. Confirm your password to regenerate backup codes or turn it off.</p>
     <div>
-      <label class="label" for="tf-mgmt-password">Current password</label>
+      <label class="label" for="tf-mgmt-password">Current Password</label>
       <input class="input" id="tf-mgmt-password" type="password" autocomplete="current-password">
     </div>`;
 

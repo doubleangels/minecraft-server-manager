@@ -2,6 +2,7 @@
 // Usage: toast('Saved'); toast('Boom', { kind: 'error', timeout: 8000 });
 //        toast('Deleted.', { action: { label: 'Undo', onClick }, onDismiss(reason) {} })
 // onDismiss gets 'action' when the action button was used, else 'closed'.
+import { friendlyError } from './errors.js';
 
 let host;
 
@@ -42,6 +43,18 @@ const KIND = {
   },
 };
 
+// Call sites toast `err.message` from their own friendly Errors, but when the
+// panel can't be reached at all, fetch rejects with the browser's raw wording
+// ("Failed to fetch", "NetworkError when attempting…", Safari's "Load failed").
+// Those never reach a person as-is.
+const RAW_NETWORK =
+  /^(?:Failed to fetch|NetworkError when attempting to fetch resource\.?|Load failed|Network request failed)$/i;
+function humane(message) {
+  const text = String(message ?? '').trim();
+  if (!text || RAW_NETWORK.test(text)) return friendlyError(null);
+  return text;
+}
+
 export function toast(message, { kind = 'success', timeout = 4500, action = null, onDismiss = null } = {}) {
   const h = ensureHost();
   const meta = KIND[kind] || KIND.success;
@@ -52,7 +65,7 @@ export function toast(message, { kind = 'success', timeout = 4500, action = null
     <button class="icon-btn -my-1.5 -mr-1.5" aria-label="Dismiss">
       <svg class="icon size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>`;
-  el.querySelector('span').textContent = message;
+  el.querySelector('span').textContent = humane(message);
   if (action) {
     const b = document.createElement('button');
     b.type = 'button';

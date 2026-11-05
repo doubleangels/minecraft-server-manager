@@ -16,7 +16,7 @@
                       {{initial username}}
                     {{/if}}
                   </span>
-                  {{username}}{{#if (eq id ../user.id)}} <span class="badge">you</span>{{/if}}
+                  {{username}}{{#if (eq id ../user.id)}} <span class="badge">You</span>{{/if}}
                 </div>
               </td>
               <td data-th="Role">
@@ -63,7 +63,7 @@
     <p class="help mt-2 max-w-prose">Roles: <b>Admin</b> can do everything. <b>Operator</b> can manage servers, but not storage, users, or update policies. <b>Viewer</b> is read-only. Server Permissions below changes what an operator or viewer may do on each server.</p>
   {{/settings/card}}
 
-  {{#> settings/card heading="Sign-in Security" id="lockouts-card" desc="Accounts and addresses currently blocked from signing in after too many failed attempts. Locks clear on their own after the cooldown; unlock one here to end it early."}}
+  {{#> settings/card heading="Sign-In Security" id="lockouts-card" desc="Accounts and addresses currently blocked from signing in after too many failed attempts. Locks clear on their own after the cooldown; unlock one here to end it early."}}
     <div id="lockouts-body" class="text-sm text-ink-faint">Checking…</div>
     <button class="btn btn-sm mt-4 hidden w-full sm:w-auto" id="lockouts-clear-all">{{{icon 'lock-open' 'size-3.5'}}} Clear All Locks</button>
   {{/settings/card}}

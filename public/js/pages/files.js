@@ -59,7 +59,7 @@ function init(rootEl) {
   document.getElementById('files-mkdir')?.addEventListener('click', () => {
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label">Folder name</label>
+      <label class="label">Folder Name</label>
       <input class="input" data-mk-name placeholder="new-folder" autocomplete="off">`;
     openModal({
       title: 'New Folder',
@@ -87,7 +87,7 @@ function init(rootEl) {
   document.getElementById('files-search')?.addEventListener('click', () => {
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label" for="fs-q">Search text</label>
+      <label class="label" for="fs-q">Search Text</label>
       <input class="input" id="fs-q" placeholder="Enter a word or phrase (at least 2 characters)" autocomplete="off">
       <label class="mt-2 flex items-center gap-2 text-xs text-ink-faint">
         <input type="checkbox" class="msm-check" id="fs-case"> Match Case
@@ -312,7 +312,7 @@ function init(rootEl) {
   function renameModal(path, name) {
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label">New name</label>
+      <label class="label">New Name</label>
       <input class="input" data-rn-name autocomplete="off">`;
     const input = content.querySelector('[data-rn-name]');
     input.value = name;
@@ -342,7 +342,7 @@ function init(rootEl) {
   function destinationModal(verb, path, name, url) {
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label">Destination folder (relative to the root)</label>
+      <label class="label">Destination Folder (Relative to the Root)</label>
       <input class="input font-mono" data-dst placeholder="e.g. world/datapacks (leave empty for the root)" autocomplete="off">
       <p class="help">${verb === 'Copy' ? 'Copies' : 'Moves'} "${escapeHtml(name)}" into the folder. It must already exist.</p>`;
     const input = content.querySelector('[data-dst]');

@@ -236,6 +236,15 @@ function createApp() {
           return 'bg-ok';
         },
         capitalize: (s) => (typeof s === 'string' && s ? s[0].toUpperCase() + s.slice(1) : s),
+        // A stored id shown as a label: every word and hyphenated part
+        // capitalised ("pre-update" → "Pre-Update").
+        titleCase: (s) =>
+          typeof s === 'string' ? s.replace(/(^|[\s-])([a-z])/g, (_, p, c) => p + c.toUpperCase()) : s,
+        // A history event type as a label ("server-started" → "Server Started").
+        eventType: (s) =>
+          typeof s === 'string'
+            ? s.replace(/[-_]+/g, ' ').replace(/(^|\s)([a-z])/g, (_, p, c) => p + c.toUpperCase())
+            : s,
         short: (s, n) => (typeof s === 'string' ? s.replace(/^sha256:/, '').slice(0, Number(n) || 12) : s),
         initial: (s) => (typeof s === 'string' && s ? s[0].toUpperCase() : '?'),
         default: (v, fallback) => (v === undefined || v === null || v === '' ? fallback : v),

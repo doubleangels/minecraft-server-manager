@@ -20,7 +20,7 @@
       <p class="help mt-1 mb-4">How this server is named and shown, in the panel and in every player's server list.</p>
       <div class="space-y-4">
         <div>
-          <label class="label" for="st-name">Display name</label>
+          <label class="label" for="st-name">Display Name</label>
           <input class="input" id="st-name" value="{{server.name}}">
           <p class="help">Rename it freely. Folders, container names, and history all stay keyed to the internal ID.</p>
         </div>
@@ -58,7 +58,7 @@
             </div>
           </div>
           <div>
-            <span class="label">Accent color</span>
+            <span class="label">Accent Color</span>
             {{! Amethyst is a deliberate off-ramp from the four semantic ramps -
                 it's identity decoration from Minecraft source material, not meaning. }}
             <div class="flex flex-wrap items-center gap-1.5" id="st-accent-picker">
@@ -78,7 +78,7 @@
           </div>
         </div>
         <div>
-          <label class="label" for="st-notes">Private notes <span class="badge ml-1">admin only</span></label>
+          <label class="label" for="st-notes">Private Notes <span class="badge ml-1">Admin Only</span></label>
           <textarea class="input font-mono text-xs" id="st-notes" rows="2" placeholder="Scratchpad, never shown to viewers">{{server.notes}}</textarea>
         </div>
       </div>
@@ -93,13 +93,13 @@
           <span class="msm-toggle"><input type="checkbox" id="st-autostart" {{#if server.autoStart}}checked{{/if}}><span></span></span>
         </label>
         <label class="flex items-center justify-between gap-3 text-sm">
-          <span>Auto-restart on Crash <span class="block text-xs text-ink-faint">Waits longer between each try, and gives up after 3 rapid crashes.</span></span>
+          <span>Auto-Restart on Crash <span class="block text-xs text-ink-faint">Waits longer between each try, and gives up after 3 rapid crashes.</span></span>
           <span class="msm-toggle"><input type="checkbox" id="st-autorestart" {{#if server.autoRestart}}checked{{/if}}><span></span></span>
         </label>
       </div>
       <p class="help">Restarts, backups and commands at set times live in <a class="text-link hover:underline" href="/schedules?server={{server.id}}">this server's schedules</a>.</p>
       <div class="mt-4 border-t border-line pt-4">
-        <span class="label">Update policy</span>
+        <span class="label">Update Policy</span>
         <div class="space-y-2 text-sm">
           <label class="flex items-start gap-2.5"><input type="radio" name="up" value="manual" class="msm-radio mt-0.5" {{#if (eq server.updatePolicy 'manual')}}checked{{/if}}> <span><span class="font-medium">Manual Only</span><span class="block text-xs text-ink-faint">Never changes anything, and shows no update badges for this server.</span></span></label>
         <label class="flex items-start gap-2.5"><input type="radio" name="up" value="notify" class="msm-radio mt-0.5" {{#if (eq server.updatePolicy 'notify')}}checked{{/if}}> <span><span class="font-medium">Notify Me</span><span class="block text-xs text-ink-faint">Shows a badge when updates exist. You apply them.</span></span></label>
@@ -120,7 +120,7 @@
       <p class="help mt-1 mb-4">Memory, CPU and disk this server may use.</p>
       <div class="space-y-4">
         <div>
-          <label class="label" for="st-heap">Java heap</label>
+          <label class="label" for="st-heap">Java Heap</label>
           <div class="flex items-center gap-3">
             <input type="range" min="1024" max="16384" step="512" value="{{server.resources.heapMb}}" id="st-heap" class="msm-range flex-1" data-out="out-heap" data-unit=" MB">
             <span class="w-20 text-right font-mono text-sm" id="out-heap">{{server.resources.heapMb}} MB</span>
@@ -128,7 +128,7 @@
           <p class="help">The amount of RAM Minecraft itself may use.</p>
         </div>
         <div>
-          <label class="label" for="st-initheap">Initial heap <span class="font-normal text-ink-faint">(optional)</span></label>
+          <label class="label" for="st-initheap">Initial Heap <span class="font-normal text-ink-faint">(optional)</span></label>
           <div class="flex items-center gap-3">
             <input type="number" min="512" step="512" inputmode="numeric" class="input w-32 font-mono" id="st-initheap" value="{{server.resources.initHeapMb}}" placeholder="Whole heap">
             <span class="text-sm text-ink-faint">MB</span>
@@ -136,7 +136,7 @@
           <p class="help">How much of the heap Java takes when the server starts. Leave it empty and Java takes the whole heap up front, so memory use sits near the full heap even when nobody is playing. A smaller value, like 512 MB, lets it grow as the world needs it.</p>
         </div>
         <div>
-          <label class="label" for="st-cmem">Container memory limit</label>
+          <label class="label" for="st-cmem">Container Memory Limit</label>
           <div class="flex items-center gap-3">
             <input type="range" min="1024" max="20480" step="512" value="{{server.resources.containerMemoryMb}}" id="st-cmem" class="msm-range msm-range-alt flex-1" data-out="out-cmem" data-unit=" MB">
             <span class="w-20 text-right font-mono text-sm" id="out-cmem">{{server.resources.containerMemoryMb}} MB</span>
@@ -145,7 +145,7 @@
         </div>
         <div class="rounded-md border border-line p-2.5 text-xs" id="st-headroom" aria-live="polite"></div>
         <div>
-          <label class="label" for="st-cpu">CPU limit</label>
+          <label class="label" for="st-cpu">CPU Limit</label>
           <div class="flex items-center gap-3">
             <input type="range" min="0" max="16" step="0.5" value="{{server.resources.cpus}}" id="st-cpu" class="msm-range msm-range-alt flex-1" data-out="out-cpu" data-unit=" cores" data-zero="∞">
             <span class="w-20 text-right font-mono text-sm" id="out-cpu">{{#if server.resources.cpus}}{{server.resources.cpus}} cores{{else}}∞{{/if}}</span>
@@ -153,7 +153,7 @@
           <p class="help">0 means unlimited. When capped, the server slows down instead of being stopped.</p>
         </div>
         <div>
-          <label class="label" for="st-quota">Disk quota <span class="badge ml-1">panel-enforced</span></label>
+          <label class="label" for="st-quota">Disk Quota <span class="badge ml-1">Panel-Enforced</span></label>
           <div class="flex items-center gap-3">
             <input type="range" min="0" max="200" step="5" value="{{quotaGb}}" id="st-quota" class="msm-range flex-1" data-out="out-quota" data-unit=" GB" data-zero="off">
             <span class="w-20 text-right font-mono text-sm" id="out-quota">{{quotaGb}} GB</span>
@@ -172,7 +172,7 @@
       <h3 class="mb-4 font-semibold">Game Port</h3>
       <div class="space-y-3">
         <div>
-          <label class="label" for="st-port">Port players connect to</label>
+          <label class="label" for="st-port">Port Players Connect to</label>
           <div class="flex flex-wrap items-center gap-2">
             <input class="input w-32 font-mono" id="st-port" value="{{server.ports.game}}" inputmode="numeric" autocomplete="off" aria-describedby="st-port-help st-port-applies{{#if portRconCustom}} st-port-rcon{{/if}}">
             <button type="button" class="btn" id="st-port-next">{{{icon 'sparkles' 'size-4'}}} Use Next Free Port</button>
@@ -225,11 +225,11 @@
       <div class="space-y-4">
         <div class="grid gap-4 sm:grid-cols-2">
           <div>
-            <label class="label" for="st-docker-name">Container name</label>
+            <label class="label" for="st-docker-name">Container Name</label>
             <input class="input font-mono" id="st-docker-name" value="{{server.containerName}}" placeholder="msm-{{server.id}}" autocomplete="off">
           </div>
           <div>
-            <label class="label" for="st-docker-network">Docker network</label>
+            <label class="label" for="st-docker-network">Docker Network</label>
             <input class="input font-mono" id="st-docker-network" list="st-docker-networks" placeholder="Default (bridge)" autocomplete="off">
             <datalist id="st-docker-networks"></datalist>
           </div>

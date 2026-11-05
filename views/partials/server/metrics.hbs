@@ -88,8 +88,8 @@
         <div><dt class="text-xs text-ink-faint">Container Health</dt><dd class="font-medium">{{#if health.health}}{{capitalize health.health}}{{else}}Unknown{{/if}}</dd></div>
         <div><dt class="text-xs text-ink-faint">Boot Phase</dt><dd class="font-medium">{{#if (or (eq server.status 'running') (eq server.status 'starting') (eq server.status 'unhealthy'))}}{{default server.statusDetail "Running"}}{{else}}Not running{{/if}}</dd></div>
         <div><dt class="text-xs text-ink-faint">Last Exit Code</dt><dd class="font-medium">{{#if health}}{{#if health.exitCode}}{{health.exitCode}}{{else}}0 / running{{/if}}{{else}}Unknown{{/if}}</dd></div>
-        <div><dt class="text-xs text-ink-faint">Out-of-memory Kills</dt><dd class="font-medium">{{stability.oomKills}}{{#if stability.oomKills24h}} <span class="text-xs font-normal text-warn">· {{stability.oomKills24h}} / 24h</span>{{/if}}</dd></div>
-        <div><dt class="text-xs text-ink-faint">Auto-restarts</dt><dd class="font-medium">{{stability.autoRestarts}}{{#if stability.autoRestarts24h}} <span class="text-xs font-normal text-warn">· {{stability.autoRestarts24h}} / 24h</span>{{/if}}</dd></div>
+        <div><dt class="text-xs text-ink-faint">Out-of-Memory Kills</dt><dd class="font-medium">{{stability.oomKills}}{{#if stability.oomKills24h}} <span class="text-xs font-normal text-warn">· {{stability.oomKills24h}} / 24h</span>{{/if}}</dd></div>
+        <div><dt class="text-xs text-ink-faint">Auto-Restarts</dt><dd class="font-medium">{{stability.autoRestarts}}{{#if stability.autoRestarts24h}} <span class="text-xs font-normal text-warn">· {{stability.autoRestarts24h}} / 24h</span>{{/if}}</dd></div>
         <div><dt class="text-xs text-ink-faint">Crashes Logged</dt><dd class="font-medium">{{stability.crashes}}{{#if stability.crashes7d}} <span class="text-xs font-normal text-ink-faint">· {{stability.crashes24h}} / 24h, {{stability.crashes7d}} / 7d</span>{{/if}}</dd></div>
       </dl>
       {{#if lastCrash}}

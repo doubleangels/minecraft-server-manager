@@ -5,7 +5,7 @@
   {{#if error}}<div class="notice notice-danger mb-4">{{{icon 'triangle-alert' 'size-4 mt-0.5 shrink-0 text-danger'}}}<div>{{error}}</div></div>{{/if}}
   <form method="post" action="/login/2fa" class="space-y-4" data-disable-on-submit>
     <div>
-      <label class="label" for="tf-code">Authenticator code</label>
+      <label class="label" for="tf-code">Authenticator Code</label>
       <input class="input font-mono text-center text-lg tracking-[0.3em]" id="tf-code" name="code" inputmode="numeric" autocomplete="one-time-code" autofocus maxlength="12" placeholder="000000" required data-auto-submit-code>
       <p class="help">Enter the 6-digit code from your authenticator app, or one of your backup codes. It sends on its own once complete.</p>
     </div>

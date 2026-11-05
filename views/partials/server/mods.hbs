@@ -3,7 +3,7 @@
     {{#if mods.length}}
     <input class="input max-w-xs" placeholder="Search installed mods…" id="mods-filter">
     <select class="input w-auto" data-label="Filter by source" id="mods-source">
-      <option value="">All Sources</option><option value="pack">Pack-managed</option><option value="overlay">Custom</option>
+      <option value="">All Sources</option><option value="pack">Pack-Managed</option><option value="overlay">Custom</option>
     </select>
     {{/if}}
     <div class="sm:ml-auto flex flex-col sm:flex-row sm:flex-wrap gap-2{{#unless perms.content}} hidden{{/unless}}">
@@ -87,7 +87,7 @@
                   <button class="btn btn-ghost btn-sm" data-mod-ignore-update data-tip="Stop offering {{updateAvailable}}.">{{{icon 'bell-off' 'size-3.5'}}} Ignore</button>
                 {{/if}}
                 {{#if updateIgnored}}
-                  <button class="btn btn-ghost btn-sm" data-mod-unignore-update data-tip="Offer {{updateIgnored}} again.">{{{icon 'bell' 'size-3.5'}}} Un-ignore</button>
+                  <button class="btn btn-ghost btn-sm" data-mod-unignore-update data-tip="Offer {{updateIgnored}} again.">{{{icon 'bell' 'size-3.5'}}} Un-Ignore</button>
                 {{/if}}
                 {{#if revertTo}}
                   <button class="btn btn-ghost btn-sm" data-mod-revert data-revert-to="{{revertTo}}" data-tip="Put this mod back on {{revertTo}}, then restart the server.">{{{icon 'undo-2' 'size-3.5'}}} Revert</button>

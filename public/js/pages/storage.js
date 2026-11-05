@@ -46,7 +46,7 @@ if (largestBody) {
       }
     })
     .catch((err) => {
-      largestBody.innerHTML = `<tr><td data-th="" class="p-6 text-center text-ink-faint">Could not load the largest files: ${escapeHtml(err.message)}</td></tr>`;
+      largestBody.innerHTML = `<tr><td data-th="" class="p-6 text-center text-ink-faint">${escapeHtml(err instanceof TypeError ? friendlyError(err, { action: 'list the largest files' }) : err.message)}</td></tr>`;
     });
 }
 
@@ -99,7 +99,7 @@ document.addEventListener('click', async (e) => {
     return toast('Nothing to clean up for this action right now.', { kind: 'info' });
   }
   const ok = await confirmDialog({
-    title: label,
+    title: `${label}?`,
     message: `This permanently removes ${preview.removed} item${preview.removed === 1 ? '' : 's'} and frees ${fmtBytes(preview.freedBytes)}.`,
     detail: days
       ? `Only items older than ${days} days are touched.`

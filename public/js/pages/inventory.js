@@ -910,7 +910,7 @@ function init(root) {
         </div>`
       }
       <div>
-        <label class="label">Player (must be online)</label>
+        <label class="label">Player (Must Be Online)</label>
         <input class="input" data-f="player" maxlength="16" value="${esc(currentPlayerName())}"
                list="inv-give-players" autocomplete="off" spellcheck="false">
         <datalist id="inv-give-players">${names.map((n) => `<option value="${esc(n)}"></option>`).join('')}</datalist>
@@ -966,11 +966,11 @@ function init(root) {
     content.className = 'space-y-3 text-sm';
     content.innerHTML = `
       <div>
-        <label class="label">Player (must be online)</label>
+        <label class="label">Player (Must Be Online)</label>
         <input class="input" data-f="player" maxlength="16" value="${esc(currentPlayerName())}" autocomplete="off" spellcheck="false">
       </div>
       <div>
-        <label class="label">Item ID (leave empty to clear everything)</label>
+        <label class="label">Item ID (Leave Empty to Clear Everything)</label>
         <input class="input font-mono" data-f="item" placeholder="minecraft:tnt" maxlength="130" autocomplete="off" spellcheck="false">
       </div>`;
     openModal({
