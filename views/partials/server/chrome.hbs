@@ -59,23 +59,24 @@
     </div>
   </div>
 
-  {{! Top-level sections. Phone: a 3 x 2 grid so all six are visible (a
-      sideways-scrolling row hid the last three off the right edge with no
-      sign there was more). sm+: one row. }}
-  <nav class="grid grid-cols-3 border-t border-line px-1 sm:flex sm:flex-nowrap sm:items-center sm:gap-0.5 sm:overflow-x-auto sm:px-2" aria-label="Server sections">
+  {{! Top-level sections. Phone: a tab bar fixed to the bottom edge, in thumb
+      reach, all six side by side (z 25, see the scale in input.css; the page
+      reserves room for it through --bottom-nav). sm+: one row in the card. }}
+  <nav data-bottom-nav class="fixed inset-x-0 bottom-0 z-[25] grid grid-cols-6 border-t border-line bg-canvas/95 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] backdrop-blur sm:static sm:z-auto sm:flex sm:flex-nowrap sm:items-center sm:gap-0.5 sm:overflow-x-auto sm:bg-transparent sm:p-0 sm:px-2 sm:backdrop-blur-none" aria-label="Server sections">
     {{#each nav.groups}}
       <a href="{{href}}" data-nav-group="{{key}}" data-nav-tabs="{{tabs}}"{{#if active}} aria-current="page"{{/if}}
-         class="inline-flex min-w-0 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap border-b-2 px-2 py-2.5 text-sm font-medium transition sm:justify-start sm:px-3
+         class="relative flex min-w-0 shrink-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap border-t-2 px-0.5 pb-1.5 pt-2 text-[10px] font-medium transition sm:inline-flex sm:flex-row sm:justify-start sm:gap-1.5 sm:border-b-2 sm:border-t-0 sm:px-3 sm:py-2.5 sm:text-sm
            {{#if active}}border-grass-500 text-ink{{else}}border-transparent text-ink-faint hover:text-ink{{/if}}">
-        {{{icon icon 'size-4'}}} {{label}}
-        {{#if badge}}<span class="badge badge-danger">{{badge}}</span>{{/if}}
+        {{{icon icon 'size-5 sm:size-4'}}} <span class="max-w-full truncate">{{label}}</span>
+        {{#if badge}}<span class="badge badge-danger absolute right-1 top-1 px-1 text-[10px] leading-none sm:static sm:px-1.5 sm:text-xs sm:leading-normal">{{badge}}</span>{{/if}}
       </a>
     {{/each}}
   </nav>
   {{! Sub-nav for the active section (only when it has more than one). }}
   {{#if nav.sub}}
     {{! Wraps onto a second line on a phone rather than hiding tabs off-screen. }}
-    <div class="flex flex-wrap items-center gap-1 border-t border-line bg-inset/40 px-3 py-1.5">
+    {{! data-subtabs: on a phone a sideways swipe moves between these (app.js). }}
+    <div class="flex flex-wrap items-center gap-1 border-t border-line bg-inset/40 px-3 py-1.5" data-subtabs>
       {{#each nav.sub}}
         <a href="{{href}}" class="subtab shrink-0 {{#if active}}active{{/if}}">
           {{label}}{{#if badge}} <span class="badge badge-danger">{{badge}}</span>{{/if}}

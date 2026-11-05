@@ -24,6 +24,8 @@
             <input class="input w-auto font-mono" id="ov-address" value="{{addresses.[0]}}" size="{{addresses.[0].length}}" readonly>
           {{/if}}
           <button class="btn" data-copy-from="#ov-address">{{{icon 'copy' 'size-4'}}} Copy Address</button>
+          {{! Revealed only where the browser has a share sheet (phones, mostly). }}
+          <button class="btn" data-share-from="#ov-address" data-share-title="{{server.name}}" hidden>{{{icon 'share-2' 'size-4'}}} Share</button>
         </div>
         <p class="help">Playing from the internet? Set up port forwarding, or send the full invite from <a class="text-link hover:underline" href="/servers/{{server.id}}/invites">Players → Invites</a>.</p>
       </div>

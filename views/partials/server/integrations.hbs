@@ -249,6 +249,7 @@
         </div>
         <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
           <button class="btn btn-primary" id="ig-copy-invite">{{{icon 'copy' 'size-4'}}} Copy Invite Text</button>
+          <button class="btn" data-share-from="#ig-invite-text" data-share-title="{{server.name}}" hidden>{{{icon 'share-2' 'size-4'}}} Share Invite</button>
           {{#if integrations.invite.modded}}
             <button class="btn" id="ig-mrpack">{{{icon 'download' 'size-4'}}} Download Client Modpack (.mrpack)</button>
           {{/if}}

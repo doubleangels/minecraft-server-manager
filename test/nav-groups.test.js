@@ -19,7 +19,7 @@ const html = async (path) => (await app.req('GET', path, { cookie, headers: { Ac
 test('server pages show the six sections, with each page under the section it belongs to', async () => {
   const overview = await html(`/servers/${SID}`);
   for (const label of ['Overview', 'Console', 'Players', 'Content', 'Data', 'Settings']) {
-    assert.match(overview, new RegExp(`</svg>\\s*${label}\\s`), `section ${label}`);
+    assert.match(overview, new RegExp(`</svg>\\s*<span[^>]*>${label}</span>`), `section ${label}`);
   }
   // Overview owns live metrics and the activity log (with crash reports).
   assert.match(overview, new RegExp(`href="/servers/${SID}/metrics"[^>]*>\\s*Performance`));
@@ -37,7 +37,7 @@ test('configuration has a jump bar and keeps Save pinned', async () => {
     assert.match(page, new RegExp(`data-jump="${id}"`));
     assert.match(page, new RegExp(`id="${id}"`));
   }
-  assert.match(page, /sticky bottom-0[^"]*"[^>]*>[\s\S]*?id="st-save"/);
+  assert.match(page, /sticky bottom-\[var\(--bottom-nav,0px\)\][^"]*"[^>]*>[\s\S]*?id="st-save"/);
 });
 
 test('user accounts live on Users & Permissions, and Panel Settings points there', async () => {

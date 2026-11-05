@@ -283,7 +283,7 @@
 
     {{! Pinned to the bottom of the screen so Save is always one tap away on
         this long page. z-10: inside the page, below the topbar (20). }}
-    <div class="sticky bottom-0 z-10 -mx-4 flex items-center justify-end gap-2 border-t border-line bg-canvas/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:-mx-6 sm:px-6">
+    <div class="sticky bottom-[var(--bottom-nav,0px)] z-10 -mx-4 flex items-center justify-end gap-2 border-t border-line bg-canvas/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:-mx-6 sm:px-6">
       <span class="mr-auto hidden text-xs text-warn" data-dirty-note>{{{icon 'circle-dot' 'size-3.5'}}} Unsaved changes</span>
       <button class="btn" id="st-discard">Discard</button>
       <button class="btn btn-primary" id="st-save">{{{icon 'save' 'size-4'}}} Save Changes</button>

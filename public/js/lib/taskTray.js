@@ -8,6 +8,13 @@ import { setRunningTasks } from './title.js';
 const mount = document.getElementById('task-tray');
 if (mount) init();
 
+let lastOk = true;
+function reportConnection(ok) {
+  if (ok === lastOk) return;
+  lastOk = ok;
+  document.dispatchEvent(new CustomEvent('msm:connection', { detail: { ok } }));
+}
+
 function init() {
   const btn = mount.querySelector('button');
   const badge = mount.querySelector('[data-task-count]');
@@ -15,6 +22,7 @@ function init() {
   const panel = mount.querySelector('[data-task-panel]');
   const list = mount.querySelector('[data-task-list]');
   const known = new Map(); // id -> last seen state (for completion toasts)
+  let failures = 0;
   let open = false;
 
   const setOpen = (v) => {
@@ -40,11 +48,20 @@ function init() {
     let data;
     try {
       const res = await fetch('/api/tasks');
+      // A 5xx (proxy up, panel down) is as unreachable as a network error.
+      if (res.status >= 500) throw new Error('unreachable');
       data = await res.json();
     } catch {
-      schedule(8000);
+      // This poll doubles as the panel's heartbeat: after two misses in a row
+      // (one is often just a blip) say it stopped answering, and retry sooner
+      // while it is down. mobile.js shows the banner.
+      failures++;
+      if (failures >= 2 || navigator.onLine === false) reportConnection(false);
+      schedule(failures === 1 ? 1500 : 3000);
       return;
     }
+    failures = 0;
+    reportConnection(true);
     const tasks = data.tasks || [];
     const running = tasks.filter((t) => t.state === 'running');
 
@@ -143,5 +160,7 @@ function init() {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') pollSoon(100);
   });
+  // Back online: check right away instead of waiting out the retry.
+  window.addEventListener('online', () => pollSoon(100));
   poll();
 }

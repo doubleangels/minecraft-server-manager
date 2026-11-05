@@ -11,6 +11,8 @@
         <input class="input w-36" id="console-label" placeholder="Announce as…" aria-label="Announce console commands as" value="{{server.consoleLabel}}" maxlength="48" autocomplete="off" spellcheck="false">
         <button class="btn btn-sm" id="console-label-save">Save</button>
       </div>
+      {{! Shown by console.js only where the browser supports the Wake Lock API. }}
+      <button class="btn btn-sm" data-wake-lock aria-pressed="false" hidden data-tip="Stops your phone or laptop from dimming and locking while this console is open.">{{{icon 'sun-medium' 'size-3.5'}}} Keep Screen On</button>
       <button class="btn btn-sm" data-menu="console-dl-menu">{{{icon 'download' 'size-3.5'}}} Download {{{icon 'chevron-down' 'size-3.5'}}}</button>
       <template id="console-dl-menu">
         <a href="/api/servers/{{server.id}}/logs?tail=2000" download="{{server.name}}-recent.log">{{{icon 'scroll-text' 'size-3.5'}}} Recent Output (Last 2000 Lines)</a>
@@ -29,7 +31,10 @@
     <div class="divide-y divide-line border-t border-line" data-console-logfiles-list></div>
   </details>
 
-  <div class="console h-96 overflow-y-auto overflow-x-auto break-words" id="console-log">
+  {{! Sized to the phone's visible height (dvh) so the command box stays on screen;
+      a fixed 24rem from sm up. }}
+  <div class="relative">
+  <div class="console h-[52dvh] min-h-60 overflow-y-auto overflow-x-auto break-words sm:h-96" id="console-log">
     {{#if consoleLines}}
       {{#each consoleLines}}
         <div data-level="{{level}}"{{#if (eq level 'WARN')}} class="text-gold-300"{{/if}}{{#if (eq level 'ERROR')}} class="text-redstone-400"{{/if}}>{{text}}</div>
@@ -44,6 +49,8 @@
       </div>
     {{/if}}
   </div>
+  <button type="button" class="btn btn-sm btn-primary absolute bottom-3 left-1/2 -translate-x-1/2 shadow-modal" data-console-latest hidden>{{{icon 'arrow-down' 'size-3.5'}}} <span data-console-latest-label>Jump to Latest</span></button>
+  </div>
 
   {{#unless perms.console}}
     <p class="notice notice-info mt-3">You can watch this console, but running commands needs the console permission on this server.</p>
@@ -52,7 +59,7 @@
     <span class="grid place-items-center rounded-md border border-line-strong bg-inset px-3 font-mono text-sm text-ok">/</span>
     {{! min-w-0: see settings.hbs - without it this input won't shrink below its
         placeholder's intrinsic width and pushes the page wider on narrow screens. }}
-    <input class="input min-w-0 flex-1 font-mono" placeholder="Type a command (Enter to send, ↑ for history)" id="console-input" aria-label="Server command" autocomplete="off">
+    <input class="input min-w-0 flex-1 font-mono" placeholder="Type a command (Enter to send, ↑ for history)" id="console-input" aria-label="Server command" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send">
     <button class="btn btn-primary" id="console-send">{{{icon 'terminal' 'size-4'}}} Send</button>
   </div>
   <div class="mt-2 flex flex-wrap gap-1.5{{#unless perms.console}} hidden{{/unless}}">

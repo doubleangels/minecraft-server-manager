@@ -26,12 +26,16 @@ export function openModal({ title = '', content = '', actions = [], size = 'md',
   // whole modal out past the viewport instead of shrinking to fit. The
   // minmax(0,1fr) track from grid-cols-1 gives w-full a definite size to
   // resolve against, so max-w-* caps it and content shrinks/wraps as normal.
+  //
+  // Phones get a bottom sheet: the panel sits on the bottom edge (in thumb
+  // reach), full width, and its actions stack into full-width buttons with
+  // Cancel last, like a native action sheet. From sm up it is the centred dialog.
   backdrop.className =
-    'fixed inset-0 z-[60] grid grid-cols-1 place-items-center bg-black/60 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur-[2px] animate-[fade-in_.15s_ease-out]';
+    'fixed inset-0 z-[60] grid grid-cols-1 place-items-end bg-black/60 backdrop-blur-[2px] animate-[fade-in_.15s_ease-out] sm:place-items-center sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]';
 
   const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-3xl' };
   const panel = document.createElement('div');
-  panel.className = `card w-full ${widths[size] || widths.md} max-h-[85vh] flex flex-col shadow-modal animate-[modal-in_.15s_ease-out]`;
+  panel.className = `card w-full ${widths[size] || widths.md} max-h-[92dvh] flex flex-col rounded-b-none border-b-0 pb-[env(safe-area-inset-bottom)] shadow-modal animate-[sheet-in_.18s_ease-out] sm:max-h-[85vh] sm:rounded-b-lg sm:border-b sm:pb-0 sm:animate-[modal-in_.15s_ease-out]`;
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-modal', 'true');
 
@@ -55,11 +59,12 @@ export function openModal({ title = '', content = '', actions = [], size = 'md',
   let footer = null;
   if (actions.length) {
     footer = document.createElement('div');
-    footer.className = 'flex flex-wrap justify-end gap-2 border-t border-line px-5 py-3.5';
+    footer.className =
+      'flex flex-col-reverse gap-2 border-t border-line px-4 py-3 sm:flex-row sm:flex-wrap sm:justify-end sm:px-5 sm:py-3.5';
     for (const action of actions) {
       const btn = document.createElement('button');
       const kinds = { primary: 'btn btn-primary', danger: 'btn btn-danger', ghost: 'btn btn-ghost', default: 'btn' };
-      btn.className = kinds[action.kind] || kinds.default;
+      btn.className = `${kinds[action.kind] || kinds.default} w-full sm:w-auto`;
       btn.textContent = action.label;
       btn.addEventListener('click', async () => {
         if (!action.onClick) return close();
@@ -101,7 +106,7 @@ export function openModal({ title = '', content = '', actions = [], size = 'md',
     backdrop.style.transition = 'opacity 120ms ease';
     backdrop.style.opacity = '0';
     panel.style.transition = 'transform 120ms ease';
-    panel.style.transform = 'scale(0.98)';
+    panel.style.transform = matchMedia('(min-width: 40rem)').matches ? 'scale(0.98)' : 'translateY(24px)';
     setTimeout(() => backdrop.remove(), 120);
     if (!stack.length) document.documentElement.style.overflow = '';
     if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();

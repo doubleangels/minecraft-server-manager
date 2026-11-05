@@ -198,8 +198,29 @@ function init(serverId) {
     let excess = log.childElementCount - MAX_LINES;
     while (excess-- > 0) log.firstElementChild.remove();
     if (autoScroll) log.scrollTop = log.scrollHeight;
+    else noteUnseen(texts.length);
     syncNoMatch();
   }
+
+  // ---- "Jump to Latest" pill: counts lines that arrived while scrolled up ----
+  const latestBtn = document.querySelector('[data-console-latest]');
+  const latestLabel = document.querySelector('[data-console-latest-label]');
+  let unseen = 0;
+  function noteUnseen(n) {
+    if (!latestBtn) return;
+    unseen += n;
+    latestLabel.textContent = `${unseen > 999 ? '999+' : unseen} New ${unseen === 1 ? 'Line' : 'Lines'}`;
+    latestBtn.hidden = false;
+  }
+  function clearUnseen() {
+    unseen = 0;
+    if (latestBtn) latestBtn.hidden = true;
+  }
+  latestBtn?.addEventListener('click', () => {
+    log.scrollTop = log.scrollHeight;
+    autoScroll = true;
+    clearUnseen();
+  });
 
   function appendLine(text) {
     appendLines([text]);
@@ -335,9 +356,26 @@ function init(serverId) {
   connect();
 
   // Pause auto-scroll when the user scrolls up; resume at bottom.
-  log.addEventListener('scroll', () => {
-    autoScroll = log.scrollTop + log.clientHeight >= log.scrollHeight - 24;
-  });
+  log.addEventListener(
+    'scroll',
+    () => {
+      autoScroll = log.scrollTop + log.clientHeight >= log.scrollHeight - 24;
+      if (autoScroll && unseen) clearUnseen();
+    },
+    { passive: true }
+  );
+
+  // Phones: when the on-screen keyboard opens it shrinks the visual viewport
+  // and can cover the command box. Keep the box in view while it has focus.
+  if (input && window.visualViewport) {
+    const keepInView = () => {
+      if (document.activeElement === input) input.scrollIntoView({ block: 'nearest' });
+    };
+    input.addEventListener('focus', () => setTimeout(keepInView, 300));
+    window.visualViewport.addEventListener('resize', keepInView);
+  }
+
+  initWakeLock();
 
   if (filterInput) filterInput.addEventListener('input', refilter);
   document.querySelectorAll('[data-level-filter]').forEach((cb) => {
@@ -566,4 +604,56 @@ function initLineCopy() {
       toast('Line copied.');
     }
   });
+}
+
+// "Keep Screen On": holds a screen wake lock while the console is open. The
+// browser drops the lock whenever the tab is hidden, so it is taken again on
+// return. The choice is remembered per device.
+function initWakeLock() {
+  const btn = document.querySelector('[data-wake-lock]');
+  if (!btn || !('wakeLock' in navigator)) return;
+  btn.hidden = false;
+  const KEY = 'msm-console-wake';
+  let want = false;
+  let lock = null;
+  try {
+    want = localStorage.getItem(KEY) === '1';
+  } catch {
+    /* storage blocked */
+  }
+  const paint = () => {
+    btn.setAttribute('aria-pressed', String(want));
+    btn.classList.toggle('btn-primary', want);
+  };
+  const acquire = async () => {
+    if (!want || lock || document.visibilityState !== 'visible') return;
+    try {
+      lock = await navigator.wakeLock.request('screen');
+      lock.addEventListener('release', () => {
+        lock = null;
+      });
+    } catch {
+      // Refused (battery saver, no user gesture yet): leave the toggle as is.
+      lock = null;
+    }
+  };
+  btn.addEventListener('click', async () => {
+    want = !want;
+    try {
+      localStorage.setItem(KEY, want ? '1' : '0');
+    } catch {
+      /* storage blocked */
+    }
+    paint();
+    if (want) {
+      await acquire();
+      if (!lock) toast('Your browser would not keep the screen on right now.', { kind: 'warn' });
+    } else if (lock) {
+      await lock.release().catch(() => {});
+      lock = null;
+    }
+  });
+  document.addEventListener('visibilitychange', acquire);
+  paint();
+  acquire();
 }

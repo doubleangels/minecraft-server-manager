@@ -18,6 +18,7 @@ import './lib/avatar.js';
 import './lib/pwa.js';
 import './lib/serverPins.js';
 import './lib/dirtyGuard.js';
+import './lib/mobile.js';
 import { setBaseTitle } from './lib/title.js';
 
 // Expose for inline handlers and future page scripts.

@@ -31,6 +31,8 @@
         phone (hamburger + title + this + theme + avatar); aria-label keeps it
         announced to screen readers regardless of which span is visible. }}
     <a href="/servers/new" class="btn btn-primary btn-sm" aria-label="Create a Server" data-tip="Create a new server.">{{{icon 'plus' 'size-3.5'}}} <span class="hidden sm:inline">Create a Server</span></a>
+    {{! Installed app only: there is no browser reload button there. }}
+    <button type="button" class="btn btn-ghost btn-sm hidden [@media(display-mode:standalone)]:inline-flex" data-app-refresh aria-label="Refresh" data-tip="Reload this page.">{{{icon 'refresh-cw' 'size-4'}}}</button>
     <button id="theme-toggle" class="btn btn-ghost btn-sm" aria-label="Toggle theme" data-tip="Switch between the dark and light theme.">
       <span data-theme-icon="dark">{{{icon 'moon' 'size-4'}}}</span><span data-theme-icon="light" class="hidden">{{{icon 'sun' 'size-4'}}}</span>
     </button>

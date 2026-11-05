@@ -186,6 +186,14 @@
     transform: none;
   }
 }
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
 @keyframes toast-in {
   from {
     opacity: 0;
@@ -311,11 +319,35 @@
   }
 }
 
+/* Phone bottom tab bar (server pages): the page reserves its height through
+   --bottom-nav so sticky save bars and toasts sit above it, not under it.
+   While a text field has focus the on-screen keyboard is up, and a bar riding
+   on top of it only eats space, so it steps aside until typing is done. */
+@media (width < 40rem) {
+  body:has([data-bottom-nav]) {
+    --bottom-nav: calc(3.5rem + env(safe-area-inset-bottom));
+    padding-bottom: var(--bottom-nav);
+  }
+  body:has([data-bottom-nav]):has(
+      :is(
+        input:not([type='checkbox'], [type='radio'], [type='range'], [type='button'], [type='submit']),
+        textarea,
+        [contenteditable='true']
+      ):focus
+    ) {
+    --bottom-nav: 0px;
+    & [data-bottom-nav] {
+      display: none;
+    }
+  }
+}
+
 @layer components {
   /* ---- Stacking scale (the ONLY z values in the app) ----
-     topbar shell 20 · sidebar backdrop 30 · sidebar 40 · modal 60 · toasts 65
-     (above modals - errors fired from modal actions must be readable) ·
-     dropdown menus 68 (they can open from inside a modal) · tooltip 70.
+     topbar shell 20 · phone bottom tab bar 25 · sidebar backdrop 30 ·
+     sidebar 40 · modal 60 · toasts 65 (above modals - errors fired from modal
+     actions must be readable) · connection banner 66 · dropdown menus 68
+     (they can open from inside a modal) · tooltip 70.
      Anything new picks a slot here first. ---- */
 
   /* Pixel heading - titles only, per design spec */

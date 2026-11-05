@@ -43,6 +43,16 @@ The top bar has the **Create a Server** button, a **theme toggle** (dark/light),
 
 Every page is laid out for a narrow screen first and widens from there: the sidebar tucks away behind the menu button, data tables stack into cards, toolbars wrap, and the world-controls rail collapses to a card you open when you need it. Buttons and chips have a real touch target size. Nothing is desktop-only.
 
+Made for thumbs:
+
+- A server's six sections (**Overview**, **Console**, **Players**, **Content**, **Data**, **Settings**) sit in a tab bar along the bottom of the screen. It steps aside while you type.
+- Swipe left or right on a server page to move between the current section's sub-tabs (for example **Players → Inventory → Analytics**). Swipes that start in a text field, the console, a map or a sideways-scrolling table are left alone.
+- Dialogs open as sheets from the bottom edge with full-width buttons.
+- The keyboard doesn't capitalise or "correct" player names, commands, file names, addresses or searches, and its Enter key reads **Send** in the console and **Search** in search boxes.
+- The console fits the screen height, keeps the command box above the keyboard, and shows a **New Lines** button when output arrives while you're scrolled up. **Keep Screen On** stops the phone from locking while you watch it.
+- **Share** next to **Copy Address** on a server's Overview, and next to **Copy Invite Text** on **Players → Invites**, opens the phone's share sheet.
+- If the panel stops answering (Wi-Fi drops, the panel restarts) a **Reconnecting…** banner says so, and goes away by itself once it answers again.
+
 ### Install it as an app
 
 The panel installs like an app on phones, tablets and desktops: its own icon, full screen with no browser bars, and shortcuts to Servers, Health, Backups and Activity on a long press of the icon.
@@ -56,6 +66,7 @@ Once installed:
 
 - **Notify Me When Tasks Finish** in the account menu sends a system notification when a backup, restore, update or other background task finishes while the panel isn't on screen.
 - The app icon shows a badge with the number of unread [health alerts](dashboard.md), where the system supports badges.
+- There's no browser bar, so the top bar has a **Refresh** button, and pulling down from the top of a page reloads it.
 - If the panel can't be reached, you get a clear offline screen with a **Try Again** button instead of a browser error. Nothing is cached that could show you out-of-date server data: every page and number still comes live from the panel.
 
 ### Small shortcuts
