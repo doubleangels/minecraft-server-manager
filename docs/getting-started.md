@@ -46,7 +46,6 @@ Every page is laid out for a narrow screen first and widens from there: the side
 Made for thumbs:
 
 - A server's six sections (**Overview**, **Console**, **Players**, **Content**, **Data**, **Settings**) sit in a tab bar along the bottom of the screen. It steps aside while you type.
-- Swipe left or right on a server page to move between the current section's sub-tabs (for example **Players → Inventory → Analytics**). Swipes that start in a text field, the console, a map or a sideways-scrolling table are left alone.
 - Dialogs open as sheets from the bottom edge with full-width buttons.
 - The keyboard doesn't capitalise or "correct" player names, commands, file names, addresses or searches, and its Enter key reads **Send** in the console and **Search** in search boxes.
 - The console fits the screen height, keeps the command box above the keyboard, and shows a **New Lines** button when output arrives while you're scrolled up. **Keep Screen On** stops the phone from locking while you watch it.

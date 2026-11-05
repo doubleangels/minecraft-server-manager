@@ -345,6 +345,12 @@
   }
 }
 
+/* Toasts rise above a visible sticky action bar instead of covering its
+   Save button (the very button that just raised the toast). */
+body:has(.action-bar:not(.hidden)) #toasts {
+  bottom: calc(1rem + var(--bottom-nav, env(safe-area-inset-bottom)) + 5.5rem);
+}
+
 @layer components {
   /* ---- Stacking scale (the ONLY z values in the app) ----
      topbar shell 20 · phone bottom tab bar 25 · sidebar backdrop 30 ·
@@ -539,9 +545,14 @@
      content never bleeds through behind the buttons; above the phone tab bar
      when there is one, otherwise clear of the home indicator. */
   .action-bar {
-    @apply sticky z-10 border-t border-line bg-canvas px-4 pt-3;
-    bottom: var(--bottom-nav, 0px);
-    padding-bottom: calc(0.75rem + var(--bar-safe, env(safe-area-inset-bottom)));
+    @apply sticky z-10 border-t border-line bg-canvas px-4;
+    /* Tucked 1px under the phone tab bar (which stacks above it): the two
+       read as one dock with a single hairline between them, and sub-pixel
+       rounding can never open a sliver of page content in between. With no
+       tab bar the fallback cancels out to bottom: 0. */
+    bottom: calc(var(--bottom-nav, 1px) - 1px);
+    padding-top: 0.625rem;
+    padding-bottom: calc(0.625rem + var(--bar-safe, env(safe-area-inset-bottom)));
     box-shadow: 0 -10px 20px -14px rgb(0 0 0 / 0.55);
   }
 

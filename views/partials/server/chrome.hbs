@@ -61,11 +61,14 @@
 
   {{! Top-level sections. Phone: a tab bar fixed to the bottom edge, in thumb
       reach, all six side by side (z 25, see the scale in input.css; the page
-      reserves room for it through --bottom-nav). sm+: one row in the card. }}
-  <nav data-bottom-nav class="fixed inset-x-0 bottom-0 z-[25] grid grid-cols-6 border-t border-line bg-canvas pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sm:static sm:z-auto sm:flex sm:flex-nowrap sm:items-center sm:gap-0.5 sm:overflow-x-auto sm:bg-transparent sm:p-0 sm:px-2" aria-label="Server sections">
+      reserves room for it through --bottom-nav, and the bar is exactly that
+      tall so nothing peeks between it and a sticky action bar). Its hairline
+      is an inset shadow, not a border, so the active tab's green top edge
+      paints over it instead of sitting under it. sm+: one row in the card. }}
+  <nav data-bottom-nav class="fixed inset-x-0 bottom-0 z-[25] grid h-[calc(3.5rem+env(safe-area-inset-bottom))] grid-cols-6 bg-canvas pb-[env(safe-area-inset-bottom)] shadow-[inset_0_1px_0_var(--color-line)] sm:h-auto sm:border-t sm:border-line sm:shadow-none pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sm:static sm:z-auto sm:flex sm:flex-nowrap sm:items-center sm:gap-0.5 sm:overflow-x-auto sm:bg-transparent sm:p-0 sm:px-2" aria-label="Server sections">
     {{#each nav.groups}}
       <a href="{{href}}" data-nav-group="{{key}}" data-nav-tabs="{{tabs}}"{{#if active}} aria-current="page"{{/if}}
-         class="relative flex min-w-0 shrink-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap border-t-2 px-0.5 pb-1.5 pt-2 text-[10px] font-medium transition sm:inline-flex sm:flex-row sm:justify-start sm:gap-1.5 sm:border-b-2 sm:border-t-0 sm:px-3 sm:py-2.5 sm:text-sm
+         class="relative flex min-w-0 shrink-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap border-t-2 px-0.5 pb-1 pt-1 text-[10px] font-medium transition sm:inline-flex sm:flex-row sm:justify-start sm:gap-1.5 sm:border-b-2 sm:border-t-0 sm:px-3 sm:py-2.5 sm:text-sm
            {{#if active}}border-grass-500 text-ink{{else}}border-transparent text-ink-faint hover:text-ink{{/if}}">
         {{{icon icon 'size-5 sm:size-4'}}} <span class="max-w-full truncate">{{label}}</span>
         {{#if badge}}<span class="badge badge-danger absolute right-1 top-1 px-1 text-[10px] leading-none sm:static sm:px-1.5 sm:text-xs sm:leading-normal">{{badge}}</span>{{/if}}
@@ -75,8 +78,7 @@
   {{! Sub-nav for the active section (only when it has more than one). }}
   {{#if nav.sub}}
     {{! Wraps onto a second line on a phone rather than hiding tabs off-screen. }}
-    {{! data-subtabs: on a phone a sideways swipe moves between these (app.js). }}
-    <div class="flex flex-wrap items-center gap-1 border-t border-line bg-inset/40 px-3 py-1.5" data-subtabs>
+    <div class="flex flex-wrap items-center gap-1 border-t border-line bg-inset/40 px-3 py-1.5">
       {{#each nav.sub}}
         <a href="{{href}}" class="subtab shrink-0 {{#if active}}active{{/if}}">
           {{label}}{{#if badge}} <span class="badge badge-danger">{{badge}}</span>{{/if}}

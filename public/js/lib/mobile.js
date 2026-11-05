@@ -1,9 +1,8 @@
 // Phone and installed-app comforts that span every page: keyboard hints on
-// typed fields, the Share button, the "panel stopped answering" banner, pull
-// to refresh in the installed app, and swiping between a section's sub-tabs.
+// typed fields, the Share button, the "panel stopped answering" banner, and
+// pull to refresh in the installed app.
 import { toast } from './toast.js';
 
-const coarse = window.matchMedia('(pointer: coarse)');
 const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 const modalOpen = () => Boolean(document.querySelector('[role="dialog"][aria-modal="true"]'));
 
@@ -167,64 +166,4 @@ function initPullToRefresh() {
     reset();
   });
   document.addEventListener('touchcancel', reset);
-}
-
-// ---- Swipe between a section's sub-tabs (phones) ----
-// A clear sideways swipe on the page moves to the next or previous sub-tab.
-// Ignored where a sideways drag already means something: text fields, the
-// console, sliders, maps, sideways-scrolling tables and rows, and dialogs.
-const subtabs = document.querySelector('[data-subtabs]');
-if (subtabs) initSwipe(subtabs);
-
-function scrollsSideways(el) {
-  for (let n = el; n && n !== document.body; n = n.parentElement) {
-    if (n.scrollWidth > n.clientWidth + 1) {
-      const ox = getComputedStyle(n).overflowX;
-      if (ox === 'auto' || ox === 'scroll') return true;
-    }
-  }
-  return false;
-}
-
-function initSwipe(row) {
-  const links = [...row.querySelectorAll('a.subtab')];
-  const current = links.findIndex((a) => a.classList.contains('active'));
-  if (links.length < 2 || current === -1) return;
-  let start = null;
-  document.addEventListener(
-    'touchstart',
-    (e) => {
-      start = null;
-      if (!coarse.matches || e.touches.length !== 1 || modalOpen()) return;
-      const t = e.target;
-      if (
-        t.closest(
-          'input, textarea, select, [contenteditable="true"], #console-log, canvas, iframe, [data-no-swipe], [draggable="true"]'
-        ) ||
-        scrollsSideways(t)
-      )
-        return;
-      start = { x: e.touches[0].clientX, y: e.touches[0].clientY, at: Date.now() };
-    },
-    { passive: true }
-  );
-  document.addEventListener(
-    'touchend',
-    (e) => {
-      if (!start) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - start.x;
-      const dy = t.clientY - start.y;
-      const quick = Date.now() - start.at < 600;
-      start = null;
-      // Mostly sideways, long enough to be on purpose, and not from the very
-      // edge (iOS uses edge swipes for back and forward).
-      if (!quick || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 2) return;
-      if (t.clientX - dx < 16 || t.clientX - dx > window.innerWidth - 16) return;
-      if (window.getSelection && String(window.getSelection()).length) return;
-      const next = links[current + (dx < 0 ? 1 : -1)];
-      if (next) location.href = next.href;
-    },
-    { passive: true }
-  );
 }

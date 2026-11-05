@@ -159,12 +159,16 @@
 {{! Bulk action bar: appears in Select mode, pinned to the bottom of the
     screen. z-10: inside the page, below the topbar (20). }}
 <div id="bulk-bar" class="action-bar -mx-4 mt-4 hidden sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-  <div class="flex flex-wrap items-center gap-2">
-    <span class="mr-auto text-sm"><b data-bulk-count>0</b> selected <button type="button" class="ml-2 text-xs text-link hover:underline" data-bulk-all>Select All</button></span>
-    <button class="btn btn-sm" data-bulk="start" disabled>{{{icon 'play' 'size-3.5'}}} Start</button>
-    <button class="btn btn-sm" data-bulk="restart" disabled>{{{icon 'rotate-cw' 'size-3.5'}}} Restart</button>
-    <button class="btn btn-sm btn-danger" data-bulk="stop" disabled>{{{icon 'square' 'size-3.5'}}} Stop</button>
-    <button class="btn btn-sm" data-bulk="backup" disabled>{{{icon 'save' 'size-3.5'}}} Back Up</button>
+  {{! Phone: the count on its own line, then the four actions as one even
+      row (no lone button wrapping onto a third line). sm+: one row. }}
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+    <span class="flex items-center gap-3 text-sm sm:mr-auto"><span><b data-bulk-count>0</b> selected</span> <button type="button" class="text-xs text-link hover:underline" data-bulk-all>Select All</button></span>
+    <div class="grid grid-cols-4 gap-2 sm:flex">
+      <button class="btn btn-sm px-1 sm:px-2.5" data-bulk="start" disabled>{{{icon 'play' 'size-3.5'}}} Start</button>
+      <button class="btn btn-sm px-1 sm:px-2.5" data-bulk="restart" disabled>{{{icon 'rotate-cw' 'size-3.5'}}} Restart</button>
+      <button class="btn btn-sm btn-danger px-1 sm:px-2.5" data-bulk="stop" disabled>{{{icon 'square' 'size-3.5'}}} Stop</button>
+      <button class="btn btn-sm px-1 sm:px-2.5" data-bulk="backup" disabled>{{{icon 'save' 'size-3.5'}}} Back Up</button>
+    </div>
   </div>
 </div>
 <script type="module" src="/js/pages/dashboard.js"></script>
