@@ -6,8 +6,8 @@
 // Push notifications for finished tasks are shown through this worker too,
 // because Android Chrome cannot construct `new Notification()` in a page.
 
-const CACHE = 'msm-shell-v1';
-const SHELL = ['/offline.html', '/css/app.css', '/favicon.svg', '/icons/icon-192.png'];
+const CACHE = 'msm-shell-v2';
+const SHELL = ['/offline.html', '/css/app.css', '/favicon.svg', '/icons/pickaxe-192.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

@@ -11,7 +11,7 @@ test.before(async () => {
 test.after(() => app.stop());
 
 test('the app manifest, service worker and offline page load without signing in', async () => {
-  for (const p of ['/manifest.json', '/sw.js', '/offline.html', '/icons/icon-maskable-192.png']) {
+  for (const p of ['/manifest.json', '/sw.js', '/offline.html', '/icons/pickaxe-maskable-192.png']) {
     const r = await app.req('GET', p);
     assert.equal(r.status, 200, p);
   }
