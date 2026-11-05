@@ -4,8 +4,13 @@
 // JSON values. Secrets (API keys, RCON passwords) live in api_keys/servers,
 // encrypted - never here.
 
+const path = require('node:path');
 const db = require('../db');
 const httpError = require('../utils/httpError');
+const logger = require('../logger')(path.basename(__filename));
+
+// Bookkeeping keys (a "last seen" cursor) move on their own all the time.
+const BOOKKEEPING_KEY = /(mark|cursor|last[-_]?seen|last[-_]?run|checked[-_]?at)/i;
 
 function get(key, fallback = null) {
   const row = db.get('SELECT value_json FROM settings WHERE key = ?', key);
@@ -18,16 +23,31 @@ function get(key, fallback = null) {
 }
 
 function set(key, value) {
+  const json = JSON.stringify(value);
+  const before = db.get('SELECT value_json FROM settings WHERE key = ?', key);
+  if (before && before.value_json === json) return;
+  // Old and new value, so the log shows what a change actually was. Values are
+  // non-secret by contract (see above); the sanitizer still redacts by key.
+  let from;
+  try {
+    from = before ? JSON.parse(before.value_json) : undefined;
+  } catch {
+    from = undefined;
+  }
+  const meta = { key, from, to: value };
+  if (BOOKKEEPING_KEY.test(key)) logger.debug('Changed a panel setting.', meta);
+  else logger.info('Changed a panel setting.', meta);
   db.run(
     `INSERT INTO settings (key, value_json) VALUES (?, ?)
      ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
     key,
-    JSON.stringify(value)
+    json
   );
 }
 
 function remove(key) {
-  db.run('DELETE FROM settings WHERE key = ?', key);
+  const { changes } = db.run('DELETE FROM settings WHERE key = ?', key);
+  if (changes) logger.info('Removed a panel setting.', { key });
 }
 
 // ---------------------------------------------------------------------------

@@ -10,6 +10,7 @@ const { toHostPath } = require('./hostPath');
 const { ensureNetwork } = require('./networks');
 const db = require('../db');
 const logger = require('../logger')(path.basename(__filename));
+const { redactCommand } = require('../utils/logSanitize');
 
 const LABEL = 'msm.id';
 const GAME_PORT = '25565';
@@ -80,8 +81,24 @@ async function createContainer(spec) {
     hostConfig.NetworkMode = spec.networkName;
   }
 
+  const name = spec.containerName || containerName(spec.serverId);
+  // The full spec, minus secrets: env is logged as an object so the logger
+  // redacts credential-named variables (RCON_PASSWORD, CF_API_KEY) by key.
+  logger.info('Creating a server container.', {
+    serverId: spec.serverId,
+    containerName: name,
+    image: spec.image,
+    ports: spec.ports,
+    extraPorts: spec.extraPorts && spec.extraPorts.length ? spec.extraPorts : undefined,
+    memoryMb: spec.resources.memoryMb,
+    swapMb: spec.resources.swapMb || 0,
+    cpus: spec.resources.cpus || undefined,
+    networkName: spec.networkName || undefined,
+    binds: hostConfig.Binds,
+    env: spec.env,
+  });
   const container = await docker.createContainer({
-    name: spec.containerName || containerName(spec.serverId),
+    name,
     Image: spec.image,
     Env: Object.entries(spec.env).map(([k, v]) => `${k}=${v}`),
     Labels: { [LABEL]: spec.serverId, 'msm.managed': 'true' },
@@ -90,6 +107,11 @@ async function createContainer(spec) {
     OpenStdin: false,
     Healthcheck: healthcheckSpec(),
     HostConfig: hostConfig,
+  });
+  logger.info('Created a server container.', {
+    serverId: spec.serverId,
+    containerName: name,
+    containerId: container.id,
   });
   return container.id;
 }
@@ -219,7 +241,9 @@ async function inspectStatus(serverId) {
 }
 
 async function startContainer(serverId) {
+  const t0 = Date.now();
   await getContainer(serverId).start();
+  logger.info('Started a server container.', { serverId, durationMs: Date.now() - t0 });
 }
 
 /**
@@ -228,6 +252,8 @@ async function startContainer(serverId) {
  * period so the world always saves.
  */
 async function stopContainer(serverId, { graceSeconds = 90 } = {}) {
+  const t0 = Date.now();
+  logger.info('Stopping a server container.', { serverId, graceSeconds });
   const container = getContainer(serverId);
   try {
     // Send the in-game `stop` (saves the world). execCapture reads + destroys the
@@ -240,6 +266,11 @@ async function stopContainer(serverId, { graceSeconds = 90 } = {}) {
   }
   const info = await inspectStatus(serverId);
   if (info.exists && (info.status === 'running' || info.status === 'starting' || info.status === 'unhealthy')) {
+    logger.info('The in-game stop did not finish, so Docker is stopping the container.', {
+      serverId,
+      status: info.status,
+      graceSeconds,
+    });
     try {
       await container.stop({ t: graceSeconds });
     } catch (err) {
@@ -254,21 +285,26 @@ async function stopContainer(serverId, { graceSeconds = 90 } = {}) {
   if (final.exists && ['running', 'starting', 'unhealthy'].includes(final.status)) {
     throw new Error('The server did not stop in time. Try Force stop, or check that Docker is running.');
   }
+  logger.info('Stopped a server container.', { serverId, durationMs: Date.now() - t0 });
 }
 
 async function killContainer(serverId) {
   try {
     await getContainer(serverId).kill();
+    logger.info('Killed a server container.', { serverId });
   } catch (err) {
     if (err.statusCode !== 404 && err.statusCode !== 409) throw err; // 409 = not running
+    logger.debug('A kill found no running container.', { serverId, statusCode: err.statusCode });
   }
 }
 
 async function removeContainer(serverId) {
   try {
     await getContainer(serverId).remove({ force: true });
+    logger.info('Removed a server container.', { serverId });
   } catch (err) {
     if (err.statusCode !== 404) throw err;
+    logger.debug('A remove found no container.', { serverId });
   }
 }
 
@@ -307,7 +343,74 @@ function withDeadline(promise, deadline, label) {
   ]);
 }
 
-async function execRaw(serverId, cmd, { timeoutMs = 15000, wantExitCode = false } = {}) {
+// RCON commands that only read state. The panel runs these on timers (player
+// lists, TPS, map data), so they log at debug; anything else changes the game
+// and logs at info.
+const READ_ONLY_RCON = new Set([
+  'list',
+  'tps',
+  'mspt',
+  'forge',
+  'neoforge',
+  'data',
+  'seed',
+  'banlist',
+  'help',
+  'version',
+  'ver',
+  'plugins',
+  'pl',
+  'locate',
+  'locatebiome',
+  'spark',
+]);
+
+/** A loggable description of an exec command: what ran, secrets masked. */
+function describeExec(cmd) {
+  const words = cmd.map(String);
+  if (words[0] !== 'rcon-cli') return { kind: 'exec', command: redactCommand(words.join(' ')), readOnly: true };
+  const args = words.slice(1).filter((w, i) => !(i === 0 && w === '--'));
+  const command = redactCommand(args.join(' '));
+  const first = (args[0] || '').toLowerCase();
+  const second = (args[1] || '').toLowerCase();
+  const readOnly =
+    READ_ONLY_RCON.has(first) ||
+    (first === 'whitelist' && second === 'list') ||
+    (first === 'time' && second === 'query') ||
+    (first === 'worldborder' && second === 'get') ||
+    (first === 'gamerule' && args.length === 2) ||
+    ((first === 'tag' || first === 'scoreboard' || first === 'team') && args.includes('list'));
+  return { kind: 'rcon', command, readOnly };
+}
+
+async function execRaw(serverId, cmd, opts = {}) {
+  const what = describeExec(cmd);
+  const t0 = Date.now();
+  try {
+    const out = await execRawImpl(serverId, cmd, opts);
+    const meta = {
+      serverId,
+      kind: what.kind,
+      command: what.command,
+      durationMs: Date.now() - t0,
+      exitCode: out.exitCode ?? undefined,
+      outputBytes: out.stdout.length,
+      // A short look at what came back, for the commands someone ran on purpose.
+      output: what.readOnly ? undefined : out.stdout.trim().slice(0, 300) || undefined,
+    };
+    if (what.readOnly) logger.debug('Ran a command in a server container.', meta);
+    else logger.info('Ran a command in a server container.', meta);
+    return out;
+  } catch (err) {
+    const meta = { serverId, kind: what.kind, command: what.command, durationMs: Date.now() - t0, err: err.message };
+    // Read-only polls fail routinely while a server boots, so they stay quiet.
+    if (what.readOnly) logger.debug('A command in a server container failed.', meta);
+    else logger.warn('A command in a server container failed.', meta);
+    throw err;
+  }
+}
+
+async function execRawImpl(serverId, cmd, { timeoutMs = 15000, wantExitCode = false } = {}) {
   // ONE deadline for the whole call: creating the exec and starting it are
   // daemon round trips too, and a wedged Docker daemon (seen live under an
   // overloaded VM) can hang either of them for minutes - which hung the HTTP
@@ -398,6 +501,7 @@ async function execCaptureChecked(serverId, cmd, opts = {}) {
  * the image's default CMD isn't appended as extra arguments to our entrypoint.
  */
 async function removeDataDir(dir, image) {
+  logger.info('Removing a data folder through a cleanup container.', { dir, image });
   const docker = getDocker();
   const parent = path.dirname(dir);
   const base = path.basename(dir);
@@ -427,6 +531,7 @@ async function removeDataDir(dir, image) {
  * the target by name; `Cmd: []` clears the image's default CMD (see removeDataDir).
  */
 async function chownDataDir(dir, image, uid, gid) {
+  logger.info('Changing a data folder owner through a cleanup container.', { dir, image, uid, gid });
   const docker = getDocker();
   const parent = path.dirname(dir);
   const base = path.basename(dir);

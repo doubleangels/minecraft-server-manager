@@ -63,7 +63,20 @@ function recordEvent({ serverId = null, actor = 'system', type, summary, details
     JSON.stringify(details),
     excerptRel
   );
-  return Number(result.lastInsertRowid);
+  const eventId = Number(result.lastInsertRowid);
+  // Every action the panel keeps in its history also lands in the container
+  // log, with its full details. The logger's sanitizer redacts secret-named
+  // keys (an env diff keyed RCON_PASSWORD, a botToken) on the way out.
+  logger.info('Recorded an action in history.', {
+    eventId,
+    type,
+    serverId: serverId || undefined,
+    actor,
+    summary,
+    details: details && Object.keys(details).length ? details : undefined,
+    logExcerpt: excerptRel || undefined,
+  });
+  return eventId;
 }
 
 /**

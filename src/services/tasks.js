@@ -7,7 +7,7 @@
 const path = require('node:path');
 const { nanoid } = require('nanoid');
 const logger = require('../logger')(path.basename(__filename));
-const { serializeError } = require('../utils/logSanitize');
+const { serializeError, summarizeBody } = require('../utils/logSanitize');
 
 const tasks = new Map(); // id -> task
 const TTL_MS = 10 * 60 * 1000; // finished tasks linger for late polls
@@ -39,10 +39,23 @@ function createTask(title, { serverId = null, actor = 'system' } = {}) {
     finishedAt: null,
   };
   tasks.set(id, task);
+  // Every task's life is in the container log: start, each step, each detail
+  // line (debug), and how it ended. This is the one place that logs it, so
+  // run(), track() and direct createTask() callers all get the same lines.
+  logger.info('Started a background task.', { taskId: id, title, serverId: serverId || undefined, actor });
+  const durationMs = () => Date.now() - task.startedAt;
 
   const handle = {
     id,
     step(label) {
+      if (label !== task.stepLabel) {
+        logger.info('A background task moved to its next step.', {
+          taskId: id,
+          title,
+          step: label,
+          atMs: durationMs(),
+        });
+      }
       task.stepLabel = label;
       task.current = 0;
       task.total = 0;
@@ -52,16 +65,34 @@ function createTask(title, { serverId = null, actor = 'system' } = {}) {
       task.total = total;
     },
     log(line) {
+      logger.debug('A background task reported a detail.', { taskId: id, line: String(line).slice(0, 300) });
       task.logs.push(String(line).slice(0, 300));
       if (task.logs.length > 50) task.logs.shift();
     },
     done(result = null) {
+      if (task.state !== 'running') return;
+      logger.info('A background task finished.', {
+        taskId: id,
+        title,
+        serverId: serverId || undefined,
+        durationMs: durationMs(),
+        result: summarizeBody(result),
+      });
       task.state = 'done';
       task.result = result;
       task.finishedAt = Date.now();
       scheduleCleanup(id);
     },
     fail(error) {
+      if (task.state !== 'running') return;
+      logger.warn('A background task failed.', {
+        taskId: id,
+        title,
+        serverId: serverId || undefined,
+        step: task.stepLabel,
+        durationMs: durationMs(),
+        err: serializeError(error),
+      });
       task.state = 'failed';
       task.error = error && error.message ? error.message : String(error);
       const extra = {};
@@ -82,23 +113,11 @@ function createTask(title, { serverId = null, actor = 'system' } = {}) {
 /** Fire-and-track: returns the task id immediately; fn runs in background. */
 function run(title, opts, fn) {
   const t = createTask(title, opts);
-  const startedAt = Date.now();
-  logger.info('Started a background task.', {
-    taskId: t.id,
-    title,
-    serverId: opts && opts.serverId,
-    actor: opts && opts.actor,
-  });
+  // createTask/done/fail own the log lines (fail keeps the stack).
   Promise.resolve()
     .then(() => fn(t))
-    .then((result) => {
-      logger.info('A background task finished.', { taskId: t.id, title, durationMs: Date.now() - startedAt });
-      t.done(result);
-    })
-    .catch((err) => {
-      logger.error('A background task failed.', { taskId: t.id, title, err: serializeError(err) });
-      t.fail(err);
-    });
+    .then((result) => t.done(result))
+    .catch((err) => t.fail(err));
   return t.id;
 }
 

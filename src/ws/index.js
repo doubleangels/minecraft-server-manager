@@ -59,6 +59,14 @@ function attachWebSockets(httpServer) {
         ws.close(4404, 'unknown server');
         return;
       }
+      // One line when a live view opens and one when it closes, with who
+      // watched what and for how long.
+      const openedAt = Date.now();
+      const who = { serverId, kind, userId: user.id, username: user.username, ip: req.socket.remoteAddress };
+      logger.info('Opened a live WebSocket view.', who);
+      ws.on('close', (code) =>
+        logger.info('Closed a live WebSocket view.', { ...who, code, durationMs: Date.now() - openedAt })
+      );
       if (kind === 'console') handleConsole(ws, serverId, user, auth.sid);
       else handleStats(ws, serverId);
     });

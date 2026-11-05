@@ -117,8 +117,11 @@ const logger = require('../logger')(require('node:path').basename(__filename));
   swallows and handles locally logs exactly once.
 - High-frequency background loops use `makeFailureThrottle()` from `src/logger.js` (one line on a
   persistent failure, plus a "recovered" line), not a log per tick.
-- Never hand the logger request bodies, passwords, tokens, or full entity lists — ids and counts
-  only. `src/utils/logSanitize.js` redacts secret-shaped keys but don't rely on it.
+- Never hand the logger passwords, tokens, raw request bodies, or full entity lists. The access log
+  already records each write's body through `summarizeBody()` (secret keys redacted, file contents
+  as a size, long text cut), and `recordEvent()` already logs every history event with its details,
+  so a service rarely needs its own "did X" line. Console/RCON text goes through `redactCommand()`.
+  `src/utils/logSanitize.js` redacts secret-shaped keys, but name secret fields so it can.
 
 ## Styling & UI (Tailwind v4, server-rendered Handlebars)
 

@@ -9,6 +9,8 @@ require('./instrument');
 require('./preflight');
 
 const logger = require('./logger')('boot');
+// Every outbound HTTP call (Modrinth, CurseForge, Discord…) gets a log line.
+require('./utils/outboundLog').installOutboundLog();
 const { captureError, closeSentry } = require('./instrument');
 const { serializeError } = require('./utils/logSanitize');
 const { makeFailureThrottle } = require('./logger');
@@ -118,7 +120,13 @@ try {
     logger.info('The panel is listening.', {
       url: `http://${shownHost}:${config.port}`,
       dataDir: config.dataDir,
+      node: process.version,
+      pid: process.pid,
     });
+    // The effective settings, for anyone reading the log of a misbehaving
+    // install. Secrets (session secret, CurseForge key, Sentry DSN) are
+    // redacted by key name on the way out.
+    logger.info('Loaded the panel configuration.', { config });
     if (config.isExposedBind) {
       logger.warn(
         'The panel is bound to an address reachable beyond this machine. Only expose it behind a reverse proxy with TLS.',

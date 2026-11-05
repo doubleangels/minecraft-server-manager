@@ -87,8 +87,29 @@ Cross-cutting:
   metadata; `src/config/logLevel.js` is the shared level allowlist (kept separate to avoid a
   require cycle with `config`). `src/instrument.js` is a dormant Sentry seam, loaded first in
   `src/server.js`. `src/web/middleware/requestLog.js` writes one access-log line per request
-  (skipping `/healthz` and static assets). ESLint enforces `no-console` under `src/**`, with
+  (skipping `/healthz` and static assets).
+- **What lands in the container log** (all secret-free, through `logSanitize.js`):
+  - every history event (`recordEvent()` logs type, server, actor, summary and full details at `info`);
+  - every request: who (username, role, API token or session), what (method, path, query), a
+    sanitized body summary for writes, upload names and sizes, status, duration and response size.
+    Sign-in, setup, 2FA, password, API-key and token routes never log a body. Polled reads (the
+    task tray, live status) log at `debug`;
+  - every Docker action: container create (full spec, env redacted by name), start, stop, kill,
+    remove, image pulls, cleanup containers;
+  - every command run in a server container, RCON included, with duration, exit code and the start
+    of its output. Commands are passed through `redactCommand()` (AuthMe-style `login`/`register`
+    arguments and any `password`/`token`/`key` value are masked). Read-only polls (`list`, `tps`,
+    `data get`…) log at `debug`, game-changing commands at `info`;
+  - every background task's start, steps, finish or failure with timings (`services/tasks.js`);
+  - every outbound HTTP call (method, host, path, status, duration; no query, headers or bodies;
+    webhook paths masked) via `utils/outboundLog.js`, `debug` for GETs and `info` for writes;
+  - live console/stats WebSocket opens and closes, panel setting changes (old and new value), and
+    the effective configuration at boot.
+
+  Values are redacted by key name (`password`, `token`, `secret`, `apiKey`, `pin`, `backupCodes`,
+  `RCON_PASSWORD`…), file contents are logged as a size only, and booleans are never redacted. ESLint enforces `no-console` under `src/**`, with
   `preflight.js`, `instrument.js`, and `config/index.js` exempt (they run before the logger exists).
+
 - **Rate limiting**: `src/web/middleware/rateLimit.js` puts `express-rate-limit` in front of `/api`
   (`RATE_LIMIT_API_PER_MIN`, default 1200) and the login / 2FA / setup POSTs
   (`RATE_LIMIT_AUTH_PER_15MIN`, default 100); `0` disables a limiter. It keys on `req.ip`, so

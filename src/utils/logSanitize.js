@@ -33,9 +33,23 @@ const SECRET_WORDS = new Set([
   'mfa',
   'dsn',
   'pat',
+  'pin',
+  'salt',
+  'cipher',
+  'signature',
 ]);
 // Adjacent word-part pairs that together mean "credential".
-const SECRET_PAIRS = new Set(['apikey', 'privatekey', 'secretkey', 'accesskey', 'clientsecret']);
+const SECRET_PAIRS = new Set([
+  'apikey',
+  'privatekey',
+  'secretkey',
+  'accesskey',
+  'clientsecret',
+  'backupcodes',
+  'recoverycodes',
+  'licensekey',
+  'encryptionkey',
+]);
 
 // Key looks like it holds a URL - value gets its query string stripped.
 const URL_KEY_RE = /(url|uri|href|endpoint|webhook|dsn)$/i;
@@ -148,6 +162,9 @@ function looksLikeError(v) {
 
 function sanitizeValue(key, value, depth, seen) {
   if (value === null || value === undefined) return value;
+  // A true/false cannot carry a credential (cookieSecure, totpEnabled), and
+  // hiding it only hides the setting someone is trying to debug.
+  if (typeof value === 'boolean') return value;
   if (isSecretKey(key)) return REDACTED;
 
   const t = typeof value;
@@ -203,8 +220,75 @@ function sanitizeLogMeta(meta) {
   }
 }
 
+// Game and plugin commands that carry a credential as an argument (AuthMe and
+// friends: `register <pass> <pass>`, `login <pass>`), plus any `password`,
+// `token` or `key` word followed by a value.
+const SECRET_COMMANDS = /^(register|reg|login|l|changepassword|changepass|cp|unregister|unreg|email|authme)$/i;
+
+/**
+ * Make a console/RCON command safe to log: keeps the command word, masks the
+ * arguments of credential commands and any value after password/token/key.
+ * Never throws.
+ * @param {unknown} command
+ * @returns {string}
+ */
+function redactCommand(command) {
+  try {
+    const text = String(command ?? '').trim();
+    const words = text.split(/\s+/);
+    const first = (words[0] || '').replace(/^\//, '');
+    if (SECRET_COMMANDS.test(first) && words.length > 1) return `${words[0]} ${REDACTED}`;
+    const out = text.replace(/\b(password|passwd|pass|token|secret|key)(\s+|=)\S+/gi, `$1$2${REDACTED}`);
+    return out.length > 300 ? out.slice(0, 300) + '…[truncated]' : out;
+  } catch {
+    return REDACTED;
+  }
+}
+
+/**
+ * A compact, secret-free picture of a request body for the access log: secret
+ * keys redacted (sanitizeLogMeta), long strings (file contents, pasted text)
+ * cut to a short preview, long lists cut to their first items. Never throws.
+ * @param {unknown} body
+ * @returns {unknown}
+ */
+function summarizeBody(body) {
+  const MAX_STR = 160;
+  const MAX_ITEMS = 20;
+  const shrink = (v, depth, key = '') => {
+    if (typeof v === 'string') {
+      // File bodies (the text editor, uploads) can hold anything, including
+      // server.properties with its RCON password: size only, never content.
+      if (/^(content|contents|file|data)$/i.test(key)) return `[${v.length} chars]`;
+      if (/^(command|cmd)$/i.test(key)) return redactCommand(v);
+      return v.length > MAX_STR ? `${v.slice(0, MAX_STR)}…[${v.length} chars]` : v;
+    }
+    if (!v || typeof v !== 'object') return v;
+    if (depth > 4) return '[Truncated]';
+    if (Array.isArray(v)) {
+      const arr = v.slice(0, MAX_ITEMS).map((x) => shrink(x, depth + 1, key));
+      if (v.length > MAX_ITEMS) arr.push(`…[${v.length - MAX_ITEMS} more]`);
+      return arr;
+    }
+    const out = {};
+    for (const k of Object.keys(v)) out[k] = shrink(v[k], depth + 1, k);
+    return out;
+  };
+  try {
+    if (body === null || body === undefined) return undefined;
+    if (Buffer.isBuffer(body)) return `[${body.length} bytes]`;
+    if (typeof body !== 'object') return shrink(body, 0);
+    if (!Object.keys(body).length) return undefined;
+    return shrink(sanitizeLogMeta(body), 0);
+  } catch {
+    return '[Unloggable]';
+  }
+}
+
 module.exports = {
   REDACTED,
+  redactCommand,
+  summarizeBody,
   sanitizeLogMeta,
   serializeError,
   stripUrlQuery,

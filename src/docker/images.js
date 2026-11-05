@@ -4,7 +4,9 @@
 // Image management: ensure-pulled with progress, and digest comparison for
 // "image update available" checks.
 
+const path = require('node:path');
 const { getDocker } = require('./connect');
+const logger = require('../logger')(path.basename(__filename));
 const config = require('../config');
 
 // Overridable via MC_IMAGE_REPO for a private mirror / air-gapped registry.
@@ -30,13 +32,19 @@ async function imageExists(ref) {
  */
 function pullImage(ref, onProgress = () => {}) {
   const docker = getDocker();
+  const t0 = Date.now();
+  logger.info('Pulling a Docker image.', { image: ref });
   return new Promise((resolve, reject) => {
     docker.pull(ref, (err, stream) => {
       if (err) return reject(err);
       const layers = new Map();
       docker.modem.followProgress(
         stream,
-        (doneErr) => (doneErr ? reject(doneErr) : resolve()),
+        (doneErr) => {
+          if (doneErr) return reject(doneErr);
+          logger.info('Pulled a Docker image.', { image: ref, durationMs: Date.now() - t0 });
+          resolve();
+        },
         (evt) => {
           if (evt.id && evt.progressDetail) layers.set(evt.id, evt.progressDetail);
           let current = 0;
