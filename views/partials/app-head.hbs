@@ -45,6 +45,6 @@
     if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
     document.documentElement.dataset.theme = t;
     var m = document.querySelector('meta[name="theme-color"]');
-    if (m) m.setAttribute('content', t === 'light' ? '#ffffff' : '#16191c');
+    if (m) m.setAttribute('content', t === 'light' ? '#fcfdfd' : '#16191c');
   } catch (e) {}
 </script>

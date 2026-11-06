@@ -86,7 +86,7 @@ for (const el of document.querySelectorAll('[data-ts], [data-ts-ago], [data-ts-i
     // The installed app's status bar follows the theme (see partials/app-head.hbs).
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', theme === 'light' ? '#ffffff' : '#16191c');
+      ?.setAttribute('content', theme === 'light' ? '#fcfdfd' : '#16191c');
   };
   // The topbar button, or the account menu's copy of it (the menu is cloned
   // from a <template> on each open, so the click is delegated).

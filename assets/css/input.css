@@ -99,7 +99,7 @@
   --shadow-modal: 0 16px 48px rgb(14 17 19 / 0.3), 0 4px 12px rgb(14 17 19 / 0.15);
   /* Resting depth of a card: a hairline lift, so cards sit on the canvas
      instead of being printed on it. Dark mode leans on the lighter surface. */
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.28);
+  --shadow-card: inset 0 1px 0 rgb(255 255 255 / 0.03), 0 1px 2px rgb(0 0 0 / 0.28);
   --shadow-card-hover: 0 4px 14px rgb(0 0 0 / 0.32), 0 1px 3px rgb(0 0 0 / 0.24);
 
   /* ---- Motion: one curve and two durations for every state change ---- */
@@ -289,9 +289,6 @@
   p {
     text-wrap: pretty;
   }
-  ::selection {
-    background: color-mix(in srgb, var(--color-link) 32%, transparent);
-  }
   /* Themed scrollbars - the OS-default grey bar is the last piece of stock
      chrome on an otherwise committed surface. Thin, line-colored, no track. */
   * {
@@ -337,7 +334,7 @@
     @apply font-semibold tracking-tight text-ink;
   }
   ::selection {
-    @apply bg-grass-600/60 text-white;
+    @apply bg-grass-600/60 text-stone-25;
   }
   /* Everything clickable gets a physical press, even outside .btn (flavor
      tiles, icon pickers, chips) - part of the Minecraft tactility. Segmented
@@ -492,7 +489,7 @@
   }
   .btn-primary {
     /* Hover darkens: white text passes 4.5:1 on grass-600/700 but not grass-500. */
-    @apply border-grass-800 bg-grass-600 text-white hover:bg-grass-700;
+    @apply border-grass-800 bg-grass-600 text-stone-25 hover:bg-grass-700;
     box-shadow:
       inset 0 2px 0 rgb(255 255 255 / 0.22),
       inset 0 -3px 0 rgb(0 0 0 / 0.32);
@@ -504,7 +501,7 @@
       inset 0 -1px 0 rgb(255 255 255 / 0.08);
   }
   .btn-danger {
-    @apply border-redstone-800 bg-redstone-600 text-white hover:bg-redstone-700;
+    @apply border-redstone-800 bg-redstone-600 text-stone-25 hover:bg-redstone-700;
     box-shadow:
       inset 0 2px 0 rgb(255 255 255 / 0.18),
       inset 0 -3px 0 rgb(0 0 0 / 0.32);
@@ -1155,7 +1152,7 @@
     @apply bg-grass-600 ring-grass-700;
   }
   .msm-toggle input:checked + span::after {
-    @apply bg-white;
+    @apply bg-stone-25;
     transform: translateX(1rem);
     transform-origin: right center;
   }
@@ -1336,5 +1333,23 @@ html {
   }
   .card-title > .icon {
     @apply shrink-0 text-ink-faint;
+  }
+}
+
+@layer components {
+  /* Icons in navigation rest a shade quieter than their label, brighten with it
+     on hover, and take the accent on the current item. */
+  .nav-item > .icon,
+  .subtab > .icon {
+    color: var(--color-ink-faint);
+    transition: color var(--duration-state) var(--ease-standard);
+  }
+  .nav-item:hover > .icon,
+  .subtab:hover > .icon {
+    color: var(--color-ink);
+  }
+  .nav-item.active > .icon,
+  .subtab.active > .icon {
+    color: var(--color-ok);
   }
 }

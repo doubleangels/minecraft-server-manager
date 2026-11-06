@@ -31,7 +31,7 @@ export function openModal({ title = '', content = '', actions = [], size = 'md',
   // reach), full width, and its actions stack into full-width buttons with
   // Cancel last, like a native action sheet. From sm up it is the centred dialog.
   backdrop.className =
-    'fixed inset-0 z-[60] grid grid-cols-1 place-items-end bg-black/60 backdrop-blur-[2px] animate-[fade-in_.15s_ease-out] sm:place-items-center sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]';
+    'fixed inset-0 z-[60] grid grid-cols-1 place-items-end bg-stone-950/60 backdrop-blur-[2px] animate-[fade-in_.15s_ease-out] sm:place-items-center sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]';
 
   const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-3xl', xl: 'max-w-5xl', full: 'max-w-6xl' };
   const panel = document.createElement('div');
