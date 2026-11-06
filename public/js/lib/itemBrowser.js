@@ -117,7 +117,7 @@ export function openItemBrowser({ serverId, onPick, onManual } = {}) {
     if (!append) {
       state.offset = 0;
       listEl.innerHTML =
-        '<div class="p-6 text-center text-sm text-ink-faint">Loading items… <span class="text-xs">The first open scans every mod file; later opens are instant.</span></div>';
+        '<div class="loading-state flex-wrap px-6">Loading items… <span class="text-xs">The first open scans every mod file; later opens are instant.</span></div>';
       setStatus('');
     }
     try {
@@ -136,7 +136,7 @@ export function openItemBrowser({ serverId, onPick, onManual } = {}) {
       }
       if (!append) listEl.innerHTML = '';
       if (!data.items.length && !append) {
-        listEl.innerHTML = `<div class="p-6 text-center text-sm text-ink-faint">No items match${state.q ? ` "${esc(state.q)}"` : ''}. Try a different search, mod, or kind filter.</div>`;
+        listEl.innerHTML = `<div class="empty-inline">No items match${state.q ? ` "${esc(state.q)}"` : ''}. Try a different search, mod, or kind filter.</div>`;
       }
       for (const item of data.items) listEl.appendChild(row(item));
       const shown = state.offset + data.items.length;

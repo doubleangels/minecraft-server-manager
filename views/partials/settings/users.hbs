@@ -1,6 +1,6 @@
 {{! User accounts + sign-in lockouts, shown on Users & Permissions. Wired by
     public/js/pages/settings.js (it binds whatever of its sections a page has). }}
-  {{#> settings/card heading="Users" id="users-card" desc="Who can sign in, and their role across the whole panel."}}
+  {{#> settings/card heading="Users" icon="users" id="users-card" desc="Who can sign in, and their role across the whole panel."}}
     <div class="overflow-x-auto">
       <table class="table-base table-stack" id="users-table">
         <thead><tr><th>User</th><th>Role</th><th>2FA</th><th>Created</th><th class="text-right">Actions</th></tr></thead>
@@ -63,7 +63,7 @@
     <p class="help mt-2 max-w-prose">Roles: <b>Admin</b> can do everything. <b>Operator</b> can manage servers, but not storage, users, or update policies. <b>Viewer</b> is read-only. Server Permissions below changes what an operator or viewer may do on each server.</p>
   {{/settings/card}}
 
-  {{#> settings/card heading="Sign-In Security" id="lockouts-card" desc="Accounts and addresses currently blocked from signing in after too many failed attempts. Locks clear on their own after the cooldown; unlock one here to end it early."}}
-    <div id="lockouts-body" class="text-sm text-ink-faint">Checking…</div>
+  {{#> settings/card heading="Sign-In Security" icon="lock" id="lockouts-card" desc="Accounts and addresses currently blocked from signing in after too many failed attempts. Locks clear on their own after the cooldown; unlock one here to end it early."}}
+    <div id="lockouts-body" class="text-sm text-ink-faint"><div class="loading-state">Checking for locked accounts…</div></div>
     <button class="btn btn-sm mt-4 hidden w-full sm:w-auto" id="lockouts-clear-all">{{{icon 'lock-open' 'size-3.5'}}} Clear All Locks</button>
   {{/settings/card}}

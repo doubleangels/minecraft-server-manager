@@ -26,7 +26,7 @@
         <table class="table-base table-stack">
           <thead><tr><th class="w-10" data-th="#">#</th><th data-th="Player">Player</th><th class="text-right" data-th="Value">Value</th></tr></thead>
           <tbody id="an-scoreboard">
-            <tr><td colspan="3" class="p-6 text-center text-ink-faint">Loading…</td></tr>
+            <tr><td colspan="3"><div class="loading-state">Loading player stats…</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -46,7 +46,7 @@
         <label class="chip cursor-pointer gap-1.5"><input type="checkbox" class="msm-check" data-an-type="advancement" checked> Advancements</label>
       </div>
       <ol class="divide-y divide-line" id="an-timeline">
-        <li class="p-6 text-center text-ink-faint">Loading…</li>
+        <li class="loading-state">Loading…</li>
       </ol>
       <div class="border-t border-line p-3">
         {{! hidden until the first response proves there IS anything older. }}

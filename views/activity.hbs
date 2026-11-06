@@ -41,7 +41,7 @@
         {{#if hasLog}}<button class="btn btn-ghost btn-sm shrink-0" data-event-excerpt data-event-id="{{id}}" data-event-type="{{type}}" data-tip="View the captured log.">{{{icon 'file-text' 'size-3.5'}}}</button>{{/if}}
       </li>
     {{else}}
-      <li class="p-10 text-center text-sm text-ink-faint">No events match these filters.</li>
+      <li class="empty-inline py-10">{{{icon 'search-x' 'size-6'}}}No events match these filters.</li>
       {{! wording kept in sync with the History tab's empty state }}
     {{/each}}
   </ol>

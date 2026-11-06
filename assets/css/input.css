@@ -97,6 +97,14 @@
   --shadow-raised: 0 1px 2px rgb(14 17 19 / 0.07), 0 1px 1px rgb(14 17 19 / 0.05);
   --shadow-overlay: 0 8px 24px rgb(14 17 19 / 0.18), 0 2px 6px rgb(14 17 19 / 0.1);
   --shadow-modal: 0 16px 48px rgb(14 17 19 / 0.3), 0 4px 12px rgb(14 17 19 / 0.15);
+  /* Resting depth of a card: a hairline lift, so cards sit on the canvas
+     instead of being printed on it. Dark mode leans on the lighter surface. */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.28);
+  --shadow-card-hover: 0 4px 14px rgb(0 0 0 / 0.32), 0 1px 3px rgb(0 0 0 / 0.24);
+
+  /* ---- Motion: one curve and two durations for every state change ---- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-state: 200ms;
 
   /* ---- Semantic tokens (dark values - the default) ---- */
   --color-canvas: var(--color-stone-950);
@@ -116,11 +124,17 @@
   --color-ok: var(--color-grass-400);
   --color-warn: var(--color-gold-400);
   --color-danger: var(--color-redstone-400);
+
+  /* The one focus color: every control's keyboard focus ring and every field's
+     focus glow. Light mode swaps it for a step that reads on white. */
+  --color-focus: var(--color-diamond-400);
 }
 
 :root[data-theme='light'] {
   --color-canvas: var(--color-stone-50);
-  --color-surface: #ffffff;
+  /* A soft white, not #fff: cards still read as the lightest layer without
+     the glare of pure white against the stone canvas. */
+  --color-surface: #fcfdfd;
   --color-raised: var(--color-stone-25);
   --color-inset: var(--color-stone-100);
   --color-line: var(--color-stone-200);
@@ -136,6 +150,9 @@
   --color-ok: var(--color-grass-700);
   --color-warn: var(--color-gold-700);
   --color-danger: var(--color-redstone-700);
+  --color-focus: var(--color-diamond-600);
+  --shadow-card: 0 1px 2px rgb(14 17 19 / 0.06), 0 1px 3px rgb(14 17 19 / 0.04);
+  --shadow-card-hover: 0 6px 18px rgb(14 17 19 / 0.1), 0 2px 4px rgb(14 17 19 / 0.06);
 }
 
 @font-face {
@@ -259,6 +276,21 @@
     /* Lets height:auto participate in transitions (details animation above)
        on browsers that support it; ignored elsewhere. */
     interpolate-size: allow-keywords;
+  }
+  /* Headings wrap into balanced lines and sit a touch tighter than body
+     copy; paragraphs avoid a lone last word. Sizes stay on the elements. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-link) 32%, transparent);
   }
   /* Themed scrollbars - the OS-default grey bar is the last piece of stock
      chrome on an otherwise committed surface. Thin, line-colored, no track. */
@@ -440,12 +472,17 @@
      the bevel inverts, exactly like clicking a button in-game. */
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-sm border border-line-strong
-      bg-raised px-3.5 py-2 text-sm font-medium text-ink transition-[background,transform,box-shadow]
-      duration-75 hover:bg-inset focus-visible:outline-2 focus-visible:outline-offset-2
-      focus-visible:outline-diamond-400 disabled:pointer-events-none disabled:opacity-50;
+      bg-raised px-3.5 py-2 text-sm font-medium text-ink hover:bg-inset focus-visible:outline-2 focus-visible:outline-offset-2
+      focus-visible:outline-focus disabled:pointer-events-none disabled:opacity-50;
     box-shadow:
       inset 0 2px 0 rgb(255 255 255 / 0.07),
       inset 0 -3px 0 rgb(0 0 0 / 0.28);
+    transition:
+      background-color var(--duration-state) var(--ease-standard),
+      border-color var(--duration-state) var(--ease-standard),
+      color var(--duration-state) var(--ease-standard),
+      box-shadow var(--duration-state) var(--ease-standard),
+      transform 75ms ease-out;
   }
   .btn:active {
     transform: translateY(2px);
@@ -588,7 +625,7 @@
   .seg-btn {
     @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-sm px-3 text-sm
       font-medium text-ink-faint transition-colors hover:text-ink
-      focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus;
   }
   .seg-btn[aria-selected='true'],
   .seg-btn[aria-pressed='true'] {
@@ -606,10 +643,11 @@
      same utility string hand-rolled per template. */
   .subtab {
     @apply inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1 sm:px-2.5 text-sm font-medium text-ink-faint transition hover:bg-raised hover:text-ink
-      focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus;
   }
   .subtab.active {
     @apply bg-grass-500/15 text-ok font-semibold hover:bg-grass-500/15 hover:text-ok;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ok) 35%, transparent);
   }
 
   /* Icon-only buttons (modal/toast close, inline glyph actions): a real hit
@@ -617,7 +655,7 @@
   .icon-btn {
     @apply grid size-8 shrink-0 place-items-center rounded-sm text-ink-faint transition-colors
       hover:bg-inset hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1
-      focus-visible:outline-diamond-400;
+      focus-visible:outline-focus;
   }
 
   /* Sticky bottom action bar (Save/Discard, bulk actions). Opaque, so page
@@ -682,6 +720,23 @@
     /* One elevation language per edge: the border carries it (plus the surface
        lightness step in dark mode) - no shadow doubling the same edge. */
     @apply rounded-lg border border-line bg-surface;
+    box-shadow: var(--shadow-card);
+  }
+  /* A card that is itself a link or a button lifts a little on hover. */
+  @media (hover: hover) {
+    a.card:hover,
+    button.card:hover {
+      border-color: var(--color-line-strong);
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-1px);
+    }
+  }
+  a.card,
+  button.card {
+    transition:
+      border-color var(--duration-state) var(--ease-standard),
+      box-shadow var(--duration-state) var(--ease-standard),
+      transform var(--duration-state) var(--ease-standard);
   }
 
   /* Stat tiles: one number with its caption (dashboard, combined graphs, a
@@ -751,7 +806,7 @@
      card was invisible; this is the fix). State lives in aria-pressed. */
   .swatch {
     @apply size-7 shrink-0 cursor-pointer rounded-sm border border-line-strong transition
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   .swatch:hover {
     border-color: var(--color-stone-500);
@@ -778,7 +833,7 @@
      the layout by a pixel. Padding/size set at the call site. */
   .tile {
     @apply grid place-items-center gap-1 rounded-sm border-2 border-line bg-inset transition
-      hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   .tile[aria-pressed='true'] {
     @apply border-grass-500 text-ok hover:border-grass-500;
@@ -788,7 +843,7 @@
      aria-pressed, matching the segmented control's contract. */
   button.chip {
     @apply cursor-pointer transition hover:border-line-strong focus-visible:outline-2
-      focus-visible:outline-offset-1 focus-visible:outline-diamond-400 disabled:cursor-default disabled:opacity-50;
+      focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-default disabled:opacity-50;
   }
   button.chip[aria-pressed='true'] {
     @apply border-grass-500 bg-grass-600/10 text-ok;
@@ -809,8 +864,8 @@
   .input {
     @apply w-full rounded-sm border border-line-strong bg-inset px-3 py-2 text-sm text-ink
       transition-[border-color,box-shadow] duration-150
-      placeholder:text-ink-faint focus:border-diamond-400 focus:outline-none
-      focus:ring-1 focus:ring-diamond-400;
+      placeholder:text-ink-faint focus:border-focus focus:outline-none
+      focus:ring-[3px] focus:ring-focus/25;
   }
   /* Fields advertise interactivity on hover (stone-500 reads stronger than
      line-strong in BOTH themes); focus keeps the diamond ring. */
@@ -852,10 +907,19 @@
   .table-base td {
     @apply border-b border-line/60 px-4 py-2.5 align-middle;
   }
+  .table-base tbody tr {
+    transition: background-color var(--duration-state) var(--ease-standard);
+  }
   @media (hover: hover) {
     .table-base tbody tr:hover {
       @apply bg-inset/50;
     }
+  }
+  /* A row picked for a bulk action: tinted, with the same left accent as the
+     current sidebar item. Driven by its checkbox, so no script has to mark it. */
+  .table-base tbody tr:has(> td input[type='checkbox']:checked) {
+    background: color-mix(in srgb, var(--color-ok) 9%, transparent);
+    box-shadow: inset 3px 0 0 var(--color-ok);
   }
 
   /* Add .table-stack to a .table-base and, below sm, every row collapses into a
@@ -912,12 +976,15 @@
   .nav-item {
     @apply flex items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium text-ink-soft
       transition hover:bg-inset hover:text-ink focus-visible:outline-2
-      focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
+      focus-visible:outline-offset-[-2px] focus-visible:outline-focus;
   }
   /* The current page is a tinted pill, the one active marker used across
      the panel (tabs, sub-tabs, phone tab bars); no accent line on an edge. */
   .nav-item.active {
     @apply bg-grass-600/15 text-ok;
+    /* A left accent bar on top of the tint, so the current page is
+       unmistakable even at a glance down a long sidebar. */
+    box-shadow: inset 3px 0 0 var(--color-ok);
   }
 
   /* Meters read like the in-game XP bar: blocky, with a beveled trough and a
@@ -1007,7 +1074,7 @@
   input[type='checkbox'].msm-check,
   input[type='radio'].msm-radio {
     @apply size-4 shrink-0 cursor-pointer appearance-none border border-line-strong bg-inset
-      transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   input[type='checkbox'].msm-check {
     @apply rounded-sm;
@@ -1050,7 +1117,7 @@
   }
   .msm-toggle input {
     @apply absolute inset-0 cursor-pointer appearance-none rounded-full
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   .msm-toggle span {
     @apply pointer-events-none relative h-5 w-9 rounded-full bg-inset ring-1 ring-inset ring-line-strong transition;
@@ -1098,7 +1165,7 @@
      so a taller touch target never fattens the bar. */
   input[type='range'].msm-range {
     @apply h-4 w-full cursor-pointer appearance-none rounded-full bg-transparent
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   input[type='range'].msm-range::-webkit-slider-runnable-track {
     @apply h-2 rounded-full bg-inset;
@@ -1189,4 +1256,85 @@ html {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+@layer components {
+  /* Every control eases its hover, focus and selected states on the same curve
+     and duration (the .btn press stays instant; see .btn). */
+  .seg-btn,
+  .subtab,
+  .icon-btn,
+  .nav-item,
+  .chip,
+  .tile,
+  .swatch,
+  .input,
+  .badge,
+  .app-tab {
+    transition-duration: var(--duration-state);
+    transition-timing-function: var(--ease-standard);
+  }
+
+  /* ---- Loading and empty states ----
+     .loading-state: a spinner with its line of text ("Finding the largest
+     files…"), in place of bare grey text. .empty-inline: an icon over one quiet
+     sentence, for a table or list with nothing in it (the full .empty-state
+     partial is for a whole page). */
+  .loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding-block: 1.5rem;
+    font-size: var(--text-sm);
+    color: var(--color-ink-faint);
+  }
+  .loading-state::before {
+    content: '';
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    border: 2px solid var(--color-line-strong);
+    border-top-color: var(--color-ok);
+    animation: msm-spin 0.8s linear infinite;
+  }
+  @keyframes msm-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .loading-state::before {
+      animation: none;
+      border-top-color: var(--color-line-strong);
+    }
+  }
+  .empty-inline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--color-ink-faint);
+  }
+  .empty-inline > .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-ink-faint);
+    opacity: 0.7;
+  }
+}
+
+@layer components {
+  /* A card's title: optional leading icon (muted, a step smaller than the text)
+     and the heading in one aligned row. */
+  .card-title {
+    @apply flex items-center gap-2 font-semibold text-ink;
+  }
+  .card-title > .icon {
+    @apply shrink-0 text-ink-faint;
+  }
 }

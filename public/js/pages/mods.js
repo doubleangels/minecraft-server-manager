@@ -520,7 +520,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
         return;
       }
       if (!data.results.length) {
-        results.innerHTML = '<p class="p-6 text-center text-sm text-ink-faint">No matches for this loader/version.</p>';
+        results.innerHTML = '<p class="empty-inline">No matches for this loader/version.</p>';
         return;
       }
       results.innerHTML = '';

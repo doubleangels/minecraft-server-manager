@@ -106,7 +106,7 @@
     {{! ---- Recent activity ---- }}
     <div class="card p-4">
       <div class="mb-3 flex items-center justify-between gap-2">
-        <h3 class="font-semibold">Recent Activity</h3>
+        <h3 class="card-title">{{{icon 'history' 'size-4'}}}Recent Activity</h3>
         <a class="text-sm text-link hover:underline" href="/servers/{{server.id}}/history">View All →</a>
       </div>
       {{#if recentEvents.length}}

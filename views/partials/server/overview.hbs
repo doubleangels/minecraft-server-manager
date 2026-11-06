@@ -30,7 +30,7 @@
         <p class="help">Playing from the internet? Set up port forwarding, or send the full invite from <a class="text-link hover:underline" href="/servers/{{server.id}}/invites">Players → Invites</a>.</p>
       </div>
     {{/if}}
-    <h3 class="mb-3 font-semibold">About</h3>
+    <h3 class="card-title mb-3">{{{icon 'info' 'size-4'}}}About</h3>
     <div class="max-w-prose space-y-2 text-sm leading-relaxed text-ink-soft [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-5 [&_h3]:font-semibold [&_h3]:text-ink [&_h4]:font-semibold [&_h4]:text-ink [&_blockquote]:border-l-2 [&_blockquote]:border-line-strong [&_blockquote]:pl-3 [&_a]:text-link [&_a]:hover:underline [&_code]:rounded-sm [&_code]:bg-inset [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:text-ink-soft">{{{markdown server.description}}}</div>
     <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
       <div><dt class="text-xs text-ink-faint">Created</dt><dd class="font-medium">{{server.created}}</dd></div>
@@ -58,7 +58,7 @@
 
   <div class="card">
     <div class="flex items-center justify-between border-b border-line px-4 py-3">
-      <h3 class="font-semibold">Recent Activity</h3>
+      <h3 class="card-title">{{{icon 'history' 'size-4'}}}Recent Activity</h3>
       <a href="/servers/{{server.id}}/history" class="text-sm text-link hover:underline">View All →</a>
     </div>
     {{#if recentEvents.length}}
@@ -80,7 +80,7 @@
   <div class="space-y-4">
     {{! Shortcuts to the things people do most, each gated like its tab. }}
     <div class="card p-4">
-      <h3 class="mb-3 font-semibold">Quick Actions</h3>
+      <h3 class="card-title mb-3">{{{icon 'zap' 'size-4'}}}Quick Actions</h3>
       <div class="grid grid-cols-2 gap-2 lg:grid-cols-1 2xl:grid-cols-2">
         {{#if perms.console}}<a class="btn justify-start" href="/servers/{{server.id}}/console">{{{icon 'terminal' 'size-4'}}} Run a Command</a>{{/if}}
         {{#if perms.backups}}<a class="btn justify-start" href="/servers/{{server.id}}/backups">{{{icon 'save' 'size-4'}}} Take a Backup</a>{{/if}}
@@ -94,7 +94,7 @@
     <div class="card p-4" data-ov-live="{{server.id}}"
          data-running="{{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}1{{/if}}"
          data-mem-limit="{{server.resources.containerMemoryMb}}" data-cpus="{{server.resources.cpus}}">
-      <h3 class="mb-3 font-semibold">Live Usage</h3>
+      <h3 class="card-title mb-3">{{{icon 'gauge' 'size-4'}}}Live Usage</h3>
       <div class="space-y-3 text-xs tabular-nums">
         <div>
           {{! CPU normalized against the core limit and clamped via pct - the raw
@@ -117,7 +117,7 @@
     </div>
 
     <div class="card p-4">
-      <h3 class="mb-3 font-semibold">Players <span class="text-sm font-normal text-ink-faint">{{server.players.online}}/{{server.players.max}}</span></h3>
+      <h3 class="card-title mb-3">{{{icon 'users' 'size-4'}}}Players <span class="text-sm font-normal text-ink-faint">{{server.players.online}}/{{server.players.max}}</span></h3>
       {{#if server.players.names.length}}
         <ul class="space-y-1.5 text-sm">
           {{#each server.players.names}}

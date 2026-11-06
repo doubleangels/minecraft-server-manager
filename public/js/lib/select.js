@@ -89,7 +89,7 @@ function openPicker(select, btn) {
     let lastGroup = null;
 
     if (!visible.length) {
-      list.innerHTML = '<div class="p-4 text-center text-sm text-ink-faint">No matches.</div>';
+      list.innerHTML = '<div class="empty-inline py-6">No matches.</div>';
       return;
     }
     for (const [i, opt] of visible.entries()) {

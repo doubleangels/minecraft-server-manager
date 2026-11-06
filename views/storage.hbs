@@ -3,7 +3,7 @@
 <div class="mb-6 grid gap-4 lg:grid-cols-3">
   <div class="card p-4 lg:col-span-2">
     <div class="flex flex-wrap items-center justify-between gap-2">
-      <h3 class="font-semibold">Disk Usage</h3>
+      <h3 class="card-title">{{{icon 'hard-drive' 'size-4'}}}Disk Usage</h3>
       <div class="flex items-center gap-2 text-xs text-ink-faint">
         <span>{{#if storage.lastScan}}Last scanned <span data-ts="{{storage.lastScan}}">{{storage.lastScan}}</span>{{else}}Not scanned yet{{/if}}</span>
         <button class="btn btn-sm" id="storage-rescan">{{{icon 'refresh-cw' 'size-3.5'}}} Re-Scan Now</button>
@@ -29,7 +29,7 @@
   </div>
 
   <div class="card p-4">
-    <h3 class="mb-2 font-semibold">Growth Trend</h3>
+    <h3 class="card-title mb-2">{{{icon 'trending-up' 'size-4'}}}Growth Trend</h3>
     {{#if storage.trend.length}}
       <div class="flex h-24 items-end gap-1">
         {{#each storage.trend}}
@@ -45,7 +45,7 @@
 
 <div class="grid gap-4 lg:grid-cols-2">
   <div class="card">
-    <h3 class="border-b border-line px-4 py-3 font-semibold">By Category</h3>
+    <h3 class="card-title border-b border-line px-4 py-3">{{{icon 'folder-tree' 'size-4'}}}By Category</h3>
     <div class="overflow-x-auto">
       <table class="table-base table-stack">
         <tbody>
@@ -64,7 +64,7 @@
 
   <div class="space-y-4">
     <div class="card">
-      <h3 class="border-b border-line px-4 py-3 font-semibold">One-Click Cleanup</h3>
+      <h3 class="card-title border-b border-line px-4 py-3">{{{icon 'sparkles' 'size-4'}}}One-Click Cleanup</h3>
       <div class="divide-y divide-line">
         {{#each storage.cleanup}}
           <div class="flex items-center gap-3 p-3 text-sm">
@@ -76,7 +76,7 @@
     </div>
 
     <div class="card">
-      <h3 class="border-b border-line px-4 py-3 font-semibold">Quota Status (All Servers)</h3>
+      <h3 class="card-title border-b border-line px-4 py-3">{{{icon 'gauge' 'size-4'}}}Quota Status (All Servers)</h3>
       <div class="overflow-x-auto">
         <table class="table-base table-stack">
           <tbody>
@@ -87,7 +87,7 @@
                 <td data-th="Quota" class="text-xs text-ink-faint sm:w-32 sm:text-right">{{bytes disk.used}}{{#if disk.quota}} / {{bytes disk.quota}}{{else}} (No Quota){{/if}}</td>
               </tr>
             {{else}}
-              <tr><td data-th="" class="p-6 text-center text-ink-faint">No servers yet. Per-server quotas appear here once you create one.</td></tr>
+              <tr><td data-th="" colspan="3"><div class="empty-inline">{{{icon 'server' 'size-6'}}}No servers yet. Per-server quotas appear here once you create one.</div></td></tr>
             {{/each}}
           </tbody>
         </table>
@@ -97,11 +97,11 @@
 </div>
 
 <div class="card mt-6">
-  <h3 class="border-b border-line px-4 py-3 font-semibold">Largest Files</h3>
+  <h3 class="card-title border-b border-line px-4 py-3">{{{icon 'file-stack' 'size-4'}}}Largest Files</h3>
   <div class="overflow-x-auto">
     <table class="table-base table-stack">
       <tbody id="largest-files-body">
-        <tr><td data-th="" class="p-6 text-center text-ink-faint">Finding the largest files…</td></tr>
+        <tr><td data-th="" colspan="3"><div class="loading-state">Finding the largest files…</div></td></tr>
       </tbody>
     </table>
   </div>

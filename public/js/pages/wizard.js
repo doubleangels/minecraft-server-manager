@@ -756,7 +756,7 @@ function initModBrowser() {
 
   function renderResults() {
     if (!lastResults.length) {
-      resultsEl.innerHTML = `<div class="p-3 text-center text-sm text-ink-faint">No ${escapeHtml(capitalize(loader))} mods found for ${escapeHtml(mc())}.</div>`;
+      resultsEl.innerHTML = `<div class="empty-inline py-6">No ${escapeHtml(capitalize(loader))} mods found for ${escapeHtml(mc())}.</div>`;
       return;
     }
     resultsEl.innerHTML = lastResults
@@ -1270,7 +1270,7 @@ function initPackPicker() {
 
   function renderResults() {
     if (!lastResults.length) {
-      resultsEl.innerHTML = '<div class="p-3 text-center text-sm text-ink-faint">No modpacks found.</div>';
+      resultsEl.innerHTML = '<div class="empty-inline py-6">No modpacks found.</div>';
       return;
     }
     resultsEl.innerHTML = lastResults
@@ -1572,7 +1572,7 @@ function initSolver({ onApplied = () => {} } = {}) {
       chip.innerHTML = `
         ${mod.iconUrl ? `<img src="${escapeHtml(mod.iconUrl)}" alt="" class="size-4 rounded-sm">` : ''}
         <span class="max-w-40 truncate">${escapeHtml(mod.title)}</span>
-        <button type="button" data-remove="${escapeHtml(keyOf(mod))}" class="grid size-5 place-items-center rounded-sm text-ink-faint transition hover:bg-line hover:text-ink focus-visible:outline-2 focus-visible:outline-diamond-400" aria-label="Remove ${escapeHtml(mod.title)}">${X_SVG}</button>`;
+        <button type="button" data-remove="${escapeHtml(keyOf(mod))}" class="grid size-5 place-items-center rounded-sm text-ink-faint transition hover:bg-line hover:text-ink focus-visible:outline-2 focus-visible:outline-focus" aria-label="Remove ${escapeHtml(mod.title)}">${X_SVG}</button>`;
       chipsEl.appendChild(chip);
     }
   }
@@ -1580,7 +1580,7 @@ function initSolver({ onApplied = () => {} } = {}) {
   function renderResults() {
     resultsEl.innerHTML = '';
     if (!lastResults.length) {
-      resultsEl.innerHTML = '<div class="p-3 text-center text-sm text-ink-faint">No mods found.</div>';
+      resultsEl.innerHTML = '<div class="empty-inline py-6">No mods found.</div>';
       resultsEl.classList.remove('hidden');
       return;
     }

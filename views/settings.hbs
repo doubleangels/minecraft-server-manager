@@ -14,7 +14,7 @@
   </nav>
 
   <div class="min-w-0 space-y-5 [&>*]:min-w-0 [&>section]:scroll-mt-32">
-  {{#> settings/card heading="General" id="sec-panel" desc="The address players see, the panel's clock, and its version."}}
+  {{#> settings/card heading="General" icon="sliders-horizontal" id="sec-panel" desc="The address players see, the panel's clock, and its version."}}
     <div class="space-y-5">
       <div data-dirty-group="the public domain">
         <label class="label" for="set-domain">Public Domain</label>
@@ -69,7 +69,7 @@
     </div>
   {{/settings/card}}
 
-  {{#> settings/card heading="New Server Defaults" id="sec-defaults" guard="the new server defaults" desc="These pre-fill the create wizard, apply when a server is created via the API or a blueprint, and drive the quota-bar colors on the dashboard."}}
+  {{#> settings/card heading="New Server Defaults" icon="server-cog" id="sec-defaults" guard="the new server defaults" desc="These pre-fill the create wizard, apply when a server is created via the API or a blueprint, and drive the quota-bar colors on the dashboard."}}
         <div class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
           <div>
             <label class="label" for="dflt-heap">Java Heap (MB)</label>
@@ -106,7 +106,7 @@
         </div>
   {{/settings/card}}
 
-  {{#> settings/card heading="Backup Retention" id="retention-card" guard="the backup retention" desc="How many backups each server keeps of each kind, plus optional age and size limits. A server trims its older backups each time it makes a new one, and can set any of these differently on its Backups tab."}}
+  {{#> settings/card heading="Backup Retention" icon="archive" id="retention-card" guard="the backup retention" desc="How many backups each server keeps of each kind, plus optional age and size limits. A server trims its older backups each time it makes a new one, and can set any of these differently on its Backups tab."}}
     <div data-retention-form>
       <div data-retention-fields>
         {{> backups/retention-fields prefix="ret" values=retention}}
@@ -118,7 +118,7 @@
     </div>
   {{/settings/card}}
 
-  {{#> settings/card heading="Mod Site Keys" id="sec-keys" guard="the CurseForge key" desc="Keys the panel uses to reach mod sites on your behalf. Stored encrypted."}}
+  {{#> settings/card heading="Mod Site Keys" icon="key-round" id="sec-keys" guard="the CurseForge key" desc="Keys the panel uses to reach mod sites on your behalf. Stored encrypted."}}
     <div class="space-y-5">
       <div>
         <label class="label" for="set-cf-key">CurseForge API Key</label>
@@ -139,7 +139,7 @@
     </div>
   {{/settings/card}}
 
-  {{#> settings/card heading="Public API" id="api-tokens-card" desc="Let another app or website read your servers' status, like a live status page, an uptime monitor, or a Discord bot. It is read-only: nothing outside can start, stop, or change anything."}}
+  {{#> settings/card heading="Public API" icon="plug" id="api-tokens-card" desc="Let another app or website read your servers' status, like a live status page, an uptime monitor, or a Discord bot. It is read-only: nothing outside can start, stop, or change anything."}}
     {{> settings/toggle-row
         label="Let Outside Apps Read Status"
         help="Switches on by itself when you make your first key below. Turn it off any time to pause outside access without losing your keys."

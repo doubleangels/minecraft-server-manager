@@ -89,7 +89,7 @@
       </li>
     {{/each}}
   </ol>
-  <div class="hidden p-8 text-center text-sm text-ink-faint" id="hist-no-match">No events match these filters.</div>
+  <div class="empty-inline hidden" id="hist-no-match">{{{icon 'search-x' 'size-6'}}}No events match these filters.</div>
 </div>
 {{else}}
   {{> empty-state iconName='history' title='No Events Recorded Yet' message='Everything that happens to this server (starts, stops, setting changes, backups, and crashes) is logged here, with who did it and when.'}}

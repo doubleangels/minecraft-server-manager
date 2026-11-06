@@ -128,7 +128,7 @@
         {{/each}}
       </tbody>
     </table>
-    <div class="hidden p-8 text-center text-sm text-ink-faint" id="players-no-match">No players match these filters.</div>
+    <div class="empty-inline hidden" id="players-no-match">{{{icon 'search-x' 'size-6'}}}No players match these filters.</div>
   </div>
   {{else}}
     {{> empty-state iconName='users' title='No Players Seen Yet' message='Add a player by name and the panel looks them up with Mojang, or players appear here automatically the first time they join.'}}

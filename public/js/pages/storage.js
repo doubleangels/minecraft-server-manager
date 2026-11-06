@@ -23,7 +23,7 @@ if (largestBody) {
     .then((files) => {
       if (!files.length) {
         largestBody.innerHTML =
-          '<tr><td data-th="" class="p-6 text-center text-ink-faint">No files in the data folder yet.</td></tr>';
+          '<tr><td data-th="" colspan="3"><div class="empty-inline">No files in the data folder yet.</div></td></tr>';
         return;
       }
       largestBody.textContent = '';

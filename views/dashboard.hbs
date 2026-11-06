@@ -62,7 +62,7 @@
 
 {{#unless serversOnly}}
 <div class="mb-6 {{#if noServers}}hidden{{/if}}">
-  <h2 class="mb-3 font-semibold">Servers by Status</h2>
+  <h2 class="card-title mb-3">{{{icon 'activity' 'size-4'}}}Servers by Status</h2>
   <div class="card flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm">
     {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot bg-ok"></span>{{overview.byStatus.running}} Running</span>{{/if}}
     {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot bg-warn"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
@@ -76,7 +76,7 @@
 {{/unless}}
 
 {{#unless noServers}}
-{{#unless serversOnly}}<h2 class="mb-3 font-semibold">Servers</h2>{{/unless}}
+{{#unless serversOnly}}<h2 class="card-title mb-3">{{{icon 'server' 'size-4'}}}Servers</h2>{{/unless}}
 <div class="mb-4 flex flex-wrap items-center gap-2">
   <input class="input w-full sm:w-auto sm:max-w-xs sm:flex-1" type="search" placeholder="Search servers, tags…" aria-label="Search servers" id="server-filter">
   {{! Visible "Sort" label: only the first option carried a "Sort:" prefix, so
@@ -123,7 +123,7 @@
 {{#unless serversOnly}}
 <div class="mt-8 {{#if noServers}}hidden{{/if}}" id="combined-overview">
   <div class="mb-3 flex items-center justify-between">
-    <h2 class="font-semibold">Resource Overview</h2>
+    <h2 class="card-title">{{{icon 'layout-grid' 'size-4'}}}Resource Overview</h2>
   </div>
   <div data-combined-root>
     {{> combined-graphs}}
@@ -133,7 +133,7 @@
 
 <div class="mt-8 {{#if serversOnly}}hidden{{/if}}">
   <div class="mb-3 flex items-center justify-between">
-    <h2 class="font-semibold">Recent Activity</h2>
+    <h2 class="card-title">{{{icon 'history' 'size-4'}}}Recent Activity</h2>
     <a href="/activity" class="text-sm text-link hover:underline">View All →</a>
   </div>
   <div class="card">
@@ -151,7 +151,7 @@
           </span>
         </li>
       {{else}}
-        <li class="p-8 text-center text-sm text-ink-faint">No activity yet. Actions on your servers will show up here.</li>
+        <li class="empty-inline">{{{icon 'history' 'size-6'}}}No activity yet. Actions on your servers will show up here.</li>
       {{/each}}
     </ol>
   </div>

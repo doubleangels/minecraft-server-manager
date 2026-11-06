@@ -94,7 +94,7 @@ function init(serverId) {
     if (!data.rows.length) {
       const tr = document.createElement('tr');
       tr.innerHTML =
-        '<td colspan="3" class="p-6 text-center text-ink-faint">No player stats yet. Stats appear once someone plays on this server.</td>';
+        '<td colspan="3"><div class="empty-inline">No player stats yet. Stats appear once someone plays on this server.</div></td>';
       scoreBody.appendChild(tr);
       return;
     }

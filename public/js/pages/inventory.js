@@ -797,7 +797,7 @@ function init(root) {
       el('inv-search-hint').classList.add('hidden');
       box.classList.remove('hidden');
       if (!results.length) {
-        box.innerHTML = `<p class="py-4 text-center text-sm text-ink-faint">No items matching "${esc(q)}" in any player's storage.</p>`;
+        box.innerHTML = `<p class="empty-inline py-6">No items matching "${esc(q)}" in any player's storage.</p>`;
         return;
       }
       box.innerHTML = `

@@ -1,5 +1,5 @@
 <div class="card p-4" data-world-controls="{{server.id}}" data-running="{{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}1{{/if}}">
-  <h3 class="mb-1 font-semibold">World Controls</h3>
+  <h3 class="card-title mb-1">{{{icon 'sliders-horizontal' 'size-4'}}}World Controls</h3>
   <p class="mb-3 text-xs text-ink-faint" data-wc-state>{{#if (eq server.status 'running')}}Loading world state…{{else}}Available while the server runs.{{/if}}</p>
   <div class="mb-3 hidden items-center justify-between rounded-md border border-line bg-inset px-3 py-2" data-wc-clock-box>
     <div>
