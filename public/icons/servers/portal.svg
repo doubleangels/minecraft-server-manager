@@ -1,29 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
   <defs>
-    <linearGradient id="portalGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#C084FC"/>
-      <stop offset="50%" stop-color="#9333EA"/>
-      <stop offset="100%" stop-color="#4C1D95"/>
+    <!-- Obsidian Volcanic Frame -->
+    <linearGradient id="p-obsidian" x1="3" y1="2" x2="21" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#312E81"/>
+      <stop offset="25%" stop-color="#1E1B4B"/>
+      <stop offset="70%" stop-color="#18181B"/>
+      <stop offset="100%" stop-color="#09090B"/>
     </linearGradient>
+    <!-- Cosmic Dimensional Vortex -->
+    <radialGradient id="p-vortex" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#FAF5FF"/>
+      <stop offset="20%" stop-color="#E9D5FF"/>
+      <stop offset="45%" stop-color="#C084FC"/>
+      <stop offset="75%" stop-color="#7E22CE"/>
+      <stop offset="100%" stop-color="#3B0764"/>
+    </radialGradient>
   </defs>
 
-  <!-- Obsidian Outer Frame -->
-  <rect x="4" y="2.5" width="16" height="19" rx="2" fill="#18181B" stroke="#27272A" stroke-width="1"/>
-  
-  <!-- Obsidian Bevel Accents -->
-  <rect x="4.5" y="3" width="3" height="3" fill="#27272A"/>
-  <rect x="16.5" y="3" width="3" height="3" fill="#27272A"/>
-  <rect x="4.5" y="18" width="3" height="3" fill="#27272A"/>
-  <rect x="16.5" y="18" width="3" height="3" fill="#27272A"/>
+  <!-- Obsidian Outer Portal Frame (Heavy 4x5 Monolith) -->
+  <rect x="3" y="1.5" width="18" height="21" rx="2" fill="url(#p-obsidian)"/>
 
-  <!-- Portal Swirl Aperture -->
-  <rect x="7" y="5.5" width="10" height="13" rx="1" fill="url(#portalGlow)"/>
+  <!-- Obsidian Masonry Seams (Block Joints) -->
+  <line x1="3" y1="5.5" x2="7" y2="5.5" stroke="#09090B" stroke-width="0.8"/>
+  <line x1="17" y1="5.5" x2="21" y2="5.5" stroke="#09090B" stroke-width="0.8"/>
+  <line x1="7" y1="1.5" x2="7" y2="5.5" stroke="#09090B" stroke-width="0.8"/>
+  <line x1="17" y1="1.5" x2="17" y2="5.5" stroke="#09090B" stroke-width="0.8"/>
+  <line x1="3" y1="18.5" x2="7" y2="18.5" stroke="#09090B" stroke-width="0.8"/>
+  <line x1="17" y1="18.5" x2="21" y2="18.5" stroke="#09090B" stroke-width="0.8"/>
+  <line x1="7" y1="18.5" x2="7" y2="22.5" stroke="#09090B" stroke-width="0.8"/>
+  <line x1="17" y1="18.5" x2="17" y2="22.5" stroke="#09090B" stroke-width="0.8"/>
 
-  <!-- Swirl Waves -->
-  <path d="M8 8C10 6.5 13 9 16 7.5" stroke="#E9D5FF" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
-  <path d="M8 12C11 10.5 13 13.5 16 12" stroke="#F3E8FF" stroke-width="0.8" stroke-linecap="round" opacity="0.9"/>
-  <path d="M8 16C10 14.5 13 17 16 15.5" stroke="#E9D5FF" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
+  <!-- Volcanic Glass Specular Edge Bevels -->
+  <path d="M3.5 2H20.5" stroke="#A5B4FC" stroke-width="0.6" stroke-linecap="round" opacity="0.6"/>
+  <path d="M3.5 2V22" stroke="#6366F1" stroke-width="0.6" stroke-linecap="round" opacity="0.4"/>
+  <path d="M4.5 3L6 4.5" stroke="#C084FC" stroke-width="0.6" opacity="0.75"/>
+  <path d="M19.5 3L18 4.5" stroke="#C084FC" stroke-width="0.6" opacity="0.75"/>
 
-  <!-- Star Particle -->
-  <circle cx="13" cy="9.5" r="0.8" fill="#FFFFFF"/>
+  <!-- Inset Portal Cavity Drop Shadow -->
+  <rect x="6.5" y="4.5" width="11" height="15" rx="1.2" fill="#1E0A3C"/>
+
+  <!-- Glowing Dimensional Rift Aperture -->
+  <rect x="6.8" y="4.8" width="10.4" height="14.4" rx="1" fill="url(#p-vortex)"/>
+
+  <!-- Ethereal Nebula Energy Waves -->
+  <path d="M7 8C9.5 6.5 13.5 9.5 17 8" stroke="#FAF5FF" stroke-width="0.85" stroke-linecap="round" opacity="0.9"/>
+  <path d="M7 12C10 13.8 14 10.2 17 12.5" stroke="#F3E8FF" stroke-width="0.95" stroke-linecap="round" opacity="0.85"/>
+  <path d="M7 16C10.5 14.2 13.5 17.5 17 16" stroke="#E9D5FF" stroke-width="0.75" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Floating Nether Energy Sparks -->
+  <circle cx="12" cy="9.5" r="0.8" fill="#FFFFFF"/>
+  <circle cx="14.5" cy="14" r="0.6" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="9.2" cy="14.5" r="0.5" fill="#E9D5FF"/>
+  <circle cx="13.2" cy="6.2" r="0.4" fill="#FFFFFF"/>
 </svg>

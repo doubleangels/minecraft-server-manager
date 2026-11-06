@@ -1,26 +1,67 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-  <!-- Brilliant Cut Diamond -->
-  <!-- Upper table / crown facets -->
-  <path d="M7 4H17L21.5 9.5L12 21L2.5 9.5L7 4Z" fill="#0891B2"/>
-  
-  <!-- Table (Center Top) -->
-  <polygon points="8,4.5 16,4.5 14,9 10,9" fill="#A5F3FC"/>
-  
-  <!-- Left Crown -->
-  <polygon points="7,4 8,4.5 10,9 2.5,9.5" fill="#22D3EE"/>
-  <!-- Right Crown -->
-  <polygon points="17,4 16,4.5 14,9 21.5,9.5" fill="#06B6D4"/>
-  
-  <!-- Center Pavilion -->
-  <polygon points="10,9 14,9 12,20.5" fill="#22D3EE"/>
-  
-  <!-- Left Pavilion -->
-  <polygon points="2.5,9.5 10,9 12,20.5" fill="#0E7490"/>
-  
-  <!-- Right Pavilion -->
-  <polygon points="21.5,9.5 14,9 12,20.5" fill="#0891B2"/>
-  
-  <!-- Inner Glimmer Highlight -->
-  <line x1="8" y1="4.5" x2="16" y2="4.5" stroke="#FFFFFF" stroke-width="0.75" stroke-linecap="round"/>
-  <circle cx="10" cy="7" r="0.8" fill="#FFFFFF"/>
+  <defs>
+    <!-- Facet Refraction Gradients -->
+    <linearGradient id="d-table" x1="7" y1="3.5" x2="17" y2="8.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#E0F2FE"/>
+      <stop offset="100%" stop-color="#BAE6FD"/>
+    </linearGradient>
+    <linearGradient id="d-crown-l" x1="3" y1="3.5" x2="10" y2="8.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#BAE6FD"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="d-crown-r" x1="14" y1="3.5" x2="21" y2="8.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7DD3FC"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <linearGradient id="d-pav-c" x1="12" y1="8.5" x2="12" y2="21.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="45%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#0369A1"/>
+    </linearGradient>
+    <linearGradient id="d-pav-l" x1="2.5" y1="8.5" x2="12" y2="21.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#075985"/>
+    </linearGradient>
+    <linearGradient id="d-pav-r" x1="21.5" y1="8.5" x2="12" y2="21.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0369A1"/>
+      <stop offset="100%" stop-color="#0C4A6E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Gem Deep Ambient Shadow -->
+  <polygon points="6.8,3.5 17.2,3.5 22,8.8 12,22 2,8.8" fill="#082F49" opacity="0.35"/>
+
+  <!-- Left Lower Pavilion Facet -->
+  <polygon points="2.5,8.5 10,8.5 12,21.5" fill="url(#d-pav-l)"/>
+
+  <!-- Right Lower Pavilion Facet -->
+  <polygon points="21.5,8.5 14,8.5 12,21.5" fill="url(#d-pav-r)"/>
+
+  <!-- Center Lower Pavilion Facet -->
+  <polygon points="10,8.5 14,8.5 12,21.5" fill="url(#d-pav-c)"/>
+
+  <!-- Left Crown Facet -->
+  <polygon points="7,3.5 2.5,8.5 10,8.5" fill="url(#d-crown-l)"/>
+
+  <!-- Right Crown Facet -->
+  <polygon points="17,3.5 14,8.5 21.5,8.5" fill="url(#d-crown-r)"/>
+
+  <!-- Center Table Top Facet -->
+  <polygon points="7,3.5 17,3.5 14,8.5 10,8.5" fill="url(#d-table)"/>
+
+  <!-- Internal Caustics & Light Refraction Rays -->
+  <polygon points="10,8.5 12,14.5 14,8.5" fill="#FFFFFF" opacity="0.4"/>
+  <line x1="12" y1="8.5" x2="12" y2="21.5" stroke="#FFFFFF" stroke-width="0.75" opacity="0.5"/>
+
+  <!-- Facet Edge Specular Highlights -->
+  <line x1="7" y1="3.5" x2="17" y2="3.5" stroke="#FFFFFF" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="7" y1="3.5" x2="2.5" y2="8.5" stroke="#FFFFFF" stroke-width="0.6" opacity="0.85"/>
+  <line x1="2.5" y1="8.5" x2="10" y2="8.5" stroke="#E0F2FE" stroke-width="0.6" opacity="0.75"/>
+  <line x1="10" y1="8.5" x2="14" y2="8.5" stroke="#FFFFFF" stroke-width="0.75" opacity="0.85"/>
+  <line x1="14" y1="8.5" x2="21.5" y2="8.5" stroke="#BAE6FD" stroke-width="0.6" opacity="0.7"/>
+
+  <!-- Radiant Specular Star Glint (Upper Left Corner) -->
+  <path d="M7 1L7.7 3.1L9.8 3.8L7.7 4.5L7 6.6L6.3 4.5L4.2 3.8L6.3 3.1Z" fill="#FFFFFF"/>
+  <circle cx="7" cy="3.8" r="0.5" fill="#38BDF8"/>
 </svg>

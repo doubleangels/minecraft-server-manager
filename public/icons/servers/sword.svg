@@ -1,17 +1,61 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-  <!-- Diamond Sword on 45-degree angle -->
-  <!-- Blade Tip & Body -->
-  <path d="M19.5 3L21 4.5L11.5 14L8.5 12.5L10 9.5L19.5 3Z" fill="#22D3EE"/>
-  <path d="M19.5 3L21 4.5L11.5 14L10 12.5L19.5 3Z" fill="#06B6D4"/>
-  <line x1="19.5" y1="3" x2="11.5" y2="11" stroke="#FFFFFF" stroke-width="0.75" stroke-linecap="round"/>
+  <defs>
+    <!-- Diamond Blade Shading -->
+    <linearGradient id="sw-blade-lit" x1="21.5" y1="2.5" x2="10.5" y2="12" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="25%" stop-color="#E0F2FE"/>
+      <stop offset="60%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <linearGradient id="sw-blade-shade" x1="21.5" y1="2.5" x2="12" y2="14" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="40%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#0369A1"/>
+    </linearGradient>
+    <!-- Leather Handle Wrap -->
+    <linearGradient id="sw-grip" x1="9" y1="14" x2="4" y2="19" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#92400E"/>
+      <stop offset="100%" stop-color="#451A03"/>
+    </linearGradient>
+  </defs>
 
-  <!-- Crossguard -->
-  <path d="M7 11L13 17L11.5 18.5L5.5 12.5L7 11Z" fill="#0F172A"/>
-  <circle cx="7" cy="11.5" r="1" fill="#0284C7"/>
-  <circle cx="12.5" cy="17" r="1" fill="#0284C7"/>
+  <!-- Ambient Blade Drop Shadow -->
+  <path d="M21.5 3L20 1.5L10 9L9.2 11.2L6 10.8L4.5 12.3L7.5 15.3L4 18.8L5.2 20L8.7 16.5L11.7 19.5L13.2 18L12.8 14.8L15 14L22 3.5L21.5 3Z" fill="#082F49" opacity="0.3"/>
 
-  <!-- Grip & Hilt -->
-  <path d="M8 15L9 16L5.5 19.5L4.5 18.5L8 15Z" fill="#78350F"/>
-  <!-- Pommel -->
-  <rect x="2.5" y="19.5" width="2.5" height="2.5" rx="0.5" transform="rotate(-45 3.75 20.75)" fill="#0284C7"/>
+  <!-- Lower Diamond Blade Facet (Shadow Side) -->
+  <path d="M21.5 2.5L11.8 12.2L10 13.8L9.2 11.2L19 3.5L21.5 2.5Z" fill="url(#sw-blade-shade)"/>
+
+  <!-- Upper Diamond Blade Facet (Specular Lit Side) -->
+  <path d="M21.5 2.5L19.5 1.8L10.5 10.8L11.8 12.2L21.5 2.5Z" fill="url(#sw-blade-lit)"/>
+
+  <!-- Blade Central Fuller Ridge Line -->
+  <line x1="21.5" y1="2.5" x2="11.8" y2="12.2" stroke="#FFFFFF" stroke-width="0.8" stroke-linecap="round" opacity="0.95"/>
+  <!-- Razor Sharp Upper Cutting Edge -->
+  <path d="M21.5 2.5L19.5 1.8L10.5 10.8" stroke="#FFFFFF" stroke-width="0.6" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Sculpted Netherite Crossguard -->
+  <path d="M6.5 10.8L13.2 17.5L11.8 18.9L5.1 12.2L6.5 10.8Z" fill="#1E293B"/>
+  <path d="M6.5 10.8L5.1 12.2L6.8 13.9L8.2 12.5L6.5 10.8Z" fill="#334155"/>
+  <path d="M13.2 17.5L11.8 18.9L10.1 17.2L11.5 15.8L13.2 17.5Z" fill="#0F172A"/>
+
+  <!-- Gemstone Inlays on Crossguard Quillons -->
+  <circle cx="6.8" cy="11.8" r="0.85" fill="#38BDF8"/>
+  <circle cx="6.8" cy="11.8" r="0.35" fill="#FFFFFF"/>
+  <circle cx="12.2" cy="17.2" r="0.85" fill="#0284C7"/>
+  <circle cx="12.2" cy="17.2" r="0.35" fill="#FFFFFF"/>
+
+  <!-- Leather Wrapped Handle Grip -->
+  <path d="M8.2 14.5L9.6 15.9L5.8 19.7L4.4 18.3L8.2 14.5Z" fill="url(#sw-grip)"/>
+
+  <!-- Diagonal Leather Binding Wraps -->
+  <line x1="7.7" y1="15.1" x2="8.9" y2="16.3" stroke="#D97706" stroke-width="0.65"/>
+  <line x1="6.4" y1="16.4" x2="7.6" y2="17.6" stroke="#D97706" stroke-width="0.65"/>
+  <line x1="5.1" y1="17.7" x2="6.3" y2="18.9" stroke="#D97706" stroke-width="0.65"/>
+
+  <!-- Diamond Pommel Counter-Weight Stone -->
+  <rect x="2.6" y="19" width="2.6" height="2.6" rx="0.6" transform="rotate(-45 3.9 20.3)" fill="#0284C7" stroke="#38BDF8" stroke-width="0.5"/>
+  <circle cx="3.9" cy="20.3" r="0.45" fill="#FFFFFF"/>
+
+  <!-- Blade Tip Specular Gleam Glint -->
+  <path d="M21.5 0.5L22 2L23.5 2.5L22 3L21.5 4.5L21 3L19.5 2.5L21 2Z" fill="#FFFFFF"/>
 </svg>
