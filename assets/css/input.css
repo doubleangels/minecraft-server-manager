@@ -558,7 +558,7 @@
      segments instead of teleporting. It carries the exact selected-state
      visuals; when active, the buttons keep only their text color. */
   .seg-pill {
-    @apply pointer-events-none absolute left-0 top-0 rounded bg-raised opacity-0;
+    @apply pointer-events-none absolute left-0 top-0 rounded-sm bg-raised opacity-0;
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.06),
       inset 0 0 0 1px var(--color-line-strong);
@@ -577,7 +577,7 @@
     box-shadow: none;
   }
   .seg-btn {
-    @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded px-3 text-sm
+    @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-sm px-3 text-sm
       font-medium text-ink-faint transition-colors hover:text-ink
       focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-diamond-400;
   }
@@ -596,7 +596,7 @@
      pick-one-of-N controls, these navigate. One shared class instead of the
      same utility string hand-rolled per template. */
   .subtab {
-    @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium text-ink-faint transition hover:bg-raised hover:text-ink
+    @apply inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-sm font-medium text-ink-faint transition hover:bg-raised hover:text-ink
       focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
   }
   .subtab.active {
@@ -606,7 +606,7 @@
   /* Icon-only buttons (modal/toast close, inline glyph actions): a real hit
      area and a visible focus state instead of a naked 16px glyph. */
   .icon-btn {
-    @apply grid size-8 shrink-0 place-items-center rounded-md text-ink-faint transition-colors
+    @apply grid size-8 shrink-0 place-items-center rounded-sm text-ink-faint transition-colors
       hover:bg-inset hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1
       focus-visible:outline-diamond-400;
   }
@@ -698,7 +698,7 @@
   /* Badges: neutral by default; the four semantic variants are the ONLY badge
      colorways - no ad-hoc bg/text pairs at call sites. */
   .badge {
-    @apply inline-flex items-center gap-1 whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-inset text-ink-soft;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-inset text-ink-soft;
   }
   .badge-ok {
     @apply bg-grass-500/15 text-ok;
@@ -768,7 +768,7 @@
      aria-pressed; the border stays 2px in every state so picking never shifts
      the layout by a pixel. Padding/size set at the call site. */
   .tile {
-    @apply grid place-items-center gap-1 rounded-md border-2 border-line bg-inset transition
+    @apply grid place-items-center gap-1 rounded-sm border-2 border-line bg-inset transition
       hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
   }
   .tile[aria-pressed='true'] {
@@ -798,7 +798,7 @@
   }
 
   .input {
-    @apply w-full rounded-md border border-line-strong bg-inset px-3 py-2 text-sm text-ink
+    @apply w-full rounded-sm border border-line-strong bg-inset px-3 py-2 text-sm text-ink
       transition-[border-color,box-shadow] duration-150
       placeholder:text-ink-faint focus:border-diamond-400 focus:outline-none
       focus:ring-1 focus:ring-diamond-400;
@@ -829,7 +829,7 @@
   /* Inline code inside body copy (a var name, a command, a hostname). Three
      slightly different hand-rolled treatments existed; this is the one. */
   .code-inline {
-    @apply rounded bg-inset px-1 font-mono text-[0.9em] text-ink-soft;
+    @apply rounded-sm bg-inset px-1 font-mono text-[0.9em] text-ink-soft;
   }
 
   .table-base {
@@ -901,7 +901,7 @@
   }
 
   .nav-item {
-    @apply flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-ink-soft
+    @apply flex items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium text-ink-soft
       transition hover:bg-inset hover:text-ink focus-visible:outline-2
       focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
   }
@@ -1001,7 +1001,7 @@
       transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
   }
   input[type='checkbox'].msm-check {
-    @apply rounded;
+    @apply rounded-sm;
     /* The checkmark lives on the element at size 0, so checking GROWS it in
        with a small overshoot and unchecking shrinks it away. */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");

@@ -79,7 +79,7 @@
         </div>
         {{#if diff}}
           {{! break-all: unbroken values (paths, JVM flag strings) must wrap, not push past the card. }}
-          <div class="mt-2 break-all rounded bg-raised p-2 font-mono text-xs">
+          <div class="mt-2 break-all rounded-md bg-raised p-2 font-mono text-xs">
             {{#each diff}}<div><span class="text-ink-faint">{{@key}}:</span> <span class="text-danger line-through">{{this.[0]}}</span> → <span class="text-ok">{{this.[1]}}</span></div>{{/each}}
           </div>
         {{/if}}

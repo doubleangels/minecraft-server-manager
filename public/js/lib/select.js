@@ -111,7 +111,7 @@ function openPicker(select, btn) {
       row.setAttribute('role', 'option');
       if (opt.value === select.value) row.setAttribute('aria-selected', 'true');
       row.innerHTML = `
-        ${opt.icon ? `<img src="${escapeHtml(opt.icon)}" alt="" class="size-6 rounded">` : ''}
+        ${opt.icon ? `<img src="${escapeHtml(opt.icon)}" alt="" class="size-6 rounded-sm">` : ''}
         <span class="min-w-0 flex-1">
           <span class="block truncate">${escapeHtml(opt.label)}</span>
           ${opt.desc ? `<span class="block truncate text-xs text-ink-faint">${escapeHtml(opt.desc)}</span>` : ''}

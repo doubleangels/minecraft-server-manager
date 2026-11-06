@@ -229,7 +229,7 @@ function initPage() {
       () =>
         `<div class="card animate-pulse p-4" aria-hidden="true">
           <div class="flex items-center gap-3"><div class="size-10 rounded-md bg-inset"></div>
-          <div class="flex-1 space-y-2"><div class="h-3 w-2/3 rounded bg-inset"></div><div class="h-2.5 w-1/2 rounded bg-inset"></div></div></div>
+          <div class="flex-1 space-y-2"><div class="h-3 w-2/3 rounded-sm bg-inset"></div><div class="h-2.5 w-1/2 rounded-sm bg-inset"></div></div></div>
         </div>`
     ).join('');
     try {

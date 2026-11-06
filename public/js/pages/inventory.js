@@ -122,7 +122,7 @@ function init(root) {
     cell.className =
       // Phone: a square that fills its grid column (9 across fit any phone);
       // sm+: the fixed 56px slot.
-      'relative grid aspect-square w-full sm:size-14 place-items-center rounded border text-[11px] font-semibold select-none ' +
+      'relative grid aspect-square w-full sm:size-14 place-items-center rounded-sm border text-[11px] font-semibold select-none ' +
       (editable
         ? 'cursor-pointer transition hover:ring-2 hover:ring-link/60 focus-visible:ring-2 focus-visible:ring-link '
         : '');
@@ -759,7 +759,7 @@ function init(root) {
       kind === 'changed'
         ? `<span class="font-mono text-xs">${entry.from} &rarr; ${entry.to}</span>`
         : `<span class="font-mono text-xs">x${entry.count}</span>`;
-    return `<li class="flex items-center justify-between gap-3 rounded px-2 py-1 text-sm odd:bg-inset/50"><span class="min-w-0 truncate">${name}</span>${qty}</li>`;
+    return `<li class="flex items-center justify-between gap-3 rounded-sm px-2 py-1 text-sm odd:bg-inset/50"><span class="min-w-0 truncate">${name}</span>${qty}</li>`;
   }
 
   function renderDiff(diff) {

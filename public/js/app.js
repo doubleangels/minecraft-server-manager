@@ -401,7 +401,7 @@ function confirmDelete({ name }) {
     content.appendChild(p);
 
     const delWrap = document.createElement('label');
-    delWrap.className = 'flex cursor-pointer items-start gap-2 rounded-md border border-danger/40 bg-red-500/10 p-2.5';
+    delWrap.className = 'notice notice-danger cursor-pointer';
     const delInput = document.createElement('input');
     delInput.type = 'checkbox';
     delInput.className = 'msm-check mt-0.5 shrink-0';

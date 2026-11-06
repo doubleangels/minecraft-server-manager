@@ -2,7 +2,7 @@
     place of the accent, matching the server card on the dashboard. }}
 {{! Way back out of a server below lg, where the sidebar is tucked away and
     the phone's bottom bar belongs to this server's own sections. }}
-<a href="/servers" class="-mt-1 mb-3 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-ink-faint hover:text-ink hover:bg-inset transition lg:hidden">{{{icon 'chevron-left' 'size-3.5'}}} All Servers</a>
+<a href="/servers" class="-mt-1 mb-3 inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs font-medium text-ink-faint hover:text-ink hover:bg-inset transition lg:hidden">{{{icon 'chevron-left' 'size-3.5'}}} All Servers</a>
 <div data-server-title="{{server.id}}" data-server-name="{{server.name}}" data-server-status="{{server.status}}" class="card mb-4 overflow-hidden sm:mb-6{{#if (or (eq server.status 'crashed') server.crashesUnread)}} border-danger/50{{/if}}" style="border-top: 3px solid {{#if (or (eq server.status 'crashed') server.crashesUnread)}}var(--color-danger){{else}}{{server.accent}}{{/if}}">
   {{! icon+name grouped into ONE flex item, separate from the actions column,
       using flex-auto (basis: auto) rather than flex-1 (basis: 0%). That's
@@ -16,7 +16,7 @@
       basis makes the wrap trigger correctly once both genuinely don't fit. }}
   <div class="texture-top flex flex-wrap items-start justify-between gap-3 p-4 sm:gap-4 sm:p-5">
     <div class="flex min-w-0 flex-auto items-center gap-3 sm:gap-4">
-      <img src="{{iconSrc server.icon}}" alt="" class="size-12 shrink-0 rounded-lg sm:size-14" style="background: {{server.accent}}" data-fallback-icon="/icons/servers/grass.svg">
+      <img src="{{iconSrc server.icon}}" alt="" class="size-12 shrink-0 rounded-md sm:size-14" style="background: {{server.accent}}" data-fallback-icon="/icons/servers/grass.svg">
 
       <div class="min-w-0 flex-1">
         {{! Phone: the name takes its own line, status + badges flow after it at

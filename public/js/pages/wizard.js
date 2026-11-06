@@ -1589,7 +1589,7 @@ function initSolver({ onApplied = () => {} } = {}) {
       row.className = 'flex items-center gap-2.5 border-b border-line px-2.5 py-2 text-sm last:border-b-0';
       const added = picked.has(keyOf(hit));
       row.innerHTML = `
-        ${hit.iconUrl ? `<img src="${escapeHtml(hit.iconUrl)}" alt="" class="size-8 shrink-0 rounded">` : '<span class="grid size-8 shrink-0 place-items-center rounded bg-inset text-ink-faint">?</span>'}
+        ${hit.iconUrl ? `<img src="${escapeHtml(hit.iconUrl)}" alt="" class="size-8 shrink-0 rounded-sm">` : '<span class="grid size-8 shrink-0 place-items-center rounded-sm bg-inset text-ink-faint">?</span>'}
         <span class="min-w-0 flex-1">
           <span class="block truncate font-medium">${escapeHtml(hit.title)}</span>
           <span class="block truncate text-xs text-ink-faint">${escapeHtml(hit.description || '')}</span>

@@ -533,7 +533,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
       const installed = installedKeys.has(`${hit.platform}:${hit.projectId}`);
       row.innerHTML = `
         <div class="flex items-center gap-3">
-          ${hit.iconUrl ? `<img src="${escAttr(hit.iconUrl)}" alt="" class="size-10 shrink-0 rounded bg-inset object-cover">` : '<span class="grid size-10 shrink-0 place-items-center rounded bg-inset text-ink-faint">?</span>'}
+          ${hit.iconUrl ? `<img src="${escAttr(hit.iconUrl)}" alt="" class="size-10 shrink-0 rounded-md bg-inset object-cover">` : '<span class="grid size-10 shrink-0 place-items-center rounded-md bg-inset text-ink-faint">?</span>'}
           <div class="min-w-0 flex-1">
             <div class="truncate text-sm font-semibold"></div>
             <div class="truncate text-xs text-ink-faint" data-role="desc"></div>

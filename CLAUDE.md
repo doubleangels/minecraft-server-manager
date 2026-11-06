@@ -131,6 +131,13 @@ the single accent, IBM Plex Sans body + Press Start 2P for titles, and cards on 
 sidebar+topbar shell. Match the existing register: blocky (`rounded-sm`), tactile (buttons
 physically press on `:active`).
 
+**One radius per role** (`test/ui-register.test.js` enforces the mechanical parts):
+`rounded-sm` for every control and small inline piece (buttons, fields, icon buttons, chips, badges,
+tabs, nav items, meters, icon tiles up to `size-8`); `rounded-md` for panels nested inside a card
+(notices, the console, bordered lists, previews) and icon tiles above `size-8`; `rounded-lg` for
+top-level surfaces (cards, modals, menus, stacked table rows); `rounded-full` only for things that
+are round (status dots, switches, sliders). Never a bare `rounded`.
+
 **Mobile-first — design the narrow layout first, then add breakpoint prefixes to widen it.**
 
 - Bare utilities are the phone layout; `sm:` / `md:` / `lg:` / `xl:` only _add_ to it. Never write a
