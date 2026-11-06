@@ -62,12 +62,12 @@
             </div>
           {{/if}}
         </div>
-        <div class="mt-2 hidden max-h-80 overflow-y-auto rounded-xl border border-line" id="wz-mods-results"></div>
+        <div class="mt-2 hidden max-h-80 overflow-y-auto rounded-md border border-line" id="wz-mods-results"></div>
       </div>
 
       <div class="mt-4 hidden" id="wz-mods-selected-wrap">
         <div class="mb-2 flex items-center gap-2">
-          <span class="text-sm font-semibold">Selected Mods</span>
+          <span class="text-sm font-semibold">Selected mods</span>
           <span class="badge" id="wz-mods-count">0</span>
           <span class="ml-auto text-xs text-ink-faint" id="wz-mods-dephint"></span>
         </div>
@@ -91,7 +91,7 @@
           {{/if}}
         </div>
       </div>
-      <div class="mt-2 hidden max-h-72 overflow-y-auto rounded-xl border border-line" id="wz-solver-results"></div>
+      <div class="mt-2 hidden max-h-72 overflow-y-auto rounded-md border border-line" id="wz-solver-results"></div>
       <div class="mt-3 hidden flex-wrap gap-1.5" id="wz-solver-chips"></div>
       <div class="mt-4 flex items-center gap-3">
         <button class="btn btn-primary" id="wz-solver-run" type="button" disabled>{{{icon 'wand-sparkles' 'size-4'}}} Solve Compatibility</button>
@@ -107,18 +107,18 @@
     <h3 class="mb-1 font-semibold">Pick a Modpack</h3>
     <p class="help mb-4">Search Modrinth or CurseForge. The pack decides the loader and Minecraft version, and the install is always pinned to the exact pack version you choose, so restarts never silently upgrade it.</p>
     {{! GTNH ships outside Modrinth/CurseForge - a fixed card, not a search result }}
-    <div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-line/70 bg-surface-container/40 p-3.5" id="wz-gtnh-card">
+    <div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-3 rounded-md border border-line p-3" id="wz-gtnh-card">
       <div class="min-w-0 flex-1">
-        <div class="font-semibold text-ink">GT New Horizons</div>
+        <div class="font-semibold">GT New Horizons</div>
         <div class="text-xs text-ink-faint">A Minecraft 1.7.10 expert pack. Needs at least 6 GB of RAM and 20 GB of disk. Runs on modern
           Java.</div>
       </div>
       <button type="button" class="btn shrink-0" id="wz-gtnh-pick">Set Up</button>
     </div>
     {{! Custom zip — CurseForge modpack export or a hand-assembled zip of jars }}
-    <div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-line/70 bg-surface-container/40 p-3.5" id="wz-zip-card">
+    <div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-3 rounded-md border border-line p-3" id="wz-zip-card">
       <div class="min-w-0 flex-1">
-        <div class="font-semibold text-ink">Custom Zip</div>
+        <div class="font-semibold">Custom zip</div>
         <div class="text-xs text-ink-faint">A CurseForge modpack export (from its Build/Export button{{#unless curseforgeEnabled}}, needs the API key in Settings{{/unless}}) or any zip of mod jars you collected yourself. Every jar is identified and installed with provenance.</div>
       </div>
       <button type="button" class="btn shrink-0" id="wz-zip-pick">Upload Zip</button>
@@ -131,7 +131,7 @@
         <button type="button" class="seg-btn" aria-pressed="false" data-platform="curseforge">CurseForge</button>
       </div>
     </div>
-    <div class="mt-2 hidden max-h-80 overflow-y-auto rounded-xl border border-line" id="wz-pack-results"></div>
+    <div class="mt-2 hidden max-h-80 overflow-y-auto rounded-md border border-line" id="wz-pack-results"></div>
     <div class="mt-4 hidden" id="wz-pack-selected">
       <div class="notice notice-ok items-center" id="wz-pack-summary"></div>
       <div class="mt-3 grid items-end gap-4 sm:grid-cols-[1fr_auto]">
@@ -189,7 +189,7 @@
     </div>
     <div class="mt-3 grid gap-4 sm:grid-cols-[minmax(14rem,1fr)_auto]">
       <div>
-        <label class="label" for="wz-desc">Description <span class="text-xs font-normal text-ink-faint">(Optional)</span></label>
+        <label class="label" for="wz-desc">Description <span class="text-xs font-normal text-ink-faint">(optional)</span></label>
         <input class="input" id="wz-desc" placeholder="What is this server for?">
       </div>
       <div>
@@ -237,7 +237,7 @@
     <h3 class="mb-4 font-semibold">World &amp; Rules</h3>
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
-        <label class="label" for="wz-seed">World Seed <span class="text-xs font-normal text-ink-faint">(Optional)</span></label>
+        <label class="label" for="wz-seed">World Seed <span class="text-xs font-normal text-ink-faint">(optional)</span></label>
         <input class="input font-mono" id="wz-seed" placeholder="random">
       </div>
       <div>
@@ -332,12 +332,12 @@
       <div class="space-y-4 border-t border-line p-4">
         <div class="grid gap-4 sm:grid-cols-2">
           <div>
-            <label class="label" for="wz-docker-name">Container Name <span class="text-xs font-normal text-ink-faint">(Optional)</span></label>
+            <label class="label" for="wz-docker-name">Container Name <span class="text-xs font-normal text-ink-faint">(optional)</span></label>
             <input class="input font-mono" id="wz-docker-name" placeholder="msm-<auto>" autocomplete="off">
             <p class="help">Letters, digits, underscores, periods, and hyphens are allowed. Leave blank for the default.</p>
           </div>
           <div>
-            <label class="label" for="wz-docker-network">Docker Network <span class="text-xs font-normal text-ink-faint">(Optional)</span></label>
+            <label class="label" for="wz-docker-network">Docker Network <span class="text-xs font-normal text-ink-faint">(optional)</span></label>
             <input class="input font-mono" id="wz-docker-network" list="wz-docker-networks" placeholder="Default (bridge)" autocomplete="off">
             <datalist id="wz-docker-networks"></datalist>
             <p class="help">Attach to an existing Docker network, or type a new name and the panel will create it for you. Leave blank for the default bridge.</p>
@@ -346,7 +346,7 @@
 
         <div>
           <div class="mb-2 flex items-center justify-between">
-            <span class="text-sm font-semibold">Extra Port Mappings</span>
+            <span class="text-sm font-semibold">Extra port mappings</span>
             <button type="button" class="btn btn-sm" id="wz-docker-port-add">{{{icon 'plus' 'size-3.5'}}} Add Port</button>
           </div>
           <div class="space-y-2" id="wz-docker-ports"></div>
@@ -355,7 +355,7 @@
 
         <div>
           <div class="mb-2 flex items-center justify-between">
-            <span class="text-sm font-semibold">Extra Volume Binds</span>
+            <span class="text-sm font-semibold">Extra volume binds</span>
             <button type="button" class="btn btn-sm" id="wz-docker-bind-add">{{{icon 'plus' 'size-3.5'}}} Add Bind</button>
           </div>
           <div class="space-y-2" id="wz-docker-binds"></div>

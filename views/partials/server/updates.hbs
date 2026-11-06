@@ -50,7 +50,7 @@
         <span id="compat-phase">{{default compat.phaseLabel "Starting…"}}</span>
         <span id="compat-count" class="font-mono text-ink-faint">{{compat.done}}/{{compat.total}}</span>
       </div>
-      <div class="h-2.5 overflow-hidden rounded-full bg-inset border border-line/40">
+      <div class="h-2 overflow-hidden rounded-sm bg-inset">
         <div id="compat-bar" class="h-full bg-ok transition-[width]" style="width:0%"></div>
       </div>
     </div>
@@ -123,7 +123,7 @@
   {{#if compatVersions.length}}
     <div class="mb-2 flex flex-wrap items-center gap-2">
       <h3 class="font-semibold">Future Versions</h3>
-      {{#if compat.report.partial}}<span class="badge badge-warn">Still Checking</span>{{/if}}
+      {{#if compat.report.partial}}<span class="badge badge-warn">still checking</span>{{/if}}
       <span class="ml-auto text-xs text-ink-faint">Nearest first. Open one to see which mods are ready.</span>
     </div>
     <div class="grid gap-2" id="compat-versions">
@@ -133,7 +133,7 @@
             <span class="shrink-0 text-ink-faint transition group-open:rotate-90">{{{icon 'chevron-right' 'size-4'}}}</span>
             <span class="font-mono text-sm font-semibold">{{version}}</span>
             {{#if (eq status 'ready')}}
-              <span class="badge badge-ok">All Mods Ready</span>
+              <span class="badge badge-ok">All mods ready</span>
             {{else if (eq status 'unknown')}}
               <span class="badge badge-warn">Unknown</span>
             {{else}}

@@ -35,7 +35,7 @@ export function confirmDialog({
     }
     if (detail) {
       const d = document.createElement('div');
-      d.className = 'rounded-xl border border-line/70 bg-surface-container/60 p-3 text-xs text-ink-soft';
+      d.className = 'rounded-md border border-line bg-raised p-2.5 text-xs text-ink-soft';
       d.textContent = detail;
       content.appendChild(d);
     }

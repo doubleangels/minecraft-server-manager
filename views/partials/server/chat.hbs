@@ -44,15 +44,15 @@
     {{! The composer group: formatting toolbar and live preview attached
         directly to the message input, not floating bands. Controls are
         injected by chat.js (swatches need the color map anyway). }}
-    <div class="space-y-2 rounded-xl border border-line bg-surface-container/40 p-3">
+    <div class="space-y-2 rounded-md border border-line bg-inset/30 p-2.5">
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5" data-chat-styles>
         <div class="flex flex-wrap items-center gap-1" id="chat-colors" role="group" aria-label="Text color"></div>
         <span class="h-5 w-px shrink-0 bg-line-strong" aria-hidden="true"></span>
         <div class="flex items-center gap-1" id="chat-formats" role="group" aria-label="Text style"></div>
       </div>
-      <div class="flex min-w-0 items-baseline gap-2 rounded-lg bg-canvas-obsidian/90 px-3 py-2 font-mono text-[13px] leading-6" data-chat-preview-row hidden>
-        <span class="shrink-0 text-[10px] uppercase tracking-wider text-ink-faint">Preview</span>
-        <span class="min-w-0 break-words text-ink" data-chat-preview></span>
+      <div class="flex min-w-0 items-baseline gap-2 rounded-sm bg-stone-950 px-2.5 py-1.5 font-mono text-[13px] leading-6" data-chat-preview-row hidden>
+        <span class="shrink-0 text-[10px] uppercase tracking-wider text-stone-500">Preview</span>
+        <span class="min-w-0 break-words text-stone-200" data-chat-preview></span>
       </div>
     </div>
   </fieldset>

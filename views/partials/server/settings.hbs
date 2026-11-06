@@ -128,7 +128,7 @@
           <p class="help">The amount of RAM Minecraft itself may use.</p>
         </div>
         <div>
-          <label class="label" for="st-initheap">Initial Heap <span class="font-normal text-ink-faint">(Optional)</span></label>
+          <label class="label" for="st-initheap">Initial Heap <span class="font-normal text-ink-faint">(optional)</span></label>
           <div class="flex items-center gap-3">
             <input type="number" min="512" step="512" inputmode="numeric" class="input w-32 font-mono" id="st-initheap" value="{{server.resources.initHeapMb}}" placeholder="Whole heap">
             <span class="text-sm text-ink-faint">MB</span>
@@ -220,7 +220,7 @@
     {{#if (eq user.role 'admin')}}
     <section class="card scroll-mt-32 p-4" id="sec-docker">
       <h3 class="flex items-center gap-2 font-semibold">Docker</h3>
-      <span class="badge">Admin Only</span>
+      <span class="badge">admin only</span>
       <p class="help mt-1 mb-4">Container name, network, extra ports and volume binds.</p>
       <div class="space-y-4">
         <div class="grid gap-4 sm:grid-cols-2">

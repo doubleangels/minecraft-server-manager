@@ -55,11 +55,11 @@
             </td>
             <td data-th="Permission">
               {{#if (eq permission 'ops')}}
-                <span class="badge badge-danger">Ops Only</span>
+                <span class="badge badge-danger">ops only</span>
               {{else if (eq permission 'whitelist')}}
-                <span class="badge badge-info">Whitelisted</span>
+                <span class="badge badge-info">whitelisted</span>
               {{else}}
-                <span class="badge badge-ok">Everyone</span>
+                <span class="badge badge-ok">everyone</span>
               {{/if}}
             </td>
             <td data-th="Cooldown" class="text-sm text-ink-soft">{{cooldownLabel}}</td>

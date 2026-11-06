@@ -13,25 +13,17 @@
     so this row is just people + infrastructure. }}
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 {{#if serversOnly}}hidden{{/if}}">
   <div class="card stat-tile">
-    <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-ok/15 text-ok">{{{icon 'server' 'size-3.5'}}}</span>
-      <span>Servers Online</span>
-    </div>
+    <div class="stat-label">{{{icon 'server' 'size-3.5'}}} Servers Online</div>
+    {{! Green only when something IS online - 0/3 in success green lied. }}
     <div class="stat-value {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="stat-unit"> / {{totals.total}}</span></div>
   </div>
   <div class="card stat-tile">
-    <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-link/15 text-link">{{{icon 'users' 'size-3.5'}}}</span>
-      <span>Players Connected</span>
-    </div>
+    <div class="stat-label">{{{icon 'users' 'size-3.5'}}} Players Connected</div>
     <div class="stat-value">{{totals.players}}</div>
   </div>
   <div class="card stat-tile col-span-2 sm:col-span-1">
-    <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-inset text-ink-soft">{{{icon 'box' 'size-3.5'}}}</span>
-      <span>Docker</span>
-    </div>
-    <div class="mt-2 flex items-center gap-2 text-sm font-semibold text-ink-faint" id="docker-status">
+    <div class="stat-label">{{{icon 'box' 'size-3.5'}}} Docker</div>
+    <div class="mt-1 flex items-center gap-2 text-sm font-semibold text-ink-faint" id="docker-status">
       <span class="status-dot relative bg-ink-faint"></span> Checking…
     </div>
   </div>
@@ -40,66 +32,56 @@
 {{#unless serversOnly}}
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 {{#if noServers}}hidden{{/if}}">
   <div class="card stat-tile">
-    <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-ok/15 text-ok">{{{icon 'memory-stick' 'size-3.5'}}}</span>
-      <span>Memory Allotted</span>
-    </div>
+    <div class="stat-label">{{{icon 'memory-stick' 'size-3.5'}}} Memory Allotted</div>
     <div class="stat-value">{{overview.mem.allottedMb}}<span class="stat-unit"> MB</span></div>
     <div class="stat-sub"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
   </div>
 
   <div class="card stat-tile">
-    <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-link/15 text-link">{{{icon 'hard-drive' 'size-3.5'}}}</span>
-      <span>Storage Used</span>
-    </div>
+    <div class="stat-label">{{{icon 'hard-drive' 'size-3.5'}}} Storage Used</div>
     <div class="stat-value">{{bytes overview.disk.usedBytes}}</div>
     <div class="stat-sub">across all server data folders</div>
   </div>
 
-  <a href="/health" class="card stat-tile block hover:border-line-strong hover:shadow-raised transition" aria-label="Open the health page">
-    <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-danger/15 text-danger">{{{icon 'activity' 'size-3.5'}}}</span>
-      <span>Health · 24h</span>
-    </div>
+  <a href="/health" class="card stat-tile block hover:border-line-strong" aria-label="Open the health page">
+    <div class="stat-label">{{{icon 'activity' 'size-3.5'}}} Health · 24h</div>
     <div class="stat-value {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="stat-unit"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
     <div class="stat-sub">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
   </a>
 
-  <a href="/updates" class="card stat-tile block hover:border-line-strong hover:shadow-raised transition" aria-label="Open the updates page">
-    <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-warn/15 text-warn">{{{icon 'circle-arrow-up' 'size-3.5'}}}</span>
-      <span>Updates</span>
-    </div>
+  <a href="/updates" class="card stat-tile block hover:border-line-strong" aria-label="Open the updates page">
+    <div class="stat-label">{{{icon 'circle-arrow-up' 'size-3.5'}}} Updates</div>
     <div class="stat-value {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
     <div class="stat-sub">{{overview.updates.mods}} mod{{#unless (eq overview.updates.mods 1)}}s{{/unless}} / {{overview.updates.server}} server-level</div>
   </a>
 </div>
 {{/unless}}
 
+
+
+
 {{#unless serversOnly}}
 <div class="mb-6 {{#if noServers}}hidden{{/if}}">
-  <h2 class="mb-3 text-base font-bold tracking-tight text-ink flex items-center gap-2">
-    {{{icon 'gauge' 'size-4 text-ok'}}}
-    <span>Servers by Status</span>
-  </h2>
-  <div class="flex flex-wrap items-center gap-2">
-    {{#if overview.byStatus.running}}<span class="inline-flex items-center gap-2 rounded-full border border-ok/30 bg-ok/10 px-3 py-1.5 text-xs shadow-xs font-semibold text-ok"><span class="status-dot bg-ok pulse"></span>{{overview.byStatus.running}} Running</span>{{/if}}
-    {{#if overview.byStatus.starting}}<span class="inline-flex items-center gap-2 rounded-full border border-warn/30 bg-warn/10 px-3 py-1.5 text-xs shadow-xs font-semibold text-warn"><span class="status-dot bg-warn pulse"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
-    {{#if overview.byStatus.unhealthy}}<span class="inline-flex items-center gap-2 rounded-full border border-warn/30 bg-warn/10 px-3 py-1.5 text-xs shadow-xs font-semibold text-warn"><span class="status-dot bg-warn"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
-    {{#if overview.byStatus.stalled}}<span class="inline-flex items-center gap-2 rounded-full border border-danger/30 bg-danger/10 px-3 py-1.5 text-xs shadow-xs font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
-    {{#if overview.byStatus.updating}}<span class="inline-flex items-center gap-2 rounded-full border border-link/30 bg-link/10 px-3 py-1.5 text-xs shadow-xs font-semibold text-link"><span class="status-dot bg-link pulse"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
-    {{#if overview.byStatus.crashed}}<span class="inline-flex items-center gap-2 rounded-full border border-danger/30 bg-danger/10 px-3 py-1.5 text-xs shadow-xs font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
-    {{#if overview.byStatus.stopped}}<span class="inline-flex items-center gap-2 rounded-full border border-line bg-inset/60 px-3 py-1.5 text-xs shadow-xs font-medium text-ink-faint"><span class="status-dot bg-ink-faint"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
+  <h2 class="mb-3 font-semibold">Servers by Status</h2>
+  <div class="card flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm">
+    {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot bg-ok"></span>{{overview.byStatus.running}} Running</span>{{/if}}
+    {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot bg-warn"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
+    {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5 text-warn"><span class="status-dot bg-warn"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
+    {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
+    {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot bg-link"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
+    {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
+    {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot bg-ink-faint"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
   </div>
 </div>
 {{/unless}}
 
 {{#unless noServers}}
-{{#unless serversOnly}}<h2 class="mb-3 text-base font-bold tracking-tight text-ink">Servers</h2>{{/unless}}
+{{#unless serversOnly}}<h2 class="mb-3 font-semibold">Servers</h2>{{/unless}}
 <div class="mb-4 flex flex-wrap items-center gap-2">
   <input class="input w-full sm:w-auto sm:max-w-xs sm:flex-1" type="search" placeholder="Search servers, tags…" aria-label="Search servers" id="server-filter">
-  <label class="text-xs font-semibold text-ink-faint" for="server-sort">Sort</label>
+  {{! Visible "Sort" label: only the first option carried a "Sort:" prefix, so
+      the closed trigger read context-free once anything else was picked. }}
+  <label class="text-xs text-ink-faint" for="server-sort">Sort</label>
   <select class="input w-auto" id="server-sort" data-label="Sort servers">
     <option value="status" {{#if (eq sort 'status')}}selected{{/if}}>Status</option>
     <option value="name" {{#if (eq sort 'name')}}selected{{/if}}>Name</option>
@@ -126,12 +108,11 @@
     {{> server-card}}
   {{/each}}
 
-  <a href="/servers/new" class="grid min-h-48 place-items-center rounded-2xl border-2 border-dashed border-line/70 bg-surface/40 text-ink-faint transition-all duration-200 hover:border-ok hover:bg-ok/5 hover:text-ok hover:shadow-raised">
-    <div class="grid place-items-center text-center p-6">
-      <div class="grid size-12 place-items-center rounded-full bg-ok/10 text-ok ring-1 ring-ok/20 mb-2">
-        {{{icon 'plus' 'size-6'}}}
-      </div>
-      <div class="text-sm font-semibold text-ink">Create a Server</div>
+  <a href="/servers/new" class="grid min-h-44 place-items-center rounded-lg border-2 border-dashed border-line text-ink-faint transition hover:border-ok hover:text-ok">
+    <div class="grid place-items-center text-center">
+      {{{icon 'plus' 'size-8'}}}
+      <div class="mt-2 text-sm font-medium">Create a Server</div>
+      {{! label kept in sync with the empty-state CTA, topbar, and setup }} 
     </div>
   </a>
 </div>
@@ -142,7 +123,7 @@
 {{#unless serversOnly}}
 <div class="mt-8 {{#if noServers}}hidden{{/if}}" id="combined-overview">
   <div class="mb-3 flex items-center justify-between">
-    <h2 class="text-base font-bold tracking-tight text-ink">Resource Overview</h2>
+    <h2 class="font-semibold">Resource Overview</h2>
   </div>
   <div data-combined-root>
     {{> combined-graphs}}
@@ -152,10 +133,10 @@
 
 <div class="mt-8 {{#if serversOnly}}hidden{{/if}}">
   <div class="mb-3 flex items-center justify-between">
-    <h2 class="text-base font-bold tracking-tight text-ink">Recent Activity</h2>
-    <a href="/activity" class="text-sm font-semibold text-link hover:underline">View All &rarr;</a>
+    <h2 class="font-semibold">Recent Activity</h2>
+    <a href="/activity" class="text-sm text-link hover:underline">View All →</a>
   </div>
-  <div class="card overflow-hidden">
+  <div class="card">
     <ol class="divide-y divide-line">
       {{#each activity}}
         {{! The summary keeps a readable minimum width; on a phone the server and

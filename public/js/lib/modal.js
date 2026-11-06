@@ -31,23 +31,23 @@ export function openModal({ title = '', content = '', actions = [], size = 'md',
   // reach), full width, and its actions stack into full-width buttons with
   // Cancel last, like a native action sheet. From sm up it is the centred dialog.
   backdrop.className =
-    'fixed inset-0 z-[60] grid grid-cols-1 place-items-end bg-black/70 backdrop-blur-sm animate-[fade-in_.15s_ease-out] sm:place-items-center sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]';
+    'fixed inset-0 z-[60] grid grid-cols-1 place-items-end bg-black/60 backdrop-blur-[2px] animate-[fade-in_.15s_ease-out] sm:place-items-center sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]';
 
   const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-3xl', xl: 'max-w-5xl', full: 'max-w-6xl' };
   const panel = document.createElement('div');
-  panel.className = `card w-full ${widths[size] || widths.md} max-h-[92dvh] flex flex-col rounded-t-3xl rounded-b-none border-b-0 pb-[env(safe-area-inset-bottom)] shadow-modal animate-[sheet-in_.18s_ease-out] sm:max-h-[85vh] sm:rounded-2xl sm:border sm:pb-0 sm:animate-[modal-in_.15s_ease-out]`;
+  panel.className = `card w-full ${widths[size] || widths.md} max-h-[92dvh] flex flex-col rounded-t-2xl rounded-b-none border-b-0 pb-[env(safe-area-inset-bottom)] shadow-modal animate-[sheet-in_.18s_ease-out] sm:max-h-[85vh] sm:rounded-lg sm:border-b sm:pb-0 sm:animate-[modal-in_.15s_ease-out]`;
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-modal', 'true');
 
   panel.innerHTML = `
     <div class="mx-auto mt-2 -mb-1 h-1 w-10 shrink-0 rounded-full bg-line-strong sm:hidden" aria-hidden="true"></div>
-    <div class="flex items-center gap-3 border-b border-line/80 py-3.5 pl-6 pr-4 texture-top">
-      <h3 class="min-w-0 flex-1 truncate text-base font-bold tracking-tight text-ink"></h3>
+    <div class="flex items-center gap-3 border-b border-line py-3 pl-5 pr-3">
+      <h3 class="min-w-0 flex-1 truncate font-semibold"></h3>
       <button data-modal-x class="icon-btn" aria-label="Close">
         <svg class="icon size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
       </button>
     </div>
-    <div data-modal-body class="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6"></div>`;
+    <div data-modal-body class="min-h-0 flex-1 overflow-y-auto p-5"></div>`;
   panel.querySelector('h3').textContent = title;
 
   const body = panel.querySelector('[data-modal-body]');
@@ -61,7 +61,7 @@ export function openModal({ title = '', content = '', actions = [], size = 'md',
   if (actions.length) {
     footer = document.createElement('div');
     footer.className =
-      'flex flex-col-reverse gap-2.5 border-t border-line/80 bg-surface-container/40 px-4 py-3 sm:flex-row sm:flex-wrap sm:justify-end sm:px-6 sm:py-3.5';
+      'flex flex-col-reverse gap-2 border-t border-line px-4 py-3 sm:flex-row sm:flex-wrap sm:justify-end sm:px-5 sm:py-3.5';
     for (const action of actions) {
       const btn = document.createElement('button');
       const kinds = { primary: 'btn btn-primary', danger: 'btn btn-danger', ghost: 'btn btn-ghost', default: 'btn' };

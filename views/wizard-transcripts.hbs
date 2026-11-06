@@ -1,22 +1,21 @@
 {{> page-header heading="CHATBOT TRANSCRIPTS" sub="Kept according to each server's retention policy, including conversations from servers that were later deleted."}}
 
-<div class="card overflow-hidden shadow-raised">
+<div class="card overflow-hidden">
   {{#if transcripts.length}}
     <div class="divide-y divide-line">
       {{#each transcripts}}
-        <div class="p-4 sm:p-5 transition hover:bg-inset/30">
+        <div class="p-4">
           <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-faint">
-            <span class="font-semibold text-ink">{{server_name}}</span>
-            <span class="font-mono text-[11px] text-ink-faint">{{server_id}}</span>
-            <span>·</span>
-            <span class="rounded-full bg-surface-container px-2 py-0.5 font-medium text-ink-soft">{{speaker}}</span>
-            <span class="ml-auto tabular-nums" data-ts="{{created_at}}">{{created_at}}</span>
+            <span class="font-medium text-ink-soft">{{server_name}}</span>
+            <span class="font-mono">{{server_id}}</span>
+            <span>·</span><span>{{speaker}}</span>
+            <span class="ml-auto" data-ts="{{created_at}}">{{created_at}}</span>
           </div>
-          <p class="mt-2.5 whitespace-pre-wrap break-words text-sm leading-relaxed {{#if (eq role 'error')}}text-danger font-mono text-xs{{else}}text-ink{{/if}}">{{content}}</p>
+          <p class="mt-2 whitespace-pre-wrap break-words text-sm {{#if (eq role 'error')}}text-danger{{else}}text-ink{{/if}}">{{content}}</p>
         </div>
       {{/each}}
     </div>
   {{else}}
-    <div class="p-12 text-center text-sm text-ink-faint">No chatbot transcripts are being kept right now.</div>
+    <div class="p-10 text-center text-sm text-ink-faint">No chatbot transcripts are being kept right now.</div>
   {{/if}}
 </div>

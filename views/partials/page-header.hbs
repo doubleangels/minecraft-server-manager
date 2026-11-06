@@ -1,7 +1,7 @@
-<div class="mb-5 flex flex-wrap items-end justify-between gap-3 sm:mb-7">
+<div class="mb-4 flex flex-wrap items-end justify-between gap-3 sm:mb-6">
   <div>
-    <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-ink">{{heading}}</h2>
-    {{#if sub}}<p class="mt-1 max-w-prose text-sm text-ink-faint leading-relaxed">{{sub}}</p>{{/if}}
+    <h2 class="pixel text-sm text-ink">{{heading}}</h2>
+    {{#if sub}}<p class="mt-1.5 max-w-prose text-sm text-ink-faint sm:mt-2">{{sub}}</p>{{/if}}
   </div>
   {{#if actionsPartial}}{{> (lookup . 'actionsPartial')}}{{/if}}
 </div>

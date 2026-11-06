@@ -43,9 +43,9 @@
             <td data-th="Mod" class="sm:w-full sm:max-w-0">
               <div class="flex items-center gap-2.5">
                 {{#if iconUrl}}
-                  <img src="{{iconUrl}}" alt="" loading="lazy" data-mod-icon class="size-8 shrink-0 rounded-xl bg-surface-container border border-line/60 object-cover">
+                  <img src="{{iconUrl}}" alt="" loading="lazy" data-mod-icon class="size-8 shrink-0 rounded-sm bg-inset object-cover">
                 {{else}}
-                  <span class="grid size-8 shrink-0 place-items-center rounded-xl bg-surface-container border border-line/60 text-ink-faint">{{{icon 'puzzle' 'size-4'}}}</span>
+                  <span class="grid size-8 shrink-0 place-items-center rounded-sm bg-inset text-ink-faint">{{{icon 'puzzle' 'size-4'}}}</span>
                 {{/if}}
                 <div class="min-w-0">
                   <div class="truncate font-medium" title="{{name}}">{{name}}</div>
@@ -55,19 +55,19 @@
             </td>
             <td data-th="Source">
               {{#if (eq source 'pack')}}
-                <span class="badge badge-info">Pack</span>
+                <span class="badge badge-info">pack</span>
               {{else if (eq source 'overlay')}}
-                <span class="badge badge-ok">Custom</span>
+                <span class="badge badge-ok">custom</span>
                 {{#if sharedWith}}<div class="mt-1 text-[11px] text-ink-faint">on {{sharedWith}} server{{#if (gt sharedWith 1)}}s{{/if}}</div>{{/if}}
               {{else}}
-                <span class="badge">File</span>
+                <span class="badge">file</span>
               {{/if}}
-              {{#if (eq kind 'datapack')}}<div class="mt-1"><span class="badge">Datapack</span></div>{{/if}}
+              {{#if (eq kind 'datapack')}}<div class="mt-1"><span class="badge">datapack</span></div>{{/if}}
             </td>
             <td data-th="Version">
               {{default version '-'}}
               {{#if updateAvailable}}<span class="badge badge-warn ml-1" data-tip="An update is available.">→ {{updateAvailable}}</span>{{/if}}
-              {{#if updateIgnored}}<span class="badge ml-1 text-ink-faint" data-tip="This update is ignored and won't be applied.">Ignored → {{updateIgnored}}</span>{{/if}}
+              {{#if updateIgnored}}<span class="badge ml-1 text-ink-faint" data-tip="This update is ignored and won't be applied.">ignored → {{updateIgnored}}</span>{{/if}}
               {{#if revertTo}}<div class="mt-1 text-[11px] text-ink-faint">updated from {{revertTo}}</div>{{/if}}
             </td>
             <td data-th="Size" class="text-right text-ink-faint">{{bytes size}}</td>

@@ -1,8 +1,5 @@
-{{! Clean minimal logo tile + modern Material 3 wordmark. Params: size (tile), textSize (wordmark). }}
-<span class="relative {{default size 'size-9'}} shrink-0 grid place-items-center rounded-xl bg-ok/10 p-1.5 ring-1 ring-ok/25 shadow-xs transition-transform duration-200 hover:scale-105">
-  <img src="/icons/logo.svg" alt="MSM Logo" class="size-full object-contain">
-</span>
-<span class="flex flex-col justify-center text-left leading-none">
-  <span class="{{default textSize 'text-sm'}} font-bold tracking-tight text-ink">Minecraft</span>
-  <span class="text-[10px] font-semibold tracking-wider text-ok uppercase mt-0.5">Server Manager</span>
-</span>
+{{! Icon tile + pixel wordmark. Params: size (tile), glyph (icon name),
+    glyphSize (icon), textSize (wordmark). Wrap it in the context you need -
+    a link in the sidebar, a centered row on the auth pages. }}
+<span class="grid {{default size 'size-10'}} shrink-0 place-items-center rounded-md bg-grass-600 text-white shadow-[inset_0_-3px_0_rgb(0_0_0/0.3)]">{{{icon (default glyph 'pickaxe') (default glyphSize 'size-5')}}}</span>
+<span class="pixel {{default textSize 'text-sm'}} leading-tight text-ink">Minecraft <span class="text-ok">Server Manager</span></span>

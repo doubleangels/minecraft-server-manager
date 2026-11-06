@@ -1,12 +1,9 @@
-<div class="grid min-h-[60vh] place-items-center py-10">
-  <div class="card w-full max-w-md p-8 sm:p-10 text-center shadow-raised border-line/80">
-    <div class="mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-danger/10 text-danger ring-1 ring-danger/20">
-      <span class="font-mono text-2xl font-black tracking-tight">{{code}}</span>
-    </div>
-    <h2 class="text-xl font-bold tracking-tight text-ink sm:text-2xl">{{title}}</h2>
-    <p class="mt-2 text-sm text-ink-faint leading-relaxed">{{message}}</p>
-    <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
-      <a href="/" class="btn btn-primary shadow-md">{{{icon 'arrow-left' 'size-4'}}} Back to the Dashboard</a>
-    </div>
+<div class="grid min-h-[50vh] place-items-center">
+  <div class="text-center">
+    {{! semantic token - raw 400/500 palette steps fail contrast on the light canvas }}
+    <div class="pixel text-4xl text-danger">{{code}}</div>
+    <h2 class="mt-4 text-lg font-semibold">{{title}}</h2>
+    <p class="mt-1 text-sm text-ink-faint">{{message}}</p>
+    <a href="/" class="btn btn-primary mt-5">{{{icon 'arrow-left' 'size-4'}}} Back to the Dashboard</a>
   </div>
 </div>
