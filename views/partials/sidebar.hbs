@@ -64,7 +64,7 @@
             <span class="ml-auto hidden shrink-0 text-warn" data-pin-mark aria-label="Pinned">{{{icon 'star' 'size-3'}}}</span>
             {{! Copy the connect address without opening the server. Revealed on
                 hover with a mouse; always there on touch screens. }}
-            <button type="button" class="-my-1 shrink-0 rounded-sm p-1 text-ink-faint hover:text-link focus-visible:outline-2 focus-visible:outline-diamond-400 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/srv:opacity-100 focus-visible:opacity-100" data-copy="{{address}}" data-tip="Copy {{address}}." aria-label="Copy the address for {{name}}">{{{icon 'copy' 'size-3.5'}}}</button>
+            <button type="button" class="-my-1 shrink-0 rounded-sm p-1 text-ink-faint hover:text-link focus-visible:outline-2 focus-visible:outline-link [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/srv:opacity-100 focus-visible:opacity-100" data-copy="{{address}}" data-tip="Copy {{address}}." aria-label="Copy the address for {{name}}">{{{icon 'copy' 'size-3.5'}}}</button>
             <span class="status-dot relative shrink-0 {{statusDot status}} {{#if (statusPulse status)}}pulse{{/if}}" title="{{statusLabel status}}"></span>
           </a>
         {{/each}}

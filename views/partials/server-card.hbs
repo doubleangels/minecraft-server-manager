@@ -27,7 +27,7 @@
           {{#if mapEnabled}}<button type="button" class="inline-flex items-center gap-1 rounded-sm bg-link/10 px-2 py-0.5 text-[11px] font-medium text-link hover:bg-link/20 border border-link/20 transition-colors" data-open-href="/map/{{id}}/" data-tip="Open the live map in a new tab." aria-label="Open the live map for {{name}}">{{{icon 'map' 'size-3'}}} Map</button>{{/if}}
         </div>
       </div>
-      <button type="button" class="-m-1 shrink-0 rounded-sm p-1.5 text-ink-faint transition hover:text-warn focus-visible:outline-2 focus-visible:outline-diamond-400 aria-pressed:text-warn" data-pin-server="{{id}}" aria-pressed="false" data-tip="Pin to the top of the list." aria-label="Pin {{name}}">{{{icon 'star' 'size-4'}}}</button>
+      <button type="button" class="-m-1 shrink-0 rounded-sm p-1.5 text-ink-faint transition hover:text-warn focus-visible:outline-2 focus-visible:outline-link aria-pressed:text-warn" data-pin-server="{{id}}" aria-pressed="false" data-tip="Pin to the top of the list." aria-label="Pin {{name}}">{{{icon 'star' 'size-4'}}}</button>
       <span class="flex flex-col items-end gap-1">
         <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold {{statusText status}}">
           <span class="status-dot relative {{statusDot status}} {{#if (statusPulse status)}}pulse{{/if}}"></span>

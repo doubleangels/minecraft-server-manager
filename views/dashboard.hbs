@@ -14,14 +14,14 @@
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 {{#if serversOnly}}hidden{{/if}}">
   <div class="card stat-tile">
     <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-grass-500/15 text-ok">{{{icon 'server' 'size-3.5'}}}</span>
+      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-ok/15 text-ok">{{{icon 'server' 'size-3.5'}}}</span>
       <span>Servers Online</span>
     </div>
     <div class="stat-value {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="stat-unit"> / {{totals.total}}</span></div>
   </div>
   <div class="card stat-tile">
     <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-diamond-400/15 text-link">{{{icon 'users' 'size-3.5'}}}</span>
+      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-link/15 text-link">{{{icon 'users' 'size-3.5'}}}</span>
       <span>Players Connected</span>
     </div>
     <div class="stat-value">{{totals.players}}</div>
@@ -41,7 +41,7 @@
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 {{#if noServers}}hidden{{/if}}">
   <div class="card stat-tile">
     <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-grass-500/15 text-ok">{{{icon 'memory-stick' 'size-3.5'}}}</span>
+      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-ok/15 text-ok">{{{icon 'memory-stick' 'size-3.5'}}}</span>
       <span>Memory Allotted</span>
     </div>
     <div class="stat-value">{{overview.mem.allottedMb}}<span class="stat-unit"> MB</span></div>
@@ -50,7 +50,7 @@
 
   <div class="card stat-tile">
     <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-diamond-400/15 text-link">{{{icon 'hard-drive' 'size-3.5'}}}</span>
+      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-link/15 text-link">{{{icon 'hard-drive' 'size-3.5'}}}</span>
       <span>Storage Used</span>
     </div>
     <div class="stat-value">{{bytes overview.disk.usedBytes}}</div>
@@ -68,7 +68,7 @@
 
   <a href="/updates" class="card stat-tile block hover:border-line-strong hover:shadow-raised transition" aria-label="Open the updates page">
     <div class="stat-label">
-      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-gold-400/15 text-warn">{{{icon 'circle-arrow-up' 'size-3.5'}}}</span>
+      <span class="grid size-6 shrink-0 place-items-center rounded-full bg-warn/15 text-warn">{{{icon 'circle-arrow-up' 'size-3.5'}}}</span>
       <span>Updates</span>
     </div>
     <div class="stat-value {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
