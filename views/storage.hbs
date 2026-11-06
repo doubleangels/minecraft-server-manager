@@ -69,7 +69,7 @@
         {{#each storage.cleanup}}
           <div class="flex items-center gap-3 p-3 text-sm">
             <span class="flex-1">{{action}}</span>
-            <button class="btn btn-sm" data-cleanup-action="{{key}}" data-cleanup-label="{{action}}" {{#if days}}data-cleanup-days="{{days}}"{{/if}}>Preview…</button>
+            <button class="btn btn-sm" data-cleanup-action="{{key}}" data-cleanup-label="{{action}}" {{#if days}}data-cleanup-days="{{days}}"{{/if}}>{{{icon 'eye' 'size-3.5'}}} Preview…</button>
           </div>
         {{/each}}
       </div>

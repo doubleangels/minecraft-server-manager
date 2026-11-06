@@ -1,6 +1,6 @@
 {{! Activity and Health as tabs, so the phone's Activity tab reaches both. The
     badge counts unread health alerts. Hidden from lg up (the sidebar has both). }}
-<nav class="-mt-2 mb-5 flex flex-wrap gap-1 lg:hidden" aria-label="Insights">
-  <a href="/activity" class="subtab {{#if (eq active 'activity')}}active{{/if}}">Activity</a>
-  <a href="/health" class="subtab {{#if (eq active 'health')}}active{{/if}}">Health{{#if healthCount}} <span class="badge badge-danger">{{healthCount}}</span>{{/if}}</a>
+<nav class="-mt-1 mb-5 inline-flex flex-wrap gap-1.5 rounded-lg border border-line/60 bg-inset/40 p-1 lg:hidden" aria-label="Insights">
+  <a href="/activity" class="subtab {{#if (eq active 'activity')}}active{{/if}}">{{{icon 'history' 'size-3.5'}}} Activity</a>
+  <a href="/health" class="subtab {{#if (eq active 'health')}}active{{/if}}">{{{icon 'activity' 'size-3.5'}}} Health{{#if healthCount}} <span class="badge badge-danger">{{healthCount}}</span>{{/if}}</a>
 </nav>

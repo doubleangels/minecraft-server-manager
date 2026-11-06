@@ -16,16 +16,16 @@
         <label class="label" for="ov-address">Server Address <span class="text-xs font-normal text-ink-faint">(share this with players on your network)</span></label>
         <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
           {{#if (gt addresses.length 1)}}
-            <select class="input w-auto font-mono" id="ov-address" data-label="Server address">
+            <select class="input w-full sm:w-auto font-mono" id="ov-address" data-label="Server address">
               {{#each addresses}}<option value="{{this}}">{{this}}</option>{{/each}}
             </select>
           {{else}}
             {{! size attr: the field grows with the address instead of clipping long LAN hostnames. }}
-            <input class="input w-auto font-mono" id="ov-address" value="{{addresses.[0]}}" size="{{addresses.[0].length}}" readonly>
+            <input class="input w-full sm:w-auto font-mono" id="ov-address" value="{{addresses.[0]}}" size="{{addresses.[0].length}}" readonly>
           {{/if}}
-          <button class="btn" data-copy-from="#ov-address">{{{icon 'copy' 'size-4'}}} Copy Address</button>
+          <button class="btn w-full sm:w-auto" data-copy-from="#ov-address">{{{icon 'copy' 'size-4'}}} Copy Address</button>
           {{! Revealed only where the browser has a share sheet (phones, mostly). }}
-          <button class="btn" data-share-from="#ov-address" data-share-title="{{server.name}}" hidden>{{{icon 'share-2' 'size-4'}}} Share</button>
+          <button class="btn w-full sm:w-auto" data-share-from="#ov-address" data-share-title="{{server.name}}" hidden>{{{icon 'share-2' 'size-4'}}} Share</button>
         </div>
         <p class="help">Playing from the internet? Set up port forwarding, or send the full invite from <a class="text-link hover:underline" href="/servers/{{server.id}}/invites">Players → Invites</a>.</p>
       </div>

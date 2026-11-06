@@ -8,11 +8,11 @@
       <button type="button" class="seg-btn" aria-pressed="true" data-platform="modrinth">Modrinth</button>
       <button type="button" class="seg-btn" aria-pressed="false" data-platform="curseforge">CurseForge</button>
     </div>
-    <div class="ml-auto flex gap-2">
+    <div class="flex w-full flex-wrap gap-2 sm:ml-auto sm:w-auto">
       {{! Honest label + weight: this button focuses the search field, it doesn't install anything. }}
-      <button class="btn" id="packs-install-btn">{{{icon 'search' 'size-4'}}} Search Packs</button>
+      <button class="btn flex-1 sm:flex-none" id="packs-install-btn">{{{icon 'search' 'size-4'}}} Search Packs</button>
       {{#if (eq user.role 'admin')}}
-        <a href="/settings#sec-keys" class="btn" data-tip="The CurseForge key that automatic CurseForge packs need.">{{{icon 'key' 'size-4'}}} Mod Site Keys</a>
+        <a href="/settings#sec-keys" class="btn flex-1 sm:flex-none" data-tip="The CurseForge key that automatic CurseForge packs need.">{{{icon 'key' 'size-4'}}} Mod Site Keys</a>
       {{/if}}
     </div>
   </div>

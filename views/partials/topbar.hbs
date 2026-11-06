@@ -1,8 +1,8 @@
 {{! Safe-area padding: installed on a phone (viewport-fit=cover, translucent
     status bar) the page runs under the status bar and notch; these keep the
     bar's content clear of them. They resolve to 0 in a normal browser tab. }}
-<header class="sticky top-0 z-20 flex items-center gap-2 border-b border-line bg-canvas/90 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] pr-[max(0.75rem,env(safe-area-inset-right))] pl-[max(0.75rem,env(safe-area-inset-left))] sm:gap-3 sm:py-3 sm:pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]">
-  <button id="sidebar-toggle" class="btn btn-ghost btn-sm lg:hidden" aria-label="Toggle navigation">{{{icon 'menu' 'size-4'}}}</button>
+<header class="sticky top-0 z-20 flex items-center gap-2 border-b border-line/80 bg-surface/85 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] pr-[max(0.75rem,env(safe-area-inset-right))] pl-[max(0.75rem,env(safe-area-inset-left))] sm:gap-3 sm:py-3 sm:pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]">
+  <button id="sidebar-toggle" class="btn btn-ghost btn-sm lg:hidden" aria-label="Toggle navigation">{{{icon 'menu' 'size-4.5'}}}</button>
   {{! min-w-0: a flex child won't shrink below its intrinsic width, so without
       it `truncate` never engages and a long title pushes the actions off-screen. }}
   <h1 class="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg">{{title}}</h1>
@@ -50,17 +50,18 @@
       {{/if}}
     </button>
     <template id="user-menu">
-      <div class="px-3 py-2 text-xs text-ink-faint">{{user.username}} · {{capitalize user.role}}</div>
-      <button type="button" class="w-full text-left" data-open-avatar-picker>Profile Picture</button>
-      <button type="button" class="w-full text-left" data-open-2fa>2FA</button>
+      <div class="border-b border-line px-3 py-2 text-xs text-ink-faint">{{user.username}} · {{capitalize user.role}}</div>
+      <button type="button" class="w-full text-left" data-open-avatar-picker>{{{icon 'user' 'size-4'}}} Profile Picture</button>
+      <button type="button" class="w-full text-left" data-open-2fa>{{{icon 'shield-check' 'size-4'}}} 2FA</button>
       {{! Phone-only copies of the topbar controls that move in here below sm. }}
-      <button type="button" class="w-full text-left sm:hidden" data-theme-toggle>Switch Theme</button>
-      <button type="button" class="hidden w-full text-left [@media(display-mode:standalone)]:block sm:[@media(display-mode:standalone)]:hidden" data-app-refresh>Reload Page</button>
+      <button type="button" class="w-full text-left sm:hidden" data-theme-toggle>{{{icon 'sun-moon' 'size-4'}}} Switch Theme</button>
+      <button type="button" class="hidden w-full text-left [@media(display-mode:standalone)]:block sm:[@media(display-mode:standalone)]:hidden" data-app-refresh>{{{icon 'refresh-cw' 'size-4'}}} Reload Page</button>
       {{! Shown by pwa.js only when this browser can install the app, or turn
           notifications on (each starts hidden and is revealed when it applies). }}
-      <button type="button" class="hidden w-full text-left" data-install-app>Install App</button>
-      <button type="button" class="hidden w-full text-left" data-enable-notifications>Notify Me When Tasks Finish</button>
-      <form method="post" action="/logout"><button type="submit" class="w-full text-left">Sign Out</button></form>
+      <button type="button" class="hidden w-full text-left" data-install-app>{{{icon 'download' 'size-4'}}} Install App</button>
+      <button type="button" class="hidden w-full text-left" data-enable-notifications>{{{icon 'bell' 'size-4'}}} Notify Me When Tasks Finish</button>
+      <div class="my-1 border-t border-line"></div>
+      <form method="post" action="/logout"><button type="submit" class="w-full text-left text-danger hover:text-danger">{{{icon 'log-out' 'size-4'}}} Sign Out</button></form>
     </template>
   </div>
 </header>

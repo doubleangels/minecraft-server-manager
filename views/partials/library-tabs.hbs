@@ -1,7 +1,7 @@
 {{! The three Library pages as tabs, so the phone's Library tab reaches all of
     them. Hidden from lg up, where the sidebar lists them side by side. }}
-<nav class="-mt-2 mb-5 flex flex-wrap gap-1 lg:hidden" aria-label="Library">
-  <a href="/modpacks" class="subtab {{#if (eq active 'modpacks')}}active{{/if}}">Modpacks</a>
-  <a href="/worlds" class="subtab {{#if (eq active 'worlds')}}active{{/if}}">Worlds</a>
-  <a href="/blueprints" class="subtab {{#if (eq active 'blueprints')}}active{{/if}}">Blueprints</a>
+<nav class="-mt-1 mb-5 inline-flex flex-wrap gap-1.5 rounded-lg border border-line/60 bg-inset/40 p-1 lg:hidden" aria-label="Library">
+  <a href="/modpacks" class="subtab {{#if (eq active 'modpacks')}}active{{/if}}">{{{icon 'package' 'size-3.5'}}} Modpacks</a>
+  <a href="/worlds" class="subtab {{#if (eq active 'worlds')}}active{{/if}}">{{{icon 'earth' 'size-3.5'}}} Worlds</a>
+  <a href="/blueprints" class="subtab {{#if (eq active 'blueprints')}}active{{/if}}">{{{icon 'drafting-compass' 'size-3.5'}}} Blueprints</a>
 </nav>

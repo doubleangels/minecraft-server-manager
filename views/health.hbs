@@ -7,7 +7,7 @@
       <span class="text-sm text-ink-faint" data-health-summary>
         {{counts.crashes}} {{plural counts.crashes 'crash' 'crashes'}}, {{counts.oom}} out of memory, {{counts.autoRestarted}} {{plural counts.autoRestarted 'auto-restart' 'auto-restarts'}}
       </span>
-      <button type="button" class="btn btn-danger btn-sm ml-auto" data-clear-all>Clear All</button>
+      <button type="button" class="btn btn-danger btn-sm ml-auto" data-clear-all>{{{icon 'trash-2' 'size-3.5'}}} Clear All</button>
     </div>
 
     <ul class="card divide-y divide-line p-0" data-alert-list>
@@ -41,7 +41,7 @@
               </div>
             {{/if}}
           </div>
-          <button type="button" class="btn btn-ghost btn-sm shrink-0 self-start" data-dismiss aria-label="Dismiss this alert">Dismiss</button>
+          <button type="button" class="btn btn-ghost btn-sm shrink-0 self-start" data-dismiss aria-label="Dismiss this alert">{{{icon 'check' 'size-3.5'}}} Dismiss</button>
         </li>
       {{/each}}
     </ul>

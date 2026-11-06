@@ -2,7 +2,7 @@
     place of the accent, matching the server card on the dashboard. }}
 {{! Way back out of a server below lg, where the sidebar is tucked away and
     the phone's bottom bar belongs to this server's own sections. }}
-<a href="/servers" class="-mt-2 mb-3 inline-flex items-center gap-1 text-sm text-ink-faint hover:text-ink lg:hidden">{{{icon 'chevron-left' 'size-4'}}} All Servers</a>
+<a href="/servers" class="-mt-1 mb-3 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-ink-faint hover:text-ink hover:bg-inset transition lg:hidden">{{{icon 'chevron-left' 'size-3.5'}}} All Servers</a>
 <div data-server-title="{{server.id}}" data-server-name="{{server.name}}" data-server-status="{{server.status}}" class="card mb-4 overflow-hidden sm:mb-6{{#if (or (eq server.status 'crashed') server.crashesUnread)}} border-danger/50{{/if}}" style="border-top: 3px solid {{#if (or (eq server.status 'crashed') server.crashesUnread)}}var(--color-danger){{else}}{{server.accent}}{{/if}}">
   {{! icon+name grouped into ONE flex item, separate from the actions column,
       using flex-auto (basis: auto) rather than flex-1 (basis: 0%). That's
@@ -69,20 +69,20 @@
       is marked by a pill behind its icon (input.css), never a line on the
       bar's top edge. sm+: one row in the card, the active tab a tinted pill
       like every other tab row in the panel. }}
-  <nav data-bottom-nav="server" class="fixed inset-x-0 bottom-0 z-[25] grid h-[calc(3.5rem+env(safe-area-inset-bottom))] grid-cols-6 bg-canvas pb-[env(safe-area-inset-bottom)] shadow-[inset_0_1px_0_var(--color-line)] sm:h-auto sm:border-t sm:border-line sm:shadow-none pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sm:static sm:z-auto sm:flex sm:flex-nowrap sm:items-center sm:gap-0.5 sm:overflow-x-auto sm:bg-transparent sm:p-0 sm:px-2" aria-label="Server sections">
+  <nav data-bottom-nav="server" class="fixed inset-x-0 bottom-0 z-[25] grid h-[calc(3.5rem+env(safe-area-inset-bottom))] grid-cols-6 border-t border-line/80 bg-surface/90 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] shadow-[0_-4px_24px_rgba(0,0,0,0.2)] backdrop-blur-xl sm:static sm:z-auto sm:flex sm:h-auto sm:flex-nowrap sm:items-center sm:gap-1 sm:overflow-x-auto sm:border-t sm:border-line sm:bg-transparent sm:p-1.5 sm:shadow-none" aria-label="Server sections">
     {{#each nav.groups}}
       <a href="{{href}}" data-nav-group="{{key}}" data-nav-tabs="{{tabs}}"{{#if active}} aria-current="page"{{/if}}
-         class="relative flex min-w-0 shrink-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap px-0.5 pb-1 pt-1 text-[10px] font-medium transition sm:my-1.5 sm:inline-flex sm:flex-row sm:justify-start sm:gap-1.5 sm:rounded-sm sm:px-3 sm:py-1.5 sm:text-sm
-           {{#if active}}text-ink{{else}}text-ink-faint hover:text-ink sm:hover:bg-inset{{/if}}">
+         class="relative flex min-w-0 shrink-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap px-0.5 pb-1 pt-1 text-[10px] font-medium transition sm:my-0 sm:inline-flex sm:flex-row sm:justify-start sm:gap-1.5 sm:rounded-md sm:px-3 sm:py-1.5 sm:text-sm
+           {{#if active}}text-ink font-semibold{{else}}text-ink-faint hover:text-ink sm:hover:bg-inset{{/if}}">
         {{{icon icon 'size-5 sm:size-4'}}} <span class="max-w-full truncate">{{label}}</span>
-        {{#if badge}}<span class="badge badge-danger absolute right-1 top-1 px-1 text-[10px] leading-none sm:static sm:px-1.5 sm:text-xs sm:leading-normal">{{badge}}</span>{{/if}}
+        {{#if badge}}<span class="badge badge-danger absolute right-1 top-0.5 px-1 py-0.2 text-[9px] font-bold leading-none ring-2 ring-surface sm:static sm:px-1.5 sm:text-xs sm:leading-normal sm:ring-0">{{badge}}</span>{{/if}}
       </a>
     {{/each}}
   </nav>
   {{! Sub-nav for the active section (only when it has more than one). }}
   {{#if nav.sub}}
     {{! Wraps onto a second line on a phone rather than hiding tabs off-screen. }}
-    <div class="flex flex-wrap items-center gap-1 border-t border-line bg-inset/40 px-3 py-1.5">
+    <div class="flex flex-wrap items-center gap-1.5 border-t border-line bg-inset/40 px-3 py-2 sm:px-4">
       {{#each nav.sub}}
         <a href="{{href}}" class="subtab shrink-0 {{#if active}}active{{/if}}">
           {{label}}{{#if badge}} <span class="badge badge-danger">{{badge}}</span>{{/if}}

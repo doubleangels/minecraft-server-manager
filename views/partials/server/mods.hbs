@@ -6,13 +6,13 @@
       <option value="">All Sources</option><option value="pack">Pack-Managed</option><option value="overlay">Custom</option>
     </select>
     {{/if}}
-    <div class="sm:ml-auto flex flex-col sm:flex-row sm:flex-wrap gap-2{{#unless perms.content}} hidden{{/unless}}">
+    <div class="sm:ml-auto grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap{{#unless perms.content}} hidden{{/unless}}">
       {{#if hasModUpdates}}
-      <button class="btn btn-ghost btn-sm text-warn" id="mods-update-all" data-tip="Apply every available update, then restart the server once.">{{{icon 'circle-arrow-up' 'size-3.5'}}} Update All</button>
+      <button class="btn btn-ghost btn-sm col-span-2 text-warn sm:col-span-1" id="mods-update-all" data-tip="Apply every available update, then restart the server once.">{{{icon 'circle-arrow-up' 'size-3.5'}}} Update All</button>
       {{/if}}
       <button class="btn btn-sm" id="mods-search">{{{icon 'search' 'size-3.5'}}} Search Mods</button>
       <button class="btn btn-sm" id="mods-import-zip" data-tip="Modrinth .mrpack, CurseForge modpack export, or any zip of mod jars.">{{{icon 'archive' 'size-3.5'}}} Import Zip</button>
-      <button class="btn btn-primary btn-sm" id="mods-add-url">{{{icon 'plus' 'size-3.5'}}} Add by URL</button>
+      <button class="btn btn-primary btn-sm col-span-2 sm:col-span-1" id="mods-add-url">{{{icon 'plus' 'size-3.5'}}} Add by URL</button>
       {{! button labels kept in sync with the modal titles in mods.js }}
     </div>
   </div>

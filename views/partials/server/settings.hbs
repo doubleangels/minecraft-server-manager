@@ -5,13 +5,13 @@
     section, and Save stays pinned to the bottom of the screen. }}
 <div class="lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-6" data-settings-server="{{server.id}}" data-settings-icon="{{server.icon}}" data-settings-accent="{{server.accent}}" data-settings-tags="{{jsonAttr server.tags}}" data-settings-env="{{settingsEnv}}" data-settings-docker-name="{{server.containerName}}" data-settings-docker-network="{{server.networkName}}" data-settings-docker-ports="{{jsonAttr server.extraPorts}}" data-settings-docker-binds="{{jsonAttr server.extraBinds}}">
   <nav class="mb-4 flex flex-nowrap overflow-x-auto pb-1 gap-1.5 lg:sticky lg:top-24 lg:mx-0 lg:mb-0 lg:flex-col lg:self-start lg:overflow-visible lg:px-0" aria-label="Settings sections" data-settings-jump>
-    <a class="subtab shrink-0" href="#sec-general" data-jump="sec-general">General</a>
-    <a class="subtab shrink-0" href="#sec-startup" data-jump="sec-startup">Startup &amp; Updates</a>
-    <a class="subtab shrink-0" href="#sec-resources" data-jump="sec-resources">Resources</a>
-    {{#if perms.settings}}<a class="subtab shrink-0" href="#port" data-jump="port">Game Port</a>{{/if}}
-    {{#if advancedSections.length}}<a class="subtab shrink-0" href="#sec-options" data-jump="sec-options">Server Options</a>{{/if}}
-    {{#if (eq user.role 'admin')}}<a class="subtab shrink-0" href="#sec-docker" data-jump="sec-docker">Docker</a>{{/if}}
-    <a class="subtab shrink-0" href="#sec-maintenance" data-jump="sec-maintenance">Maintenance</a>
+    <a class="subtab shrink-0" href="#sec-general" data-jump="sec-general">{{{icon 'sliders' 'size-3.5'}}} General</a>
+    <a class="subtab shrink-0" href="#sec-startup" data-jump="sec-startup">{{{icon 'play-circle' 'size-3.5'}}} Startup &amp; Updates</a>
+    <a class="subtab shrink-0" href="#sec-resources" data-jump="sec-resources">{{{icon 'cpu' 'size-3.5'}}} Resources</a>
+    {{#if perms.settings}}<a class="subtab shrink-0" href="#port" data-jump="port">{{{icon 'network' 'size-3.5'}}} Game Port</a>{{/if}}
+    {{#if advancedSections.length}}<a class="subtab shrink-0" href="#sec-options" data-jump="sec-options">{{{icon 'sliders-horizontal' 'size-3.5'}}} Server Options</a>{{/if}}
+    {{#if (eq user.role 'admin')}}<a class="subtab shrink-0" href="#sec-docker" data-jump="sec-docker">{{{icon 'box' 'size-3.5'}}} Docker</a>{{/if}}
+    <a class="subtab shrink-0" href="#sec-maintenance" data-jump="sec-maintenance">{{{icon 'wrench' 'size-3.5'}}} Maintenance</a>
   </nav>
 
   <div class="min-w-0 space-y-4">
