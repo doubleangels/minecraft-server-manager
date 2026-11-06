@@ -60,22 +60,46 @@
 
   {{! ---- Charts ---- }}
   <div class="mt-4 grid gap-4 lg:grid-cols-2 [&>*]:min-w-0">
-    <div class="card p-4">
-      <h3 class="mb-2 font-semibold">CPU <span class="text-xs font-normal text-ink-faint">vs limit</span></h3>
-      <canvas class="max-w-full" data-chart="cpu" height="140"></canvas>
+    <div class="card p-5">
+      <div class="mb-3 flex items-center justify-between border-b border-line pb-2.5">
+        <h3 class="font-bold flex items-center gap-2">
+          {{{icon 'cpu' 'size-4 text-link'}}}
+          <span>CPU</span>
+        </h3>
+        <span class="text-xs font-medium text-ink-faint">Vs Limit</span>
+      </div>
+      <canvas class="max-w-full" data-chart="cpu" height="150"></canvas>
     </div>
-    <div class="card p-4">
-      <h3 class="mb-2 font-semibold">Memory <span class="text-xs font-normal text-ink-faint">vs container limit</span></h3>
-      <canvas class="max-w-full" data-chart="memory" height="140"></canvas>
+    <div class="card p-5">
+      <div class="mb-3 flex items-center justify-between border-b border-line pb-2.5">
+        <h3 class="font-bold flex items-center gap-2">
+          {{{icon 'memory-stick' 'size-4 text-ok'}}}
+          <span>Memory</span>
+        </h3>
+        <span class="text-xs font-medium text-ink-faint">Vs Container Limit</span>
+      </div>
+      <canvas class="max-w-full" data-chart="memory" height="150"></canvas>
       {{#if server.memory.note}}<p class="mt-2 text-xs text-ink-faint">{{server.memory.note}}</p>{{/if}}
     </div>
-    <div class="card p-4">
-      <h3 class="mb-2 font-semibold">Network</h3>
-      <canvas class="max-w-full" data-chart="network" height="140"></canvas>
+    <div class="card p-5">
+      <div class="mb-3 flex items-center justify-between border-b border-line pb-2.5">
+        <h3 class="font-bold flex items-center gap-2">
+          {{{icon 'activity' 'size-4 text-warn'}}}
+          <span>Network</span>
+        </h3>
+        <span class="text-xs font-medium text-ink-faint">Throughput</span>
+      </div>
+      <canvas class="max-w-full" data-chart="network" height="150"></canvas>
     </div>
-    <div class="card p-4" data-tps-card {{#unless server.stats.perfSupported}}hidden{{/unless}}>
-      <h3 class="mb-2 font-semibold">Tick Rate <span class="text-xs font-normal text-ink-faint">TPS &amp; ms per tick</span></h3>
-      <canvas class="max-w-full" data-chart="tps" height="140"></canvas>
+    <div class="card p-5" data-tps-card {{#unless server.stats.perfSupported}}hidden{{/unless}}>
+      <div class="mb-3 flex items-center justify-between border-b border-line pb-2.5">
+        <h3 class="font-bold flex items-center gap-2">
+          {{{icon 'gauge' 'size-4 text-ok'}}}
+          <span>Tick Rate</span>
+        </h3>
+        <span class="text-xs font-medium text-ink-faint">TPS &amp; MSPT</span>
+      </div>
+      <canvas class="max-w-full" data-chart="tps" height="150"></canvas>
       <p class="help">20 TPS is a healthy server. A lasting drop means the server can't keep up with what's happening in the world.</p>
     </div>
   </div>
@@ -145,7 +169,7 @@
           <p class="text-sm text-ink-faint">No folder sizes yet. Run a storage scan from the <a class="text-link hover:underline" href="/storage">Storage page</a>.</p>
         {{/if}}
         <div class="mt-4 border-t border-line pt-3">
-          <div class="mb-1 flex justify-between text-xs"><span>Quota</span><span class="text-ink-faint">{{bytes server.disk.used}}{{#if server.disk.quota}} / {{bytes server.disk.quota}}{{else}} (no quota){{/if}}</span></div>
+          <div class="mb-1 flex justify-between text-xs"><span>Quota</span><span class="text-ink-faint">{{bytes server.disk.used}}{{#if server.disk.quota}} / {{bytes server.disk.quota}}{{else}} (No Quota){{/if}}</span></div>
           <div class="meter"><div class="{{meterColor server.disk.used server.disk.quota}}" style="width: {{pct server.disk.used server.disk.quota}}%"></div></div>
         </div>
         {{#if diskFree}}

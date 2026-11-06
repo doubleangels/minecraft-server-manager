@@ -44,16 +44,40 @@ function init(serverId, memLimitMb, cpuLimit) {
     const css = getComputedStyle(document.documentElement);
     const line = css.getPropertyValue('--color-line').trim();
     return {
-      grass: css.getPropertyValue('--color-grass-400').trim() || '#59c53e',
-      diamond: css.getPropertyValue('--color-diamond-400').trim() || '#3cc5c7',
-      gold: css.getPropertyValue('--color-gold-400').trim() || '#f0b42f',
-      redstone: css.getPropertyValue('--color-redstone-400').trim() || '#e5484d',
-      grid: line ? `${line}66` : 'rgba(128,128,128,.12)',
-      tick: css.getPropertyValue('--color-ink-faint').trim() || '#87919b',
+      grass: css.getPropertyValue('--color-grass-400').trim() || '#34d399',
+      diamond: css.getPropertyValue('--color-diamond-400').trim() || '#22d3ee',
+      gold: css.getPropertyValue('--color-gold-400').trim() || '#fbbf24',
+      redstone: css.getPropertyValue('--color-redstone-400').trim() || '#fb7185',
+      grid: line ? `${line}44` : 'rgba(255,255,255,0.06)',
+      tick: css.getPropertyValue('--color-ink-faint').trim() || '#64748b',
     };
   }
   let colors = themeColors();
   const charts = [];
+
+  function hexToRgba(hexOrCss, alpha) {
+    if (!hexOrCss) return `rgba(16, 185, 129, ${alpha})`;
+    if (hexOrCss.startsWith('#')) {
+      let c = hexOrCss.slice(1);
+      if (c.length === 3) c = c.split('').map((x) => x + x).join('');
+      const num = parseInt(c, 16);
+      return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+    }
+    return hexOrCss;
+  }
+
+  function makeGradient(color, topAlpha = 0.32, bottomAlpha = 0.0) {
+    return (context) => {
+      const chart = context.chart;
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return null;
+      const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+      g.addColorStop(0, hexToRgba(color, topAlpha));
+      g.addColorStop(0.8, hexToRgba(color, topAlpha * 0.2));
+      g.addColorStop(1, hexToRgba(color, bottomAlpha));
+      return g;
+    };
+  }
 
   function makeChart(canvas, datasets, { max, unit, y1 } = {}) {
     if (!canvas) return null;
@@ -62,8 +86,8 @@ function init(serverId, memLimitMb, cpuLimit) {
       y: {
         beginAtZero: true,
         suggestedMax: max,
-        grid: { color: colors.grid },
-        ticks: { callback: (v) => `${v}${unit || ''}`, color: colors.tick },
+        grid: { color: colors.grid, borderDash: [3, 3] },
+        ticks: { callback: (v) => `${v}${unit || ''}`, color: colors.tick, font: { family: 'IBM Plex Sans', size: 11 } },
       },
     };
     if (y1)
@@ -71,7 +95,7 @@ function init(serverId, memLimitMb, cpuLimit) {
         beginAtZero: true,
         position: 'right',
         grid: { drawOnChartArea: false },
-        ticks: { callback: (v) => `${v}${y1}`, color: colors.tick },
+        ticks: { callback: (v) => `${v}${y1}`, color: colors.tick, font: { family: 'IBM Plex Sans', size: 11 } },
       };
     const chart = new window.Chart(canvas, {
       type: 'line',
@@ -80,9 +104,40 @@ function init(serverId, memLimitMb, cpuLimit) {
         responsive: true,
         animation: false,
         interaction: { intersect: false, mode: 'index' },
-        plugins: { legend: { display: datasets.length > 1, labels: { boxWidth: 10, color: colors.tick } } },
+        plugins: {
+          legend: {
+            display: datasets.length > 1,
+            position: 'top',
+            align: 'end',
+            labels: {
+              boxWidth: 8,
+              boxHeight: 8,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              padding: 10,
+              font: { family: 'IBM Plex Sans', size: 11, weight: '600' },
+              color: colors.tick,
+            },
+          },
+          tooltip: {
+            backgroundColor: 'rgba(14, 20, 32, 0.94)',
+            titleColor: '#f8fafc',
+            bodyColor: '#cbd5e1',
+            borderColor: 'rgba(255, 255, 255, 0.12)',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 10,
+            boxPadding: 4,
+            usePointStyle: true,
+            titleFont: { family: 'IBM Plex Sans', size: 12, weight: '700' },
+            bodyFont: { family: 'IBM Plex Sans', size: 12, weight: '500' },
+          },
+        },
         scales,
-        elements: { point: { radius: 0 }, line: { borderWidth: 2, tension: 0.35 } },
+        elements: {
+          point: { radius: 0, hoverRadius: 5, hoverBorderWidth: 2.5, hoverBackgroundColor: '#ffffff' },
+          line: { borderWidth: 3, tension: 0.4 },
+        },
       },
     });
     charts.push(chart);
@@ -102,26 +157,26 @@ function init(serverId, memLimitMb, cpuLimit) {
 
   const cpuChart = makeChart(
     document.querySelector('[data-chart="cpu"]'),
-    [{ label: 'CPU %', data: [], borderColor: colors.diamond, backgroundColor: 'transparent' }],
+    [{ label: 'CPU %', data: [], borderColor: colors.diamond, backgroundColor: makeGradient(colors.diamond, 0.35, 0.0), fill: true }],
     { max: cpuLimit ? cpuLimit * 100 : 100, unit: '%' }
   );
   const memChart = makeChart(
     document.querySelector('[data-chart="memory"]'),
-    [{ label: 'Used MB', data: [], borderColor: colors.grass, backgroundColor: 'transparent' }],
+    [{ label: 'Used MB', data: [], borderColor: colors.grass, backgroundColor: makeGradient(colors.grass, 0.35, 0.0), fill: true }],
     { max: memLimitMb || undefined, unit: ' MB' }
   );
   const netChart = makeChart(
     document.querySelector('[data-chart="network"]'),
     [
-      { label: 'RX KB/s', data: [], borderColor: colors.diamond, backgroundColor: 'transparent' },
-      { label: 'TX KB/s', data: [], borderColor: colors.gold, backgroundColor: 'transparent' },
+      { label: 'RX KB/s', data: [], borderColor: colors.diamond, backgroundColor: makeGradient(colors.diamond, 0.25, 0.0), fill: true },
+      { label: 'TX KB/s', data: [], borderColor: colors.gold, backgroundColor: makeGradient(colors.gold, 0.25, 0.0), fill: true },
     ],
     { unit: '' }
   );
   const tpsChart = makeChart(
     document.querySelector('[data-chart="tps"]'),
     [
-      { label: 'TPS', data: [], borderColor: colors.grass, backgroundColor: 'transparent', yAxisID: 'y' },
+      { label: 'TPS', data: [], borderColor: colors.grass, backgroundColor: makeGradient(colors.grass, 0.25, 0.0), fill: true, yAxisID: 'y' },
       { label: 'ms/tick', data: [], borderColor: colors.redstone, backgroundColor: 'transparent', yAxisID: 'y1' },
     ],
     { max: 20, unit: '', y1: ' ms' }

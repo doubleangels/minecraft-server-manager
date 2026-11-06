@@ -19,7 +19,7 @@ function ensure() {
   // Shown/hidden via opacity (not `hidden`) so it gets the same ~120ms ease
   // as every other surface instead of snapping; pointer-events stay off.
   tipEl.className =
-    'pointer-events-none fixed z-[70] max-w-64 rounded-md border border-line-strong bg-raised px-2.5 py-1.5 text-xs text-ink opacity-0 shadow-overlay transition-opacity duration-100';
+    'pointer-events-none fixed z-[70] max-w-64 rounded-xl border border-line-strong bg-surface/95 backdrop-blur-md px-3 py-1.5 text-xs text-ink opacity-0 shadow-overlay transition-opacity duration-100';
   tipEl.setAttribute('role', 'tooltip');
   document.body.appendChild(tipEl);
   return tipEl;

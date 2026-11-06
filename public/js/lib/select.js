@@ -106,12 +106,12 @@ function openPicker(select, btn) {
       row.dataset.i = i;
       row.id = `msm-opt-${i}`;
       row.className =
-        'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition ' +
-        'hover:bg-inset disabled:opacity-40 aria-selected:bg-ok/15 aria-selected:text-ok';
+        'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm transition ' +
+        'hover:bg-inset disabled:opacity-40 aria-selected:bg-ok/15 aria-selected:text-ok aria-selected:font-semibold';
       row.setAttribute('role', 'option');
       if (opt.value === select.value) row.setAttribute('aria-selected', 'true');
       row.innerHTML = `
-        ${opt.icon ? `<img src="${escapeHtml(opt.icon)}" alt="" class="size-6 rounded-sm">` : ''}
+        ${opt.icon ? `<img src="${escapeHtml(opt.icon)}" alt="" class="size-6 rounded-md">` : ''}
         <span class="min-w-0 flex-1">
           <span class="block truncate">${escapeHtml(opt.label)}</span>
           ${opt.desc ? `<span class="block truncate text-xs text-ink-faint">${escapeHtml(opt.desc)}</span>` : ''}

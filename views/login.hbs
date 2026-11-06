@@ -1,22 +1,22 @@
-<div class="card w-full max-w-sm p-6">
+<div class="card w-full max-w-sm p-7 sm:p-8 shadow-raised">
   <div class="mb-6 flex items-center justify-center gap-2.5">
-    {{> brand-lockup}}
+    {{> brand-lockup size='size-11' textSize='text-base'}}
   </div>
   {{#if error}}<div class="notice notice-danger mb-4">{{{icon 'triangle-alert' 'size-4 mt-0.5 shrink-0 text-danger'}}}<div>{{error}}</div></div>{{/if}}
   <form method="post" action="/login" class="space-y-4" data-disable-on-submit>
     <input type="hidden" name="next" value="{{next}}">
     <div>
       <label class="label" for="li-user">Username</label>
-      <input class="input" id="li-user" name="username" autocomplete="username" required>
+      <input class="input" id="li-user" name="username" autocomplete="username" required autofocus>
     </div>
     <div>
       <label class="label" for="li-pass">Password</label>
       <input class="input" id="li-pass" name="password" type="password" autocomplete="current-password" required>
     </div>
-    <label class="flex cursor-pointer items-center gap-2 text-sm">
+    <label class="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-ink-soft select-none">
       <input type="checkbox" class="msm-check" name="remember" value="1" checked>
       Remember Me
     </label>
-    <button class="btn btn-primary w-full" type="submit">{{{icon 'log-in' 'size-4'}}} Sign In</button>
+    <button class="btn btn-primary w-full shadow-md" type="submit">{{{icon 'log-in' 'size-4'}}} Sign In</button>
   </form>
 </div>

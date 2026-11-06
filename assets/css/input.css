@@ -9,15 +9,13 @@
 @source '../../views';
 @source '../../public/js';
 
-/* ---- The three commitments ----
-   Palette: a cool-tinted "stone" neutral ramp (#0e1113 → #fafbfb) with grass green
-   #3fa62b as the single accent, taken from the grass block itself; diamond, redstone
-   and gold serve info/danger/warning and come from the same source material.
-   Type: IBM Plex Sans for body - an engineered grotesque that suits an infrastructure
-   tool and stays quiet under Press Start 2P, the pixel display face (titles only)
-   that carries the product's character.
-   Structural primitive: cards on the canvas inside a fixed sidebar + topbar shell;
-   surfaces separate by background shift first, hairline border second. */
+/* ---- The Material 3 commitments ----
+   Palette: A modern refined slate/obsidian dark canvas with Material emerald #10b981
+   as the vibrant primary accent; cyan/teal, crimson/rose, and amber serve info/danger/warning.
+   Type: IBM Plex Sans / system grotesque engineered for high legibility, clean weights,
+   and crisp letter-spacing. Display titles use bold, modern sans tracking.
+   Structural primitive: Material 3 tonal cards on a sleek canvas inside a modern shell;
+   surfaces separate by tonal elevation, smooth rounded geometry, and hairline borders. */
 
 /* Dark is the default theme; light mode is opt-in via <html data-theme="light">.
    Toggling swaps the semantic tokens below, so components only ever reference
@@ -25,78 +23,75 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  /* ---- Minecraft-flavored brand palette ---- */
-  --color-grass-50: #edfbe8;
-  --color-grass-100: #d5f5c9;
-  --color-grass-200: #aeea99;
-  --color-grass-300: #7fd965;
-  --color-grass-400: #59c53e;
-  --color-grass-500: #3fa62b;
-  --color-grass-600: #2f8520;
-  --color-grass-700: #27661d;
-  --color-grass-800: #22521c;
-  --color-grass-900: #1e461b;
+  /* ---- Modern Material 3 brand palette ---- */
+  --color-grass-50: #ecfdf5;
+  --color-grass-100: #d1fae5;
+  --color-grass-200: #a7f3d0;
+  --color-grass-300: #6ee7b7;
+  --color-grass-400: #34d399;
+  --color-grass-500: #10b981;
+  --color-grass-600: #059669;
+  --color-grass-700: #047857;
+  --color-grass-800: #065f46;
+  --color-grass-900: #064e3b;
 
-  --color-diamond-50: #ecfdfb;
-  --color-diamond-100: #d0f7f4;
-  --color-diamond-200: #a6efeb;
-  --color-diamond-300: #6ce0dd;
-  --color-diamond-400: #3cc5c7;
-  --color-diamond-500: #21a7ab;
-  --color-diamond-600: #1b8589;
-  --color-diamond-700: #1a6a6e;
-  --color-diamond-800: #1a5558;
-  --color-diamond-900: #1a474a;
+  --color-diamond-50: #ecfeff;
+  --color-diamond-100: #cffafe;
+  --color-diamond-200: #a5f3fc;
+  --color-diamond-300: #67e8f9;
+  --color-diamond-400: #22d3ee;
+  --color-diamond-500: #06b6d4;
+  --color-diamond-600: #0891b2;
+  --color-diamond-700: #0e7490;
+  --color-diamond-800: #155e75;
+  --color-diamond-900: #164e63;
 
-  --color-redstone-50: #fef2f2;
-  --color-redstone-100: #fee2e2;
-  --color-redstone-200: #fecaca;
-  --color-redstone-300: #fca5a5;
-  --color-redstone-400: #f87171;
-  --color-redstone-500: #e5484d;
-  --color-redstone-600: #d13438;
-  --color-redstone-700: #b02a2e;
-  --color-redstone-800: #922727;
-  --color-redstone-900: #7a2524;
+  --color-redstone-50: #fff1f2;
+  --color-redstone-100: #ffe4e6;
+  --color-redstone-200: #fecdd3;
+  --color-redstone-300: #fda4af;
+  --color-redstone-400: #fb7185;
+  --color-redstone-500: #f43f5e;
+  --color-redstone-600: #e11d48;
+  --color-redstone-700: #be123c;
+  --color-redstone-800: #9f1239;
+  --color-redstone-900: #881337;
 
-  --color-gold-50: #fefaec;
-  --color-gold-100: #fbf0ca;
-  --color-gold-200: #f7e090;
-  --color-gold-300: #f3ca56;
-  --color-gold-400: #f0b42f;
-  --color-gold-500: #e99417;
-  --color-gold-600: #ce7011;
-  --color-gold-700: #ab4f12;
-  --color-gold-800: #8b3d15;
-  --color-gold-900: #723315;
+  --color-gold-50: #fffbeb;
+  --color-gold-100: #fef3c7;
+  --color-gold-200: #fde68a;
+  --color-gold-300: #fcd34d;
+  --color-gold-400: #fbbf24;
+  --color-gold-500: #f59e0b;
+  --color-gold-600: #d97706;
+  --color-gold-700: #b45309;
+  --color-gold-800: #92400e;
+  --color-gold-900: #78350f;
 
-  /* Stone - the neutral ramp used for both themes */
-  --color-stone-25: #fafbfb;
-  --color-stone-50: #f4f5f6;
-  --color-stone-100: #e8eaec;
-  --color-stone-200: #d3d7db;
-  --color-stone-300: #b1b8bf;
-  --color-stone-400: #87919b;
-  --color-stone-500: #6a747f;
-  --color-stone-600: #555e68;
-  --color-stone-700: #464d55;
-  --color-stone-800: #33383e;
-  --color-stone-850: #262b30;
-  --color-stone-900: #1b1f23;
-  --color-stone-925: #16191c;
-  --color-stone-950: #0e1113;
+  /* Stone - the modern slate/neutral ramp used for both themes */
+  --color-stone-25: #ffffff;
+  --color-stone-50: #f8fafc;
+  --color-stone-100: #f1f5f9;
+  --color-stone-200: #e2e8f0;
+  --color-stone-300: #cbd5e1;
+  --color-stone-400: #94a3b8;
+  --color-stone-500: #64748b;
+  --color-stone-600: #475569;
+  --color-stone-700: #334155;
+  --color-stone-800: #1e293b;
+  --color-stone-850: #172033;
+  --color-stone-900: #111827;
+  --color-stone-925: #0d131f;
+  --color-stone-950: #080c14;
 
-  --font-pixel: 'Press Start 2P', 'Courier New', monospace;
+  --font-pixel: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
 
-  /* ---- Elevation: three shadow levels mapped to meaning, one light source
-     (above), tinted with the stone ramp's cool hue. Dark mode separates raised
-     surfaces by background lightness, so these mostly carry the light theme.
-     Never write an ad-hoc shadow - pick the level that matches the meaning. ---- */
-  --shadow-raised: 0 1px 2px rgb(14 17 19 / 0.07), 0 1px 1px rgb(14 17 19 / 0.05);
-  --shadow-overlay: 0 8px 24px rgb(14 17 19 / 0.18), 0 2px 6px rgb(14 17 19 / 0.1);
-  --shadow-modal: 0 16px 48px rgb(14 17 19 / 0.3), 0 4px 12px rgb(14 17 19 / 0.15);
+  /* ---- Elevation: Material 3 tonal elevation shadows ---- */
+  --shadow-raised: 0 4px 14px -2px rgb(0 0 0 / 0.3), 0 2px 6px -1px rgb(0 0 0 / 0.2);
+  --shadow-overlay: 0 12px 32px -4px rgb(0 0 0 / 0.4), 0 4px 12px -2px rgb(0 0 0 / 0.25);
+  --shadow-modal: 0 24px 64px -12px rgb(0 0 0 / 0.6), 0 8px 24px -4px rgb(0 0 0 / 0.35);
 
   /* ---- Semantic tokens (dark values - the default) ---- */
   --color-canvas: var(--color-stone-950);
@@ -109,9 +104,7 @@
   --color-ink-soft: var(--color-stone-300);
   --color-ink-faint: var(--color-stone-400);
 
-  /* Accent-as-text tokens. The 400 steps read well on dark surfaces (6.4–9.5:1)
-     but fail hard on white (1.9–2.8:1), so text colored by meaning must go
-     through these - never through a raw palette step. Light mode swaps them. */
+  /* Accent-as-text tokens. */
   --color-link: var(--color-diamond-400);
   --color-ok: var(--color-grass-400);
   --color-warn: var(--color-gold-400);
@@ -121,21 +114,18 @@
 :root[data-theme='light'] {
   --color-canvas: var(--color-stone-50);
   --color-surface: #ffffff;
-  --color-raised: var(--color-stone-25);
-  --color-inset: var(--color-stone-100);
+  --color-raised: var(--color-stone-100);
+  --color-inset: var(--color-stone-200);
   --color-line: var(--color-stone-200);
   --color-line-strong: var(--color-stone-300);
   --color-ink: var(--color-stone-900);
   --color-ink-soft: var(--color-stone-700);
-  /* stone-600 (not 500) so the pervasive text-xs help copy clears WCAG AA on the
-     near-white light canvas. */
-  --color-ink-faint: var(--color-stone-600);
-  /* Measured on white: diamond-700 6.3:1, grass-700 7.0:1, gold-700 5.4:1,
-     redstone-700 6.5:1 (redstone-600 dips to 4.2:1 on the error-box tint). */
-  --color-link: var(--color-diamond-700);
-  --color-ok: var(--color-grass-700);
-  --color-warn: var(--color-gold-700);
-  --color-danger: var(--color-redstone-700);
+  --color-ink-faint: var(--color-stone-500);
+
+  --color-link: var(--color-diamond-600);
+  --color-ok: var(--color-grass-600);
+  --color-warn: var(--color-gold-600);
+  --color-danger: var(--color-redstone-600);
 }
 
 @font-face {
@@ -308,14 +298,10 @@
     @apply bg-grass-600/60 text-white;
   }
   /* Everything clickable gets a physical press, even outside .btn (flavor
-     tiles, icon pickers, chips) - part of the Minecraft tactility. Segmented
+     tiles, icon pickers, chips) - part of the tactility. Segmented
      controls are exempt: a selected tab that keeps bouncing reads as broken. */
   button:not(.btn):not(.msm-toggle):not(.seg-btn):active {
     transform: translateY(1px);
-  }
-  /* Keep pixel-art crisp if the browser ever rasterizes/scales it. */
-  img[src^='/icons/servers/'] {
-    image-rendering: pixelated;
   }
 }
 
@@ -428,75 +414,62 @@
      (they can open from inside a modal) · tooltip 70.
      Anything new picks a slot here first. ---- */
 
-  /* Pixel heading - titles only, per design spec */
+  /* Material 3 display typography - sleek, bold, modern tracking */
   .pixel {
     font-family: var(--font-pixel);
-    letter-spacing: 0;
-    line-height: 1.6;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
   }
 
-  /* Minecraft-style buttons: blocky, beveled (light top edge, dark bottom
-     edge), and they physically PRESS - on :active the button shifts down and
-     the bevel inverts, exactly like clicking a button in-game. */
+  /* Material 3 buttons: rounded-xl, subtle border, smooth hover lift,
+     ambient elevation, and tactile micro-press. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-line-strong
-      bg-raised px-3.5 py-2 text-sm font-medium text-ink transition-[background,transform,box-shadow]
-      duration-75 hover:bg-inset focus-visible:outline-2 focus-visible:outline-offset-2
-      focus-visible:outline-diamond-400 disabled:pointer-events-none disabled:opacity-50;
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.07),
-      inset 0 -3px 0 rgb(0 0 0 / 0.28);
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line-strong/60
+      bg-raised px-4 py-2 text-sm font-medium text-ink transition-all
+      duration-150 hover:bg-inset hover:border-line-strong hover:-translate-y-0.5 hover:shadow-sm
+      focus-visible:outline-2 focus-visible:outline-offset-2
+      focus-visible:outline-diamond-400 disabled:pointer-events-none disabled:opacity-50 active:translate-y-0 active:scale-[0.98];
   }
   .btn:active {
-    transform: translateY(2px);
-    box-shadow:
-      inset 0 2px 0 rgb(0 0 0 / 0.22),
-      inset 0 -1px 0 rgb(255 255 255 / 0.05);
+    transform: scale(0.98);
   }
   .btn-primary {
-    /* Hover darkens: white text passes 4.5:1 on grass-600/700 but not grass-500. */
-    @apply border-grass-800 bg-grass-600 text-white hover:bg-grass-700;
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.22),
-      inset 0 -3px 0 rgb(0 0 0 / 0.32);
-    text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+    @apply border-transparent bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold
+      hover:from-emerald-400 hover:to-teal-500;
+    box-shadow: 0 2px 8px -1px rgb(16 185 129 / 0.4);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 4px 14px -2px rgb(16 185 129 / 0.55);
   }
   .btn-primary:active {
-    box-shadow:
-      inset 0 2px 0 rgb(0 0 0 / 0.28),
-      inset 0 -1px 0 rgb(255 255 255 / 0.08);
+    box-shadow: 0 1px 4px rgb(16 185 129 / 0.3);
   }
   .btn-danger {
-    @apply border-redstone-800 bg-redstone-600 text-white hover:bg-redstone-700;
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.18),
-      inset 0 -3px 0 rgb(0 0 0 / 0.32);
-    text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+    @apply border-transparent bg-gradient-to-r from-rose-500 to-red-600 text-white font-semibold
+      hover:from-rose-400 hover:to-red-500;
+    box-shadow: 0 2px 8px -1px rgb(244 63 94 / 0.4);
+  }
+  .btn-danger:hover {
+    box-shadow: 0 4px 14px -2px rgb(244 63 94 / 0.55);
   }
   .btn-danger:active {
-    box-shadow:
-      inset 0 2px 0 rgb(0 0 0 / 0.28),
-      inset 0 -1px 0 rgb(255 255 255 / 0.08);
+    box-shadow: 0 1px 4px rgb(244 63 94 / 0.3);
   }
   .btn-ghost {
-    @apply border-transparent bg-transparent hover:bg-inset;
+    @apply border-transparent bg-transparent hover:bg-inset/70 text-ink-soft hover:text-ink;
     box-shadow: none;
-    text-shadow: none;
   }
   .btn-ghost:active {
-    transform: translateY(1px);
+    transform: scale(0.97);
     box-shadow: none;
   }
   .btn-sm {
-    @apply px-2.5 py-1.5 text-xs;
+    @apply px-3 py-1.5 text-xs rounded-lg;
   }
   /* Touch-only floor: an icon-only .btn-sm/.chip (the row actions used all
      over - players, files, backups, schedules, users…) visually measures
-     well under the ~44px touch target guideline. Real min-height/min-width,
-     not an invisible expanded hit-area - flexbox gaps keep adjacent buttons
-     from overlapping as they grow, it just reflows/wraps a bit more, which is
-     the right trade on a phone. Guarded to (pointer: coarse) only, so mouse
-     users on desktop see zero change. */
+     well under the ~44px touch target guideline. */
   @media (pointer: coarse) {
     .btn-sm,
     button.chip,
@@ -509,22 +482,16 @@
       min-height: 2.75rem;
       min-width: 2.75rem;
     }
-    /* Same 44px floor for the switch's clickable area and for inline selects
-       (Settings' role picker, time zone, etc.) that otherwise render ~32px. */
     .msm-toggle {
       min-height: 2.75rem;
     }
     select.input {
       min-height: 2.75rem;
     }
-    /* A bare checkbox/radio is 16px; float the whole row it sits in to 44px so
-       the label text is part of the target, without inflating the box itself. */
     label:has(> input.msm-check),
     label:has(> input.msm-radio) {
       min-height: 2.75rem;
     }
-    /* Range: keep the 8px track but give the control a 44px hit area, and a
-       thumb big enough to grab. */
     input[type='range'].msm-range {
       min-height: 2.75rem;
     }
@@ -538,38 +505,20 @@
     }
   }
 
-  /* Segmented control - the ONE component for every pick-one-of-N group
-     (source tabs, platform pickers, view toggles, sub-mode switches).
-     Selection state lives in aria-selected / aria-pressed; pages toggle the
-     attribute, never style classes. Sizing: 1px border + 2px padding + 32px
-     button = 38px total, identical to .input, so segments align with inputs
-     on the same row. The active segment is the raised key of the group (lit
-     top edge + green text); inactive hover moves TEXT only, so a hovered
-     segment can never be mistaken for the selected one. */
-  /* max-w-full + overflow-x-auto: a seg with many/long text segments (the
-     wizard's source-type tabs) is wider than a narrow phone screen - scroll
-     it horizontally instead of pushing the whole page wider. No-op for the
-     common short/icon segs, and safe with seg.js's pill (it positions off
-     offsetLeft/offsetTop, unaffected by scroll position). */
+  /* Segmented control - Material 3 segmented button */
   .seg {
-    @apply relative inline-flex max-w-full flex-wrap items-center gap-1 rounded-md border border-line bg-inset/40 p-0.5;
+    @apply relative inline-flex max-w-full flex-wrap items-center gap-1 rounded-xl border border-line/70 bg-inset/40 p-1;
   }
-  /* Sliding pill (injected by lib/seg.js): the raised key GLIDES between
-     segments instead of teleporting. It carries the exact selected-state
-     visuals; when active, the buttons keep only their text color. */
   .seg-pill {
-    @apply pointer-events-none absolute left-0 top-0 rounded-sm bg-raised opacity-0;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.06),
-      inset 0 0 0 1px var(--color-line-strong);
+    @apply pointer-events-none absolute left-0 top-0 rounded-lg bg-surface opacity-0 shadow-sm;
     transition:
-      transform 200ms cubic-bezier(0.3, 0.7, 0.4, 1),
-      width 200ms cubic-bezier(0.3, 0.7, 0.4, 1),
-      height 200ms cubic-bezier(0.3, 0.7, 0.4, 1),
+      transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+      width 200ms cubic-bezier(0.4, 0, 0.2, 1),
+      height 200ms cubic-bezier(0.4, 0, 0.2, 1),
       opacity 150ms ease;
   }
   .seg[data-seg-animated] .seg-btn {
-    @apply relative; /* paint above the pill (DOM order wins among positioned) */
+    @apply relative;
   }
   .seg[data-seg-animated] .seg-btn[aria-selected='true'],
   .seg[data-seg-animated] .seg-btn[aria-pressed='true'] {
@@ -577,88 +526,60 @@
     box-shadow: none;
   }
   .seg-btn {
-    @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-sm px-3 text-sm
-      font-medium text-ink-faint transition-colors hover:text-ink
+    @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg px-3.5 text-sm
+      font-medium text-ink-faint transition-all hover:text-ink
       focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-diamond-400;
   }
   .seg-btn[aria-selected='true'],
   .seg-btn[aria-pressed='true'] {
-    @apply bg-raised text-ok;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.06),
-      inset 0 0 0 1px var(--color-line-strong);
+    @apply bg-surface text-ok font-semibold shadow-xs;
   }
   .seg-btn:disabled {
     @apply pointer-events-none opacity-50;
   }
 
-  /* Sub-navigation pill (server sub-tabs) - a link, not a seg-btn: segments are
-     pick-one-of-N controls, these navigate. One shared class instead of the
-     same utility string hand-rolled per template. */
+  /* Sub-navigation pill (server sub-tabs) */
   .subtab {
-    @apply inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-sm font-medium text-ink-faint transition hover:bg-raised hover:text-ink
+    @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-ink-faint transition-all hover:bg-raised hover:text-ink
       focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
   }
   .subtab.active {
-    @apply bg-grass-500/15 text-ok font-semibold hover:bg-grass-500/15 hover:text-ok;
+    @apply bg-grass-500/15 text-ok font-semibold hover:bg-grass-500/20 hover:text-ok;
   }
 
-  /* Icon-only buttons (modal/toast close, inline glyph actions): a real hit
-     area and a visible focus state instead of a naked 16px glyph. */
+  /* Icon-only buttons */
   .icon-btn {
-    @apply grid size-8 shrink-0 place-items-center rounded-sm text-ink-faint transition-colors
-      hover:bg-inset hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1
+    @apply grid size-8 shrink-0 place-items-center rounded-xl text-ink-faint transition-all
+      hover:bg-inset/70 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1
       focus-visible:outline-diamond-400;
   }
 
-  /* Sticky bottom action bar (Save/Discard, bulk actions). Opaque, so page
-     content never bleeds through behind the buttons; above the phone tab bar
-     when there is one, otherwise clear of the home indicator. */
+  /* Sticky bottom action bar */
   .action-bar {
-    @apply sticky z-10 border-t border-line bg-canvas px-4;
-    /* Tucked well under the phone tab bar (which stacks above it and hides
-       the tucked part), with matching extra padding so the buttons sit where
-       they would anyway. The tab bar is position: fixed and this bar is
-       sticky; mobile Chrome re-places the two slightly differently while its
-       address bar slides, and a 1px overlap still let a sliver of the page
-       show between them on real phones. 0.75rem of overlap absorbs that. With
-       no tab bar both vars fall back to 0 and this is a plain bottom: 0 bar. */
+    @apply sticky z-10 border-t border-line/80 bg-surface/90 backdrop-blur-xl px-4;
     bottom: calc(var(--bottom-nav, 0px) - var(--bar-tuck, 0px));
-    padding-top: 0.625rem;
-    padding-bottom: calc(0.625rem + var(--bar-tuck, 0px) + var(--bar-safe, env(safe-area-inset-bottom)));
-    box-shadow: 0 -10px 20px -14px rgb(0 0 0 / 0.55);
+    padding-top: 0.75rem;
+    padding-bottom: calc(0.75rem + var(--bar-tuck, 0px) + var(--bar-safe, env(safe-area-inset-bottom)));
+    box-shadow: 0 -8px 24px -6px rgb(0 0 0 / 0.35);
   }
 
-  /* The action bar for a form inside a page column (Configuration, Create
-     Server, Discord, Status Page, Chatbot): edge to edge on a phone, a
-     floating card inside the column from sm up. */
   .action-bar-card {
     margin-inline: -1rem;
     @variant sm {
-      /* Floats 0.75rem above the screen edge. With the panel tab bar fixed
-         (a tablet), --float-gap tucks it under the bar instead, like the
-         phone's bar, so no strip of page shows between card and tab bar. */
       bottom: calc(var(--bottom-nav, 0px) + var(--float-gap, 0.75rem));
       margin-inline: 0;
-      border-width: 1px;
-      border-radius: var(--radius-lg);
-      padding-inline: 1rem;
-      padding-bottom: calc(0.625rem + var(--bar-tuck, 0px));
+      @apply rounded-2xl border border-line/80 shadow-modal;
+      padding-inline: 1.25rem;
+      padding-bottom: calc(0.75rem + var(--bar-tuck, 0px));
     }
   }
 
-  /* The action bar as a card's own footer (Discord, Status Page, Chatbot):
-     flush with the card's edges and bottom corners, pinned while the card
-     is longer than the screen. */
   .action-bar-footer {
     margin: 1rem -1rem -1rem;
-    border-bottom-left-radius: var(--radius-lg);
-    border-bottom-right-radius: var(--radius-lg);
+    @apply rounded-b-2xl border-t border-line/80;
   }
 
-  /* A tab in the phone's panel-wide bottom bar (partials/app-nav.hbs). Same
-     look as a server section tab on a phone: icon over label, the active one
-     marked by a tinted pill behind its icon (see the bottom-nav rules). */
+  /* Phone bottom tab */
   .app-tab {
     @apply relative flex min-w-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap px-0.5 pt-1.5 pb-1 text-[10px] font-medium text-ink-faint transition sm:text-xs;
   }
@@ -669,90 +590,79 @@
     @apply text-ok font-semibold;
   }
 
+  /* Material 3 Card Container */
   .card {
-    /* One elevation language per edge: the border carries it (plus the surface
-       lightness step in dark mode) - no shadow doubling the same edge. */
-    @apply rounded-lg border border-line bg-surface;
+    @apply rounded-2xl border border-line/70 bg-surface shadow-xs transition-all duration-200;
   }
 
-  /* Stat tiles: one number with its caption (dashboard, combined graphs, a
-     server's Metrics strip). Used as `card stat-tile`; a linked tile adds
-     `block hover:border-line-strong`. One shape everywhere, so a number reads
-     the same size wherever it appears. */
+  /* Stat tiles: Material 3 Tonal Metric Card */
   .stat-tile {
-    @apply min-w-0 p-4 transition;
+    @apply min-w-0 p-5 rounded-2xl border border-line/60 bg-surface/90 backdrop-blur-sm transition-all duration-200;
   }
   .stat-label {
-    @apply flex items-center gap-1 text-xs text-ink-faint;
+    @apply flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink-faint;
   }
   .stat-value {
-    @apply mt-1 break-words text-2xl font-bold tabular-nums;
+    @apply mt-2 break-words text-3xl font-extrabold tracking-tight tabular-nums text-ink;
   }
   .stat-unit {
-    @apply text-base font-medium text-ink-faint;
+    @apply text-base font-semibold text-ink-soft ml-1;
   }
   .stat-sub {
-    @apply text-xs text-ink-faint;
+    @apply mt-1 text-xs text-ink-faint flex items-center gap-1;
   }
 
-  /* Badges: neutral by default; the four semantic variants are the ONLY badge
-     colorways - no ad-hoc bg/text pairs at call sites. */
+  /* Badges: Material 3 Pill Chips */
   .badge {
-    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-inset text-ink-soft;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide border border-transparent bg-inset text-ink-soft;
   }
   .badge-ok {
-    @apply bg-grass-500/15 text-ok;
+    @apply bg-grass-500/15 text-ok border-grass-500/30;
   }
   .badge-warn {
-    @apply bg-gold-400/15 text-warn;
+    @apply bg-gold-400/15 text-warn border-gold-400/30;
   }
   .badge-danger {
-    @apply bg-redstone-500/15 text-danger;
+    @apply bg-redstone-500/15 text-danger border-redstone-500/30;
   }
   .badge-info {
-    @apply bg-diamond-400/15 text-link;
+    @apply bg-diamond-400/15 text-link border-diamond-400/30;
   }
 
   .chip {
-    /* rounded-sm, not a pill - the whole product sits in the blocky register. */
-    @apply inline-flex items-center gap-1 rounded-sm border border-line bg-inset px-2 py-0.5 text-xs text-ink-soft;
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-line/70 bg-inset/60 px-2.5 py-1 text-xs font-medium text-ink-soft transition hover:border-line-strong hover:text-ink;
   }
 
-  /* Notices: the ONE inline callout. Border and tint pairs are fixed per
-     meaning - no ad-hoc border/background combinations at call sites. */
+  /* Notices: Material 3 Callout Cards */
   .notice {
-    @apply flex items-start gap-2 rounded-md border border-line bg-inset/40 px-3 py-2 text-sm text-ink-soft;
+    @apply flex items-start gap-3 rounded-2xl border border-line/80 bg-inset/40 p-4 text-sm text-ink-soft backdrop-blur-sm;
   }
   .notice-ok {
-    @apply border-ok/40 bg-grass-500/10;
+    @apply border-ok/30 bg-grass-500/10 text-ink;
   }
   .notice-warn {
-    @apply border-warn/40 bg-gold-500/10;
+    @apply border-warn/30 bg-gold-500/10 text-ink;
   }
   .notice-danger {
-    @apply border-danger/40 bg-redstone-500/10;
+    @apply border-danger/30 bg-redstone-500/10 text-ink;
   }
   .notice-info {
-    @apply border-link/40 bg-diamond-500/10;
+    @apply border-link/30 bg-diamond-500/10 text-ink;
   }
 
-  /* Color-picker swatch (chat colors, MOTD, accent pickers). Selection is a
-     theme-aware gap ring - an ink halo separated by the surface color - so it
-     stays visible on ANY swatch color in BOTH themes (a white ring on a white
-     card was invisible; this is the fix). State lives in aria-pressed. */
+  /* Swatch */
   .swatch {
-    @apply size-7 shrink-0 cursor-pointer rounded-sm border border-line-strong transition
+    @apply size-7 shrink-0 cursor-pointer rounded-lg border border-line-strong transition
       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
   }
   .swatch:hover {
-    border-color: var(--color-stone-500);
+    border-color: var(--color-stone-400);
   }
   .swatch[aria-pressed='true'] {
     box-shadow:
       0 0 0 2px var(--color-surface),
       0 0 0 4px var(--color-ink);
   }
-  /* The "no color" swatch: neutral tile with a diagonal strike. */
   .swatch-none {
     background:
       linear-gradient(
@@ -764,101 +674,80 @@
       var(--color-inset);
   }
 
-  /* Pick-one tiles (wizard loader/flavor/icon pickers): selection lives in
-     aria-pressed; the border stays 2px in every state so picking never shifts
-     the layout by a pixel. Padding/size set at the call site. */
+  /* Selection tiles */
   .tile {
-    @apply grid place-items-center gap-1 rounded-sm border-2 border-line bg-inset transition
+    @apply grid place-items-center gap-1.5 rounded-xl border-2 border-line bg-inset/60 p-2.5 transition
       hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
   }
   .tile[aria-pressed='true'] {
-    @apply border-grass-500 text-ok hover:border-grass-500;
+    @apply border-grass-500 text-ok hover:border-grass-500 bg-grass-500/10 shadow-xs;
   }
 
-  /* Toggle chips (multi-select, unlike .seg which is pick-one): state lives in
-     aria-pressed, matching the segmented control's contract. */
   button.chip {
     @apply cursor-pointer transition hover:border-line-strong focus-visible:outline-2
       focus-visible:outline-offset-1 focus-visible:outline-diamond-400 disabled:cursor-default disabled:opacity-50;
   }
   button.chip[aria-pressed='true'] {
-    @apply border-grass-500 bg-grass-600/10 text-ok;
+    @apply border-grass-500 bg-grass-600/15 text-ok font-semibold;
   }
-  /* World Controls: a rule that couldn't be read this cycle - don't let it pass
-     for a known "off". Dashed border + muted text, no colour claim either way. */
   button.chip[data-wc-unknown] {
     @apply border-dashed text-ink-faint;
   }
 
-  /* Whole-group disable (composers while the server is stopped): real
-     disabled - the old pointer-events-none trick let keyboard events straight
-     through to "disabled" controls. */
   fieldset:disabled {
     @apply opacity-60;
   }
 
+  /* Material 3 Outlined Text Field */
   .input {
-    @apply w-full rounded-sm border border-line-strong bg-inset px-3 py-2 text-sm text-ink
-      transition-[border-color,box-shadow] duration-150
-      placeholder:text-ink-faint focus:border-diamond-400 focus:outline-none
-      focus:ring-1 focus:ring-diamond-400;
+    @apply w-full rounded-xl border border-line-strong/60 bg-inset/40 px-3.5 py-2.5 text-sm text-ink
+      transition-all duration-150
+      placeholder:text-ink-faint focus:border-ok focus:bg-surface focus:outline-none
+      focus:ring-2 focus:ring-ok/25 hover:border-line-strong;
   }
-  /* Fields advertise interactivity on hover (stone-500 reads stronger than
-     line-strong in BOTH themes); focus keeps the diamond ring. */
   .input:hover:not(:focus):not(:disabled) {
-    border-color: var(--color-stone-500);
+    border-color: var(--color-stone-400);
   }
   .input:disabled {
     @apply cursor-not-allowed opacity-60;
   }
 
   .label {
-    @apply mb-1 block text-sm font-medium text-ink;
+    @apply mb-1.5 block text-sm font-semibold text-ink;
   }
   .help {
-    @apply mt-1 max-w-prose text-xs leading-relaxed text-ink-faint;
+    @apply mt-1.5 max-w-prose text-xs leading-relaxed text-ink-faint;
   }
 
-  /* Section eyebrow - the small all-caps label above a group of controls
-     (sidebar "Servers", world-controls sections, modpacks column headers).
-     Was hand-rolled as this exact utility string ~15 times. */
   .eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-wider text-ink-faint;
+    @apply text-[11px] font-bold uppercase tracking-wider text-ink-faint;
   }
 
-  /* Inline code inside body copy (a var name, a command, a hostname). Three
-     slightly different hand-rolled treatments existed; this is the one. */
   .code-inline {
-    @apply rounded-sm bg-inset px-1 font-mono text-[0.9em] text-ink-soft;
+    @apply rounded-md bg-inset/80 px-1.5 py-0.5 font-mono text-[0.9em] text-ink-soft border border-line/40;
   }
 
+  /* Material 3 Table */
   .table-base {
     @apply w-full text-left text-sm;
     font-variant-numeric: tabular-nums;
   }
-  /* px-4 so the first/last columns align with card headers and card padding. */
   .table-base th {
-    @apply border-b border-line px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-ink-faint;
+    @apply border-b border-line px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ink-faint;
   }
   .table-base td {
-    @apply border-b border-line/60 px-4 py-2.5 align-middle;
+    @apply border-b border-line/40 px-4 py-3.5 align-middle;
   }
   @media (hover: hover) {
+    .table-base tbody tr {
+      transition: background-color 120ms ease;
+    }
     .table-base tbody tr:hover {
-      @apply bg-inset/50;
+      @apply bg-inset/40;
     }
   }
 
-  /* Add .table-stack to a .table-base and, below sm, every row collapses into a
-     little card and every cell becomes a "Label: value" line. The label text
-     comes from each <td data-th="…">; give an actions cell data-th="" to drop
-     the label and let its buttons sit on their own line. Keep the usual
-     overflow-x-auto wrapper for the sm-and-up table. */
   @media (width < 40rem) {
-    /* The table and its body size to the card, not to their widest content:
-       as a table they'd grow to fit the longest file or mod name and run off
-       the right edge of the screen. Gutter padding keeps stacked row cards
-       from crashing into the parent card's border. */
     .table-stack {
       @apply block w-full p-2.5 sm:p-0;
     }
@@ -869,31 +758,27 @@
       @apply sr-only;
     }
     .table-stack tbody tr {
-      @apply block rounded-lg border border-line bg-inset/30 p-3 shadow-xs;
+      @apply block rounded-2xl border border-line/70 bg-surface p-3.5 shadow-xs;
     }
     .table-stack tbody tr + tr {
-      @apply mt-2.5;
+      @apply mt-3;
     }
     .table-stack td {
-      @apply flex min-w-0 items-baseline justify-between gap-4 border-0 px-0 py-1 text-sm;
+      @apply flex min-w-0 items-baseline justify-between gap-4 border-0 px-0 py-1.5 text-sm;
       overflow-wrap: anywhere;
     }
-    /* A value may shrink (truncate, or wrap a long unbroken name) instead of
-       pushing the row past the card. */
     .table-stack td > * {
       @apply min-w-0 max-w-full;
     }
     .table-stack td::before {
       content: attr(data-th);
-      /* Long labels (a server name heading a permissions column) wrap within
-         about half the row instead of pushing the value off-screen. */
       @apply max-w-[55%] shrink-0 text-xs font-semibold uppercase tracking-wider text-ink-faint;
     }
     .table-stack td[data-th='']::before {
       content: none;
     }
     .table-stack td[data-th=''] {
-      @apply justify-start border-t border-line/40 pt-2.5 mt-1.5;
+      @apply justify-start border-t border-line/40 pt-2.5 mt-2;
     }
     .table-stack td:empty {
       @apply hidden;
@@ -901,36 +786,21 @@
   }
 
   .nav-item {
-    @apply flex items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium text-ink-soft
-      transition hover:bg-inset hover:text-ink focus-visible:outline-2
+    @apply flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink-soft
+      transition-all duration-150 hover:bg-inset/70 hover:text-ink focus-visible:outline-2
       focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
   }
-  /* The current page is a tinted pill, the one active marker used across
-     the panel (tabs, sub-tabs, phone tab bars); no accent line on an edge. */
   .nav-item.active {
-    @apply bg-grass-600/15 text-ok;
+    @apply bg-grass-500/15 text-ok font-semibold shadow-xs;
   }
 
-  /* Meters read like the in-game XP bar: blocky, with a beveled trough and a
-     glossy top edge on the fill. */
+  /* Material 3 Progress Bar */
   .meter {
-    @apply relative h-2.5 w-full overflow-hidden rounded-sm bg-inset;
-    box-shadow:
-      inset 0 1px 2px rgb(0 0 0 / 0.4),
-      inset 0 -1px 0 rgb(255 255 255 / 0.05);
+    @apply relative h-2.5 w-full overflow-hidden rounded-full bg-inset/80 p-0.5 border border-line/40;
   }
   .meter > div {
-    /* Width (not scaleX) is transitioned on purpose: scaling would distort the
-       fill's beveled inset shadows. */
-    @apply h-full rounded-sm transition-[width];
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.3),
-      inset 0 -2px 0 rgb(0 0 0 / 0.25);
+    @apply h-full rounded-full transition-all duration-300;
   }
-  /* Indeterminate meter: an honest sliding block (progress unknown), replacing
-     fake pulsing bars stuck at an arbitrary percentage. Set the fill to ~25%. */
-  /* A reference tick on a meter (the Java heap on the memory meter). A <span>,
-     not a <div>, so the fill rules above leave it alone. */
   .meter-mark {
     position: absolute;
     top: 0;
@@ -945,38 +815,26 @@
   }
 
   .status-dot {
-    @apply inline-block size-2.5 rounded-full;
+    @apply inline-block size-2.5 rounded-full shadow-xs;
   }
   .status-dot.pulse::after {
     content: '';
-    @apply absolute inline-block size-2.5 animate-ping rounded-full opacity-60;
+    @apply absolute inline-block size-2.5 animate-ping rounded-full opacity-70;
     background: inherit;
   }
 
-  /* Console - always dark regardless of theme; the inset shadow gives it the
-     same recessed-trough depth as the meters. NOTE: log-level colors inside a
-     .console use RAW palette steps (text-gold-300, text-redstone-400) on
-     purpose - the semantic warn/danger tokens flip to 700-steps in light mode
-     and would vanish on this always-dark surface. Don't "fix" them. */
   .console {
-    @apply rounded-md border border-line bg-stone-950 p-3 font-mono text-[13px] leading-6 text-stone-200;
-    box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.35);
+    @apply rounded-xl border border-line/80 bg-stone-950 p-4 font-mono text-[13px] leading-6 text-stone-200 shadow-inner;
   }
-  /* Live console lines copy on click (console.js): show which line a click
-     would take, with a mouse. */
   @media (hover: hover) {
     #console-log > [data-level]:hover {
-      @apply -mx-1 cursor-copy rounded-sm bg-white/5 px-1;
+      @apply -mx-1 cursor-copy rounded-md bg-white/5 px-1;
     }
   }
 
-  /* Collapsible catalog sections (<details class="card">): the summary row is
-     a control - show it on hover. */
   details.card > summary:hover {
-    @apply rounded-lg bg-inset/40;
+    @apply rounded-2xl bg-inset/40;
   }
-  /* Progressive: browsers with interpolate-size (Chrome 131+) animate the
-     open/close height of collapsibles; everyone else keeps the instant snap. */
   details.card::details-content {
     height: 0;
     overflow: clip;
@@ -988,8 +846,7 @@
     height: auto;
   }
 
-  /* ---- Custom form controls: no native browser widgets, ever ---- */
-
+  /* ---- Custom form controls ---- */
   .icon {
     display: inline-block;
     vertical-align: -0.125em;
@@ -997,13 +854,11 @@
 
   input[type='checkbox'].msm-check,
   input[type='radio'].msm-radio {
-    @apply size-4 shrink-0 cursor-pointer appearance-none border border-line-strong bg-inset
-      transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+    @apply size-4 shrink-0 cursor-pointer appearance-none border border-line-strong bg-inset/60
+      transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
   }
   input[type='checkbox'].msm-check {
-    @apply rounded-sm;
-    /* The checkmark lives on the element at size 0, so checking GROWS it in
-       with a small overshoot and unchecking shrinks it away. */
+    @apply rounded-md;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
     background-size: 0%;
     background-position: center;
@@ -1018,8 +873,6 @@
   }
   input[type='radio'].msm-radio {
     @apply rounded-full;
-    /* The dot radius rides the registered --msm-radio-r custom property, so it
-       grows out from the center instead of popping in. */
     --msm-radio-r: 0%;
     background: radial-gradient(
       circle,
@@ -1035,7 +888,7 @@
     --msm-radio-r: 38%;
   }
 
-  /* Toggle switch: <label class="msm-toggle"><input type="checkbox"><span></span></label> */
+  /* Material 3 Toggle Switch */
   .msm-toggle {
     @apply relative inline-flex cursor-pointer items-center;
   }
@@ -1044,29 +897,18 @@
       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
   }
   .msm-toggle span {
-    @apply pointer-events-none relative h-5 w-9 rounded-full bg-inset ring-1 ring-inset ring-line-strong transition;
+    @apply pointer-events-none relative h-6 w-11 rounded-full bg-inset border border-line-strong transition-all duration-200;
   }
   .msm-toggle span::after {
     content: '';
-    @apply absolute left-0.5 top-0.5 size-4 rounded-full bg-stone-300;
-    /* NO overshoot on travel: both resting positions sit flush against the
-       track edges, so an overshooting spring pokes the knob OUTSIDE the track
-       (visible when switching off). The tactile character comes from the
-       held-down squash below instead. */
+    @apply absolute left-1 top-1 size-4 rounded-full bg-stone-300 shadow-sm transition-all duration-200;
     transform-origin: left center;
-    transition:
-      transform 200ms cubic-bezier(0.3, 0.7, 0.4, 1),
-      background-color 200ms;
   }
-  /* Held down, the knob squashes toward the direction of travel - scaleX
-     anchored to the trailing edge, so it can never leave the track, and the
-     release (:active clears a beat before :checked flips) stays smooth because
-     travel and squash live on ONE animated property. */
   .msm-toggle:active input:not(:disabled):not(:checked) + span::after {
-    transform: scaleX(1.2);
+    transform: scaleX(1.25);
   }
   .msm-toggle:active input:checked:not(:disabled) + span::after {
-    transform: translateX(1rem) scaleX(1.2);
+    transform: translateX(1.25rem) scaleX(1.25);
   }
   .msm-toggle:has(input:disabled) {
     @apply cursor-not-allowed;
@@ -1076,49 +918,47 @@
     @apply cursor-not-allowed opacity-50;
   }
   .msm-toggle input:checked + span {
-    @apply bg-grass-600 ring-grass-700;
+    @apply bg-grass-600 border-grass-600;
   }
   .msm-toggle input:checked + span::after {
     @apply bg-white;
-    transform: translateX(1rem);
+    transform: translateX(1.25rem);
     transform-origin: right center;
   }
 
   /* Range sliders */
   input[type='range'].msm-range {
-    @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-inset
+    @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-inset border border-line/40
       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
   }
   input[type='range'].msm-range::-webkit-slider-thumb {
-    @apply size-4 appearance-none rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
+    @apply size-4 appearance-none rounded-full border-2 border-white bg-grass-500 shadow-raised transition-transform hover:scale-110 active:scale-95;
   }
   input[type='range'].msm-range::-moz-range-thumb {
-    @apply size-4 rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
+    @apply size-4 rounded-full border-2 border-white bg-grass-500 shadow-raised;
   }
   input[type='range'].msm-range.msm-range-alt::-webkit-slider-thumb {
-    @apply border-diamond-700 bg-diamond-400;
+    @apply border-2 border-white bg-diamond-400;
   }
   input[type='range'].msm-range.msm-range-alt::-moz-range-thumb {
-    @apply border-diamond-700 bg-diamond-400;
+    @apply border-2 border-white bg-diamond-400;
   }
 
   .msm-select {
     @apply cursor-pointer;
   }
 
-  /* Dashboard list view: a genuinely compact row - name, status and meta only.
-     The toggle used to change nothing but the column count. */
   .view-list [data-card-stats],
   .view-list [data-card-disk],
   .view-list [data-card-tags] {
     display: none;
   }
 
-  /* Subtle "dirt" texture strip used on page headers */
+  /* Material 3 ambient surface texture */
   .texture-top {
     background-image:
-      linear-gradient(to bottom, rgb(63 166 43 / 0.08), transparent 60%),
-      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.015) 0 8px, transparent 8px 16px);
+      linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, transparent 100%),
+      radial-gradient(ellipse at top, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
   }
 }
 

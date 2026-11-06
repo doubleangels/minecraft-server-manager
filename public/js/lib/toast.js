@@ -60,9 +60,9 @@ export function toast(message, { kind = 'success', timeout = 4500, action = null
   const meta = KIND[kind] || KIND.success;
 
   const el = document.createElement('div');
-  el.className = `card flex items-start gap-2.5 p-3 text-sm shadow-overlay ${meta.border} animate-[toast-in_.18s_ease-out]`;
-  el.innerHTML = `${meta.icon}<span class="min-w-0 flex-1 break-words"></span>
-    <button class="icon-btn -my-1.5 -mr-1.5" aria-label="Dismiss">
+  el.className = `card flex items-start gap-3 rounded-2xl p-3.5 text-sm shadow-overlay ${meta.border} bg-surface/95 backdrop-blur-md animate-[toast-in_.18s_ease-out]`;
+  el.innerHTML = `${meta.icon}<span class="min-w-0 flex-1 break-words font-medium"></span>
+    <button class="icon-btn -my-1 -mr-1" aria-label="Dismiss">
       <svg class="icon size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
     </button>`;
   el.querySelector('span').textContent = humane(message);

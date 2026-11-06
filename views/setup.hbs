@@ -1,6 +1,6 @@
 <div class="w-full max-w-lg" id="setup-wizard">
   <div class="mb-5 flex items-center justify-center gap-2.5">
-    {{> brand-lockup}}
+    {{> brand-lockup size='size-11' textSize='text-base'}}
   </div>
 
   {{! Progress dots - one per step, driven by setup.js }}
@@ -12,7 +12,7 @@
     <span class="h-1.5 w-6 rounded-full bg-line transition-colors" data-dot></span>
   </div>
 
-  <div class="card p-6">
+  <div class="card p-7 sm:p-8 shadow-raised">
     {{! ---- Step 0: Welcome ---- }}
     <section data-step="0">
       <h2 class="text-center text-lg font-semibold">Welcome to Minecraft Server Manager</h2>

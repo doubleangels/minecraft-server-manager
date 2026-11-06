@@ -1,6 +1,6 @@
-<div class="card w-full max-w-sm p-6">
+<div class="card w-full max-w-sm p-7 sm:p-8 shadow-raised">
   <div class="mb-6 flex items-center justify-center gap-2.5">
-    {{> brand-lockup glyph='shield-check'}}
+    {{> brand-lockup size='size-11' textSize='text-base'}}
   </div>
   {{#if error}}<div class="notice notice-danger mb-4">{{{icon 'triangle-alert' 'size-4 mt-0.5 shrink-0 text-danger'}}}<div>{{error}}</div></div>{{/if}}
   <form method="post" action="/login/2fa" class="space-y-4" data-disable-on-submit>

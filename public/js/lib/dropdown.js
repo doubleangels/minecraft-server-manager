@@ -30,7 +30,7 @@ function open(trigger) {
   // one. See the stacking scale in input.css. max-h + scroll so a long menu on
   // a short (phone) viewport stays on screen instead of running off both ends.
   menu.className =
-    'card fixed z-[68] min-w-44 max-h-[min(70vh,28rem)] overflow-y-auto p-1 shadow-overlay animate-[menu-in_.12s_ease-out]';
+    'card fixed z-[68] min-w-44 max-h-[min(70vh,28rem)] overflow-y-auto p-1.5 rounded-2xl border border-line/80 bg-surface/95 backdrop-blur-xl shadow-modal animate-[menu-in_.12s_ease-out]';
   menu.setAttribute('role', 'menu');
   menu.appendChild(tpl.content.cloneNode(true));
   menu.querySelectorAll('button, a').forEach((el) => {

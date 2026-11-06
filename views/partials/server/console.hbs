@@ -30,7 +30,7 @@
 
   {{! Rotated game logs the server itself keeps next to latest.log. Populated by
       console.js on load; hidden until there's at least one. }}
-  <details class="mb-3 rounded-md border border-line text-xs" data-console-logfiles hidden>
+  <details class="mb-3 rounded-xl border border-line text-xs" data-console-logfiles hidden>
     <summary class="cursor-pointer px-3 py-2 font-semibold text-ink-faint marker:content-none">
       {{{icon 'archive' 'size-3.5'}}} Older log files <span data-console-logfiles-count></span>
     </summary>
@@ -65,7 +65,7 @@
   {{! Phone: pinned to the bottom of the screen above the tab bar, like a chat
       app's message box. sm+: an ordinary row under the log. }}
   <div class="action-bar -mx-4 mt-3 flex gap-2 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none{{#unless perms.console}} hidden{{/unless}}">
-    <span class="grid place-items-center rounded-sm border border-line-strong bg-inset px-3 font-mono text-sm text-ok">/</span>
+    <span class="grid place-items-center rounded-xl border border-line-strong bg-inset px-3 font-mono text-sm font-bold text-ok">/</span>
     {{! min-w-0: see settings.hbs - without it this input won't shrink below its
         placeholder's intrinsic width and pushes the page wider on narrow screens. }}
     <input class="input min-w-0 flex-1 font-mono" placeholder="Type a command (Enter to send, ↑ for history)" id="console-input" aria-label="Server command" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send">

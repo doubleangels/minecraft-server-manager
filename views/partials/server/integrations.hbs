@@ -59,7 +59,7 @@
       </div>
     </div>
 
-    <div class="mt-5 rounded-md border border-line bg-inset p-4">
+    <div class="mt-5 rounded-xl border border-line/70 bg-surface-container/50 p-4 sm:p-5 shadow-xs">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h4 class="font-semibold">Player Outreach</h4>
@@ -95,7 +95,7 @@
       </div>
     </div>
 
-    <div class="mt-5 rounded-md border border-line bg-inset p-4">
+    <div class="mt-5 rounded-xl border border-line/70 bg-surface-container/50 p-4 sm:p-5 shadow-xs">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h4 class="font-semibold">Chatbot Powers <span class="text-xs font-normal text-warn">Experimental</span></h4>
@@ -141,8 +141,8 @@
       <button class="btn" id="ig-wz-power-audit">Refresh Power Audit</button>
       <a class="btn btn-ghost" href="/wizard-transcripts">All Transcript Archives</a>
     </div>
-    <div class="mt-4 hidden max-h-80 overflow-auto rounded-md border border-line bg-inset p-3 text-xs" id="ig-wz-transcript-list"></div>
-    <div class="mt-4 hidden max-h-80 overflow-auto rounded-md border border-line bg-inset p-3 text-xs" id="ig-wz-power-audit-list"></div>
+    <div class="mt-4 hidden max-h-80 overflow-auto rounded-xl border border-line bg-surface-container/60 p-3 text-xs" id="ig-wz-transcript-list"></div>
+    <div class="mt-4 hidden max-h-80 overflow-auto rounded-xl border border-line bg-surface-container/60 p-3 text-xs" id="ig-wz-power-audit-list"></div>
   {{! Save pinned as the card's footer, so it stays in reach on a long card. }}
   <div class="action-bar action-bar-footer flex flex-wrap items-center gap-2 sm:flex-nowrap">
     <span class="hidden basis-full items-center gap-1.5 text-xs text-warn sm:mr-auto sm:basis-auto" data-ig-dirty="wz">{{{icon 'circle-dot' 'size-3.5'}}} Unsaved changes!</span>
@@ -254,7 +254,7 @@
         </div>
         <div>
           <span class="label">Invite Text</span>
-          <pre class="max-h-44 overflow-auto whitespace-pre-wrap rounded-md border border-line bg-inset p-3 font-mono text-xs text-ink-soft" id="ig-invite-text">{{integrations.invite.inviteText}}</pre>
+          <pre class="max-h-44 overflow-auto whitespace-pre-wrap rounded-xl border border-line bg-surface-container/60 p-3 font-mono text-xs text-ink-soft" id="ig-invite-text">{{integrations.invite.inviteText}}</pre>
         </div>
         <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
           <button class="btn btn-primary" id="ig-copy-invite">{{{icon 'copy' 'size-4'}}} Copy Invite Text</button>
@@ -266,7 +266,7 @@
       </div>
       <div class="space-y-3 text-sm">
         {{#if integrations.invite.modded}}
-          <div class="rounded-md border border-line bg-raised p-3">
+          <div class="rounded-xl border border-line bg-surface-container/60 p-3.5">
             <p class="font-medium">{{{icon 'shield' 'size-3.5'}}} What friends need.</p>
             <p class="mt-1 text-xs text-ink-soft">Import the .mrpack into Prism Launcher or the Modrinth App. It installs the right Minecraft version and the mods, and adds this server to their multiplayer list.</p>
             {{#if integrations.invite.manualMods.length}}
@@ -277,7 +277,7 @@
             {{/if}}
           </div>
         {{else}}
-          <div class="rounded-md border border-line bg-raised p-3">
+          <div class="rounded-xl border border-line bg-surface-container/60 p-3.5">
             <p class="font-medium">{{{icon 'shield' 'size-3.5'}}} What friends need.</p>
             <p class="mt-1 text-xs text-ink-soft">Just vanilla Minecraft {{integrations.invite.mcVersion}}. No mods are needed on the client.</p>
           </div>
@@ -285,7 +285,7 @@
         {{#if integrations.invite.whitelistEnforced}}
           <div class="notice notice-warn text-xs">{{{icon 'triangle-alert' 'size-4 mt-0.5 shrink-0 text-warn'}}}<div>The whitelist is enforced. Add each friend on the Players tab before they join.</div></div>
         {{/if}}
-        <details class="rounded-md border border-line bg-raised p-3 text-xs">
+        <details class="rounded-xl border border-line bg-surface-container/60 p-3.5 text-xs">
           <summary class="cursor-pointer font-medium text-sm">Playing over the Internet (Port Forwarding)</summary>
           <p class="mt-2 text-ink-soft">{{integrations.invite.portForwardGuidance}}</p>
           {{#if integrations.invite.publicIp}}

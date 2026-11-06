@@ -1,8 +1,8 @@
-<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 h-dvh w-72 max-w-[85vw] -translate-x-full border-r border-line bg-surface transition-transform lg:sticky lg:top-0 lg:w-60 xl:w-64 lg:translate-x-0">
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 h-dvh w-72 max-w-[85vw] -translate-x-full border-r border-line bg-surface/95 backdrop-blur-xl transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:w-64 xl:w-68 lg:translate-x-0">
   <div class="flex h-full flex-col">
     <div class="flex items-center justify-between border-b border-line px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] texture-top">
       <a href="/" class="flex items-center gap-2.5">
-        {{> brand-lockup size='size-9' textSize='text-[11px]'}}
+        {{> brand-lockup size='size-9' textSize='text-xs'}}
       </a>
       <button type="button" id="sidebar-close" class="icon-btn lg:hidden" aria-label="Close navigation">
         {{{icon 'x' 'size-4'}}}
@@ -12,15 +12,15 @@
     {{! Grouped by intent: your servers first, then what you install from
         (Library), the recurring care every server needs (Maintenance), and
         what happened and what it costs (Insights). }}
-    <nav class="flex-1 space-y-0.5 overflow-y-auto p-3" aria-label="Main">
+    <nav class="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Main">
       <a class="nav-item {{#if (eq active 'dashboard')}}active{{/if}}" href="/">
-        {{{icon 'house' 'size-4'}}} Dashboard
+        {{{icon 'layout-dashboard' 'size-4'}}} Dashboard
       </a>
       <a class="nav-item {{#if (eq active 'servers')}}active{{/if}}" href="/servers">
         {{{icon 'server' 'size-4'}}} Servers
       </a>
 
-      <div class="pt-3 pb-1 pl-3 eyebrow">Library</div>
+      <div class="pt-4 pb-1 pl-3.5 eyebrow">Library</div>
       <a class="nav-item {{#if (eq active 'modpacks')}}active{{/if}}" href="/modpacks">
         {{{icon 'package' 'size-4'}}} Modpacks
       </a>
@@ -31,7 +31,7 @@
         {{{icon 'drafting-compass' 'size-4'}}} Blueprints
       </a>
 
-      <div class="pt-3 pb-1 pl-3 eyebrow">Maintenance</div>
+      <div class="pt-4 pb-1 pl-3.5 eyebrow">Maintenance</div>
       <a class="nav-item {{#if (eq active 'updates')}}active{{/if}}" href="/updates">
         {{{icon 'circle-arrow-up' 'size-4'}}} Updates
         {{#if updatesCount}}<span class="badge badge-warn ml-auto">{{updatesCount}}</span>{{/if}}
@@ -43,7 +43,7 @@
         {{{icon 'calendar-clock' 'size-4'}}} Schedules
       </a>
 
-      <div class="pt-3 pb-1 pl-3 eyebrow">Insights</div>
+      <div class="pt-4 pb-1 pl-3.5 eyebrow">Insights</div>
       <a class="nav-item {{#if (eq active 'health')}}active{{/if}}" href="/health">
         {{{icon 'activity' 'size-4'}}} Health
         {{#if healthCount}}<span class="badge badge-danger ml-auto">{{healthCount}}</span>{{/if}}
@@ -56,15 +56,15 @@
       </a>
 
       {{#if servers.length}}
-        <div class="pt-3 pb-1 pl-3 eyebrow">Jump to a Server</div>
+        <div class="pt-4 pb-1 pl-3.5 eyebrow">Jump to a Server</div>
         {{#each servers}}
           <a class="nav-item group/srv {{#if (eq id @root.server.id)}}active{{/if}}" href="/servers/{{id}}" data-sidebar-server="{{id}}"{{#if (eq id @root.server.id)}} aria-current="page"{{/if}}>
-            <img src="{{iconSrc this.icon}}" alt="" class="size-5 rounded-sm" style="background: {{this.accent}}" data-fallback-icon="/icons/servers/grass.svg">
+            <img src="{{iconSrc this.icon}}" alt="" class="size-5.5 shrink-0 rounded-lg shadow-xs ring-1 ring-white/10" style="background: {{this.accent}}" data-fallback-icon="/icons/servers/grass.svg">
             <span class="truncate" title="{{name}}">{{name}}</span>
             <span class="ml-auto hidden shrink-0 text-warn" data-pin-mark aria-label="Pinned">{{{icon 'star' 'size-3'}}}</span>
             {{! Copy the connect address without opening the server. Revealed on
                 hover with a mouse; always there on touch screens. }}
-            <button type="button" class="icon-btn -my-1.5 size-7 hover:text-link [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/srv:opacity-100 focus-visible:opacity-100" data-copy="{{address}}" data-tip="Copy {{address}}." aria-label="Copy the address for {{name}}">{{{icon 'copy' 'size-3.5'}}}</button>
+            <button type="button" class="-my-1 shrink-0 rounded-sm p-1 text-ink-faint hover:text-link focus-visible:outline-2 focus-visible:outline-diamond-400 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/srv:opacity-100 focus-visible:opacity-100" data-copy="{{address}}" data-tip="Copy {{address}}." aria-label="Copy the address for {{name}}">{{{icon 'copy' 'size-3.5'}}}</button>
             <span class="status-dot relative shrink-0 {{statusDot status}} {{#if (statusPulse status)}}pulse{{/if}}" title="{{statusLabel status}}"></span>
           </a>
         {{/each}}
@@ -72,7 +72,7 @@
     </nav>
 
     {{#if (eq user.role 'admin')}}
-      <div class="space-y-0.5 border-t border-line p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+      <div class="space-y-1 border-t border-line p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <a href="/settings" class="nav-item {{#if (eq active 'settings')}}active{{/if}}">
           {{{icon 'settings' 'size-4'}}} Panel Settings
         </a>

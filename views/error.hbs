@@ -1,9 +1,8 @@
 <div class="grid min-h-[50vh] place-items-center">
-  <div class="text-center">
-    {{! semantic token - raw 400/500 palette steps fail contrast on the light canvas }}
-    <div class="pixel text-4xl text-danger">{{code}}</div>
-    <h2 class="mt-4 text-lg font-semibold">{{title}}</h2>
-    <p class="mt-1 text-sm text-ink-faint">{{message}}</p>
-    <a href="/" class="btn btn-primary mt-5">{{{icon 'arrow-left' 'size-4'}}} Back to the Dashboard</a>
+  <div class="text-center p-6">
+    <div class="text-6xl font-extrabold tracking-tight text-danger">{{code}}</div>
+    <h2 class="mt-4 text-xl font-bold tracking-tight text-ink">{{title}}</h2>
+    <p class="mt-1.5 max-w-md text-sm text-ink-faint leading-relaxed">{{message}}</p>
+    <a href="/" class="btn btn-primary mt-6 shadow-md">{{{icon 'arrow-left' 'size-4'}}} Back to the Dashboard</a>
   </div>
 </div>

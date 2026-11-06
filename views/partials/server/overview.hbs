@@ -43,7 +43,7 @@
       <div><dt class="text-xs text-ink-faint">Next Restart</dt><dd class="font-medium">{{#if nextRestartMs}}<span data-ts-in="{{nextRestartMs}}">{{nextRestartMs}}</span>{{else}}<span class="text-ink-faint">Not scheduled</span>{{/if}}</dd></div>
     </dl>
     {{#if server.pack}}
-      <div class="mt-4 rounded-md border border-line bg-raised p-3 text-sm">
+      <div class="mt-4 rounded-xl border border-line/70 bg-surface-container p-3 text-sm">
         <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2">
           <span class="badge badge-info">{{platformName server.pack.platform}}</span>
           <b>{{server.pack.name}}</b>
@@ -110,7 +110,7 @@
           {{#if server.memory.note}}<p class="mt-1 text-ink-faint">{{server.memory.note}}</p>{{/if}}
         </div>
         <div>
-          <div class="mb-1 flex justify-between text-ink-faint"><span>Disk quota</span><span>{{bytes server.disk.used}}{{#if server.disk.quota}} / {{bytes server.disk.quota}}{{else}} (no quota){{/if}}</span></div>
+          <div class="mb-1 flex justify-between text-ink-faint"><span>Disk Quota</span><span>{{bytes server.disk.used}}{{#if server.disk.quota}} / {{bytes server.disk.quota}}{{else}} (No Quota){{/if}}</span></div>
           <div class="meter"><div class="{{meterColor server.disk.used server.disk.quota}}" style="width: {{pct server.disk.used server.disk.quota}}%"></div></div>
         </div>
       </div>
@@ -121,8 +121,8 @@
       {{#if server.players.names.length}}
         <ul class="space-y-1.5 text-sm">
           {{#each server.players.names}}
-            <li class="flex items-center gap-2">
-              <span class="grid size-6 place-items-center rounded-sm bg-inset text-[11px] font-bold">{{this.[0]}}</span>
+            <li class="flex items-center gap-2.5">
+              <span class="grid size-7 place-items-center rounded-full bg-surface-container border border-line/60 text-xs font-semibold text-ink">{{this.[0]}}</span>
               <span class="flex-1 truncate">{{this}}</span>
               {{! arrow, not "⋯" - the ellipsis glyph means "menu" everywhere else, this navigates. }}
               <a class="btn btn-ghost btn-sm" href="/servers/{{../server.id}}/players" data-tip="Manage on the Players tab." aria-label="Manage {{this}}">{{{icon 'arrow-right' 'size-3.5'}}}</a>
