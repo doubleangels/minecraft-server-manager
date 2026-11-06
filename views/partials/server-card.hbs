@@ -12,7 +12,7 @@
           {{! Selection mark for bulk actions (shown only in Select mode). }}
           <span class="hidden size-5 shrink-0 place-items-center rounded-md border-2 border-line-strong text-canvas" data-select-mark aria-hidden="true">{{{icon 'check' 'size-3.5'}}}</span>
           <h3 class="truncate text-base font-bold text-ink group-hover:text-ok transition-colors">{{name}}</h3>
-          {{#if updateAvailable}}<span class="badge badge-warn shrink-0" title="An update is available.">update</span>{{/if}}
+          {{#if updateAvailable}}<span class="badge badge-warn shrink-0" title="An update is available.">Update</span>{{/if}}
           {{#if crashesUnread}}<span class="badge badge-danger shrink-0" title="New crash reports.">{{crashesUnread}} {{plural crashesUnread 'crash' 'crashes'}}</span>{{/if}}
         </div>
         <p class="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-ink-faint">

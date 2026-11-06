@@ -59,7 +59,7 @@
         <div class="pt-4 pb-1 pl-3.5 eyebrow">Jump to a Server</div>
         {{#each servers}}
           <a class="nav-item group/srv {{#if (eq id @root.server.id)}}active{{/if}}" href="/servers/{{id}}" data-sidebar-server="{{id}}"{{#if (eq id @root.server.id)}} aria-current="page"{{/if}}>
-            <img src="{{iconSrc this.icon}}" alt="" class="size-5.5 shrink-0 rounded-lg shadow-xs ring-1 ring-white/10" style="background: {{this.accent}}" data-fallback-icon="/icons/servers/grass.svg">
+            <img src="{{iconSrc this.icon}}" alt="" class="size-6 shrink-0 rounded-lg shadow-xs ring-1 ring-white/10" style="background: {{this.accent}}" data-fallback-icon="/icons/servers/grass.svg">
             <span class="truncate" title="{{name}}">{{name}}</span>
             <span class="ml-auto hidden shrink-0 text-warn" data-pin-mark aria-label="Pinned">{{{icon 'star' 'size-3'}}}</span>
             {{! Copy the connect address without opening the server. Revealed on

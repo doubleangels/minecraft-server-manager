@@ -295,7 +295,7 @@
     @apply font-semibold tracking-tight text-ink;
   }
   ::selection {
-    @apply bg-grass-600/60 text-white;
+    @apply bg-ok/30 text-ink;
   }
   /* Everything clickable gets a physical press, even outside .btn (flavor
      tiles, icon pickers, chips) - part of the tactility. Segmented
@@ -364,7 +364,7 @@
     transform 150ms ease;
 }
 [data-bottom-nav='app'] > .active > svg {
-  @apply bg-grass-500/15 text-ok scale-105;
+  @apply bg-ok/15 text-ok scale-105;
 }
 @media (width < 40rem) {
   [data-bottom-nav='server'] > a > svg {
@@ -377,7 +377,7 @@
       transform 150ms ease;
   }
   [data-bottom-nav='server'] > a[aria-current='page'] > svg {
-    @apply bg-grass-500/15 text-ok scale-105;
+    @apply bg-ok/15 text-ok scale-105;
   }
   [data-bottom-nav='server'] > a[aria-current='page'] {
     @apply text-ok font-semibold;
@@ -387,7 +387,7 @@
    active one is the same tinted pill as a sub-tab. */
 @media (width >= 40rem) {
   [data-bottom-nav='server'] > a[aria-current='page'] {
-    @apply bg-grass-500/15 text-ok font-semibold;
+    @apply bg-ok/15 text-ok font-semibold;
   }
 }
 
@@ -429,7 +429,7 @@
       bg-raised px-4 py-2 text-sm font-medium text-ink transition-all
       duration-150 hover:bg-inset hover:border-line-strong hover:-translate-y-0.5 hover:shadow-sm
       focus-visible:outline-2 focus-visible:outline-offset-2
-      focus-visible:outline-diamond-400 disabled:pointer-events-none disabled:opacity-50 active:translate-y-0 active:scale-[0.98];
+      focus-visible:outline-link disabled:pointer-events-none disabled:opacity-50 active:translate-y-0 active:scale-[0.98];
   }
   .btn:active {
     transform: scale(0.98);
@@ -528,7 +528,7 @@
   .seg-btn {
     @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-lg px-3.5 text-sm
       font-medium text-ink-faint transition-all hover:text-ink
-      focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-link;
   }
   .seg-btn[aria-selected='true'],
   .seg-btn[aria-pressed='true'] {
@@ -541,17 +541,17 @@
   /* Sub-navigation pill (server sub-tabs) */
   .subtab {
     @apply inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-ink-faint transition-all hover:bg-raised hover:text-ink
-      focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-link;
   }
   .subtab.active {
-    @apply bg-grass-500/15 text-ok font-semibold hover:bg-grass-500/20 hover:text-ok;
+    @apply bg-ok/15 text-ok font-semibold hover:bg-ok/20 hover:text-ok;
   }
 
   /* Icon-only buttons */
   .icon-btn {
     @apply grid size-8 shrink-0 place-items-center rounded-xl text-ink-faint transition-all
       hover:bg-inset/70 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1
-      focus-visible:outline-diamond-400;
+      focus-visible:outline-link;
   }
 
   /* Sticky bottom action bar */
@@ -617,16 +617,16 @@
     @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide border border-transparent bg-inset text-ink-soft;
   }
   .badge-ok {
-    @apply bg-grass-500/15 text-ok border-grass-500/30;
+    @apply bg-ok/15 text-ok border-ok/30;
   }
   .badge-warn {
-    @apply bg-gold-400/15 text-warn border-gold-400/30;
+    @apply bg-warn/15 text-warn border-warn/30;
   }
   .badge-danger {
-    @apply bg-redstone-500/15 text-danger border-redstone-500/30;
+    @apply bg-danger/15 text-danger border-danger/30;
   }
   .badge-info {
-    @apply bg-diamond-400/15 text-link border-diamond-400/30;
+    @apply bg-link/15 text-link border-link/30;
   }
 
   .chip {
@@ -638,22 +638,22 @@
     @apply flex items-start gap-3 rounded-2xl border border-line/80 bg-inset/40 p-4 text-sm text-ink-soft backdrop-blur-sm;
   }
   .notice-ok {
-    @apply border-ok/30 bg-grass-500/10 text-ink;
+    @apply border-ok/30 bg-ok/10 text-ink;
   }
   .notice-warn {
-    @apply border-warn/30 bg-gold-500/10 text-ink;
+    @apply border-warn/30 bg-warn/10 text-ink;
   }
   .notice-danger {
-    @apply border-danger/30 bg-redstone-500/10 text-ink;
+    @apply border-danger/30 bg-danger/10 text-ink;
   }
   .notice-info {
-    @apply border-link/30 bg-diamond-500/10 text-ink;
+    @apply border-link/30 bg-link/10 text-ink;
   }
 
   /* Swatch */
   .swatch {
     @apply size-7 shrink-0 cursor-pointer rounded-lg border border-line-strong transition
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link;
   }
   .swatch:hover {
     border-color: var(--color-stone-400);
@@ -677,18 +677,18 @@
   /* Selection tiles */
   .tile {
     @apply grid place-items-center gap-1.5 rounded-xl border-2 border-line bg-inset/60 p-2.5 transition
-      hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link;
   }
   .tile[aria-pressed='true'] {
-    @apply border-grass-500 text-ok hover:border-grass-500 bg-grass-500/10 shadow-xs;
+    @apply border-ok text-ok hover:border-ok bg-ok/10 shadow-xs;
   }
 
   button.chip {
     @apply cursor-pointer transition hover:border-line-strong focus-visible:outline-2
-      focus-visible:outline-offset-1 focus-visible:outline-diamond-400 disabled:cursor-default disabled:opacity-50;
+      focus-visible:outline-offset-1 focus-visible:outline-link disabled:cursor-default disabled:opacity-50;
   }
   button.chip[aria-pressed='true'] {
-    @apply border-grass-500 bg-grass-600/15 text-ok font-semibold;
+    @apply border-ok bg-ok/15 text-ok font-semibold;
   }
   button.chip[data-wc-unknown] {
     @apply border-dashed text-ink-faint;
@@ -788,10 +788,10 @@
   .nav-item {
     @apply flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink-soft
       transition-all duration-150 hover:bg-inset/70 hover:text-ink focus-visible:outline-2
-      focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
+      focus-visible:outline-offset-[-2px] focus-visible:outline-link;
   }
   .nav-item.active {
-    @apply bg-grass-500/15 text-ok font-semibold shadow-xs;
+    @apply bg-ok/15 text-ok font-semibold shadow-xs;
   }
 
   /* Material 3 Progress Bar */
@@ -855,7 +855,7 @@
   input[type='checkbox'].msm-check,
   input[type='radio'].msm-radio {
     @apply size-4 shrink-0 cursor-pointer appearance-none border border-line-strong bg-inset/60
-      transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link;
   }
   input[type='checkbox'].msm-check {
     @apply rounded-md;
@@ -868,7 +868,7 @@
     transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   input[type='checkbox'].msm-check:checked {
-    @apply border-grass-500 bg-grass-600;
+    @apply border-ok bg-ok;
     background-size: 80%;
   }
   input[type='radio'].msm-radio {
@@ -876,7 +876,7 @@
     --msm-radio-r: 0%;
     background: radial-gradient(
       circle,
-      var(--color-grass-500) 0 var(--msm-radio-r),
+      var(--color-ok) 0 var(--msm-radio-r),
       var(--color-inset) calc(var(--msm-radio-r) + 4%)
     );
     transition:
@@ -884,7 +884,7 @@
       border-color 180ms;
   }
   input[type='radio'].msm-radio:checked {
-    @apply border-grass-500;
+    @apply border-ok;
     --msm-radio-r: 38%;
   }
 
@@ -894,7 +894,7 @@
   }
   .msm-toggle input {
     @apply absolute inset-0 cursor-pointer appearance-none rounded-full
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link;
   }
   .msm-toggle span {
     @apply pointer-events-none relative h-6 w-11 rounded-full bg-inset border border-line-strong transition-all duration-200;
@@ -918,7 +918,7 @@
     @apply cursor-not-allowed opacity-50;
   }
   .msm-toggle input:checked + span {
-    @apply bg-grass-600 border-grass-600;
+    @apply bg-ok border-ok;
   }
   .msm-toggle input:checked + span::after {
     @apply bg-white;
@@ -929,19 +929,19 @@
   /* Range sliders */
   input[type='range'].msm-range {
     @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-inset border border-line/40
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link;
   }
   input[type='range'].msm-range::-webkit-slider-thumb {
-    @apply size-4 appearance-none rounded-full border-2 border-white bg-grass-500 shadow-raised transition-transform hover:scale-110 active:scale-95;
+    @apply size-4 appearance-none rounded-full border-2 border-white bg-ok shadow-raised transition-transform hover:scale-110 active:scale-95;
   }
   input[type='range'].msm-range::-moz-range-thumb {
-    @apply size-4 rounded-full border-2 border-white bg-grass-500 shadow-raised;
+    @apply size-4 rounded-full border-2 border-white bg-ok shadow-raised;
   }
   input[type='range'].msm-range.msm-range-alt::-webkit-slider-thumb {
-    @apply border-2 border-white bg-diamond-400;
+    @apply border-2 border-white bg-link;
   }
   input[type='range'].msm-range.msm-range-alt::-moz-range-thumb {
-    @apply border-2 border-white bg-diamond-400;
+    @apply border-2 border-white bg-link;
   }
 
   .msm-select {

@@ -138,9 +138,9 @@
     <div class="mb-3 flex flex-wrap items-end gap-2">
       <h3 class="w-full font-semibold">Banned IPs</h3>
       <div class="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto sm:flex-wrap sm:items-end sm:justify-end">
-        <input class="input col-span-2 sm:w-40" placeholder="IP address" id="banip-ip" aria-label="IP address">
-        <input class="input col-span-2 sm:w-48" placeholder="Reason (optional)" id="banip-reason" aria-label="Reason">
-        <input class="input min-w-0 sm:w-36" placeholder="Linked player" id="banip-player" list="banip-player-list" autocomplete="off" data-tip="Optional. Tags this ban with the player it belongs to, shown in the Player column below.">
+        <input class="input col-span-2 sm:w-40" placeholder="IP Address" id="banip-ip" aria-label="IP Address">
+        <input class="input col-span-2 sm:w-48" placeholder="Reason (Optional)" id="banip-reason" aria-label="Reason">
+        <input class="input min-w-0 sm:w-36" placeholder="Linked Player" id="banip-player" list="banip-player-list" autocomplete="off" data-tip="Optional. Tags this ban with the player it belongs to, shown in the Player column below.">
         <datalist id="banip-player-list">
           {{#each players}}<option value="{{name}}">{{/each}}
         </datalist>
