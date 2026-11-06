@@ -1,7 +1,10 @@
 {{! Safe-area padding: installed on a phone (viewport-fit=cover, translucent
     status bar) the page runs under the status bar and notch; these keep the
-    bar's content clear of them. They resolve to 0 in a normal browser tab. }}
-<header class="sticky top-0 z-20 flex items-center gap-2 border-b border-line/80 bg-surface/85 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] pr-[max(0.75rem,env(safe-area-inset-right))] pl-[max(0.75rem,env(safe-area-inset-left))] sm:gap-3 sm:py-3 sm:pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]">
+    bar's content clear of them. They resolve to 0 in a normal browser tab.
+    The bar is opaque (page content must never show through it). backdrop-blur
+    stays only because it makes the header the containing block for the task
+    tray's fixed drop sheet on a phone; behind a solid background it draws nothing. }}
+<header class="sticky top-0 z-20 flex items-center gap-2 border-b border-line bg-surface py-2 pt-[max(0.5rem,env(safe-area-inset-top))] pr-[max(0.75rem,env(safe-area-inset-right))] pl-[max(0.75rem,env(safe-area-inset-left))] sm:gap-3 sm:py-3 sm:pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]">
   <button id="sidebar-toggle" class="btn btn-ghost btn-sm lg:hidden" aria-label="Toggle navigation">{{{icon 'menu' 'size-4.5'}}}</button>
   {{! min-w-0: a flex child won't shrink below its intrinsic width, so without
       it `truncate` never engages and a long title pushes the actions off-screen. }}
