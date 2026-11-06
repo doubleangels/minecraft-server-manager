@@ -31,7 +31,7 @@
       </div>
     {{/if}}
     <h3 class="mb-3 font-semibold">About</h3>
-    <div class="prose-sm max-w-prose text-sm text-ink-soft [&_a]:text-link [&_code]:rounded-sm [&_code]:bg-inset [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:text-ink-soft">{{{markdown server.description}}}</div>
+    <div class="max-w-prose space-y-2 text-sm leading-relaxed text-ink-soft [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-5 [&_h3]:font-semibold [&_h3]:text-ink [&_h4]:font-semibold [&_h4]:text-ink [&_blockquote]:border-l-2 [&_blockquote]:border-line-strong [&_blockquote]:pl-3 [&_a]:text-link [&_a]:hover:underline [&_code]:rounded-sm [&_code]:bg-inset [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:text-ink-soft">{{{markdown server.description}}}</div>
     <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
       <div><dt class="text-xs text-ink-faint">Created</dt><dd class="font-medium">{{server.created}}</dd></div>
       <div><dt class="text-xs text-ink-faint">Last Started</dt><dd class="font-medium">{{server.lastStarted}}</dd></div>
@@ -81,7 +81,7 @@
     {{! Shortcuts to the things people do most, each gated like its tab. }}
     <div class="card p-4">
       <h3 class="mb-3 font-semibold">Quick Actions</h3>
-      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
+      <div class="grid grid-cols-2 gap-2 lg:grid-cols-1 2xl:grid-cols-2">
         {{#if perms.console}}<a class="btn justify-start" href="/servers/{{server.id}}/console">{{{icon 'terminal' 'size-4'}}} Run a Command</a>{{/if}}
         {{#if perms.backups}}<a class="btn justify-start" href="/servers/{{server.id}}/backups">{{{icon 'save' 'size-4'}}} Take a Backup</a>{{/if}}
         <a class="btn justify-start" href="/servers/{{server.id}}/invites">{{{icon 'send' 'size-4'}}} Invite Players</a>
@@ -110,7 +110,7 @@
           {{#if server.memory.note}}<p class="mt-1 text-ink-faint">{{server.memory.note}}</p>{{/if}}
         </div>
         <div>
-          <div class="mb-1 flex justify-between text-ink-faint"><span>Disk quota</span><span>{{bytes server.disk.used}}{{#if server.disk.quota}} / {{bytes server.disk.quota}}{{else}} (no quota){{/if}}</span></div>
+          <div class="mb-1 flex justify-between text-ink-faint"><span>Disk quota</span><span>{{bytes server.disk.used}}{{#if server.disk.quota}} / {{bytes server.disk.quota}}{{else}} (No Quota){{/if}}</span></div>
           <div class="meter"><div class="{{meterColor server.disk.used server.disk.quota}}" style="width: {{pct server.disk.used server.disk.quota}}%"></div></div>
         </div>
       </div>

@@ -8,7 +8,10 @@
   <button id="sidebar-toggle" class="btn btn-ghost btn-sm lg:hidden" aria-label="Toggle navigation">{{{icon 'menu' 'size-4'}}}</button>
   {{! min-w-0: a flex child won't shrink below its intrinsic width, so without
       it `truncate` never engages and a long title pushes the actions off-screen. }}
-  <h1 class="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg">{{title}}</h1>
+  {{! topbarTitle: a server page shows "Servers" here; its header card names the
+      server (the browser tab still does). From lg a page with a page-header
+      hides this copy so the title is never shown twice (input.css). }}
+  <h1 id="topbar-title" class="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg">{{#if topbarTitle}}{{topbarTitle}}{{else}}{{title}}{{/if}}</h1>
   {{! A phone keeps four controls here (menu, tasks, create, account) so the
       title has room; theme and the installed app's Refresh move into the
       account menu below sm (pull to refresh also reloads there). }}

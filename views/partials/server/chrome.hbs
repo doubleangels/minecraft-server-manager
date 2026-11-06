@@ -75,14 +75,16 @@
          class="relative flex min-w-0 shrink-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap px-0.5 pb-1 pt-1 text-[10px] font-medium transition sm:my-0 sm:inline-flex sm:flex-row sm:justify-start sm:gap-1.5 sm:rounded-md sm:px-3 sm:py-1.5 sm:text-sm
            {{#if active}}text-ink font-semibold{{else}}text-ink-faint hover:text-ink sm:hover:bg-inset{{/if}}">
         {{{icon icon 'size-5 sm:size-4'}}} <span class="max-w-full truncate">{{label}}</span>
-        {{#if badge}}<span class="badge badge-danger absolute right-1 top-0.5 px-1 py-0.2 text-[9px] font-bold leading-none ring-2 ring-surface sm:static sm:px-1.5 sm:text-xs sm:leading-normal sm:ring-0">{{badge}}</span>{{/if}}
+        {{#if badge}}<span class="badge badge-danger absolute right-1 top-0.5 px-1 py-0.5 text-[9px] font-bold leading-none ring-2 ring-surface sm:static sm:px-1.5 sm:text-xs sm:leading-normal sm:ring-0">{{badge}}</span>{{/if}}
       </a>
     {{/each}}
   </nav>
   {{! Sub-nav for the active section (only when it has more than one). }}
   {{#if nav.sub}}
-    {{! Wraps onto a second line on a phone rather than hiding tabs off-screen. }}
-    <div class="flex flex-wrap items-center gap-1.5 border-t border-line bg-inset/40 px-3 py-2 sm:px-4">
+    {{! One row, scrolling sideways on a phone when it is too wide (a wrapped row
+        left a lone tab on its own line). The phone padding is a touch tighter so
+        the usual sets fit without scrolling. }}
+    <div class="no-scrollbar flex items-center gap-1 overflow-x-auto border-t border-line bg-inset/40 px-2 py-2 sm:flex-wrap sm:gap-1.5 sm:px-4" data-subtab-row>
       {{#each nav.sub}}
         <a href="{{href}}" class="subtab shrink-0 {{#if active}}active{{/if}}">
           {{label}}{{#if badge}} <span class="badge badge-danger">{{badge}}</span>{{/if}}

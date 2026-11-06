@@ -693,3 +693,13 @@ function setServerTitle(head, status) {
   const head = document.querySelector('[data-server-title]');
   if (head) setServerTitle(head, head.dataset.serverStatus);
 }
+
+// ---- Scrolling tab rows: start with the active tab in view ----
+// On a phone a sub-tab row scrolls sideways; a tab past the edge would be
+// active but out of sight, so bring it in (without moving the page itself).
+for (const row of document.querySelectorAll('[data-subtab-row]')) {
+  const active = row.querySelector('.active');
+  if (active && row.scrollWidth > row.clientWidth) {
+    row.scrollLeft = active.offsetLeft - (row.clientWidth - active.offsetWidth) / 2;
+  }
+}

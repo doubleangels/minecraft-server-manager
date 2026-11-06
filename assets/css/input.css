@@ -514,8 +514,15 @@
     .msm-toggle {
       min-height: 2.75rem;
     }
-    select.input {
+    /* Every field, not just selects, so a search box sits level with the
+       buttons beside it. */
+    .input {
       min-height: 2.75rem;
+    }
+    /* A segmented control is a tray (1px border + 2px padding each side), so its
+       buttons are 6px short of 2.75rem and the whole control lands level. */
+    .seg > .seg-btn {
+      min-height: calc(2.75rem - 6px);
     }
     /* A bare checkbox/radio is 16px; float the whole row it sits in to 44px so
        the label text is part of the target, without inflating the box itself. */
@@ -523,18 +530,20 @@
     label:has(> input.msm-radio) {
       min-height: 2.75rem;
     }
-    /* Range: keep the 8px track but give the control a 44px hit area, and a
-       thumb big enough to grab. */
+    /* Range: the track stays an 8px bar (it is the ::*-track, not the
+       element), while the element grows to a 44px hit area and the thumb to
+       something a thumb can grab. */
     input[type='range'].msm-range {
-      min-height: 2.75rem;
+      height: 2.75rem;
     }
     input[type='range'].msm-range::-webkit-slider-thumb {
-      width: 1.75rem;
-      height: 1.75rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-top: -0.5rem; /* (8px track - 24px thumb) / 2 */
     }
     input[type='range'].msm-range::-moz-range-thumb {
-      width: 1.75rem;
-      height: 1.75rem;
+      width: 1.5rem;
+      height: 1.5rem;
     }
   }
 
@@ -596,7 +605,7 @@
      pick-one-of-N controls, these navigate. One shared class instead of the
      same utility string hand-rolled per template. */
   .subtab {
-    @apply inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-sm font-medium text-ink-faint transition hover:bg-raised hover:text-ink
+    @apply inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1 sm:px-2.5 text-sm font-medium text-ink-faint transition hover:bg-raised hover:text-ink
       focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
   }
   .subtab.active {
@@ -1085,12 +1094,20 @@
   }
 
   /* Range sliders */
+  /* The element is a transparent hit area; the visible bar is the track part,
+     so a taller touch target never fattens the bar. */
   input[type='range'].msm-range {
-    @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-inset
+    @apply h-4 w-full cursor-pointer appearance-none rounded-full bg-transparent
       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
   }
+  input[type='range'].msm-range::-webkit-slider-runnable-track {
+    @apply h-2 rounded-full bg-inset;
+  }
+  input[type='range'].msm-range::-moz-range-track {
+    @apply h-2 rounded-full bg-inset;
+  }
   input[type='range'].msm-range::-webkit-slider-thumb {
-    @apply size-4 appearance-none rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
+    @apply -mt-1 size-4 appearance-none rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
   }
   input[type='range'].msm-range::-moz-range-thumb {
     @apply size-4 rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
@@ -1154,4 +1171,22 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+/* One title per page: from lg (where the sidebar is always shown) a page with
+   a page-header shows its own big heading, so the topbar hides its copy. It is
+   hidden, not removed, so the actions keep their place on the right. */
+@media (width >= 64rem) {
+  body:has([data-page-header]) #topbar-title {
+    visibility: hidden;
+  }
+}
+
+/* A scroll row (tab strips) that scrolls by touch or trackpad without drawing a
+   scrollbar under the tabs. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

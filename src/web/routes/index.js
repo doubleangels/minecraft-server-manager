@@ -452,6 +452,7 @@ router.get(
     }
     res.render('server-player', {
       title: `${player.name} · ${server.name}`,
+      topbarTitle: 'Servers', // the header card names the server
       active: 'servers',
       server,
       tab: 'players',
@@ -493,6 +494,7 @@ router.get(
     }
     const context = {
       title: server.name,
+      topbarTitle: 'Servers', // the header card names the server
       active: 'servers',
       server,
       tab,
