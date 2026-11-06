@@ -15,11 +15,11 @@
   <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
     <div class="card stat-tile">
       <div class="stat-label">{{{icon 'activity' 'size-3.5'}}} Status</div>
-      <div class="mt-1 flex items-center gap-1.5 text-sm font-bold {{statusText server.status}}">
+      <div class="stat-value flex items-center gap-2 text-xl {{statusText server.status}}">
         <span class="status-dot relative {{statusDot server.status}} {{#if (statusPulse server.status)}}pulse{{/if}}"></span>
         {{statusLabel server.status}}
       </div>
-      <div class="stat-sub">{{default server.statusDetail "-"}}</div>
+      {{#if server.statusDetail}}<div class="stat-sub">{{server.statusDetail}}</div>{{/if}}
     </div>
     <div class="card stat-tile">
       <div class="stat-label">{{{icon 'timer' 'size-3.5'}}} Uptime</div>
