@@ -67,8 +67,8 @@ function init(root) {
 
   // ------------------------------------------------- in-place row patching
   const CHIP_ON = {
-    whitelist: ['border-ok', 'bg-ok/15', 'text-ok'],
-    op: ['border-link', 'bg-link/15', 'text-link'],
+    whitelist: ['border-ok/40', 'bg-ok/15', 'text-ok'],
+    op: ['border-link/40', 'bg-link/15', 'text-link'],
     ban: ['border-danger/40', 'bg-danger/15', 'text-danger'],
   };
   const rowFor = (name) => root.querySelector(`[data-player-row][data-name="${CSS.escape(name)}"]`);

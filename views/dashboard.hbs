@@ -12,17 +12,17 @@
 {{! Update counts live in the Updates card below (with the mod/server split),
     so this row is just people + infrastructure. }}
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 {{#if serversOnly}}hidden{{/if}}">
-  <div class="card p-4">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'server' 'size-3.5'}}} Servers online</div>
+  <div class="card stat-tile">
+    <div class="stat-label">{{{icon 'server' 'size-3.5'}}} Servers Online</div>
     {{! Green only when something IS online - 0/3 in success green lied. }}
-    <div class="mt-1 text-2xl font-bold tabular-nums {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="text-base font-medium text-ink-faint"> / {{totals.total}}</span></div>
+    <div class="stat-value {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="stat-unit"> / {{totals.total}}</span></div>
   </div>
-  <div class="card p-4">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'users' 'size-3.5'}}} Players connected</div>
-    <div class="mt-1 text-2xl font-bold tabular-nums">{{totals.players}}</div>
+  <div class="card stat-tile">
+    <div class="stat-label">{{{icon 'users' 'size-3.5'}}} Players Connected</div>
+    <div class="stat-value">{{totals.players}}</div>
   </div>
-  <div class="card col-span-2 p-4 sm:col-span-1">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'box' 'size-3.5'}}} Docker</div>
+  <div class="card stat-tile col-span-2 sm:col-span-1">
+    <div class="stat-label">{{{icon 'box' 'size-3.5'}}} Docker</div>
     <div class="mt-1 flex items-center gap-2 text-sm font-semibold text-ink-faint" id="docker-status">
       <span class="status-dot relative bg-ink-faint"></span> Checking…
     </div>
@@ -31,28 +31,28 @@
 
 {{#unless serversOnly}}
 <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 {{#if noServers}}hidden{{/if}}">
-  <div class="card min-w-0 p-4">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'memory-stick' 'size-3.5'}}} Memory allotted</div>
-    <div class="mt-1 break-words text-2xl font-bold tabular-nums">{{overview.mem.allottedMb}}<span class="text-base font-medium text-ink-faint"> MB</span></div>
-    <div class="text-xs text-ink-faint"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
+  <div class="card stat-tile">
+    <div class="stat-label">{{{icon 'memory-stick' 'size-3.5'}}} Memory Allotted</div>
+    <div class="stat-value">{{overview.mem.allottedMb}}<span class="stat-unit"> MB</span></div>
+    <div class="stat-sub"><span data-overview-mem-used>{{overview.mem.usedMb}}</span> MB in use{{#if overview.mem.allottedMb}} · {{pct overview.mem.usedMb overview.mem.allottedMb}}% used{{/if}}</div>
   </div>
 
-  <div class="card min-w-0 p-4">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'hard-drive' 'size-3.5'}}} Storage used</div>
-    <div class="mt-1 break-words text-2xl font-bold tabular-nums">{{bytes overview.disk.usedBytes}}</div>
-    <div class="text-xs text-ink-faint">across all server data folders</div>
+  <div class="card stat-tile">
+    <div class="stat-label">{{{icon 'hard-drive' 'size-3.5'}}} Storage Used</div>
+    <div class="stat-value">{{bytes overview.disk.usedBytes}}</div>
+    <div class="stat-sub">across all server data folders</div>
   </div>
 
-  <a href="/health" class="card block min-w-0 p-4 transition hover:border-line-strong" aria-label="Open the health page">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'activity' 'size-3.5'}}} Health · 24h</div>
-    <div class="mt-1 break-words text-2xl font-bold tabular-nums {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="text-base font-medium text-ink-faint"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
-    <div class="text-xs text-ink-faint">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
+  <a href="/health" class="card stat-tile block hover:border-line-strong" aria-label="Open the health page">
+    <div class="stat-label">{{{icon 'activity' 'size-3.5'}}} Health · 24h</div>
+    <div class="stat-value {{#if overview.healthTotal}}text-danger{{else}}text-ok{{/if}}">{{overview.healthTotal}}<span class="stat-unit"> alert{{#unless (eq overview.healthTotal 1)}}s{{/unless}}</span></div>
+    <div class="stat-sub">{{#if overview.healthTotal}}{{overview.health.crashes}} crash{{#unless (eq overview.health.crashes 1)}}es{{/unless}}, {{overview.health.oom}} out of memory, {{overview.health.autoRestarted}} auto-restart{{#unless (eq overview.health.autoRestarted 1)}}s{{/unless}}{{else}}No crashes, out-of-memory stops, or auto-restarts{{/if}}</div>
   </a>
 
-  <a href="/updates" class="card block min-w-0 p-4 transition hover:border-line-strong" aria-label="Open the updates page">
-    <div class="flex items-center gap-1 text-xs text-ink-faint">{{{icon 'circle-arrow-up' 'size-3.5'}}} Updates</div>
-    <div class="mt-1 break-words text-2xl font-bold tabular-nums {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
-    <div class="text-xs text-ink-faint">{{overview.updates.mods}} mod{{#unless (eq overview.updates.mods 1)}}s{{/unless}} / {{overview.updates.server}} server-level</div>
+  <a href="/updates" class="card stat-tile block hover:border-line-strong" aria-label="Open the updates page">
+    <div class="stat-label">{{{icon 'circle-arrow-up' 'size-3.5'}}} Updates</div>
+    <div class="stat-value {{#if overview.updates.all}}text-warn{{/if}}">{{overview.updates.all}}</div>
+    <div class="stat-sub">{{overview.updates.mods}} mod{{#unless (eq overview.updates.mods 1)}}s{{/unless}} / {{overview.updates.server}} server-level</div>
   </a>
 </div>
 {{/unless}}

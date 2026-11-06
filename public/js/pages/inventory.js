@@ -533,7 +533,7 @@ function init(root) {
     if (!editable) {
       content.insertAdjacentHTML(
         'beforeend',
-        '<p class="rounded-md border border-warn/40 bg-warn/5 p-2.5 text-xs text-warn">Read-only while the player is online. Stop the server or kick the player to edit backpack contents.</p>'
+        '<p class="notice notice-warn text-xs">Read-only while the player is online. Stop the server or kick the player to edit backpack contents.</p>'
       );
     }
     const grid = document.createElement('div');

@@ -56,8 +56,8 @@ function init(root) {
   // ---- in-place chip/banner patching (mirrors the roster page - same
   // action, same UI, no page flash and no silent success) ----
   const CHIP_ON = {
-    whitelist: ['border-ok', 'bg-ok/15', 'text-ok'],
-    op: ['border-link', 'bg-link/15', 'text-link'],
+    whitelist: ['border-ok/40', 'bg-ok/15', 'text-ok'],
+    op: ['border-link/40', 'bg-link/15', 'text-link'],
     ban: ['border-danger/40', 'bg-danger/15', 'text-danger'],
   };
   function setChip(role, on, label) {

@@ -32,7 +32,7 @@ export function openItemBrowser({ serverId, onPick, onManual } = {}) {
       <input class="input flex-1 min-w-48" data-ib-q placeholder="Search by name or ID, e.g. Iron Ingot, allthemodium, minecraft:tnt"
              maxlength="120" autocomplete="off" spellcheck="false">
       <div class="w-52 max-w-full">
-        <select data-ib-mod data-label="Filter by mod" aria-label="Filter by mod">
+        <select class="input" data-ib-mod data-label="Filter by mod" aria-label="Filter by mod">
           <option value="">All Mods</option>
         </select>
       </div>

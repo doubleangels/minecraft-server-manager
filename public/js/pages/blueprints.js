@@ -99,10 +99,10 @@ function showPreview(preview, importBody) {
     ${
       preview.warnings.length
         ? `
-      <div class="rounded-md border border-warn/40 bg-warn/10 p-2.5 text-xs">
+      <div class="notice notice-warn text-xs"><div class="min-w-0">
         <div class="mb-1 font-medium text-warn">Warnings</div>
-        <ul class="list-inside list-disc space-y-0.5 text-ink-soft">${preview.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>
-      </div>`
+        <ul class="list-inside list-disc space-y-0.5">${preview.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>
+      </div></div>`
         : ''
     }
     <p class="text-xs text-ink-faint">A new server will be created with fresh ports and a fresh RCON password. Nothing existing is touched.</p>`;

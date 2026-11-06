@@ -26,7 +26,7 @@
         {{! A button, not a link: the card is already a link and links cannot nest. }}
         {{#if mapEnabled}}<button type="button" class="ml-2 inline-flex items-center gap-1 rounded-sm text-xs text-link hover:underline" data-open-href="/map/{{id}}/" data-tip="Open the live map in a new tab." aria-label="Open the live map for {{name}}">{{{icon 'map' 'size-3'}}} Map</button>{{/if}}
       </div>
-      <button type="button" class="-m-1 shrink-0 rounded-sm p-1 text-ink-faint transition hover:text-warn aria-pressed:text-warn" data-pin-server="{{id}}" aria-pressed="false" data-tip="Pin to the top of the list." aria-label="Pin {{name}}">{{{icon 'star' 'size-4'}}}</button>
+      <button type="button" class="icon-btn -m-1.5 hover:text-warn aria-pressed:text-warn" data-pin-server="{{id}}" aria-pressed="false" data-tip="Pin to the top of the list." aria-label="Pin {{name}}">{{{icon 'star' 'size-4'}}}</button>
       <span class="flex flex-col items-end gap-0.5">
         <span class="flex items-center gap-1.5 text-xs font-medium {{statusText status}}">
           <span class="status-dot relative {{statusDot status}} {{#if (statusPulse status)}}pulse{{/if}}"></span>

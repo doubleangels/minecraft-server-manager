@@ -675,6 +675,26 @@
     @apply rounded-lg border border-line bg-surface;
   }
 
+  /* Stat tiles: one number with its caption (dashboard, combined graphs, a
+     server's Metrics strip). Used as `card stat-tile`; a linked tile adds
+     `block hover:border-line-strong`. One shape everywhere, so a number reads
+     the same size wherever it appears. */
+  .stat-tile {
+    @apply min-w-0 p-4 transition;
+  }
+  .stat-label {
+    @apply flex items-center gap-1 text-xs text-ink-faint;
+  }
+  .stat-value {
+    @apply mt-1 break-words text-2xl font-bold tabular-nums;
+  }
+  .stat-unit {
+    @apply text-base font-medium text-ink-faint;
+  }
+  .stat-sub {
+    @apply text-xs text-ink-faint;
+  }
+
   /* Badges: neutral by default; the four semantic variants are the ONLY badge
      colorways - no ad-hoc bg/text pairs at call sites. */
   .badge {
@@ -1114,4 +1134,24 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* iOS Safari zooms the whole page in when a focused field's text is under
+   16px, and stays zoomed. Every .input is text-sm (14px), and code-like ones
+   are text-xs, so on a touch screen fields read at 16px. Unlayered on purpose:
+   it must beat the text-xs/text-sm utilities on the element. Desktop keeps the
+   compact sizes (a mouse never triggers the zoom). */
+@media (pointer: coarse) {
+  .input,
+  textarea,
+  select,
+  input:not([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file']) {
+    font-size: 16px;
+  }
+}
+
+/* Keep iOS from inflating text when a phone turns landscape. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
