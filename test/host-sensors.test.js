@@ -135,10 +135,39 @@ test('the API, the dashboard card and the Performance chart appear when sensors 
     cpuTempC: 52.4,
     maxTempC: 52.4,
     fans: [
-      { label: 'Fan 1', rpm: 0 },
-      { label: 'CPU Fan', rpm: 1180 },
+      { label: 'Fan 1', rpm: 0, maxRpm: 0 },
+      { label: 'CPU Fan', rpm: 1180, maxRpm: 1180 },
     ],
   });
+});
+
+test("a fan's top speed: the rated maximum when the driver reports it, else the highest seen", async () => {
+  const root = tree({
+    'class/hwmon/hwmon2/name': 'nct6798',
+    'class/hwmon/hwmon2/fan1_input': '900',
+    'class/hwmon/hwmon2/fan1_max': '2200',
+    'class/hwmon/hwmon2/fan2_input': '1400',
+    'class/hwmon/hwmon2/fan2_max': '0', // driver leaves it unset
+  });
+  process.env.HOST_SYS_PATH = root;
+  sensors._reset();
+  let s = await sensors.readSensors();
+  assert.deepEqual(
+    s.fans.map((f) => [f.rpm, f.maxRpm, f.maxRated]),
+    [
+      [900, 2200, true],
+      [1400, 1400, false],
+    ]
+  );
+  // The second fan spins up, then back down: its top speed remembers the peak.
+  fs.writeFileSync(path.join(root, 'class/hwmon/hwmon2/fan2_input'), '1750\n');
+  await new Promise((r) => setTimeout(r, 2100)); // past the 2 s cache
+  await sensors.readSensors();
+  fs.writeFileSync(path.join(root, 'class/hwmon/hwmon2/fan2_input'), '1100\n');
+  await new Promise((r) => setTimeout(r, 2100)); // past the 2 s cache
+  s = await sensors.readSensors();
+  assert.equal(s.fans[1].rpm, 1100);
+  assert.equal(s.fans[1].maxRpm, 1750);
 });
 
 test('the sensors API needs a signed-in user', async () => {

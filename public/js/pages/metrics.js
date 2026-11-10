@@ -137,9 +137,20 @@ function init(serverId, memLimitMb, cpuLimit) {
     { max: 90, unit: '°', y1: hostHasFans ? ' rpm' : undefined }
   );
   const FAN_COLORS = [colors.diamond, colors.gold, colors.grass];
+  if (hostChart?.options.scales.y1) {
+    hostChart.options.scales.y1.min = 0;
+    delete hostChart.options.scales.y1.beginAtZero;
+  }
   function pushHost(host) {
     if (!hostChart || !host) return;
     const fans = (host.fans || []).slice(0, 3);
+    // Fan axis: 0 to the fastest shown fan's top speed (rated, or highest seen),
+    // rounded up to the next 100 rpm. Grows if a fan sets a new high.
+    const top = Math.max(0, ...fans.map((f) => f.maxRpm || f.rpm || 0));
+    if (hostChart.options.scales.y1 && top > 0) {
+      const max = Math.ceil(top / 100) * 100;
+      if (max !== hostChart.options.scales.y1.max) hostChart.options.scales.y1.max = max;
+    }
     if (hostChart.data.datasets.length === 1 && fans.length && hostHasFans) {
       fans.forEach((f, i) =>
         hostChart.data.datasets.push({

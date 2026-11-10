@@ -67,6 +67,9 @@ async function listDir(dir) {
   }
 }
 
+/** Highest speed seen per fan id, for fans whose driver reports no maximum. */
+const peakRpm = new Map();
+
 /** Every hwmon chip's temperatures and fans. */
 async function readHwmon() {
   const base = path.join(sysRoot(), 'class', 'hwmon');
@@ -91,7 +94,15 @@ async function readHwmon() {
         const rpm = await readNumber(path.join(dir, file));
         if (rpm === null || rpm < 0 || rpm > FAN_MAX_RPM) continue;
         const label = (await readText(path.join(dir, `fan${m[1]}_label`))) || `Fan ${m[1]}`;
-        fans.push({ id: `${dev}/fan${m[1]}`, chip, label, rpm: Math.round(rpm) });
+        const id = `${dev}/fan${m[1]}`;
+        // The chart's fan axis runs 0 to the fan's top speed: the driver's
+        // rated maximum when it reports one (most leave fan*_max unset or 0),
+        // else the highest speed seen since the panel started.
+        const rated = await readNumber(path.join(dir, `fan${m[1]}_max`));
+        const peak = Math.max(peakRpm.get(id) || 0, Math.round(rpm));
+        peakRpm.set(id, peak);
+        const maxRpm = rated && rated > 0 && rated <= FAN_MAX_RPM ? Math.max(Math.round(rated), peak) : peak;
+        fans.push({ id, chip, label, rpm: Math.round(rpm), maxRpm, maxRated: Boolean(rated && rated > 0) });
       }
     }
   }
@@ -167,7 +178,11 @@ async function readSensors() {
 async function liveReading() {
   const s = await readSensors().catch(() => null);
   if (!s || !s.available) return null;
-  return { cpuTempC: s.cpuTempC, maxTempC: s.maxTempC, fans: s.fans.map((f) => ({ label: f.label, rpm: f.rpm })) };
+  return {
+    cpuTempC: s.cpuTempC,
+    maxTempC: s.maxTempC,
+    fans: s.fans.map((f) => ({ label: f.label, rpm: f.rpm, maxRpm: f.maxRpm })),
+  };
 }
 
 // ---- History (dashboard chart) ----
@@ -213,6 +228,7 @@ function sensorHistory() {
 function _reset() {
   cache = null;
   cacheAt = 0;
+  peakRpm.clear();
   history.length = 0;
   if (historyTimer) clearInterval(historyTimer);
   historyTimer = null;

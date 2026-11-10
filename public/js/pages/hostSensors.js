@@ -41,7 +41,8 @@ function init() {
   };
   if (hasFans) {
     scales.y1 = {
-      beginAtZero: true,
+      // 0 to the fans' top speed, set from the data in render().
+      min: 0,
       position: 'right',
       grid: { drawOnChartArea: false },
       ticks: { callback: (v) => `${v} rpm`, color: colors.tick },
@@ -96,6 +97,17 @@ function init() {
         data: history.map((p) => (p.fans && label in p.fans ? p.fans[label] : null)),
       })),
     ];
+    if (chart.options.scales.y1) {
+      // Top of the fan axis: the shown fans' top speed (rated, or highest
+      // seen), and never below any point in the history.
+      const shown = (data.fans || []).filter((f) => fanLabels.includes(f.label));
+      const top = Math.max(
+        0,
+        ...shown.map((f) => f.maxRpm || f.rpm || 0),
+        ...history.flatMap((p) => fanLabels.map((l) => (p.fans && p.fans[l]) || 0))
+      );
+      chart.options.scales.y1.max = top > 0 ? Math.ceil(top / 100) * 100 : undefined;
+    }
     chart.update('none');
 
     const set = (sel, v) => {
