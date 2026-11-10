@@ -122,9 +122,9 @@ function init(root) {
     cell.className =
       // Phone: a square that fills its grid column (9 across fit any phone);
       // sm+: the fixed 56px slot.
-      'relative grid aspect-square w-full sm:size-14 place-items-center rounded border text-[11px] font-semibold select-none ' +
+      'relative grid aspect-square w-full sm:size-14 place-items-center rounded-sm border text-[11px] font-semibold select-none ' +
       (editable
-        ? 'cursor-pointer transition hover:ring-2 hover:ring-diamond-400/60 focus-visible:ring-2 focus-visible:ring-diamond-400 '
+        ? 'cursor-pointer transition hover:ring-2 hover:ring-link/60 focus-visible:ring-2 focus-visible:ring-link '
         : '');
     const hasNested = Boolean(item && item.nested && item.nested.length);
     if (!item) {
@@ -145,9 +145,9 @@ function init(root) {
       const named = Boolean(item.displayName);
       const enchanted = Boolean(item.enchants && item.enchants.length);
       cell.className += named
-        ? 'border-gold-500 bg-gold-400/10 text-warn'
+        ? 'border-warn bg-warn/10 text-warn'
         : enchanted
-          ? 'border-diamond-700 bg-diamond-400/10 text-link'
+          ? 'border-link bg-link/10 text-link'
           : 'border-line-strong bg-inset text-ink';
       const where = label
         ? `${label} slot`
@@ -173,7 +173,7 @@ function init(root) {
             : ''
         }
         ${enchanted ? '<span class="pointer-events-none absolute left-0.5 top-0 z-10 text-[10px] font-bold text-link [text-shadow:1px_1px_0_#000]">*</span>' : ''}
-        ${hasNested ? '<span class="pointer-events-none absolute bottom-0.5 left-0.5 z-10 size-1.5 rounded-full bg-grass-400 ring-1 ring-black/60" aria-hidden="true"></span>' : ''}`;
+        ${hasNested ? '<span class="pointer-events-none absolute bottom-0.5 left-0.5 z-10 size-1.5 rounded-full bg-ok ring-1 ring-black/60" aria-hidden="true"></span>' : ''}`;
       // The bundled icon set only covers vanilla - modded items (and the rare
       // vanilla id it's missing) just keep the text abbreviation as-is.
       if (iconBase && item.id.startsWith('minecraft:')) {
@@ -487,7 +487,7 @@ function init(root) {
             ? () => toast("That's the source slot.", { kind: 'error' })
             : () => doMove({ container, slot: i }),
         });
-        if (isSource) cell.classList.add('ring-2', 'ring-gold-500');
+        if (isSource) cell.classList.add('ring-2', 'ring-warn');
         grid.appendChild(cell);
       }
       scroller.appendChild(grid);
@@ -518,7 +518,7 @@ function init(root) {
           ? () => toast("That's the source slot.", { kind: 'error' })
           : () => doMove({ container: 'offhand', slot: 0 }),
     });
-    if (from.container === 'offhand') offCell.classList.add('ring-2', 'ring-gold-500');
+    if (from.container === 'offhand') offCell.classList.add('ring-2', 'ring-warn');
     armorRow.querySelector('.grid').appendChild(offCell);
     grids.appendChild(armorRow);
     content.appendChild(grids);
@@ -533,7 +533,7 @@ function init(root) {
     if (!editable) {
       content.insertAdjacentHTML(
         'beforeend',
-        '<p class="rounded-md border border-gold-500/40 bg-gold-400/5 p-2.5 text-xs text-warn">Read-only while the player is online. Stop the server or kick the player to edit backpack contents.</p>'
+        '<p class="notice notice-warn text-xs">Read-only while the player is online. Stop the server or kick the player to edit backpack contents.</p>'
       );
     }
     const grid = document.createElement('div');
@@ -759,7 +759,7 @@ function init(root) {
       kind === 'changed'
         ? `<span class="font-mono text-xs">${entry.from} &rarr; ${entry.to}</span>`
         : `<span class="font-mono text-xs">x${entry.count}</span>`;
-    return `<li class="flex items-center justify-between gap-3 rounded px-2 py-1 text-sm odd:bg-inset/50"><span class="min-w-0 truncate">${name}</span>${qty}</li>`;
+    return `<li class="flex items-center justify-between gap-3 rounded-sm px-2 py-1 text-sm odd:bg-inset/50"><span class="min-w-0 truncate">${name}</span>${qty}</li>`;
   }
 
   function renderDiff(diff) {
@@ -797,7 +797,7 @@ function init(root) {
       el('inv-search-hint').classList.add('hidden');
       box.classList.remove('hidden');
       if (!results.length) {
-        box.innerHTML = `<p class="py-4 text-center text-sm text-ink-faint">No items matching "${esc(q)}" in any player's storage.</p>`;
+        box.innerHTML = `<p class="empty-inline py-6">No items matching "${esc(q)}" in any player's storage.</p>`;
         return;
       }
       box.innerHTML = `
@@ -910,7 +910,7 @@ function init(root) {
         </div>`
       }
       <div>
-        <label class="label">Player (must be online)</label>
+        <label class="label">Player (Must Be Online)</label>
         <input class="input" data-f="player" maxlength="16" value="${esc(currentPlayerName())}"
                list="inv-give-players" autocomplete="off" spellcheck="false">
         <datalist id="inv-give-players">${names.map((n) => `<option value="${esc(n)}"></option>`).join('')}</datalist>
@@ -966,11 +966,11 @@ function init(root) {
     content.className = 'space-y-3 text-sm';
     content.innerHTML = `
       <div>
-        <label class="label">Player (must be online)</label>
+        <label class="label">Player (Must Be Online)</label>
         <input class="input" data-f="player" maxlength="16" value="${esc(currentPlayerName())}" autocomplete="off" spellcheck="false">
       </div>
       <div>
-        <label class="label">Item ID (leave empty to clear everything)</label>
+        <label class="label">Item ID (Leave Empty to Clear Everything)</label>
         <input class="input font-mono" data-f="item" placeholder="minecraft:tnt" maxlength="130" autocomplete="off" spellcheck="false">
       </div>`;
     openModal({

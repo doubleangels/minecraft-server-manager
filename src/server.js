@@ -112,6 +112,10 @@ try {
     .seedStarters()
     .catch((err) => logger.error('Seeding starter blueprints failed.', { err: serializeError(err) }));
 
+  // After a `git pull` the templates are new but the built stylesheet is not:
+  // rebuild it before serving, so new classes don't render unstyled.
+  require('./web/cssFreshness').ensureFreshCss(config.root);
+
   const { createApp } = require('./web/app');
   const app = createApp();
 

@@ -14,7 +14,7 @@ function init(card) {
   const memLabel = card.querySelector('[data-ov-mem-label]');
   const memBar = card.querySelector('[data-ov-mem-bar]');
 
-  const METER = ['bg-grass-500', 'bg-gold-400', 'bg-redstone-500'];
+  const METER = ['bg-ok', 'bg-warn', 'bg-danger'];
   function paint(bar, pct) {
     bar.style.width = `${Math.min(100, Math.round(pct))}%`;
     bar.classList.remove(...METER);

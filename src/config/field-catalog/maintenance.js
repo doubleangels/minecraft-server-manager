@@ -7,7 +7,7 @@ module.exports = [
   {
     key: 'STOP_DURATION',
     scope: 'env',
-    label: 'Graceful stop timeout',
+    label: 'Graceful Stop Timeout',
     help: 'Seconds to wait for the server to save and exit after "stop" is sent. Raise it together with the Docker stop grace period. If the server is force-killed before it finishes saving, give it more time here.',
     type: 'number',
     unit: 'seconds',
@@ -20,7 +20,7 @@ module.exports = [
   {
     key: 'STOP_SERVER_ANNOUNCE_DELAY',
     scope: 'env',
-    label: 'Shutdown announce delay',
+    label: 'Shutdown Announce Delay',
     help: 'Seconds between announcing the shutdown in-game and actually stopping, so players can wrap up. The Docker stop grace period must be longer than this delay plus save time.',
     type: 'number',
     unit: 'seconds',
@@ -32,7 +32,7 @@ module.exports = [
   {
     key: 'ENABLE_ROLLING_LOGS',
     scope: 'env',
-    label: 'Rolling Log Files (legacy)',
+    label: 'Rolling Log Files (Legacy)',
     help: 'Legacy switch. Rolling and archived log files are now on by default through the templated logging config. Only relevant for old Minecraft versions where rolling logs conflict with Log4j security patches.',
     type: 'boolean',
     default: false,
@@ -55,7 +55,7 @@ module.exports = [
     key: 'SNOOPER_ENABLED',
     scope: 'env',
     prop: 'snooper-enabled',
-    label: 'Mojang Telemetry (snooper)',
+    label: 'Mojang Telemetry (Snooper)',
     help: 'Sends usage telemetry to Mojang. This only exists on older Minecraft versions; it was removed in modern ones.',
     type: 'boolean',
     mode: 'advanced',

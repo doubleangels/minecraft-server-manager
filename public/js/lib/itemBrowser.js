@@ -32,7 +32,7 @@ export function openItemBrowser({ serverId, onPick, onManual } = {}) {
       <input class="input flex-1 min-w-48" data-ib-q placeholder="Search by name or ID, e.g. Iron Ingot, allthemodium, minecraft:tnt"
              maxlength="120" autocomplete="off" spellcheck="false">
       <div class="w-52 max-w-full">
-        <select data-ib-mod data-label="Filter by mod" aria-label="Filter by mod">
+        <select class="input" data-ib-mod data-label="Filter by mod" aria-label="Filter by mod">
           <option value="">All Mods</option>
         </select>
       </div>
@@ -71,7 +71,7 @@ export function openItemBrowser({ serverId, onPick, onManual } = {}) {
     btn.type = 'button';
     btn.className = 'flex w-full items-center gap-3 px-3 py-2 text-left transition hover:bg-inset';
     btn.innerHTML = `
-      <span class="flex size-8 shrink-0 items-center justify-center rounded bg-inset p-1 text-ink-faint" data-ib-icon>${glyphFor(item.id)}</span>
+      <span class="flex size-8 shrink-0 items-center justify-center rounded-sm bg-inset p-1 text-ink-faint" data-ib-icon>${glyphFor(item.id)}</span>
       <span class="min-w-0 flex-1">
         <span class="block truncate font-semibold">${esc(item.name)}</span>
         <span class="block truncate font-mono text-[11px] text-ink-faint">${esc(item.id)}</span>
@@ -117,7 +117,7 @@ export function openItemBrowser({ serverId, onPick, onManual } = {}) {
     if (!append) {
       state.offset = 0;
       listEl.innerHTML =
-        '<div class="p-6 text-center text-sm text-ink-faint">Loading items… <span class="text-xs">The first open scans every mod file; later opens are instant.</span></div>';
+        '<div class="loading-state flex-wrap px-6">Loading items… <span class="text-xs">The first open scans every mod file; later opens are instant.</span></div>';
       setStatus('');
     }
     try {
@@ -136,7 +136,7 @@ export function openItemBrowser({ serverId, onPick, onManual } = {}) {
       }
       if (!append) listEl.innerHTML = '';
       if (!data.items.length && !append) {
-        listEl.innerHTML = `<div class="p-6 text-center text-sm text-ink-faint">No items match${state.q ? ` "${esc(state.q)}"` : ''}. Try a different search, mod, or kind filter.</div>`;
+        listEl.innerHTML = `<div class="empty-inline">No items match${state.q ? ` "${esc(state.q)}"` : ''}. Try a different search, mod, or kind filter.</div>`;
       }
       for (const item of data.items) listEl.appendChild(row(item));
       const shown = state.offset + data.items.length;

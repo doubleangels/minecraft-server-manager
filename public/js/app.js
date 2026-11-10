@@ -78,18 +78,20 @@ for (const el of document.querySelectorAll('[data-ts], [data-ts-ago], [data-ts-i
 
 // ---- Theme toggle (persisted; applied pre-paint by the inline layout script) ----
 (() => {
-  const btn = document.getElementById('theme-toggle');
   const sync = () => {
     const theme = document.documentElement.dataset.theme;
     document.querySelectorAll('[data-theme-icon]').forEach((el) => {
       el.classList.toggle('hidden', el.dataset.themeIcon !== theme);
     });
-    // The installed app's status bar follows the theme (see layouts/main.hbs).
+    // The installed app's status bar follows the theme (see partials/app-head.hbs).
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', theme === 'light' ? '#ffffff' : '#16191c');
+      ?.setAttribute('content', theme === 'light' ? '#fcfdfd' : '#16191c');
   };
-  btn?.addEventListener('click', () => {
+  // The topbar button, or the account menu's copy of it (the menu is cloned
+  // from a <template> on each open, so the click is delegated).
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest || !e.target.closest('#theme-toggle, [data-theme-toggle]')) return;
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
     try {
@@ -164,6 +166,7 @@ for (const el of document.querySelectorAll('[data-ts], [data-ts-ago], [data-ts-i
   toggle.setAttribute('aria-expanded', 'false');
   toggle.setAttribute('aria-controls', 'sidebar');
   toggle.addEventListener('click', () => (isOpen() ? close() : open()));
+  document.getElementById('sidebar-close')?.addEventListener('click', close);
   // The phone tab bar's "More" opens the same drawer.
   document.querySelectorAll('[data-sidebar-open]').forEach((b) => b.addEventListener('click', () => open()));
   backdrop.addEventListener('click', close);
@@ -398,7 +401,7 @@ function confirmDelete({ name }) {
     content.appendChild(p);
 
     const delWrap = document.createElement('label');
-    delWrap.className = 'flex cursor-pointer items-start gap-2 rounded-md border border-danger/40 bg-red-500/10 p-2.5';
+    delWrap.className = 'notice notice-danger cursor-pointer';
     const delInput = document.createElement('input');
     delInput.type = 'checkbox';
     delInput.className = 'msm-check mt-0.5 shrink-0';
@@ -633,7 +636,7 @@ function askWarning({ action, name, online }) {
     const label = document.createElement('label');
     label.className = 'label';
     label.setAttribute('for', 'warn-seconds');
-    label.textContent = 'Warn players first';
+    label.textContent = 'Warn Players First';
     const sel = document.createElement('select');
     sel.className = 'input';
     sel.id = 'warn-seconds';
@@ -689,4 +692,14 @@ function setServerTitle(head, status) {
 {
   const head = document.querySelector('[data-server-title]');
   if (head) setServerTitle(head, head.dataset.serverStatus);
+}
+
+// ---- Scrolling tab rows: start with the active tab in view ----
+// On a phone a sub-tab row scrolls sideways; a tab past the edge would be
+// active but out of sight, so bring it in (without moving the page itself).
+for (const row of document.querySelectorAll('[data-subtab-row]')) {
+  const active = row.querySelector('.active');
+  if (active && row.scrollWidth > row.clientWidth) {
+    row.scrollLeft = active.offsetLeft - (row.clientWidth - active.offsetWidth) / 2;
+  }
 }

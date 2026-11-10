@@ -3,16 +3,16 @@
     {{#if mods.length}}
     <input class="input max-w-xs" placeholder="Search installed mods…" id="mods-filter">
     <select class="input w-auto" data-label="Filter by source" id="mods-source">
-      <option value="">All Sources</option><option value="pack">Pack-managed</option><option value="overlay">Custom</option>
+      <option value="">All Sources</option><option value="pack">Pack-Managed</option><option value="overlay">Custom</option>
     </select>
     {{/if}}
-    <div class="sm:ml-auto flex flex-col sm:flex-row sm:flex-wrap gap-2{{#unless perms.content}} hidden{{/unless}}">
+    <div class="sm:ml-auto grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap{{#unless perms.content}} hidden{{/unless}}">
       {{#if hasModUpdates}}
-      <button class="btn btn-ghost btn-sm text-warn" id="mods-update-all" data-tip="Apply every available update, then restart the server once.">{{{icon 'circle-arrow-up' 'size-3.5'}}} Update All</button>
+      <button class="btn btn-ghost btn-sm col-span-2 text-warn sm:col-span-1" id="mods-update-all" data-tip="Apply every available update, then restart the server once.">{{{icon 'circle-arrow-up' 'size-3.5'}}} Update All</button>
       {{/if}}
       <button class="btn btn-sm" id="mods-search">{{{icon 'search' 'size-3.5'}}} Search Mods</button>
       <button class="btn btn-sm" id="mods-import-zip" data-tip="Modrinth .mrpack, CurseForge modpack export, or any zip of mod jars.">{{{icon 'archive' 'size-3.5'}}} Import Zip</button>
-      <button class="btn btn-primary btn-sm" id="mods-add-url">{{{icon 'plus' 'size-3.5'}}} Add by URL</button>
+      <button class="btn btn-primary btn-sm col-span-2 sm:col-span-1" id="mods-add-url">{{{icon 'plus' 'size-3.5'}}} Add by URL</button>
       {{! button labels kept in sync with the modal titles in mods.js }}
     </div>
   </div>
@@ -40,12 +40,12 @@
           <tr class="{{#unless enabled}}opacity-60{{/unless}}" data-mod-row data-file="{{file}}" data-name="{{name}}" data-source="{{source}}" data-enabled="{{enabled}}">
             {{! w-full + max-w-0 (sm+ only) so `truncate` actually engages - long mod file
                 names were widening the table into horizontal scroll. }}
-            <td data-th="" class="sm:w-full sm:max-w-0">
+            <td data-th="Mod" class="sm:w-full sm:max-w-0">
               <div class="flex items-center gap-2.5">
                 {{#if iconUrl}}
-                  <img src="{{iconUrl}}" alt="" loading="lazy" data-mod-icon class="size-8 shrink-0 rounded bg-inset object-cover">
+                  <img src="{{iconUrl}}" alt="" loading="lazy" data-mod-icon class="size-8 shrink-0 rounded-sm bg-inset object-cover">
                 {{else}}
-                  <span class="grid size-8 shrink-0 place-items-center rounded bg-inset text-ink-faint">{{{icon 'puzzle' 'size-4'}}}</span>
+                  <span class="grid size-8 shrink-0 place-items-center rounded-sm bg-inset text-ink-faint">{{{icon 'puzzle' 'size-4'}}}</span>
                 {{/if}}
                 <div class="min-w-0">
                   <div class="truncate font-medium" title="{{name}}">{{name}}</div>
@@ -87,7 +87,7 @@
                   <button class="btn btn-ghost btn-sm" data-mod-ignore-update data-tip="Stop offering {{updateAvailable}}.">{{{icon 'bell-off' 'size-3.5'}}} Ignore</button>
                 {{/if}}
                 {{#if updateIgnored}}
-                  <button class="btn btn-ghost btn-sm" data-mod-unignore-update data-tip="Offer {{updateIgnored}} again.">{{{icon 'bell' 'size-3.5'}}} Un-ignore</button>
+                  <button class="btn btn-ghost btn-sm" data-mod-unignore-update data-tip="Offer {{updateIgnored}} again.">{{{icon 'bell' 'size-3.5'}}} Un-Ignore</button>
                 {{/if}}
                 {{#if revertTo}}
                   <button class="btn btn-ghost btn-sm" data-mod-revert data-revert-to="{{revertTo}}" data-tip="Put this mod back on {{revertTo}}, then restart the server.">{{{icon 'undo-2' 'size-3.5'}}} Revert</button>
@@ -108,7 +108,7 @@
   {{! Cloned in by the global image-error handler (app.js) when a /library/icons
       request 404s, so a stale icon path degrades to this exact placeholder
       instead of a broken-image glyph. }}
-  <template id="mod-icon-fallback"><span class="grid size-8 shrink-0 place-items-center rounded bg-inset text-ink-faint">{{{icon 'puzzle' 'size-4'}}}</span></template>
+  <template id="mod-icon-fallback"><span class="grid size-8 shrink-0 place-items-center rounded-sm bg-inset text-ink-faint">{{{icon 'puzzle' 'size-4'}}}</span></template>
   {{else}}
     {{> empty-state iconName='puzzle' title='No Mods Installed Yet' message='Search Modrinth or CurseForge; add a mod, plugin, or datapack by URL; or import a zip with the buttons above. Custom content lives in the shared library and survives pack updates.'}}
   {{/if}}

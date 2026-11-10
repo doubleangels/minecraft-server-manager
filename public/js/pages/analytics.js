@@ -94,7 +94,7 @@ function init(serverId) {
     if (!data.rows.length) {
       const tr = document.createElement('tr');
       tr.innerHTML =
-        '<td colspan="3" class="p-6 text-center text-ink-faint">No player stats yet. Stats appear once someone plays on this server.</td>';
+        '<td colspan="3"><div class="empty-inline">No player stats yet. Stats appear once someone plays on this server.</div></td>';
       scoreBody.appendChild(tr);
       return;
     }
@@ -274,10 +274,10 @@ function init(serverId) {
     const style = document.createElement('div');
     style.innerHTML = '<h4 class="mb-2 text-sm font-semibold">Playstyle</h4>';
     const styleColors = {
-      miner: 'bg-diamond-400',
-      fighter: 'bg-redstone-500',
-      explorer: 'bg-grass-500',
-      builder: 'bg-gold-400',
+      miner: 'bg-link',
+      fighter: 'bg-danger',
+      explorer: 'bg-ok',
+      builder: 'bg-warn',
     };
     for (const key of ['miner', 'fighter', 'explorer', 'builder']) {
       const pct = p.playstyle[key] || 0;

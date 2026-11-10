@@ -129,8 +129,12 @@ users:
 - **Casing:** Title Case for buttons and for short selectable choices (dropdown
   options, radio and checkbox labels, tabs, overflow-menu items, toggle chips).
   The `page-header heading=` stays ALL CAPS. `<h2>` / `<h3>` section and card
-  headings, table `<th>`, and non-progress `openModal` titles are Title Case
-  too. Everything else (help, hints, tooltips, placeholders, empty-state bodies,
+  headings, table `<th>`, field captions (the `.label` above an input, a `<dt>`,
+  every field-catalog `label`), and non-progress `openModal` titles are Title
+  Case too. Title Case covers a parenthetical ("Viewer (Read-Only)", "Disk Quota
+  (GB)") and every part of a hyphenated word ("Sign-In", "Pre-Update"; only a
+  middle minor word stays lowercase, as in "Out-of-Memory"). A stored id shown
+  as a label goes through the `titleCase` or `eventType` template helper. Everything else (help, hints, tooltips, placeholders, empty-state bodies,
   toasts, confirm-dialog bodies and titles, event and history summaries) is a
   full sentence in sentence case.
 - **Terminal punctuation:** every sentence-shaped string ends in `.`, `!`, or
@@ -187,7 +191,8 @@ A few things are deliberately judged more loosely. Placeholders and screen-reade
 that is an example (a host name, a URL, anything in a monospace field) is not checked at all. A
 checkbox label longer than six words is a sentence, so it is not forced into Title Case. A disabled
 option or an option that reads as a status line ("Loading biomes…") is a message, not a choice.
-A field-catalog switch (a `boolean` field) is a choice, so its label is Title Case; the catalog's other captions stay sentence case. Prompts sent to a language model
+Every field-catalog `label` is Title Case: a switch (a `boolean` field) is a choice, and every other
+label is a field caption. The catalog's help and descriptions stay sentence case. Prompts sent to a language model
 (`src/services/wizard*.js`) are not user copy.
 
 ## Logging

@@ -1196,6 +1196,7 @@ async function deleteServerImpl(id, { actor = 'system', keepWorld = true, keepBa
     details: { keepWorld, keepBackups, freedBytes },
   });
   logger.info('Deleted a server.', { serverId: id, actor, keepWorld, keepBackups, freedBytes });
+  require('../storage/indexer').rescanSoon(); // lazy, like scheduler above
   return { freedBytes };
 }
 

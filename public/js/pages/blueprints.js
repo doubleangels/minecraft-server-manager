@@ -99,10 +99,10 @@ function showPreview(preview, importBody) {
     ${
       preview.warnings.length
         ? `
-      <div class="rounded-md border border-gold-400/40 bg-gold-400/10 p-2.5 text-xs">
+      <div class="notice notice-warn text-xs"><div class="min-w-0">
         <div class="mb-1 font-medium text-warn">Warnings</div>
-        <ul class="list-inside list-disc space-y-0.5 text-ink-soft">${preview.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>
-      </div>`
+        <ul class="list-inside list-disc space-y-0.5">${preview.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>
+      </div></div>`
         : ''
     }
     <p class="text-xs text-ink-faint">A new server will be created with fresh ports and a fresh RCON password. Nothing existing is touched.</p>`;
@@ -212,7 +212,7 @@ function openProgress(text) {
   content.className = 'space-y-3 text-sm';
   content.innerHTML = `
     <p></p>
-    <div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div>
+    <div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div>
     <p class="text-xs text-ink-faint">Closing this window doesn't cancel the import. It keeps running in the background.</p>`;
   content.querySelector('p').textContent = text;
   return openModal({ title: 'Importing…', content, actions: [] });

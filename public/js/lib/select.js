@@ -89,7 +89,7 @@ function openPicker(select, btn) {
     let lastGroup = null;
 
     if (!visible.length) {
-      list.innerHTML = '<div class="p-4 text-center text-sm text-ink-faint">No matches.</div>';
+      list.innerHTML = '<div class="empty-inline py-6">No matches.</div>';
       return;
     }
     for (const [i, opt] of visible.entries()) {
@@ -107,11 +107,11 @@ function openPicker(select, btn) {
       row.id = `msm-opt-${i}`;
       row.className =
         'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition ' +
-        'hover:bg-inset disabled:opacity-40 aria-selected:bg-grass-600/15 aria-selected:text-ok';
+        'hover:bg-inset disabled:opacity-40 aria-selected:bg-ok/15 aria-selected:text-ok';
       row.setAttribute('role', 'option');
       if (opt.value === select.value) row.setAttribute('aria-selected', 'true');
       row.innerHTML = `
-        ${opt.icon ? `<img src="${escapeHtml(opt.icon)}" alt="" class="size-6 rounded">` : ''}
+        ${opt.icon ? `<img src="${escapeHtml(opt.icon)}" alt="" class="size-6 rounded-sm">` : ''}
         <span class="min-w-0 flex-1">
           <span class="block truncate">${escapeHtml(opt.label)}</span>
           ${opt.desc ? `<span class="block truncate text-xs text-ink-faint">${escapeHtml(opt.desc)}</span>` : ''}

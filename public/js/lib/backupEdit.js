@@ -16,7 +16,7 @@ export function openBackupEditor(row) {
   content.className = 'space-y-3';
   content.innerHTML = `
     <div>
-      <label class="label" for="bk-edit-name">Archive name</label>
+      <label class="label" for="bk-edit-name">Archive Name</label>
       <input class="input font-mono" id="bk-edit-name" maxlength="120">
       <p class="help">Changes the displayed name and the file you download. Restore and retention are unaffected.</p>
     </div>

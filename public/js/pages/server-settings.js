@@ -10,6 +10,7 @@ import { setBusy } from '../lib/loading.js';
 import { initDockerSettings } from '../lib/dockerSettings.js';
 import { wireCatalogConflicts } from '../lib/catalogConflicts.js';
 import { escapeHtml } from '../lib/format.js';
+import { trackDirty } from '../lib/dirtyState.js';
 
 const root = document.querySelector('[data-settings-server]');
 if (root) init(root.dataset.settingsServer);
@@ -45,17 +46,23 @@ function init(serverId) {
 
   // ---- dirty tracking: Save always works, but Discard/leave now warn instead
   // of silently dropping edits ----
+  // Dirty means a value really differs from the loaded one (see dirtyState.js),
+  // not that some input/change event fired.
   let dirty = false;
   const dirtyNote = document.querySelector('[data-dirty-note]');
-  const markDirty = (e) => {
-    // The game port saves on its own button, so typing there is not a
-    // pending change for the page-wide Save.
-    if (e && e.target && e.target.closest && e.target.closest('[data-port-card]')) return;
-    dirty = true;
-    dirtyNote?.classList.replace('hidden', 'flex');
-  };
-  root.addEventListener('input', markDirty);
-  root.addEventListener('change', markDirty);
+  const tracker = trackDirty(root, {
+    // The game port saves on its own button, so it is not a pending change
+    // for the page-wide Save.
+    skip: '[data-port-card]',
+    // The icon/accent pickers and tag chips keep their state outside the
+    // form controls.
+    extra: () => JSON.stringify([icon, accent, [...tags].sort()]),
+    onChange: (d) => {
+      dirty = d;
+      dirtyNote?.classList.replace(d ? 'hidden' : 'flex', d ? 'flex' : 'hidden');
+    },
+  });
+  const markDirty = () => tracker.refresh();
   window.addEventListener('beforeunload', (e) => {
     if (dirty) e.preventDefault(); // the browser's own unsaved-changes prompt
   });
@@ -175,6 +182,7 @@ function init(serverId) {
       tags.add(tagInput.value.trim().toLowerCase());
       tagInput.value = '';
       renderTags();
+      markDirty();
       e.preventDefault();
     }
   });
@@ -189,15 +197,16 @@ function init(serverId) {
     const heap = Number(heapEl.value);
     const cmem = Number(cmemEl.value);
     const pctAbove = heap ? Math.round(((cmem - heap) / heap) * 100) : 0;
-    const base = 'rounded-md border p-2.5 text-xs ';
+    // The shared .notice callout, colored by how much room Java has.
+    const base = 'notice text-xs ';
     if (cmem <= heap) {
-      headroomBox.className = base + 'border-danger/40 bg-redstone-500/10 text-danger';
+      headroomBox.className = base + 'notice-danger';
       headroomBox.textContent = `The container limit (${cmem} MB) is at or below the Java heap (${heap} MB). The server will be killed for running out of memory on start. Raise the limit or lower the heap.`;
     } else if (cmem < heap * 1.25) {
-      headroomBox.className = base + 'border-warn/40 bg-gold-500/10 text-warn';
+      headroomBox.className = base + 'notice-warn';
       headroomBox.textContent = `Tight headroom: the container limit is only ${pctAbove}% above the Java heap. Java needs extra room beyond the heap, so aim for 25% or more.`;
     } else {
-      headroomBox.className = base + 'border-ok/40 bg-grass-500/10 text-ok';
+      headroomBox.className = base + 'notice-ok';
       headroomBox.textContent = `Healthy headroom: the container limit is ${pctAbove}% above the Java heap.`;
     }
   }

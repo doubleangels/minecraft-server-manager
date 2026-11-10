@@ -85,11 +85,11 @@ const STATUS_TEXT = {
 // produces a class the build never emits (bg-gold-500 was missing for exactly
 // this reason, rendering the Starting/Unhealthy dot invisible).
 const STATUS_DOT = {
-  grass: 'bg-grass-500',
-  gold: 'bg-gold-500',
-  diamond: 'bg-diamond-500',
-  redstone: 'bg-redstone-500',
-  stone: 'bg-stone-500',
+  grass: 'bg-ok',
+  gold: 'bg-warn',
+  diamond: 'bg-link',
+  redstone: 'bg-danger',
+  stone: 'bg-ink-faint',
 };
 
 // The 8 icons bundled in public/icons/servers - original pixel-art SVGs drawn
@@ -228,14 +228,23 @@ function createApp() {
         statusText: (s) => STATUS_TEXT[(STATUS_META[s] || STATUS_META.stopped).color],
         // Quota bar color by usage percentage against the configured thresholds.
         meterColor: (used, total) => {
-          if (!total) return 'bg-diamond-400';
+          if (!total) return 'bg-link';
           const d = settings.getDefaults();
           const p = (used / total) * 100;
-          if (p >= d.quotaCriticalPct) return 'bg-redstone-500';
-          if (p >= d.quotaWarnPct) return 'bg-gold-400';
-          return 'bg-grass-500';
+          if (p >= d.quotaCriticalPct) return 'bg-danger';
+          if (p >= d.quotaWarnPct) return 'bg-warn';
+          return 'bg-ok';
         },
         capitalize: (s) => (typeof s === 'string' && s ? s[0].toUpperCase() + s.slice(1) : s),
+        // A stored id shown as a label: every word and hyphenated part
+        // capitalised ("pre-update" → "Pre-Update").
+        titleCase: (s) =>
+          typeof s === 'string' ? s.replace(/(^|[\s-])([a-z])/g, (_, p, c) => p + c.toUpperCase()) : s,
+        // A history event type as a label ("server-started" → "Server Started").
+        eventType: (s) =>
+          typeof s === 'string'
+            ? s.replace(/[-_]+/g, ' ').replace(/(^|\s)([a-z])/g, (_, p, c) => p + c.toUpperCase())
+            : s,
         short: (s, n) => (typeof s === 'string' ? s.replace(/^sha256:/, '').slice(0, Number(n) || 12) : s),
         initial: (s) => (typeof s === 'string' && s ? s[0].toUpperCase() : '?'),
         default: (v, fallback) => (v === undefined || v === null || v === '' ? fallback : v),

@@ -328,7 +328,7 @@ function init() {
       title: `Creating ${name} from a blueprint…`,
       size: 'sm',
       content:
-        '<div class="space-y-3 text-sm"><p>Installing the blueprint: the pinned pack, custom mods (each hash-verified), and config files.</p><div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div><p class="text-xs text-ink-faint">Closing this window doesn\'t cancel the import. It keeps running in the background.</p></div>',
+        '<div class="space-y-3 text-sm"><p>Installing the blueprint: the pinned pack, custom mods (each hash-verified), and config files.</p><div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div><p class="text-xs text-ink-faint">Closing this window doesn\'t cancel the import. It keeps running in the background.</p></div>',
     });
     try {
       const res = await fetch('/api/blueprints/import', {
@@ -563,7 +563,7 @@ function init() {
       size: 'sm',
       content: `<div class="space-y-3 text-sm">
         <p>Downloading the server image if needed (the first time can take a few minutes), creating the container, and starting it.</p>
-        <div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div>
+        <div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div>
         <p class="text-xs text-ink-faint">Closing this window doesn't cancel the creation. It keeps running in the background.</p>
       </div>`,
     });
@@ -679,7 +679,7 @@ function initModBrowser() {
       refreshLoaderBuilds();
       if (q.value.trim()) search();
     },
-    ['border-grass-500', 'text-ok']
+    ['border-ok', 'text-ok']
   );
 
   function syncPlatformChips() {
@@ -715,7 +715,7 @@ function initModBrowser() {
 
   async function refreshLoaderBuilds() {
     if (!loaderVerSel) return;
-    loaderVerSel.innerHTML = '<option value="">Latest (recommended)</option>';
+    loaderVerSel.innerHTML = '<option value="">Latest (Recommended)</option>';
     loaderVerSel.dispatchEvent(new Event('change', { bubbles: true }));
     try {
       const res = await fetch(
@@ -756,7 +756,7 @@ function initModBrowser() {
 
   function renderResults() {
     if (!lastResults.length) {
-      resultsEl.innerHTML = `<div class="p-3 text-center text-sm text-ink-faint">No ${escapeHtml(capitalize(loader))} mods found for ${escapeHtml(mc())}.</div>`;
+      resultsEl.innerHTML = `<div class="empty-inline py-6">No ${escapeHtml(capitalize(loader))} mods found for ${escapeHtml(mc())}.</div>`;
       return;
     }
     resultsEl.innerHTML = lastResults
@@ -883,7 +883,7 @@ function initModBrowser() {
   }
 
   function versionOptions(m) {
-    if (!m.versions || !m.versions.length) return '<option value="">(no compatible build)</option>';
+    if (!m.versions || !m.versions.length) return '<option value="">(No Compatible Build)</option>';
     return m.versions
       .map((v) => {
         const nonRelease = v.versionType && v.versionType !== 'release';
@@ -1071,7 +1071,7 @@ function initZipUpload() {
 
     selectedEl.classList.remove('hidden');
     selectedEl.innerHTML = `
-      <div class="rounded-md border border-grass-700 bg-grass-600/10 p-3">
+      <div class="rounded-md border border-ok bg-ok/10 p-3">
         <div class="flex flex-wrap items-center gap-3">
           <div class="min-w-0 flex-1">
             <div class="truncate font-semibold" data-role="title"></div>
@@ -1162,13 +1162,13 @@ function initZipUpload() {
       const mcOptions = (p.inferred && p.inferred.mcVersionOptions) || [];
       pickers.innerHTML = `
         <div>
-          <label class="label">Mod loader ${state.loader ? '<span class="text-xs font-normal text-ink-faint">(auto-detected)</span>' : ''}</label>
+          <label class="label">Mod Loader ${state.loader ? '<span class="text-xs font-normal text-ink-faint">(auto-detected)</span>' : ''}</label>
           <select class="input" data-role="loader">
             ${loaders.map((l) => `<option value="${l}" ${l === state.loader ? 'selected' : ''}>${loaderLabels[l]}</option>`).join('')}
           </select>
         </div>
         <div>
-          <label class="label">Minecraft version ${state.mcVersion ? '<span class="text-xs font-normal text-ink-faint">(auto-detected)</span>' : ''}</label>
+          <label class="label">Minecraft Version ${state.mcVersion ? '<span class="text-xs font-normal text-ink-faint">(auto-detected)</span>' : ''}</label>
           ${
             mcOptions.length
               ? `<select class="input" data-role="mc">${mcOptions.map((v) => `<option value="${escapeHtml(v)}" ${v === state.mcVersion ? 'selected' : ''}>${escapeHtml(v)}</option>`).join('')}</select>`
@@ -1270,7 +1270,7 @@ function initPackPicker() {
 
   function renderResults() {
     if (!lastResults.length) {
-      resultsEl.innerHTML = '<div class="p-3 text-center text-sm text-ink-faint">No modpacks found.</div>';
+      resultsEl.innerHTML = '<div class="empty-inline py-6">No modpacks found.</div>';
       return;
     }
     resultsEl.innerHTML = lastResults
@@ -1572,7 +1572,7 @@ function initSolver({ onApplied = () => {} } = {}) {
       chip.innerHTML = `
         ${mod.iconUrl ? `<img src="${escapeHtml(mod.iconUrl)}" alt="" class="size-4 rounded-sm">` : ''}
         <span class="max-w-40 truncate">${escapeHtml(mod.title)}</span>
-        <button type="button" data-remove="${escapeHtml(keyOf(mod))}" class="grid size-5 place-items-center rounded-sm text-ink-faint transition hover:bg-line hover:text-ink" aria-label="Remove ${escapeHtml(mod.title)}">${X_SVG}</button>`;
+        <button type="button" data-remove="${escapeHtml(keyOf(mod))}" class="grid size-5 place-items-center rounded-sm text-ink-faint transition hover:bg-line hover:text-ink focus-visible:outline-2 focus-visible:outline-focus" aria-label="Remove ${escapeHtml(mod.title)}">${X_SVG}</button>`;
       chipsEl.appendChild(chip);
     }
   }
@@ -1580,7 +1580,7 @@ function initSolver({ onApplied = () => {} } = {}) {
   function renderResults() {
     resultsEl.innerHTML = '';
     if (!lastResults.length) {
-      resultsEl.innerHTML = '<div class="p-3 text-center text-sm text-ink-faint">No mods found.</div>';
+      resultsEl.innerHTML = '<div class="empty-inline py-6">No mods found.</div>';
       resultsEl.classList.remove('hidden');
       return;
     }
@@ -1589,7 +1589,7 @@ function initSolver({ onApplied = () => {} } = {}) {
       row.className = 'flex items-center gap-2.5 border-b border-line px-2.5 py-2 text-sm last:border-b-0';
       const added = picked.has(keyOf(hit));
       row.innerHTML = `
-        ${hit.iconUrl ? `<img src="${escapeHtml(hit.iconUrl)}" alt="" class="size-8 shrink-0 rounded">` : '<span class="grid size-8 shrink-0 place-items-center rounded bg-inset text-ink-faint">?</span>'}
+        ${hit.iconUrl ? `<img src="${escapeHtml(hit.iconUrl)}" alt="" class="size-8 shrink-0 rounded-sm">` : '<span class="grid size-8 shrink-0 place-items-center rounded-sm bg-inset text-ink-faint">?</span>'}
         <span class="min-w-0 flex-1">
           <span class="block truncate font-medium">${escapeHtml(hit.title)}</span>
           <span class="block truncate text-xs text-ink-faint">${escapeHtml(hit.description || '')}</span>

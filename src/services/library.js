@@ -397,6 +397,7 @@ async function deleteLibraryFile(libraryId, { actor = 'system', force = false } 
     type: 'library-deleted',
     summary: `Removed from library: ${lib.name} (${humanBytes(lib.size_bytes)} freed).`,
   });
+  require('../storage/indexer').rescanSoon();
   return { freedBytes: lib.size_bytes };
 }
 

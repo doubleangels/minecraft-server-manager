@@ -74,7 +74,7 @@ test('env differences expand per key, with catalog labels, additions and deletio
   const byLabel = Object.fromEntries(r.changes.map((c) => [c.label, c]));
   assert.equal(r.needsRecreate, true);
   // MOTD gets its catalog label, not the raw env key.
-  const motd = byLabel['Server list message (MOTD)'];
+  const motd = byLabel[getField('env', 'MOTD').label];
   assert.equal(motd.before, 'Hi');
   assert.equal(motd.after, 'Hello there');
   assert.equal(motd.requiresRebuild, true);
@@ -83,9 +83,9 @@ test('env differences expand per key, with catalog labels, additions and deletio
   const allowFlight = byLabel[getField('env', 'ALLOW_FLIGHT').label];
   assert.equal(allowFlight.before, 'true');
   assert.equal(allowFlight.after, null);
-  // MEMORY (catalog label 'RAM (Java heap)') is brand new.
-  assert.equal(byLabel['RAM (Java heap)'].before, null);
-  assert.equal(byLabel['RAM (Java heap)'].after, '1G');
+  // MEMORY (the catalog's RAM field) is brand new.
+  assert.equal(byLabel[getField('env', 'MEMORY').label].before, null);
+  assert.equal(byLabel[getField('env', 'MEMORY').label].after, '1G');
   // Unchanged keys produce no row at all.
   assert.ok(!('MAX_PLAYERS' in byLabel), 'unchanged env keys should not be listed');
 });

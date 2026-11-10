@@ -8,7 +8,7 @@ module.exports = [
   {
     key: 'SERVER_PORT',
     scope: 'env',
-    label: 'In-container game port',
+    label: 'In-Container Game Port',
     help: 'The port the server binds inside the container. The docs warn that changing it breaks image integrations, so the panel keeps it at 25565 and maps a host port instead.',
     type: 'number',
     default: 25565,
@@ -20,7 +20,7 @@ module.exports = [
   {
     key: 'portGame',
     scope: 'panel',
-    label: 'Game port (on this machine)',
+    label: 'Game Port (on This Machine)',
     help: 'The host port players connect to; the panel maps it to the container’s internal game port (25565). A free port is suggested automatically, each server needs its own, and you can change it later on the server’s Configuration tab.',
     type: 'number',
     min: 1024,
@@ -32,7 +32,7 @@ module.exports = [
   {
     key: 'portRcon',
     scope: 'panel',
-    label: 'RCON port (on this machine)',
+    label: 'RCON Port (on This Machine)',
     help: 'Host port the panel maps to the container’s RCON port (25575) so it can send commands and stop the server gracefully. Keep it firewalled from the internet: RCON grants full console access.',
     type: 'number',
     min: 1024,
@@ -44,7 +44,7 @@ module.exports = [
   {
     key: 'portBedrock',
     scope: 'panel',
-    label: 'Bedrock port (on this machine)',
+    label: 'Bedrock Port (on This Machine)',
     help: 'UDP host port mapped for Bedrock clients when a GeyserMC bridge is installed (in-container 19132/udp). Leave empty if you only serve Java Edition players.',
     type: 'number',
     min: 1024,
@@ -69,7 +69,7 @@ module.exports = [
   {
     key: 'QUERY_PORT',
     scope: 'env',
-    label: 'Query port (UDP)',
+    label: 'Query Port (UDP)',
     help: 'UDP port used by the query protocol inside the container (default 25565). Only relevant when the query protocol is enabled.',
     type: 'number',
     default: 25565,
@@ -94,7 +94,7 @@ module.exports = [
     key: 'NETWORK_COMPRESSION_THRESHOLD',
     scope: 'env',
     prop: 'network-compression-threshold',
-    label: 'Packet compression threshold',
+    label: 'Packet Compression Threshold',
     help: 'Packets larger than this many bytes are compressed before sending (vanilla default 256). Use -1 to disable compression or 0 to compress everything. Lower values trade CPU for bandwidth.',
     type: 'number',
     min: -1,

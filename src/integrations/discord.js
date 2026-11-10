@@ -30,15 +30,23 @@ const DEFAULT_EVENTS = {
 
 const WEBHOOK_RE = /^https:\/\/(discord|discordapp)\.com\/api\/webhooks\//;
 
-// Embed accent color per notification kind (decimal RGB, matches panel palette).
+// Embed accent colors: the panel palette, by what the event means (decimal RGB).
+const TONES = {
+  ok: 0x3fa62b, // grass-500: up and running, applied
+  info: 0x21a7ab, // diamond-500: backups and restores
+  warn: 0xe99417, // gold-500: worth a look, nothing broken yet
+  danger: 0xe5484d, // redstone-500: down, failed, or someone was removed
+  neutral: 0x87919b, // stone-400: a normal stop
+};
+// The tone of each notification kind, for callers that pass only a kind.
 const COLORS = {
-  crash: 0xe5484d, // red
-  start: 0x3fa62b, // green
-  stop: 0x8b8f98, // grey
-  backup: 0x3b82f6, // blue
-  update: 0xe99417, // gold
-  player: 0x21a7ab, // teal
-  alert: 0xe5484d, // red - something needs a human
+  crash: TONES.danger,
+  start: TONES.ok,
+  stop: TONES.neutral,
+  backup: TONES.info,
+  update: TONES.ok,
+  player: TONES.warn,
+  alert: TONES.danger,
 };
 
 // History event type → [notification kind, toggle category]
@@ -147,8 +155,8 @@ async function testWebhook(serverId) {
   const res = await post(
     url,
     buildEmbed('start', {
-      title: 'Minecraft Server Manager test notification',
-      description: `Webhook is wired up for **${server ? server.display_name : serverId}**. You will receive the event types you enabled.`,
+      title: 'Test Notification',
+      description: `This webhook is connected to **${server ? server.display_name : serverId}**. Notifications for the events you turned on will arrive here.`,
     })
   );
   if (!res.ok) throw httpError(502, 'Discord rejected the request. Check that the webhook URL is correct.');
@@ -174,20 +182,20 @@ async function notify(serverId, kind, payload = {}) {
   }
 }
 
-function buildEmbed(kind, { title, description, fields } = {}) {
+function buildEmbed(kind, { title, description, fields, color, timestamp } = {}) {
   return {
     username: 'Minecraft Server Manager',
     embeds: [
       {
-        title: title || 'Server event',
-        description: description || undefined,
-        color: COLORS[kind] || COLORS.stop,
+        title: title || 'Server Event',
+        description: description ? sentence(description).slice(0, 4096) : undefined,
+        color: color ?? COLORS[kind] ?? TONES.neutral,
         fields: (fields || []).slice(0, 10).map((f) => ({
           name: String(f.name).slice(0, 256),
           value: String(f.value).slice(0, 1024),
           inline: f.inline !== false,
         })),
-        timestamp: new Date().toISOString(),
+        timestamp: timestamp || new Date().toISOString(),
         footer: { text: 'Minecraft Server Manager' },
       },
     ],
@@ -312,8 +320,11 @@ async function pollOnce() {
   // server, and config row lookups dominate the poll's DB cost).
   const integRows = db.all('SELECT * FROM integrations WHERE kind = ?', KIND);
   const integById = new Map(integRows.map((r) => [r.server_id, r]));
-  const nameRows = db.all('SELECT id, display_name FROM servers WHERE deleted_at IS NULL');
-  const nameById = new Map(nameRows.map((r) => [r.id, r.display_name]));
+  const serverRows = db.all(
+    'SELECT id, display_name, type, mc_version, port_game FROM servers WHERE deleted_at IS NULL'
+  );
+  const serverById = new Map(serverRows.map((r) => [r.id, r]));
+  const publicHost = settings.getPublicHost();
   const cfgFor = (serverId) => {
     const r = integById.get(serverId);
     const cfg = r ? JSON.parse(r.config_json || '{}') : {};
@@ -331,15 +342,7 @@ async function pollOnce() {
 
     if (deliverable) {
       const [kind] = mapped;
-      const serverName = nameById.get(evt.server_id) || evt.server_id;
-      const ok = await notify(evt.server_id, kind, {
-        title: titleFor(evt.type),
-        description: evt.summary,
-        fields: [
-          { name: 'Server', value: serverName },
-          { name: 'By', value: evt.actor || 'system' },
-        ],
-      });
+      const ok = await notify(evt.server_id, kind, eventEmbed(evt, serverById.get(evt.server_id), { publicHost }));
       if (!ok) {
         retryCount = retryId === evt.id ? retryCount + 1 : 1;
         retryId = evt.id;
@@ -363,31 +366,140 @@ async function pollOnce() {
   persistMark();
 }
 
+// Title (Title Case) and accent tone of every forwarded event type.
+const EVENT_STYLE = {
+  started: ['Server Started', 'ok'],
+  stopped: ['Server Stopped', 'neutral'],
+  crashed: ['Server Crashed', 'danger'],
+  'crash-loop': ['Crash Loop Detected', 'danger'],
+  'crash-report': ['New Crash Report', 'danger'],
+  'backup-created': ['Backup Created', 'info'],
+  'backup-restored': ['Backup Restored', 'info'],
+  'update-applied': ['Update Applied', 'ok'],
+  'update-rolled-back': ['Update Rolled Back', 'warn'],
+  'update-failed': ['Update Failed', 'danger'],
+  'player-ban': ['Player Banned', 'danger'],
+  'player-kick': ['Player Kicked', 'warn'],
+  oom: ['Out of Memory', 'danger'],
+  unhealthy: ['Server Unhealthy', 'warn'],
+  'startup-stalled': ['Startup Stalled', 'warn'],
+  'stop-failed': ['Stop Failed', 'danger'],
+  'schedule-failed': ['Scheduled Task Failed', 'danger'],
+  'quota-exceeded': ['Disk Quota Exceeded', 'danger'],
+  'offline-after-restart': ['Offline After Panel Restart', 'warn'],
+  'port-change-failed': ['Port Change Left the Server Down', 'danger'],
+  'auto-restart-gave-up': ['Gave Up Restarting After a Crash', 'danger'],
+};
+
+/** Title Case for an id the map does not know ("some-new-event" → "Some New Event"). */
 function titleFor(type) {
-  const map = {
-    started: 'Server started',
-    stopped: 'Server stopped',
-    crashed: 'Server crashed',
-    'crash-loop': 'Crash loop detected',
-    'backup-created': 'Backup created',
-    'backup-restored': 'Backup restored',
-    'update-applied': 'Update applied',
-    'update-rolled-back': 'Update rolled back',
-    'update-failed': 'Update failed',
-    'player-ban': 'Player banned',
-    'player-kick': 'Player kicked',
-    oom: 'Out of memory',
-    unhealthy: 'Server unhealthy',
-    'startup-stalled': 'Startup stalled',
-    'stop-failed': 'Stop failed',
-    'schedule-failed': 'Scheduled task failed',
-    'quota-exceeded': 'Disk quota exceeded',
-    'offline-after-restart': 'Offline after panel restart',
-    'port-change-failed': 'Port change left the server down',
-    'auto-restart-gave-up': 'Gave up restarting after a crash',
-    'crash-report': 'New crash report',
+  if (EVENT_STYLE[type]) return EVENT_STYLE[type][0];
+  return String(type)
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((w) => w[0].toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+/** A description is a full sentence: end it with punctuation if it has none. */
+function sentence(text) {
+  const t = String(text).trim();
+  return /[.!?…)]$/.test(t) ? t : `${t}.`;
+}
+
+const LOADER_NAMES = {
+  vanilla: 'Vanilla',
+  paper: 'Paper',
+  purpur: 'Purpur',
+  fabric: 'Fabric',
+  forge: 'Forge',
+  neoforge: 'NeoForge',
+  quilt: 'Quilt',
+  spigot: 'Spigot',
+  bukkit: 'Bukkit',
+  folia: 'Folia',
+  auto_curseforge: 'CurseForge Pack',
+  modrinth: 'Modrinth Pack',
+};
+/** "Paper 1.21.4", or "Fabric (Latest)" for an unpinned version. */
+function versionLabel(server) {
+  const raw = String(server.type || '').toLowerCase();
+  const loader = LOADER_NAMES[raw] || (raw ? raw[0].toUpperCase() + raw.slice(1) : 'Minecraft');
+  const v = String(server.mc_version || '');
+  return `${loader} ${v.toUpperCase() === 'LATEST' ? '(Latest)' : v}`.trim();
+}
+
+/** Who did it: a person's username, or the panel acting on its own. */
+function actorLabel(actor) {
+  return !actor || actor === 'system' ? 'Panel (Automatic)' : String(actor);
+}
+
+/** SQLite's "YYYY-MM-DD HH:MM:SS" (UTC) as ISO, so Discord shows when it happened. */
+function eventTime(createdAt) {
+  if (!createdAt) return undefined;
+  const d = new Date(`${String(createdAt).replace(' ', 'T')}Z`);
+  return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+}
+
+const field = (name, value, inline = true) =>
+  value === undefined || value === null || value === '' ? null : { name, value: String(value), inline };
+const titleWords = (s) => String(s).replace(/(^|[\s-])([a-z])/g, (_, p, c) => p + c.toUpperCase());
+
+/** Extra fields an event has the data for. */
+function detailFields(type, d, server, { publicHost } = {}) {
+  switch (type) {
+    case 'started':
+      if (!server) return [];
+      return [
+        publicHost ? field('Address', `${publicHost}:${server.port_game}`) : field('Game Port', server.port_game),
+      ];
+    case 'crashed':
+      return [field('Exit Code', d.exitCode), field('Auto-Restart', d.armedRestart ? 'Scheduled' : 'Not Scheduled')];
+    case 'backup-created':
+      return [
+        field('Reason', d.reason ? titleWords(d.reason) : null),
+        field('Files', Number.isFinite(d.entryCount) ? d.entryCount.toLocaleString('en-US') : null),
+        field('Archive', d.filename ? `\`${d.filename}\`` : null, false),
+      ];
+    case 'player-ban':
+      return [
+        field('Player', d.name),
+        field('Until', d.expires || 'Permanent'),
+        field('Reason', d.reason ? sentence(d.reason) : null, false),
+      ];
+    case 'player-kick':
+      return [field('Player', d.name), field('Message', d.message ? sentence(d.message) : null, false)];
+    case 'startup-stalled':
+      return [field('Waiting', Number.isFinite(d.elapsedMs) ? `${Math.round(d.elapsedMs / 60000)} min` : null)];
+    default:
+      return [];
+  }
+}
+
+/** The embed payload for one history event. */
+function eventEmbed(evt, server, opts = {}) {
+  let d;
+  try {
+    d = (evt.details_json && JSON.parse(evt.details_json)) || {};
+  } catch {
+    d = {}; // a malformed details blob just means no extra fields
+  }
+  let tone = EVENT_STYLE[evt.type] ? EVENT_STYLE[evt.type][1] : null;
+  // A backup that was made, but with warnings, deserves a look.
+  if (evt.type === 'backup-created' && (d.inconsistent || d.empty)) tone = 'warn';
+  const fields = [
+    field('Server', server ? server.display_name : evt.server_id),
+    server ? field('Version', versionLabel(server)) : null,
+    field('Triggered By', actorLabel(evt.actor)),
+    ...detailFields(evt.type, d, server, opts),
+  ].filter(Boolean);
+  return {
+    title: titleFor(evt.type),
+    description: evt.summary,
+    color: tone ? TONES[tone] : undefined,
+    fields,
+    timestamp: eventTime(evt.created_at),
   };
-  return map[type] || type;
 }
 
 module.exports = {
@@ -399,6 +511,8 @@ module.exports = {
   stopEventBridge,
   WEBHOOK_RE,
   EVENT_MAP, // exported for tests
+  _eventEmbed: eventEmbed,
+  _buildEmbed: buildEmbed,
   // Exported for tests: drive one poll cycle / resolve the boot mark deterministically.
   _pollOnce: pollOnce,
   _initialMark: initialMark,

@@ -5,6 +5,7 @@
 import { toast } from '../lib/toast.js';
 import { friendlyError } from '../lib/errors.js';
 import { setBusy, withBusy } from '../lib/loading.js';
+import { trackDirty } from '../lib/dirtyState.js';
 
 const root = document.getElementById('ig-root');
 if (root) init();
@@ -15,12 +16,17 @@ function init() {
 
   // ---- Dirty hints: the enable toggles LOOK live but only apply on Save -
   // flag the pending state so flipping one and leaving isn't a silent no-op.
+  // Shown only while a saved field really differs from its loaded value.
   function bindDirty(key, controls) {
     const hint = root.querySelector(`[data-ig-dirty="${key}"]`);
-    if (!hint) return () => {};
-    // hidden <-> flex: the note is an icon + text row in the pinned Save bar.
-    for (const el of controls) el?.addEventListener('change', () => hint.classList.replace('hidden', 'flex'));
-    return () => hint.classList.replace('flex', 'hidden');
+    const card = hint?.closest('[data-dirty-group]');
+    if (!hint || !card) return () => {};
+    const tracker = trackDirty(card, {
+      fields: () => controls,
+      // hidden <-> flex: the note is an icon + text row in the pinned Save bar.
+      onChange: (d) => hint.classList.replace(d ? 'hidden' : 'flex', d ? 'flex' : 'hidden'),
+    });
+    return () => tracker.reset();
   }
   const cleanDc = bindDirty('dc', [
     document.getElementById('ig-dc-enabled'),

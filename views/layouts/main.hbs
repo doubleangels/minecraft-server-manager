@@ -2,31 +2,8 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{{title}} · Minecraft Server Manager</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  {{! "Add to Home Screen" on iOS/Android - manifest.json covers Android/Chrome;
-      iOS ignores the manifest's icons entirely and needs its own apple-touch-icon
-      and apple-mobile-web-app-* tags to behave like an installed app. }}
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-  <meta name="theme-color" content="#16191c">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="MSM">
-  <link rel="stylesheet" href="/css/app.css">
-  <script nonce="{{cspNonce}}">
-    // Apply persisted theme before first paint to avoid a flash.
-    try {
-      var t = localStorage.getItem('msm-theme');
-      if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-      document.documentElement.dataset.theme = t;
-      // The installed app's status bar follows the theme's surface color.
-      var m = document.querySelector('meta[name="theme-color"]');
-      if (m) m.setAttribute('content', t === 'light' ? '#ffffff' : '#16191c');
-    } catch (e) {}
-  </script>
+  {{> app-head}}
 </head>
 <body class="min-h-screen" data-health-count="{{healthCount}}">
   <div class="flex min-h-screen">
@@ -34,10 +11,10 @@
 
     <div class="flex min-w-0 flex-1 flex-col">
       {{> topbar}}
-      <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+      <main class="mx-auto w-full max-w-7xl flex-1 py-4 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:py-6 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:px-8">
         {{{body}}}
       </main>
-      <footer class="border-t border-line px-6 py-3 text-xs text-ink-faint">
+      <footer class="border-t border-line py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] text-xs text-ink-faint sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]">
         Minecraft Server Manager <span class="text-ink-soft">v{{appVersion}}</span> &middot; a control panel for Minecraft servers on Docker
         {{#if repoUrl}}&middot; <a class="whitespace-nowrap text-ink-soft hover:text-link" href="{{repoUrl}}" target="_blank" rel="noopener noreferrer"><svg class="mr-1 inline-block size-3.5 align-[-0.2em]" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>{{/if}}
       </footer>

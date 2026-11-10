@@ -16,10 +16,10 @@
           <span class="text-ink">data</span>
         {{/if}}
       </nav>
-      <div class="ml-auto flex flex-wrap gap-2">
-        <button class="btn btn-sm" id="files-search" data-tip="Search the text of files under this folder.">{{{icon 'search' 'size-3.5'}}} Find in Files</button>
-        <button class="btn btn-sm" id="files-upload">{{{icon 'upload' 'size-3.5'}}} Upload</button>
-        <button class="btn btn-sm" id="files-mkdir">{{{icon 'folder-plus' 'size-3.5'}}} New Folder</button>
+      <div class="flex w-full flex-wrap gap-2 sm:ml-auto sm:w-auto">
+        <button class="btn btn-sm flex-1 sm:flex-none" id="files-search" data-tip="Search the text of files under this folder.">{{{icon 'search' 'size-3.5'}}} Find in Files</button>
+        <button class="btn btn-sm flex-1 sm:flex-none" id="files-upload">{{{icon 'upload' 'size-3.5'}}} Upload</button>
+        <button class="btn btn-sm flex-1 sm:flex-none" id="files-mkdir">{{{icon 'folder-plus' 'size-3.5'}}} New Folder</button>
       </div>
     </div>
     <div class="overflow-x-auto">
@@ -38,7 +38,7 @@
               {{! w-full + max-w-0 (sm+ only): inside an auto-layout table `truncate` never
                   engages (the column grows to the content) - this cell absorbs
                   the free width and long names actually ellipsize. }}
-              <td data-th="" class="sm:w-full sm:max-w-0">
+              <td data-th="Name" class="sm:w-full sm:max-w-0">
                 <div class="flex items-center gap-2">
                   {{#if dir}}
                     {{{icon 'folder' 'size-4 shrink-0 text-warn'}}}

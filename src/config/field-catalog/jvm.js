@@ -32,7 +32,7 @@ module.exports = [
   {
     key: 'JVM_OPTS',
     scope: 'env',
-    label: 'Extra JVM options',
+    label: 'Extra JVM Options',
     help: 'Additional options passed straight to the Java command line, space-separated (for example -XX:+UseZGC). These come after the flag presets, so they win over them; -XX:-AlwaysPreTouch here stops Aikar’s or MeowIce’s flags from reserving the whole heap at start. For -X options use the dedicated field below.',
     type: 'text',
     mode: 'advanced',
@@ -42,7 +42,7 @@ module.exports = [
   {
     key: 'JVM_XX_OPTS',
     scope: 'env',
-    label: 'JVM -XX options',
+    label: 'JVM -XX Options',
     help: 'Options placed before the memory flags, typically -XX garbage-collector settings. Note that the flag presets are added after these, so a preset’s own setting wins over a conflicting one here; use "Extra JVM options" to override a preset.',
     type: 'text',
     mode: 'advanced',
@@ -52,7 +52,7 @@ module.exports = [
   {
     key: 'JVM_DD_OPTS',
     scope: 'env',
-    label: 'JVM system properties (-D)',
+    label: 'JVM System Properties (-D)',
     help: 'Comma or space separated name=value pairs turned into -Dname=value system properties. Example: disable.watchdog:true is needed for auto-pause on Paper servers.',
     type: 'text',
     mode: 'advanced',

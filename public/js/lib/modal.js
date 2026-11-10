@@ -31,15 +31,16 @@ export function openModal({ title = '', content = '', actions = [], size = 'md',
   // reach), full width, and its actions stack into full-width buttons with
   // Cancel last, like a native action sheet. From sm up it is the centred dialog.
   backdrop.className =
-    'fixed inset-0 z-[60] grid grid-cols-1 place-items-end bg-black/60 backdrop-blur-[2px] animate-[fade-in_.15s_ease-out] sm:place-items-center sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]';
+    'fixed inset-0 z-[60] grid grid-cols-1 place-items-end bg-stone-950/60 backdrop-blur-[2px] animate-[fade-in_.15s_ease-out] sm:place-items-center sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]';
 
-  const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-3xl' };
+  const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-3xl', xl: 'max-w-5xl', full: 'max-w-6xl' };
   const panel = document.createElement('div');
-  panel.className = `card w-full ${widths[size] || widths.md} max-h-[92dvh] flex flex-col rounded-b-none border-b-0 pb-[env(safe-area-inset-bottom)] shadow-modal animate-[sheet-in_.18s_ease-out] sm:max-h-[85vh] sm:rounded-b-lg sm:border-b sm:pb-0 sm:animate-[modal-in_.15s_ease-out]`;
+  panel.className = `card w-full ${widths[size] || widths.md} max-h-[92dvh] flex flex-col rounded-t-2xl rounded-b-none border-b-0 pb-[env(safe-area-inset-bottom)] shadow-modal animate-[sheet-in_.18s_ease-out] sm:max-h-[85vh] sm:rounded-lg sm:border-b sm:pb-0 sm:animate-[modal-in_.15s_ease-out]`;
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-modal', 'true');
 
   panel.innerHTML = `
+    <div class="mx-auto mt-2 -mb-1 h-1 w-10 shrink-0 rounded-full bg-line-strong sm:hidden" aria-hidden="true"></div>
     <div class="flex items-center gap-3 border-b border-line py-3 pl-5 pr-3">
       <h3 class="min-w-0 flex-1 truncate font-semibold"></h3>
       <button data-modal-x class="icon-btn" aria-label="Close">

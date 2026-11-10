@@ -69,8 +69,9 @@ const bare = (raw) => raw.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '');
 /** Lowercase-initial English words that break Title Case. */
 function titleCaseViolations(text) {
   const bad = [];
-  // A parenthetical aside is an annotation, not part of the title.
-  const tokens = wordsOf(text.replace(/\([^)]*\)/g, ' '));
+  // A parenthetical is part of the title ("Viewer (Read-Only)"); its first word
+  // is capitalised even when it is a minor word, like a title's first word.
+  const tokens = wordsOf(text.replace(/\(\s*/g, '( '));
   tokens.forEach((raw, i) => {
     if (raw.includes(DYN)) return;
     const word = bare(raw);
@@ -80,14 +81,37 @@ function titleCaseViolations(text) {
     // A unit after a number ("1 hour", "30 days", "256 MB") is a measurement.
     if (i > 0 && /^\d[\d,.]*$/.test(tokens[i - 1])) return;
     if (word[0] !== word[0].toUpperCase()) bad.push(word);
+    // Each part of a hyphenated compound is capitalised ("Sign-In", "Read-Only").
+    // Only a middle part may stay a lowercase minor word ("Out-of-Memory").
+    else if (
+      word.includes('-') &&
+      word.split('-').some((p, j, all) => j > 0 && /^[a-z]/.test(p) && (j === all.length - 1 || !LOWER_OK.has(p)))
+    )
+      bad.push(word);
   });
   return bad;
 }
 
+/** The Title Case spelling of one word token, as titleCaseViolations judges it. */
+function titleWord(raw, first) {
+  const lead = raw.match(/^[^A-Za-z0-9]*/)[0];
+  const word = raw.slice(lead.length);
+  const opensParen = lead.includes('(');
+  if (!/^[a-z]/.test(word) && !word.includes('-')) return raw;
+  if (NOT_A_WORD.test(bare(word)) && !word.includes('-')) return raw;
+  const parts = word.split('-').map((p, j, all) => {
+    const middle = j > 0 && j < all.length - 1;
+    const keepLower =
+      (middle || (j === 0 && !first && !opensParen)) && LOWER_OK.has(p.toLowerCase().replace(/\W+$/, ''));
+    return keepLower || !/^[a-z]/.test(p) ? p : p[0].toUpperCase() + p.slice(1);
+  });
+  return lead + parts.join('-');
+}
 const titleCase = (text) =>
-  wordsOf(text)
-    .map((w, i) => (i > 0 && LOWER_OK.has(w.toLowerCase()) ? w : w[0].toUpperCase() + w.slice(1)))
-    .join(' ');
+  text
+    .split(/(\s+)/)
+    .map((tok, i) => (/^\s*$/.test(tok) ? tok : titleWord(tok, i === 0)))
+    .join('');
 
 const PROPER_NOUNS =
   'Minecraft Mojang Docker Java RCON Modrinth CurseForge BlueMap Discord Fabric Forge NeoForge Quilt Paper Purpur Bedrock Geyser'.split(
@@ -709,14 +733,15 @@ function scanJsSource(source, name, { catalog = false, file = name, lineBase = 0
   });
 
   if (catalog) {
-    // A boolean field renders as a switch row, and a switch label is a choice,
-    // so it is Title Case like every other toggle. (Other fields are captions.)
+    // Every field's label is Title Case: a boolean renders as a switch (a
+    // choice), and every other field's label is its caption (a field name).
     visit(ast, (node) => {
       if (node.type !== 'ObjectExpression') return;
       const type = objProp(node, 'type');
       const label = objProp(node, 'label');
-      if (!type || !label || type.value.type !== 'Literal' || type.value.value !== 'boolean') return;
-      for (const r of readings(label.value)) checkTitleCase(name, ...at(r.loc), r.text, 'toggle label');
+      if (!type || !label || type.value.type !== 'Literal') return;
+      const what = type.value.value === 'boolean' ? 'toggle label' : 'field label';
+      for (const r of readings(label.value)) checkTitleCase(name, ...at(r.loc), r.text, what);
     });
     visit(ast, (node) => {
       if (node.type === 'Literal' && typeof node.value === 'string' && /[A-Za-z]'[A-Za-z]/.test(node.value)) {
@@ -814,6 +839,9 @@ const TITLE_ELEMENTS = [
   ['heading', /<h[1-4]\b[^>]*>(?<t>[\s\S]*?)<\/h[1-4]>/gi],
   ['table header', /<th\b[^>]*>(?<t>[\s\S]*?)<\/th>/gi],
   ['label', /<dt\b[^>]*>(?<t>[\s\S]*?)<\/dt>/gi],
+  // A field's caption (`.label`, the line above an input) names the field, like
+  // a column header, so it is Title Case too.
+  ['field label', /<(label|span|div|p)\b[^>]*class="(?:[^"]*\s)?label(?:\s[^"]*)?"[^>]*>(?<t>[\s\S]*?)<\/\1>/gi],
   ['eyebrow', /<(div|span)\b[^>]*class="[^"]*\beyebrow\b[^"]*"[^>]*>(?<t>[\s\S]*?)<\/\1>/gi],
   ['button', /<button\b(?![^>]*\bdata-quick-cmd\b)[^>]*>(?<t>[\s\S]*?)<\/button>/gi],
   // A disabled option, or one that reads as a sentence or a progress line, is a

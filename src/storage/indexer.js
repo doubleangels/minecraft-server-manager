@@ -219,13 +219,66 @@ function startIndexer({ intervalMs = 60 * 60 * 1000 } = {}) {
 // timer out, so a walk never runs mid-restore. The 15-minute interval scan is
 // the backstop if mutations never stop long enough for the timer to fire.
 let debounceTimer = null;
+let debounceDue = 0;
+let debounceSoon = false;
+// A request that lands while a walk is running would otherwise be dropped (scan()
+// returns { skipped }) and the deletion it was for would wait for the next tick.
+let rerunAfterScan = false;
 function scheduleScan({ delayMs = 45_000 } = {}) {
+  const due = Date.now() + delayMs;
+  // A quick rescan (a removal) is never pushed later, by another removal or by a
+  // growth call; the walk it runs covers both. Growth calls alone keep the long
+  // trailing debounce, so a walk never lands mid-restore.
+  if (debounceTimer && debounceSoon && debounceDue <= due) return;
+  debounceSoon = delayMs < 45_000;
   if (debounceTimer) clearTimeout(debounceTimer);
+  debounceDue = due;
   debounceTimer = setTimeout(() => {
     debounceTimer = null;
-    scan().catch(onScanFailed);
+    runQueuedScan();
   }, delayMs);
   debounceTimer.unref();
+}
+
+function runQueuedScan() {
+  if (scanning) {
+    rerunAfterScan = true;
+    return;
+  }
+  scan()
+    .catch(onScanFailed)
+    .finally(() => {
+      if (rerunAfterScan) {
+        rerunAfterScan = false;
+        runQueuedScan();
+      }
+    });
+}
+
+/**
+ * Something was removed: refresh the sizes the Storage page, quota bars and
+ * dashboard show within a couple of seconds, not 45. A short trailing debounce
+ * still folds a multi-select delete into one walk.
+ */
+function rescanSoon() {
+  scheduleScan({ delayMs: 1500 });
+}
+
+/**
+ * Rescan now and wait for it, for a caller that reloads the page straight after
+ * (Storage cleanup). Waits out a walk already running, then walks again so the
+ * result includes this removal.
+ */
+async function rescanNow() {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  while (scanning) await new Promise((r) => setTimeout(r, 100));
+  return scan().catch((err) => {
+    onScanFailed(err);
+    return { failed: true };
+  });
 }
 
 /** Instant size lookup from cache; 0 when not yet scanned. */
@@ -328,6 +381,8 @@ async function enforceStrictQuotas() {
 module.exports = {
   scan,
   scheduleScan,
+  rescanSoon,
+  rescanNow,
   startIndexer,
   sizeOf,
   sizeOfMany,

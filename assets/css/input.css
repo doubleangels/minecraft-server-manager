@@ -97,6 +97,14 @@
   --shadow-raised: 0 1px 2px rgb(14 17 19 / 0.07), 0 1px 1px rgb(14 17 19 / 0.05);
   --shadow-overlay: 0 8px 24px rgb(14 17 19 / 0.18), 0 2px 6px rgb(14 17 19 / 0.1);
   --shadow-modal: 0 16px 48px rgb(14 17 19 / 0.3), 0 4px 12px rgb(14 17 19 / 0.15);
+  /* Resting depth of a card: a hairline lift, so cards sit on the canvas
+     instead of being printed on it. Dark mode leans on the lighter surface. */
+  --shadow-card: inset 0 1px 0 rgb(255 255 255 / 0.03), 0 1px 2px rgb(0 0 0 / 0.28);
+  --shadow-card-hover: 0 4px 14px rgb(0 0 0 / 0.32), 0 1px 3px rgb(0 0 0 / 0.24);
+
+  /* ---- Motion: one curve and two durations for every state change ---- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-state: 200ms;
 
   /* ---- Semantic tokens (dark values - the default) ---- */
   --color-canvas: var(--color-stone-950);
@@ -116,11 +124,17 @@
   --color-ok: var(--color-grass-400);
   --color-warn: var(--color-gold-400);
   --color-danger: var(--color-redstone-400);
+
+  /* The one focus color: every control's keyboard focus ring and every field's
+     focus glow. Light mode swaps it for a step that reads on white. */
+  --color-focus: var(--color-diamond-400);
 }
 
 :root[data-theme='light'] {
   --color-canvas: var(--color-stone-50);
-  --color-surface: #ffffff;
+  /* A soft white, not #fff: cards still read as the lightest layer without
+     the glare of pure white against the stone canvas. */
+  --color-surface: #fcfdfd;
   --color-raised: var(--color-stone-25);
   --color-inset: var(--color-stone-100);
   --color-line: var(--color-stone-200);
@@ -136,6 +150,9 @@
   --color-ok: var(--color-grass-700);
   --color-warn: var(--color-gold-700);
   --color-danger: var(--color-redstone-700);
+  --color-focus: var(--color-diamond-600);
+  --shadow-card: 0 1px 2px rgb(14 17 19 / 0.06), 0 1px 3px rgb(14 17 19 / 0.04);
+  --shadow-card-hover: 0 6px 18px rgb(14 17 19 / 0.1), 0 2px 4px rgb(14 17 19 / 0.06);
 }
 
 @font-face {
@@ -260,6 +277,18 @@
        on browsers that support it; ignored elsewhere. */
     interpolate-size: allow-keywords;
   }
+  /* Headings wrap into balanced lines and sit a touch tighter than body
+     copy; paragraphs avoid a lone last word. Sizes stay on the elements. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  p {
+    text-wrap: pretty;
+  }
   /* Themed scrollbars - the OS-default grey bar is the last piece of stock
      chrome on an otherwise committed surface. Thin, line-colored, no track. */
   * {
@@ -305,7 +334,7 @@
     @apply font-semibold tracking-tight text-ink;
   }
   ::selection {
-    @apply bg-grass-600/60 text-white;
+    @apply bg-grass-600/60 text-stone-25;
   }
   /* Everything clickable gets a physical press, even outside .btn (flavor
      tiles, icon pickers, chips) - part of the Minecraft tactility. Segmented
@@ -370,33 +399,38 @@
    bleeding through. */
 [data-bottom-nav='app'] > :is(a, button) > svg {
   box-sizing: content-box;
-  padding: 0.25rem 0.875rem;
-  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.75rem;
+  border-radius: 9999px;
   transition:
-    background-color 150ms,
-    color 150ms;
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
 }
 [data-bottom-nav='app'] > .active > svg {
-  @apply bg-grass-500/15 text-ok;
+  @apply bg-grass-500/15 text-ok scale-105;
 }
 @media (width < 40rem) {
   [data-bottom-nav='server'] > a > svg {
     box-sizing: content-box;
-    padding: 0.25rem 0.875rem;
-    border-radius: var(--radius-sm);
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
     transition:
-      background-color 150ms,
-      color 150ms;
+      background-color 150ms ease,
+      color 150ms ease,
+      transform 150ms ease;
   }
   [data-bottom-nav='server'] > a[aria-current='page'] > svg {
-    @apply bg-grass-500/15 text-ok;
+    @apply bg-grass-500/15 text-ok scale-105;
+  }
+  [data-bottom-nav='server'] > a[aria-current='page'] {
+    @apply text-ok font-semibold;
   }
 }
 /* From sm up a server's section tabs sit in a row in the header card; the
    active one is the same tinted pill as a sub-tab. */
 @media (width >= 40rem) {
   [data-bottom-nav='server'] > a[aria-current='page'] {
-    @apply bg-grass-500/15 text-ok;
+    @apply bg-grass-500/15 text-ok font-semibold;
   }
 }
 
@@ -435,12 +469,17 @@
      the bevel inverts, exactly like clicking a button in-game. */
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-sm border border-line-strong
-      bg-raised px-3.5 py-2 text-sm font-medium text-ink transition-[background,transform,box-shadow]
-      duration-75 hover:bg-inset focus-visible:outline-2 focus-visible:outline-offset-2
-      focus-visible:outline-diamond-400 disabled:pointer-events-none disabled:opacity-50;
+      bg-raised px-3.5 py-2 text-sm font-medium text-ink hover:bg-inset focus-visible:outline-2 focus-visible:outline-offset-2
+      focus-visible:outline-focus disabled:pointer-events-none disabled:opacity-50;
     box-shadow:
       inset 0 2px 0 rgb(255 255 255 / 0.07),
       inset 0 -3px 0 rgb(0 0 0 / 0.28);
+    transition:
+      background-color var(--duration-state) var(--ease-standard),
+      border-color var(--duration-state) var(--ease-standard),
+      color var(--duration-state) var(--ease-standard),
+      box-shadow var(--duration-state) var(--ease-standard),
+      transform 75ms ease-out;
   }
   .btn:active {
     transform: translateY(2px);
@@ -450,7 +489,7 @@
   }
   .btn-primary {
     /* Hover darkens: white text passes 4.5:1 on grass-600/700 but not grass-500. */
-    @apply border-grass-800 bg-grass-600 text-white hover:bg-grass-700;
+    @apply border-grass-800 bg-grass-600 text-stone-25 hover:bg-grass-700;
     box-shadow:
       inset 0 2px 0 rgb(255 255 255 / 0.22),
       inset 0 -3px 0 rgb(0 0 0 / 0.32);
@@ -462,7 +501,7 @@
       inset 0 -1px 0 rgb(255 255 255 / 0.08);
   }
   .btn-danger {
-    @apply border-redstone-800 bg-redstone-600 text-white hover:bg-redstone-700;
+    @apply border-redstone-800 bg-redstone-600 text-stone-25 hover:bg-redstone-700;
     box-shadow:
       inset 0 2px 0 rgb(255 255 255 / 0.18),
       inset 0 -3px 0 rgb(0 0 0 / 0.32);
@@ -499,7 +538,8 @@
     .seg-btn,
     .tile,
     .swatch,
-    .icon-btn {
+    .icon-btn,
+    .subtab {
       min-height: 2.75rem;
       min-width: 2.75rem;
     }
@@ -508,8 +548,15 @@
     .msm-toggle {
       min-height: 2.75rem;
     }
-    select.input {
+    /* Every field, not just selects, so a search box sits level with the
+       buttons beside it. */
+    .input {
       min-height: 2.75rem;
+    }
+    /* A segmented control is a tray (1px border + 2px padding each side), so its
+       buttons are 6px short of 2.75rem and the whole control lands level. */
+    .seg > .seg-btn {
+      min-height: calc(2.75rem - 6px);
     }
     /* A bare checkbox/radio is 16px; float the whole row it sits in to 44px so
        the label text is part of the target, without inflating the box itself. */
@@ -517,18 +564,20 @@
     label:has(> input.msm-radio) {
       min-height: 2.75rem;
     }
-    /* Range: keep the 8px track but give the control a 44px hit area, and a
-       thumb big enough to grab. */
+    /* Range: the track stays an 8px bar (it is the ::*-track, not the
+       element), while the element grows to a 44px hit area and the thumb to
+       something a thumb can grab. */
     input[type='range'].msm-range {
-      min-height: 2.75rem;
+      height: 2.75rem;
     }
     input[type='range'].msm-range::-webkit-slider-thumb {
-      width: 1.75rem;
-      height: 1.75rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-top: -0.5rem; /* (8px track - 24px thumb) / 2 */
     }
     input[type='range'].msm-range::-moz-range-thumb {
-      width: 1.75rem;
-      height: 1.75rem;
+      width: 1.5rem;
+      height: 1.5rem;
     }
   }
 
@@ -552,7 +601,7 @@
      segments instead of teleporting. It carries the exact selected-state
      visuals; when active, the buttons keep only their text color. */
   .seg-pill {
-    @apply pointer-events-none absolute left-0 top-0 rounded bg-raised opacity-0;
+    @apply pointer-events-none absolute left-0 top-0 rounded-sm bg-raised opacity-0;
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.06),
       inset 0 0 0 1px var(--color-line-strong);
@@ -571,9 +620,9 @@
     box-shadow: none;
   }
   .seg-btn {
-    @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded px-3 text-sm
+    @apply inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-sm px-3 text-sm
       font-medium text-ink-faint transition-colors hover:text-ink
-      focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus;
   }
   .seg-btn[aria-selected='true'],
   .seg-btn[aria-pressed='true'] {
@@ -590,19 +639,20 @@
      pick-one-of-N controls, these navigate. One shared class instead of the
      same utility string hand-rolled per template. */
   .subtab {
-    @apply rounded-md px-2.5 py-1 text-sm font-medium text-ink-faint transition hover:bg-raised hover:text-ink
-      focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
+    @apply inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1 sm:px-2.5 text-sm font-medium text-ink-faint transition hover:bg-raised hover:text-ink
+      focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus;
   }
   .subtab.active {
-    @apply bg-grass-500/15 text-ok hover:bg-grass-500/15 hover:text-ok;
+    @apply bg-grass-500/15 text-ok font-semibold hover:bg-grass-500/15 hover:text-ok;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ok) 35%, transparent);
   }
 
   /* Icon-only buttons (modal/toast close, inline glyph actions): a real hit
      area and a visible focus state instead of a naked 16px glyph. */
   .icon-btn {
-    @apply grid size-8 shrink-0 place-items-center rounded-md text-ink-faint transition-colors
+    @apply grid size-8 shrink-0 place-items-center rounded-sm text-ink-faint transition-colors
       hover:bg-inset hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1
-      focus-visible:outline-diamond-400;
+      focus-visible:outline-focus;
   }
 
   /* Sticky bottom action bar (Save/Discard, bulk actions). Opaque, so page
@@ -654,25 +704,62 @@
      look as a server section tab on a phone: icon over label, the active one
      marked by a tinted pill behind its icon (see the bottom-nav rules). */
   .app-tab {
-    @apply relative flex min-w-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap px-0.5 pt-1 pb-1 text-[10px] font-medium text-ink-faint transition sm:text-xs;
+    @apply relative flex min-w-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap px-0.5 pt-1.5 pb-1 text-[10px] font-medium text-ink-faint transition sm:text-xs;
   }
   .app-tab > span:not(.badge) {
-    @apply max-w-full truncate;
+    @apply max-w-full truncate tracking-tight;
   }
   .app-tab.active {
-    @apply text-ink;
+    @apply text-ok font-semibold;
   }
 
   .card {
     /* One elevation language per edge: the border carries it (plus the surface
        lightness step in dark mode) - no shadow doubling the same edge. */
     @apply rounded-lg border border-line bg-surface;
+    box-shadow: var(--shadow-card);
+  }
+  /* A card that is itself a link or a button lifts a little on hover. */
+  @media (hover: hover) {
+    a.card:hover,
+    button.card:hover {
+      border-color: var(--color-line-strong);
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-1px);
+    }
+  }
+  a.card,
+  button.card {
+    transition:
+      border-color var(--duration-state) var(--ease-standard),
+      box-shadow var(--duration-state) var(--ease-standard),
+      transform var(--duration-state) var(--ease-standard);
+  }
+
+  /* Stat tiles: one number with its caption (dashboard, combined graphs, a
+     server's Metrics strip). Used as `card stat-tile`; a linked tile adds
+     `block hover:border-line-strong`. One shape everywhere, so a number reads
+     the same size wherever it appears. */
+  .stat-tile {
+    @apply min-w-0 p-4 transition;
+  }
+  .stat-label {
+    @apply flex items-center gap-1 text-xs text-ink-faint;
+  }
+  .stat-value {
+    @apply mt-1 break-words text-2xl font-bold tabular-nums;
+  }
+  .stat-unit {
+    @apply text-base font-medium text-ink-faint;
+  }
+  .stat-sub {
+    @apply text-xs text-ink-faint;
   }
 
   /* Badges: neutral by default; the four semantic variants are the ONLY badge
      colorways - no ad-hoc bg/text pairs at call sites. */
   .badge {
-    @apply inline-flex items-center gap-1 whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-inset text-ink-soft;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-inset text-ink-soft;
   }
   .badge-ok {
     @apply bg-grass-500/15 text-ok;
@@ -716,7 +803,7 @@
      card was invisible; this is the fix). State lives in aria-pressed. */
   .swatch {
     @apply size-7 shrink-0 cursor-pointer rounded-sm border border-line-strong transition
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   .swatch:hover {
     border-color: var(--color-stone-500);
@@ -742,8 +829,8 @@
      aria-pressed; the border stays 2px in every state so picking never shifts
      the layout by a pixel. Padding/size set at the call site. */
   .tile {
-    @apply grid place-items-center gap-1 rounded-md border-2 border-line bg-inset transition
-      hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+    @apply grid place-items-center gap-1 rounded-sm border-2 border-line bg-inset transition
+      hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   .tile[aria-pressed='true'] {
     @apply border-grass-500 text-ok hover:border-grass-500;
@@ -753,7 +840,7 @@
      aria-pressed, matching the segmented control's contract. */
   button.chip {
     @apply cursor-pointer transition hover:border-line-strong focus-visible:outline-2
-      focus-visible:outline-offset-1 focus-visible:outline-diamond-400 disabled:cursor-default disabled:opacity-50;
+      focus-visible:outline-offset-1 focus-visible:outline-focus disabled:cursor-default disabled:opacity-50;
   }
   button.chip[aria-pressed='true'] {
     @apply border-grass-500 bg-grass-600/10 text-ok;
@@ -772,10 +859,10 @@
   }
 
   .input {
-    @apply w-full rounded-md border border-line-strong bg-inset px-3 py-2 text-sm text-ink
+    @apply w-full rounded-sm border border-line-strong bg-inset px-3 py-2 text-sm text-ink
       transition-[border-color,box-shadow] duration-150
-      placeholder:text-ink-faint focus:border-diamond-400 focus:outline-none
-      focus:ring-1 focus:ring-diamond-400;
+      placeholder:text-ink-faint focus:border-focus focus:outline-none
+      focus:ring-[3px] focus:ring-focus/25;
   }
   /* Fields advertise interactivity on hover (stone-500 reads stronger than
      line-strong in BOTH themes); focus keeps the diamond ring. */
@@ -803,7 +890,7 @@
   /* Inline code inside body copy (a var name, a command, a hostname). Three
      slightly different hand-rolled treatments existed; this is the one. */
   .code-inline {
-    @apply rounded bg-inset px-1 font-mono text-[0.9em] text-ink-soft;
+    @apply rounded-sm bg-inset px-1 font-mono text-[0.9em] text-ink-soft;
   }
 
   .table-base {
@@ -817,10 +904,19 @@
   .table-base td {
     @apply border-b border-line/60 px-4 py-2.5 align-middle;
   }
+  .table-base tbody tr {
+    transition: background-color var(--duration-state) var(--ease-standard);
+  }
   @media (hover: hover) {
     .table-base tbody tr:hover {
       @apply bg-inset/50;
     }
+  }
+  /* A row picked for a bulk action: tinted, with the same left accent as the
+     current sidebar item. Driven by its checkbox, so no script has to mark it. */
+  .table-base tbody tr:has(> td input[type='checkbox']:checked) {
+    background: color-mix(in srgb, var(--color-ok) 9%, transparent);
+    box-shadow: inset 3px 0 0 var(--color-ok);
   }
 
   /* Add .table-stack to a .table-base and, below sm, every row collapses into a
@@ -831,8 +927,11 @@
   @media (width < 40rem) {
     /* The table and its body size to the card, not to their widest content:
        as a table they'd grow to fit the longest file or mod name and run off
-       the right edge of the screen. */
-    .table-stack,
+       the right edge of the screen. Gutter padding keeps stacked row cards
+       from crashing into the parent card's border. */
+    .table-stack {
+      @apply block w-full p-2.5 sm:p-0;
+    }
     .table-stack tbody {
       @apply block w-full;
     }
@@ -840,10 +939,10 @@
       @apply sr-only;
     }
     .table-stack tbody tr {
-      @apply block rounded-md border border-line bg-inset/30 p-3;
+      @apply block rounded-lg border border-line bg-inset/30 p-3 shadow-xs;
     }
     .table-stack tbody tr + tr {
-      @apply mt-2;
+      @apply mt-2.5;
     }
     .table-stack td {
       @apply flex min-w-0 items-baseline justify-between gap-4 border-0 px-0 py-1 text-sm;
@@ -864,7 +963,7 @@
       content: none;
     }
     .table-stack td[data-th=''] {
-      @apply justify-start pt-2;
+      @apply justify-start border-t border-line/40 pt-2.5 mt-1.5;
     }
     .table-stack td:empty {
       @apply hidden;
@@ -872,14 +971,17 @@
   }
 
   .nav-item {
-    @apply flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-ink-soft
+    @apply flex items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium text-ink-soft
       transition hover:bg-inset hover:text-ink focus-visible:outline-2
-      focus-visible:outline-offset-[-2px] focus-visible:outline-diamond-400;
+      focus-visible:outline-offset-[-2px] focus-visible:outline-focus;
   }
   /* The current page is a tinted pill, the one active marker used across
      the panel (tabs, sub-tabs, phone tab bars); no accent line on an edge. */
   .nav-item.active {
     @apply bg-grass-600/15 text-ok;
+    /* A left accent bar on top of the tint, so the current page is
+       unmistakable even at a glance down a long sidebar. */
+    box-shadow: inset 3px 0 0 var(--color-ok);
   }
 
   /* Meters read like the in-game XP bar: blocky, with a beveled trough and a
@@ -969,10 +1071,10 @@
   input[type='checkbox'].msm-check,
   input[type='radio'].msm-radio {
     @apply size-4 shrink-0 cursor-pointer appearance-none border border-line-strong bg-inset
-      transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   input[type='checkbox'].msm-check {
-    @apply rounded;
+    @apply rounded-sm;
     /* The checkmark lives on the element at size 0, so checking GROWS it in
        with a small overshoot and unchecking shrinks it away. */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
@@ -1012,7 +1114,7 @@
   }
   .msm-toggle input {
     @apply absolute inset-0 cursor-pointer appearance-none rounded-full
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   .msm-toggle span {
     @apply pointer-events-none relative h-5 w-9 rounded-full bg-inset ring-1 ring-inset ring-line-strong transition;
@@ -1050,18 +1152,26 @@
     @apply bg-grass-600 ring-grass-700;
   }
   .msm-toggle input:checked + span::after {
-    @apply bg-white;
+    @apply bg-stone-25;
     transform: translateX(1rem);
     transform-origin: right center;
   }
 
   /* Range sliders */
+  /* The element is a transparent hit area; the visible bar is the track part,
+     so a taller touch target never fattens the bar. */
   input[type='range'].msm-range {
-    @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-inset
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-diamond-400;
+    @apply h-4 w-full cursor-pointer appearance-none rounded-full bg-transparent
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
+  }
+  input[type='range'].msm-range::-webkit-slider-runnable-track {
+    @apply h-2 rounded-full bg-inset;
+  }
+  input[type='range'].msm-range::-moz-range-track {
+    @apply h-2 rounded-full bg-inset;
   }
   input[type='range'].msm-range::-webkit-slider-thumb {
-    @apply size-4 appearance-none rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
+    @apply -mt-1 size-4 appearance-none rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
   }
   input[type='range'].msm-range::-moz-range-thumb {
     @apply size-4 rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
@@ -1104,5 +1214,142 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* iOS Safari zooms the whole page in when a focused field's text is under
+   16px, and stays zoomed. Every .input is text-sm (14px), and code-like ones
+   are text-xs, so on a touch screen fields read at 16px. Unlayered on purpose:
+   it must beat the text-xs/text-sm utilities on the element. Desktop keeps the
+   compact sizes (a mouse never triggers the zoom). */
+@media (pointer: coarse) {
+  .input,
+  textarea,
+  select,
+  input:not([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file']) {
+    font-size: 16px;
+  }
+}
+
+/* Keep iOS from inflating text when a phone turns landscape. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* One title per page: from lg (where the sidebar is always shown) a page with
+   a page-header shows its own big heading, so the topbar hides its copy. It is
+   hidden, not removed, so the actions keep their place on the right. */
+@media (width >= 64rem) {
+  body:has([data-page-header]) #topbar-title {
+    visibility: hidden;
+  }
+}
+
+/* A scroll row (tab strips) that scrolls by touch or trackpad without drawing a
+   scrollbar under the tabs. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@layer components {
+  /* Every control eases its hover, focus and selected states on the same curve
+     and duration (the .btn press stays instant; see .btn). */
+  .seg-btn,
+  .subtab,
+  .icon-btn,
+  .nav-item,
+  .chip,
+  .tile,
+  .swatch,
+  .input,
+  .badge,
+  .app-tab {
+    transition-duration: var(--duration-state);
+    transition-timing-function: var(--ease-standard);
+  }
+
+  /* ---- Loading and empty states ----
+     .loading-state: a spinner with its line of text ("Finding the largest
+     files…"), in place of bare grey text. .empty-inline: an icon over one quiet
+     sentence, for a table or list with nothing in it (the full .empty-state
+     partial is for a whole page). */
+  .loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding-block: 1.5rem;
+    font-size: var(--text-sm);
+    color: var(--color-ink-faint);
+  }
+  .loading-state::before {
+    content: '';
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    border: 2px solid var(--color-line-strong);
+    border-top-color: var(--color-ok);
+    animation: msm-spin 0.8s linear infinite;
+  }
+  @keyframes msm-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .loading-state::before {
+      animation: none;
+      border-top-color: var(--color-line-strong);
+    }
+  }
+  .empty-inline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--color-ink-faint);
+  }
+  .empty-inline > .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--color-ink-faint);
+    opacity: 0.7;
+  }
+}
+
+@layer components {
+  /* A card's title: optional leading icon (muted, a step smaller than the text)
+     and the heading in one aligned row. */
+  .card-title {
+    @apply flex items-center gap-2 font-semibold text-ink;
+  }
+  .card-title > .icon {
+    @apply shrink-0 text-ink-faint;
+  }
+}
+
+@layer components {
+  /* Icons in navigation rest a shade quieter than their label, brighten with it
+     on hover, and take the accent on the current item. */
+  .nav-item > .icon,
+  .subtab > .icon {
+    color: var(--color-ink-faint);
+    transition: color var(--duration-state) var(--ease-standard);
+  }
+  .nav-item:hover > .icon,
+  .subtab:hover > .icon {
+    color: var(--color-ink);
+  }
+  .nav-item.active > .icon,
+  .subtab.active > .icon {
+    color: var(--color-ok);
   }
 }

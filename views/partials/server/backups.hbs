@@ -9,8 +9,8 @@
     <label class="flex items-center gap-2 text-xs text-ink-faint" data-tip="After the backup is saved, remove chunks no player has spent 30+ seconds in to shrink the world. Only runs while the server is stopped.">
       <input type="checkbox" class="msm-check" id="bk-shrink"> Also Shrink the World Afterwards
     </label>
-    <a class="btn btn-sm" href="/schedules?server={{server.id}}" data-tip="Back this server up automatically on a schedule.">{{{icon 'calendar-clock' 'size-3.5'}}} Schedule Backups</a>
-    <button class="btn btn-primary btn-sm{{#unless perms.backups}} hidden{{/unless}}" id="bk-now">{{{icon 'save' 'size-3.5'}}} Back Up Now</button>
+    <a class="btn btn-sm w-full sm:w-auto" href="/schedules?server={{server.id}}" data-tip="Back this server up automatically on a schedule.">{{{icon 'calendar-clock' 'size-3.5'}}} Schedule Backups</a>
+    <button class="btn btn-primary btn-sm w-full sm:w-auto{{#unless perms.backups}} hidden{{/unless}}" id="bk-now">{{{icon 'save' 'size-3.5'}}} Back Up Now</button>
   </div>
 </div>
 {{! Admin-only, like the API behind it. Per field: a blank one follows the
@@ -43,7 +43,7 @@
           {{! w-full + max-w-0 (sm+ only) so long archive names truncate instead of pushing
               the Actions column into horizontal scroll. }}
           <td data-th="Archive" class="sm:w-full sm:max-w-0"><span class="block min-w-0"><span class="block truncate font-mono text-xs" title="{{file}}">{{file}}</span><span class="block text-xs text-ink-soft [overflow-wrap:anywhere] {{#unless note}}hidden{{/unless}}" data-backup-note>{{note}}</span></span></td>
-          <td data-th="Reason"><span class="badge {{#if (eq reason 'pre-update')}}badge-warn{{else if (eq reason 'pre-restore')}}badge-info{{/if}}">{{reason}}</span></td>
+          <td data-th="Reason"><span class="badge {{#if (eq reason 'pre-update')}}badge-warn{{else if (eq reason 'pre-restore')}}badge-info{{/if}}">{{titleCase reason}}</span></td>
           <td data-th="Size" class="whitespace-nowrap text-right text-ink-faint">{{bytes size}}</td>
           <td data-th="Created" class="whitespace-nowrap text-right text-ink-faint" data-ts="{{ts}}">{{ts}}</td>
           <td data-th="" class="text-right"><div class="flex flex-wrap gap-1 sm:inline-flex sm:flex-nowrap">

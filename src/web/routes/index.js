@@ -105,6 +105,8 @@ const SUB_LABELS = {
 };
 // Sub-nav entries only shown to admins (the API 403s these for other roles).
 const ADMIN_ONLY_TABS = new Set(['chatbot']);
+// Server tabs that carry the World Controls rail: the ones about the running game.
+const WORLD_CONTROL_TABS = new Set(['overview', 'console', 'players', 'chat', 'map']);
 
 /** Build the two-level nav (top groups + contextual sub-nav) for a given active tab. */
 // Sub-nav entries that need a per-server capability beyond `view`.
@@ -450,6 +452,7 @@ router.get(
     }
     res.render('server-player', {
       title: `${player.name} · ${server.name}`,
+      topbarTitle: 'Servers', // the header card names the server
       active: 'servers',
       server,
       tab: 'players',
@@ -491,6 +494,7 @@ router.get(
     }
     const context = {
       title: server.name,
+      topbarTitle: 'Servers', // the header card names the server
       active: 'servers',
       server,
       tab,
@@ -698,11 +702,11 @@ router.get(
       const total = indexer.sizeOf(`servers/${row.id}`);
       if (total > 0) {
         const cats = [
-          { label: 'World(s)', rel: 'world', color: 'bg-grass-500' },
-          { label: 'Mods', rel: 'mods', color: 'bg-diamond-400' },
-          { label: 'Plugins', rel: 'plugins', color: 'bg-diamond-400' },
-          { label: 'Logs', rel: 'logs', color: 'bg-gold-400' },
-          { label: 'Config', rel: 'config', color: 'bg-stone-500' },
+          { label: 'World(s)', rel: 'world', color: 'bg-ok' },
+          { label: 'Mods', rel: 'mods', color: 'bg-link' },
+          { label: 'Plugins', rel: 'plugins', color: 'bg-link' },
+          { label: 'Logs', rel: 'logs', color: 'bg-warn' },
+          { label: 'Config', rel: 'config', color: 'bg-ink-faint' },
         ];
         const rows = [];
         let accounted = 0;
@@ -719,7 +723,7 @@ router.get(
             label: 'Config & other',
             size: other,
             pct: Math.max(1, Math.round((other / total) * 100)),
-            color: 'bg-stone-500',
+            color: 'bg-ink-faint',
           });
         context.breakdown = rows;
       }
@@ -861,6 +865,9 @@ router.get(
       context.retentionGlobal = backupRetention.globalConfig();
     }
 
+    // World controls (time, weather, difficulty, game rules) belong beside the
+    // tabs about the running game, not under Settings, Files or Backups.
+    context.showWorldControls = WORLD_CONTROL_TABS.has(tab);
     res.render('server-detail', context);
   })
 );
@@ -1006,13 +1013,13 @@ router.get(
     const catNames = {
       servers: 'Servers',
       backups: 'Backups',
-      'library/worlds': 'Worlds library',
-      'library/mods': 'Mods and content library',
-      'library/modpacks': 'Modpacks library',
-      'library/icons': 'Icons library',
-      logs: 'Logs and event captures',
+      'library/worlds': 'Worlds Library',
+      'library/mods': 'Mods and Content Library',
+      'library/modpacks': 'Modpacks Library',
+      'library/icons': 'Icons Library',
+      logs: 'Logs and Event Captures',
       blueprints: 'Blueprints',
-      tmp: 'Temporary files',
+      tmp: 'Temporary Files',
     };
     const catKeys = Object.keys(catNames);
     const sizes = indexer.sizeOfMany([...catKeys, '', 'library']);
@@ -1033,13 +1040,13 @@ router.get(
     const totalUsed = sizes.get('') || 0;
     // Real category bar: servers / backups / library / other, from the index.
     const segs = [
-      { label: 'Servers', cls: 'bg-grass-600', size: sizes.get('servers') || 0 },
-      { label: 'Backups', cls: 'bg-diamond-500', size: sizes.get('backups') || 0 },
-      { label: 'Library', cls: 'bg-gold-400', size: sizes.get('library') || 0 },
+      { label: 'Servers', cls: 'bg-ok', size: sizes.get('servers') || 0 },
+      { label: 'Backups', cls: 'bg-link', size: sizes.get('backups') || 0 },
+      { label: 'Library', cls: 'bg-warn', size: sizes.get('library') || 0 },
     ];
     segs.push({
-      label: 'Logs, blueprints, temporary files',
-      cls: 'bg-stone-500',
+      label: 'Logs, Blueprints, Temporary Files',
+      cls: 'bg-ink-faint',
       size: Math.max(0, totalUsed - segs.reduce((n, s) => n + s.size, 0)),
     });
     const breakdown = segs.map((s) => ({
@@ -1065,7 +1072,7 @@ router.get(
         totalUsed,
         diskFree: free,
         diskTotal: total,
-        lastScan: indexer.lastScan() || 'not yet',
+        lastScan: indexer.lastScan() || null,
         categories,
         breakdown,
         largestFiles: [],

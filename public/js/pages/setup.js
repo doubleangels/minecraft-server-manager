@@ -18,7 +18,7 @@ function init() {
   function goTo(i) {
     step = Math.max(0, Math.min(sections.length - 1, i));
     sections.forEach((s) => (s.hidden = Number(s.dataset.step) !== step));
-    dots.forEach((d, di) => d.classList.toggle('bg-grass-500', di <= step));
+    dots.forEach((d, di) => d.classList.toggle('bg-ok', di <= step));
     dots.forEach((d, di) => d.classList.toggle('bg-line', di > step));
     if (step === 1 && !checksLoaded) loadChecks();
     if (step === 3 && !localizationLoaded) loadLocalization();

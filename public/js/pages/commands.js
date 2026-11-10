@@ -121,7 +121,7 @@ function init(root) {
           </div>
         </div>
         <div>
-          <label class="label">Description (optional)</label>
+          <label class="label">Description (Optional)</label>
           <input class="input" data-f="description" maxlength="200" placeholder="Random teleport, 500-5000 blocks" value="${esc(existing ? existing.description : '')}">
         </div>
       </div>
@@ -129,7 +129,7 @@ function init(root) {
       <div>
         <label class="label">Action</label>
         <select class="input" data-f="action" data-label="Action">
-          <option value="rtp">Random Teleport (built-in)</option>
+          <option value="rtp">Random Teleport (Built-In)</option>
           <option value="structure">Teleport to a Structure</option>
           <option value="biome">Teleport to a Biome</option>
           <option value="console">Run Console Commands</option>
@@ -138,8 +138,8 @@ function init(root) {
 
       <div data-cc-panel="rtp" class="space-y-3">
         <div class="grid grid-cols-2 gap-2">
-          <div><label class="label">Min distance</label><input class="input" type="number" data-f="minDistance" min="0" value="${Number(pRtp.minDistance ?? 500)}"></div>
-          <div><label class="label">Max distance</label><input class="input" type="number" data-f="maxDistance" min="16" value="${Number(pRtp.maxDistance ?? 5000)}"></div>
+          <div><label class="label">Min Distance</label><input class="input" type="number" data-f="minDistance" min="0" value="${Number(pRtp.minDistance ?? 500)}"></div>
+          <div><label class="label">Max Distance</label><input class="input" type="number" data-f="maxDistance" min="16" value="${Number(pRtp.maxDistance ?? 5000)}"></div>
         </div>
         <div>
           <label class="label">Around</label>
@@ -157,7 +157,7 @@ function init(root) {
           <select class="input" data-f="structure" data-label="Structure"><option value="">Loading structures…</option></select>
         </div>
         <div class="grid grid-cols-2 items-end gap-2">
-          <div><label class="label">Search radius</label><input class="input" type="number" data-f="structMaxDistance" min="16" value="${Number(pStruct.maxDistance ?? 5000)}"></div>
+          <div><label class="label">Search Radius</label><input class="input" type="number" data-f="structMaxDistance" min="16" value="${Number(pStruct.maxDistance ?? 5000)}"></div>
           <label class="flex items-center gap-2 pb-2"><input type="checkbox" class="msm-check" data-f="structRandom" ${pStruct.random === false ? '' : 'checked'}> Surprise Me (Random One, Not Nearest)</label>
         </div>
       </div>
@@ -172,7 +172,7 @@ function init(root) {
 
       <div data-cc-panel="console" class="hidden space-y-3">
         <div>
-          <label class="label">Console commands (one per line, run in order)</label>
+          <label class="label">Console Commands (One per Line, Run in Order)</label>
           <textarea class="input min-h-28 font-mono text-xs" data-f="commands" rows="4" spellcheck="false" placeholder="give {player} minecraft:golden_apple 1&#10;tell {player} Enjoy!">${esc(Array.isArray(p.commands) ? p.commands.join('\n') : '')}</textarea>
           <p class="mt-1 text-xs text-ink-faint">
             Placeholders: <code class="font-mono">{player}</code> = who typed it, <code class="font-mono">{arg1}</code> to <code class="font-mono">{arg3}</code> = words after the trigger
@@ -184,15 +184,15 @@ function init(root) {
       <div class="rounded-md border border-line p-3 space-y-3">
         <div class="text-sm font-medium">Messages whispered to the player <span class="font-normal text-ink-faint">(optional)</span></div>
         <div>
-          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-gold-400"></span> While it runs</label>
+          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-warn"></span> While It Runs</label>
           <input class="input" data-f="msgPending" maxlength="200" placeholder="Looking for a random location…" value="${esc(existing ? existing.msg_pending : '')}">
         </div>
         <div>
-          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-grass-500"></span> On success</label>
+          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-ok"></span> On Success</label>
           <input class="input" data-f="msgSuccess" maxlength="200" placeholder="Teleported {player} to {x}, {z} ({distance} blocks away)" value="${esc(existing ? existing.msg_success : '')}">
         </div>
         <div>
-          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-redstone-500"></span> On failure</label>
+          <label class="label flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-danger"></span> On Failure</label>
           <input class="input" data-f="msgFailure" maxlength="200" placeholder="Couldn't find a safe spot. Try again in a moment. ({error})" value="${esc(existing ? existing.msg_failure : '')}">
         </div>
         <p class="text-xs text-ink-faint" data-cc-placeholders></p>
@@ -200,7 +200,7 @@ function init(root) {
 
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="label">Who can use it</label>
+          <label class="label">Who Can Use It</label>
           <select class="input" data-f="permission" data-label="Who can use it">
             <option value="everyone">Everyone</option>
             <option value="whitelist">Whitelisted Players</option>
@@ -208,7 +208,7 @@ function init(root) {
           </select>
         </div>
         <div>
-          <label class="label">Cooldown (seconds per player)</label>
+          <label class="label">Cooldown (Seconds per Player)</label>
           <input class="input" type="number" data-f="cooldownSec" min="0" max="86400" value="${Number(existing ? existing.cooldown_sec : 30)}">
           <p class="mt-1 text-xs text-ink-faint">Use 0 for no cooldown.</p>
         </div>
@@ -441,7 +441,7 @@ function init(root) {
     content.className = 'space-y-3 text-sm';
     content.innerHTML = `
       <div>
-        <label class="label">Run as player (must be online for teleports)</label>
+        <label class="label">Run as Player (Must Be Online for Teleports)</label>
         <input class="input" data-f="player" maxlength="16" autocomplete="off" spellcheck="false" placeholder="AverageLupo" value="${esc(localStorage.getItem('cc-test-player') || '')}">
       </div>
       <p class="text-xs text-ink-faint">Runs <code class="font-mono">${esc(prefix + cmd.trigger)}</code> right now. Permission and cooldown checks are skipped, and the result is whispered to the player in-game.</p>`;

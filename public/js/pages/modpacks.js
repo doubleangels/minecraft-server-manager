@@ -80,12 +80,12 @@ function renderPackDetails(pack) {
     </div>
     <div data-desc class="max-h-72 overflow-y-auto rounded-md border border-line bg-inset p-4 text-sm leading-relaxed"></div>
     <div>
-      <label class="label" for="pd-version">Version to pin</label>
+      <label class="label" for="pd-version">Version to Pin</label>
       <select class="input" id="pd-version" data-label="Pack version"></select>
       <p class="help">Installs are always pinned to this exact version, so a restart can never silently upgrade the pack.</p>
     </div>
     <div data-mods class="hidden">
-      <div class="label" data-mods-title>Pack contents</div>
+      <div class="label" data-mods-title>Pack Contents</div>
       <div data-mods-list class="max-h-56 overflow-y-auto rounded-md border border-line"></div>
     </div>`;
 
@@ -229,7 +229,7 @@ function initPage() {
       () =>
         `<div class="card animate-pulse p-4" aria-hidden="true">
           <div class="flex items-center gap-3"><div class="size-10 rounded-md bg-inset"></div>
-          <div class="flex-1 space-y-2"><div class="h-3 w-2/3 rounded bg-inset"></div><div class="h-2.5 w-1/2 rounded bg-inset"></div></div></div>
+          <div class="flex-1 space-y-2"><div class="h-3 w-2/3 rounded-sm bg-inset"></div><div class="h-2.5 w-1/2 rounded-sm bg-inset"></div></div></div>
         </div>`
     ).join('');
     try {

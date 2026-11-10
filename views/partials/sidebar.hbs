@@ -1,8 +1,13 @@
-<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 h-dvh w-60 -translate-x-full border-r border-line bg-surface transition-transform lg:sticky lg:top-0 lg:translate-x-0">
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 h-dvh w-72 max-w-[85vw] -translate-x-full border-r border-line bg-surface transition-transform lg:sticky lg:top-0 lg:w-60 xl:w-64 lg:translate-x-0">
   <div class="flex h-full flex-col">
-    <a href="/" class="flex items-center gap-2.5 border-b border-line px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] texture-top">
-      {{> brand-lockup size='size-9' textSize='text-[11px]'}}
-    </a>
+    <div class="flex items-center justify-between border-b border-line px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] texture-top">
+      <a href="/" class="flex items-center gap-2.5">
+        {{> brand-lockup size='size-9' textSize='text-[11px]'}}
+      </a>
+      <button type="button" id="sidebar-close" class="icon-btn lg:hidden" aria-label="Close navigation">
+        {{{icon 'x' 'size-4'}}}
+      </button>
+    </div>
 
     {{! Grouped by intent: your servers first, then what you install from
         (Library), the recurring care every server needs (Maintenance), and
@@ -59,7 +64,7 @@
             <span class="ml-auto hidden shrink-0 text-warn" data-pin-mark aria-label="Pinned">{{{icon 'star' 'size-3'}}}</span>
             {{! Copy the connect address without opening the server. Revealed on
                 hover with a mouse; always there on touch screens. }}
-            <button type="button" class="-my-1 shrink-0 rounded-sm p-1 text-ink-faint hover:text-link [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/srv:opacity-100 focus-visible:opacity-100" data-copy="{{address}}" data-tip="Copy {{address}}." aria-label="Copy the address for {{name}}">{{{icon 'copy' 'size-3.5'}}}</button>
+            <button type="button" class="-my-1 shrink-0 rounded-sm p-1 text-ink-faint hover:text-link focus-visible:outline-2 focus-visible:outline-focus [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/srv:opacity-100 focus-visible:opacity-100" data-copy="{{address}}" data-tip="Copy {{address}}." aria-label="Copy the address for {{name}}">{{{icon 'copy' 'size-3.5'}}}</button>
             <span class="status-dot relative shrink-0 {{statusDot status}} {{#if (statusPulse status)}}pulse{{/if}}" title="{{statusLabel status}}"></span>
           </a>
         {{/each}}
@@ -78,4 +83,4 @@
     {{/if}}
   </div>
 </aside>
-<div id="sidebar-backdrop" class="fixed inset-0 z-30 hidden bg-black/50 lg:hidden"></div>
+<div id="sidebar-backdrop" class="fixed inset-0 z-30 hidden bg-stone-950/60 backdrop-blur-sm lg:hidden"></div>

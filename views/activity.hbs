@@ -28,7 +28,7 @@
       {{! The summary keeps a readable minimum width; on a phone the server,
           actor and time drop to their own line instead of squeezing it. }}
       <li class="flex flex-wrap items-center gap-x-2 gap-y-1 p-3 text-sm">
-        <span class="badge shrink-0">{{type}}</span>
+        <span class="badge shrink-0">{{eventType type}}</span>
         <span class="min-w-[12rem] flex-1 break-words">{{summary}}</span>
         <span class="flex min-w-0 max-w-full flex-wrap items-center gap-x-2 text-xs">
           {{#if serverId}}
@@ -41,7 +41,7 @@
         {{#if hasLog}}<button class="btn btn-ghost btn-sm shrink-0" data-event-excerpt data-event-id="{{id}}" data-event-type="{{type}}" data-tip="View the captured log.">{{{icon 'file-text' 'size-3.5'}}}</button>{{/if}}
       </li>
     {{else}}
-      <li class="p-10 text-center text-sm text-ink-faint">No events match these filters.</li>
+      <li class="empty-inline py-10">{{{icon 'search-x' 'size-6'}}}No events match these filters.</li>
       {{! wording kept in sync with the History tab's empty state }}
     {{/each}}
   </ol>
@@ -49,9 +49,9 @@
   <div class="flex items-center justify-between border-t border-line p-3 text-xs text-ink-faint">
     <span>Showing {{from}} to {{to}} of {{total}} events</span>
     <div class="flex items-center gap-2">
-      {{#if prevHref}}<a class="btn btn-ghost btn-sm" href="{{prevHref}}" aria-label="Previous page">{{{icon 'chevron-left' 'size-4'}}}</a>{{else}}<button class="btn btn-ghost btn-sm" disabled aria-label="Previous page">{{{icon 'chevron-left' 'size-4'}}}</button>{{/if}}
+      {{#if prevHref}}<a class="btn btn-ghost btn-sm" href="{{prevHref}}" aria-label="Previous page">{{{icon 'chevron-left' 'size-3.5'}}}</a>{{else}}<button class="btn btn-ghost btn-sm" disabled aria-label="Previous page">{{{icon 'chevron-left' 'size-3.5'}}}</button>{{/if}}
       <span class="tabular-nums">Page {{page}} of {{pages}}</span>
-      {{#if nextHref}}<a class="btn btn-ghost btn-sm" href="{{nextHref}}" aria-label="Next page">{{{icon 'chevron-right' 'size-4'}}}</a>{{else}}<button class="btn btn-ghost btn-sm" disabled aria-label="Next page">{{{icon 'chevron-right' 'size-4'}}}</button>{{/if}}
+      {{#if nextHref}}<a class="btn btn-ghost btn-sm" href="{{nextHref}}" aria-label="Next page">{{{icon 'chevron-right' 'size-3.5'}}}</a>{{else}}<button class="btn btn-ghost btn-sm" disabled aria-label="Next page">{{{icon 'chevron-right' 'size-3.5'}}}</button>{{/if}}
     </div>
   </div>
   {{/if}}

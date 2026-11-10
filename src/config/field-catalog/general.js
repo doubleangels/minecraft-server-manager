@@ -7,7 +7,7 @@ module.exports = [
   {
     key: 'TYPE',
     scope: 'env',
-    label: 'Server type',
+    label: 'Server Type',
     help: 'Which server platform to install and run. Changing this re-installs the server files on the next start; your world data is kept, but mods and plugins only work on matching types.',
     type: 'enum',
     default: 'VANILLA',
@@ -67,12 +67,12 @@ module.exports = [
       { value: 'CUSTOM', label: 'Custom JAR', desc: 'Bring your own server jar via the custom server URL/path field.' },
       {
         value: 'AUTO_CURSEFORGE',
-        label: 'CurseForge Modpack (auto)',
+        label: 'CurseForge Modpack (Auto)',
         desc: 'Fully automated CurseForge modpack install and upgrades; needs a CurseForge API key.',
       },
       {
         value: 'CURSEFORGE',
-        label: 'CurseForge Server Pack (manual)',
+        label: 'CurseForge Server Pack (Manual)',
         desc: 'Legacy. A manual server-pack runner; use the automated CurseForge type instead.',
       },
       {
@@ -94,7 +94,7 @@ module.exports = [
   {
     key: 'VERSION',
     scope: 'env',
-    label: 'Minecraft version',
+    label: 'Minecraft Version',
     help: 'The Minecraft version to install, e.g. 1.20.4, or LATEST / SNAPSHOT to track a channel. With LATEST or SNAPSHOT, restarting the server upgrades it when a newer version is out.',
     type: 'text',
     default: 'LATEST',
@@ -116,7 +116,7 @@ module.exports = [
   {
     key: 'PAPER_BUILD',
     scope: 'env',
-    label: 'Paper build',
+    label: 'Paper Build',
     help: 'Pins a specific PaperMC build number instead of the latest one for the chosen Minecraft version. Leave empty for the latest build.',
     type: 'text',
     mode: 'advanced',
@@ -126,11 +126,11 @@ module.exports = [
   {
     key: 'PAPER_CHANNEL',
     scope: 'env',
-    label: 'Paper release channel',
+    label: 'Paper Release Channel',
     help: 'Which PaperMC channel to download from. If a brand-new Minecraft version fails with "No build found ... with channel \'default\'", switch to experimental.',
     type: 'enum',
     options: [
-      { value: 'default', label: 'Default (stable releases)' },
+      { value: 'default', label: 'Default (Stable Releases)' },
       { value: 'experimental', label: 'Experimental', desc: 'Pre-release builds for brand-new Minecraft versions.' },
     ],
     default: 'default',
@@ -141,7 +141,7 @@ module.exports = [
   {
     key: 'PURPUR_BUILD',
     scope: 'env',
-    label: 'Purpur build',
+    label: 'Purpur Build',
     help: 'Pins a specific Purpur build for the chosen Minecraft version. Leave at LATEST unless you need to roll back a broken build.',
     type: 'text',
     default: 'LATEST',
@@ -152,7 +152,7 @@ module.exports = [
   {
     key: 'FORGE_VERSION',
     scope: 'env',
-    label: 'Forge version',
+    label: 'Forge Version',
     help: 'The Forge loader version, e.g. 14.23.5.2854 or "latest". When empty, the recommended Forge version for your Minecraft version is used.',
     type: 'text',
     mode: 'advanced',
@@ -162,7 +162,7 @@ module.exports = [
   {
     key: 'NEOFORGE_VERSION',
     scope: 'env',
-    label: 'NeoForge version',
+    label: 'NeoForge Version',
     help: 'The NeoForge loader version: a specific version, "latest", or "beta". When empty, the latest non-beta version for your Minecraft version is used.',
     type: 'text',
     mode: 'advanced',
@@ -172,7 +172,7 @@ module.exports = [
   {
     key: 'FABRIC_LOADER_VERSION',
     scope: 'env',
-    label: 'Fabric loader version',
+    label: 'Fabric Loader Version',
     help: 'Pins a specific Fabric loader version. Leave empty for the latest; most mods also need the Fabric API mod installed separately.',
     type: 'text',
     mode: 'advanced',
@@ -182,7 +182,7 @@ module.exports = [
   {
     key: 'FABRIC_LAUNCHER_VERSION',
     scope: 'env',
-    label: 'Fabric launcher version',
+    label: 'Fabric Launcher Version',
     help: 'Pins a specific version of the Fabric server launcher itself. Rarely needed. Leave it empty for the latest.',
     type: 'text',
     mode: 'advanced',
@@ -192,7 +192,7 @@ module.exports = [
   {
     key: 'QUILT_LOADER_VERSION',
     scope: 'env',
-    label: 'Quilt loader version',
+    label: 'Quilt Loader Version',
     help: 'Pins a specific Quilt loader version. Leave empty for the latest.',
     type: 'text',
     mode: 'advanced',
@@ -202,7 +202,7 @@ module.exports = [
   {
     key: 'CUSTOM_SERVER',
     scope: 'env',
-    label: 'Custom server JAR',
+    label: 'Custom Server JAR',
     help: 'URL or container path of the server jar when the type is Custom. A URL is only downloaded once. To fetch a new copy, delete the jar from the server folder and restart.',
     type: 'text',
     mode: 'advanced',
@@ -212,14 +212,14 @@ module.exports = [
   {
     key: 'javaTag',
     scope: 'panel',
-    label: 'Java version (image tag)',
+    label: 'Java Version (Image Tag)',
     help: 'Which Java runtime image the server runs on. Auto picks the right one for your Minecraft version, and for GT New Horizons, the newest Java the pinned pack version supports. Override only for special cases like old Forge (needs Java 8) or mods that break on newer Java. Forcing a GTNH server to Java 8 makes the image install GTNH’s legacy Java 8 server pack instead of the faster lwjgl3ify one.',
     type: 'enum',
     default: '',
     options: [
       {
         value: '',
-        label: 'Auto (recommended)',
+        label: 'Auto (Recommended)',
         desc: 'The panel picks the correct Java for your Minecraft version and server type.',
       },
       { value: 'java8', label: 'Java 8', desc: 'Required for Forge below 1.18 and other very old servers.' },
@@ -239,7 +239,7 @@ module.exports = [
   {
     key: 'TZ',
     scope: 'env',
-    label: 'Time zone',
+    label: 'Time Zone',
     help: 'IANA time zone name (for example, Europe/London) so log timestamps and scheduled tasks match your local time. Defaults to UTC.',
     type: 'text',
     default: 'UTC',
@@ -250,7 +250,7 @@ module.exports = [
   {
     key: 'UID',
     scope: 'env',
-    label: 'File owner user ID',
+    label: 'File Owner User ID',
     help: 'Linux user ID the server process runs as. The panel sets this to its own user automatically so it can manage the server’s files (mods, backups, deletes); on Linux a value here is overridden. Only relevant on hosts that must pin a specific owner.',
     type: 'number',
     default: 1000,
@@ -262,7 +262,7 @@ module.exports = [
   {
     key: 'GID',
     scope: 'env',
-    label: 'File owner group ID',
+    label: 'File Owner Group ID',
     help: 'Linux group ID the server process runs as. Pairs with the user ID above.',
     type: 'number',
     default: 1000,
@@ -274,7 +274,7 @@ module.exports = [
   {
     key: 'SETUP_ONLY',
     scope: 'env',
-    label: 'Setup Only (no launch)',
+    label: 'Setup Only (No Launch)',
     help: 'Downloads and installs all server files, then exits without starting the server. Useful for pre-provisioning a data directory; the container stops right after setup.',
     type: 'boolean',
     default: false,

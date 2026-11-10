@@ -131,6 +131,13 @@ the single accent, IBM Plex Sans body + Press Start 2P for titles, and cards on 
 sidebar+topbar shell. Match the existing register: blocky (`rounded-sm`), tactile (buttons
 physically press on `:active`).
 
+**One radius per role** (`test/ui-register.test.js` enforces the mechanical parts):
+`rounded-sm` for every control and small inline piece (buttons, fields, icon buttons, chips, badges,
+tabs, nav items, meters, icon tiles up to `size-8`); `rounded-md` for panels nested inside a card
+(notices, the console, bordered lists, previews) and icon tiles above `size-8`; `rounded-lg` for
+top-level surfaces (cards, modals, menus, stacked table rows); `rounded-full` only for things that
+are round (status dots, switches, sliders). Never a bare `rounded`.
+
 **Mobile-first — design the narrow layout first, then add breakpoint prefixes to widen it.**
 
 - Bare utilities are the phone layout; `sm:` / `md:` / `lg:` / `xl:` only _add_ to it. Never write a
@@ -172,7 +179,9 @@ validation and error messages, and the docs — follows one house style (full de
 
 - **Title Case:** buttons; short selectable choices (dropdown options, radio/checkbox labels, tabs,
   overflow-menu items, toggle chips); `<h2>` / `<h3>` section and card headings; table `<th>`;
-  non-progress `openModal` titles.
+  field captions (`.label`, `<dt>`, every field-catalog `label`); non-progress `openModal` titles.
+  Parentheticals and every hyphenated part included: "Viewer (Read-Only)", "Sign-In Security".
+  Show a stored id as a label through the `titleCase` / `eventType` template helpers.
 - **ALL CAPS:** only `page-header heading=`.
 - **Sentence case (a full sentence):** everything else — help, hints, tooltips, placeholders,
   empty-state bodies, toasts, confirm-dialog bodies _and_ titles, event and history summaries.

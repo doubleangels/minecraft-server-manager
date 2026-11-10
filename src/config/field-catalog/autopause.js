@@ -7,7 +7,7 @@ module.exports = [
   {
     key: 'ENABLE_AUTOPAUSE',
     scope: 'env',
-    label: 'Auto-pause When Empty',
+    label: 'Auto-Pause When Empty',
     help: 'Freezes the Java process after the server has been idle, and wakes it the moment someone tries to connect. Requires the tick watchdog to be disabled (Max tick time = -1) or the server may be killed on resume.',
     type: 'boolean',
     default: false,
@@ -20,7 +20,7 @@ module.exports = [
   {
     key: 'AUTOPAUSE_TIMEOUT_EST',
     scope: 'env',
-    label: 'Pause after last player leaves',
+    label: 'Pause After Last Player Leaves',
     help: 'Seconds to wait after the last player disconnects before pausing.',
     type: 'number',
     unit: 'seconds',
@@ -33,7 +33,7 @@ module.exports = [
   {
     key: 'AUTOPAUSE_TIMEOUT_INIT',
     scope: 'env',
-    label: 'Pause after start (no players)',
+    label: 'Pause After Start (No Players)',
     help: 'Seconds to wait after server start before pausing if nobody has connected at all.',
     type: 'number',
     unit: 'seconds',
@@ -46,7 +46,7 @@ module.exports = [
   {
     key: 'AUTOPAUSE_TIMEOUT_KN',
     scope: 'env',
-    label: 'Pause after port knock',
+    label: 'Pause After Port Knock',
     help: 'Seconds to wait after a connection attempt (like a server-list ping) before pausing again if no player actually joins. Note: any external ping, including uptime monitors, wakes a paused server.',
     type: 'number',
     unit: 'seconds',
@@ -59,7 +59,7 @@ module.exports = [
   {
     key: 'AUTOPAUSE_PERIOD',
     scope: 'env',
-    label: 'Pause check interval',
+    label: 'Pause Check Interval',
     help: 'How often, in seconds, the pause state machine checks whether it should pause. Waking up is instant and knock-driven, not tied to this interval.',
     type: 'number',
     unit: 'seconds',
@@ -72,7 +72,7 @@ module.exports = [
   {
     key: 'AUTOPAUSE_KNOCK_INTERFACE',
     scope: 'env',
-    label: 'Knock network interface',
+    label: 'Knock Network Interface',
     help: 'Network interface watched for incoming connection attempts. Only change with host networking or unusual setups. The interface must exist inside the container, and "lo" does not work.',
     type: 'text',
     default: 'eth0',
@@ -83,7 +83,7 @@ module.exports = [
   {
     key: 'AUTOPAUSE_STATUS_RETRY_LIMIT',
     scope: 'env',
-    label: 'Status retry limit',
+    label: 'Status Retry Limit',
     help: 'How many times the pause monitor retries reading the server status before giving up.',
     type: 'number',
     default: 10,
@@ -95,7 +95,7 @@ module.exports = [
   {
     key: 'AUTOPAUSE_STATUS_RETRY_INTERVAL',
     scope: 'env',
-    label: 'Status retry interval',
+    label: 'Status Retry Interval',
     help: 'Delay between status retries, e.g. 2s.',
     type: 'duration',
     default: '2s',
@@ -106,7 +106,7 @@ module.exports = [
   {
     key: 'DEBUG_AUTOPAUSE',
     scope: 'env',
-    label: 'Auto-pause Debug Logging',
+    label: 'Auto-Pause Debug Logging',
     help: 'Verbose logging of the auto-pause state machine, for troubleshooting why the server does or does not pause.',
     type: 'boolean',
     default: false,
@@ -118,7 +118,7 @@ module.exports = [
     key: 'MAX_TICK_TIME',
     scope: 'env',
     prop: 'max-tick-time',
-    label: 'Max tick time (watchdog)',
+    label: 'Max Tick Time (Watchdog)',
     help: 'Milliseconds a single tick may take before the watchdog kills the server (vanilla default 60000). Must be -1 (disabled) for auto-pause, since a paused tick looks endless to the watchdog. It is also common for heavy modpacks.',
     type: 'number',
     unit: 'ms',
@@ -130,7 +130,7 @@ module.exports = [
   {
     key: 'ENABLE_AUTOSTOP',
     scope: 'env',
-    label: 'Auto-stop When Empty',
+    label: 'Auto-Stop When Empty',
     help: 'Shuts the server down entirely (the container exits) after being idle. Unlike auto-pause, it does not wake automatically. You start it again from the panel. Do not combine it with auto-pause.',
     type: 'boolean',
     default: false,
@@ -143,7 +143,7 @@ module.exports = [
   {
     key: 'AUTOSTOP_TIMEOUT_EST',
     scope: 'env',
-    label: 'Stop after last player leaves',
+    label: 'Stop After Last Player Leaves',
     help: 'Seconds to wait after the last player disconnects before stopping the server.',
     type: 'number',
     unit: 'seconds',
@@ -156,7 +156,7 @@ module.exports = [
   {
     key: 'AUTOSTOP_TIMEOUT_INIT',
     scope: 'env',
-    label: 'Stop after start (no players)',
+    label: 'Stop After Start (No Players)',
     help: 'Seconds to wait after server start before stopping if nobody has connected at all.',
     type: 'number',
     unit: 'seconds',
@@ -169,7 +169,7 @@ module.exports = [
   {
     key: 'AUTOSTOP_PERIOD',
     scope: 'env',
-    label: 'Stop check interval',
+    label: 'Stop Check Interval',
     help: 'How often, in seconds, the auto-stop state machine checks whether it should stop the server.',
     type: 'number',
     unit: 'seconds',
@@ -182,7 +182,7 @@ module.exports = [
   {
     key: 'DEBUG_AUTOSTOP',
     scope: 'env',
-    label: 'Auto-stop Debug Logging',
+    label: 'Auto-Stop Debug Logging',
     help: 'Verbose logging of the auto-stop state machine.',
     type: 'boolean',
     default: false,
@@ -194,7 +194,7 @@ module.exports = [
     key: 'PAUSE_WHEN_EMPTY_SECONDS',
     scope: 'env',
     prop: 'pause-when-empty-seconds',
-    label: 'Native pause when empty (1.21.2+)',
+    label: 'Native Pause When Empty (1.21.2+)',
     help: 'Minecraft’s built-in pause: the game loop stops after the server has been empty this many seconds. On modern versions this is the recommended, simpler alternative to the container-level auto-pause above.',
     type: 'number',
     unit: 'seconds',

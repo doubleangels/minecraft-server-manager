@@ -2,8 +2,8 @@
 
   <div class="mb-4 flex flex-wrap items-center gap-2">
     {{#if players.length}}
-    <input class="input max-w-xs" placeholder="Search players…" id="players-search">
-    <select class="input w-auto" id="players-filter" data-label="Filter players">
+    <input class="input w-full sm:w-auto sm:max-w-xs" placeholder="Search players…" id="players-search">
+    <select class="input w-full sm:w-auto" id="players-filter" data-label="Filter players">
       <option value="all">All Players</option>
       <option value="online">Online</option>
       <option value="whitelisted">Whitelisted</option>
@@ -15,8 +15,8 @@
       <span class="msm-toggle"><input type="checkbox" id="players-wl-enforce" {{#if whitelistEnforced}}checked{{/if}}><span></span></span>
       Whitelist Enforced
     </label>
-    <div class="ml-auto flex gap-2">
-      <button class="btn btn-primary btn-sm" id="players-add">{{{icon 'user-plus' 'size-3.5'}}} Add Players</button>
+    <div class="flex w-full sm:ml-auto sm:w-auto gap-2">
+      <button class="btn btn-primary btn-sm w-full sm:w-auto" id="players-add">{{{icon 'user-plus' 'size-3.5'}}} Add Players</button>
     </div>
   </div>
 
@@ -42,9 +42,9 @@
               data-op="{{#if op}}1{{else}}0{{/if}}"
               data-banned="{{#if banned}}1{{else}}0{{/if}}"
               data-last-seen="{{lastSeen}}" data-last-seen-approx="{{#if lastSeenApprox}}1{{/if}}">
-            <td data-th="">
+            <td data-th="Player">
               <a href="/servers/{{../server.id}}/players/{{name}}" class="group flex items-center gap-2.5" data-tip="Open {{name}}'s page: roles, teleport, and inventory.">
-                <span class="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded bg-inset text-xs font-bold">
+                <span class="relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-sm bg-inset text-xs font-bold">
                   {{#if bedrock}}{{{icon 'gamepad-2' 'size-4'}}}{{else}}{{name.[0]}}{{/if}}
                   {{#if uuid}}<img class="absolute inset-0 h-full w-full object-cover" data-skin-uuid="{{uuid}}" alt="{{name}}" aria-hidden="true" loading="lazy">{{/if}}
                 </span>
@@ -59,13 +59,13 @@
             </td>
             <td data-th="Status" data-player-status>
               {{#if online}}
-                <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot relative bg-grass-500 pulse"></span> Online</span>
+                <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot relative bg-ok pulse"></span> Online</span>
               {{else if banned}}
-                <span class="flex items-center gap-1.5 text-xs font-medium text-danger"><span class="status-dot bg-redstone-500"></span> Banned</span>
+                <span class="flex items-center gap-1.5 text-xs font-medium text-danger"><span class="status-dot bg-danger"></span> Banned</span>
               {{else if whitelisted}}
-                <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot bg-grass-700"></span> Whitelisted</span>
+                <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot bg-ok"></span> Whitelisted</span>
               {{else}}
-                <span class="flex items-center gap-1.5 text-xs font-medium text-ink-soft"><span class="status-dot bg-stone-500"></span> Joined</span>
+                <span class="flex items-center gap-1.5 text-xs font-medium text-ink-soft"><span class="status-dot bg-ink-faint"></span> Joined</span>
                 {{#if ../whitelistEnforced}}
                   <div class="mt-0.5 text-[11px] leading-tight text-warn" data-tip="Whitelist enforcement is on. This player has never been whitelisted, so they will be turned away when they try to join.">Not whitelisted, join blocked</div>
                 {{else}}
@@ -78,17 +78,17 @@
                 and genuinely disabled composers already use opacity for that. }}
             <td data-th="Roles">
               <div class="flex flex-wrap gap-1.5">
-                <button class="chip {{#if whitelisted}}border-grass-700 bg-grass-500/15 text-ok{{/if}}"
+                <button class="chip {{#if whitelisted}}border-ok/40 bg-ok/15 text-ok{{/if}}"
                         data-role-toggle="whitelist" data-name="{{name}}" data-on="{{#if whitelisted}}1{{else}}0{{/if}}"
                         data-tip="{{#if whitelisted}}Remove this player from the whitelist.{{else}}Add this player to the whitelist.{{/if}}">
                   {{{icon 'shield-check' 'size-3.5'}}} <span data-chip-label>Whitelist</span>
                 </button>
-                <button class="chip {{#if op}}border-diamond-700 bg-diamond-400/15 text-link{{/if}}"
+                <button class="chip {{#if op}}border-link/40 bg-link/15 text-link{{/if}}"
                         data-role-toggle="op" data-name="{{name}}" data-on="{{#if op}}1{{else}}0{{/if}}"
                         data-tip="{{#if op}}Remove operator status from this player.{{else}}Make this player an operator (level 4).{{/if}}">
                   {{{icon 'shield' 'size-3.5'}}} <span data-chip-label>Op{{#if op}} L{{opLevel}}{{/if}}</span>
                 </button>
-                <button class="chip {{#if banned}}border-danger/40 bg-redstone-500/15 text-danger{{/if}}"
+                <button class="chip {{#if banned}}border-danger/40 bg-danger/15 text-danger{{/if}}"
                         data-role-toggle="ban" data-name="{{name}}" data-on="{{#if banned}}1{{else}}0{{/if}}"
                         data-tip="{{#if banned}}Pardon this player.{{else}}Ban this player.{{/if}}">
                   {{{icon 'ban' 'size-3.5'}}} <span data-chip-label>{{#if banned}}Banned{{else}}Ban{{/if}}</span>
@@ -99,7 +99,7 @@
               {{#if banned}}
                 <div class="truncate text-danger sm:max-w-56" title="{{default banReason 'No reason recorded'}}">{{default banReason 'No reason recorded'}}</div>
                 {{#if banDate}}<div class="mt-0.5">{{banDate}}{{#if banSource}} · {{banSource}}{{/if}}</div>{{/if}}
-                {{#if banExpires}}<div class="mt-0.5 text-warn">expires {{banExpires}}</div>{{/if}}
+                {{#if banExpires}}<div class="mt-0.5 text-warn">Expires {{banExpires}}</div>{{/if}}
               {{else}}
                 -
               {{/if}}
@@ -128,7 +128,7 @@
         {{/each}}
       </tbody>
     </table>
-    <div class="hidden p-8 text-center text-sm text-ink-faint" id="players-no-match">No players match these filters.</div>
+    <div class="empty-inline hidden" id="players-no-match">{{{icon 'search-x' 'size-6'}}}No players match these filters.</div>
   </div>
   {{else}}
     {{> empty-state iconName='users' title='No Players Seen Yet' message='Add a player by name and the panel looks them up with Mojang, or players appear here automatically the first time they join.'}}

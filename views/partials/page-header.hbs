@@ -1,7 +1,9 @@
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+{{! The topbar already names the page on a phone and tablet, so the big heading
+    shows only from lg, where the topbar hides its own copy (see input.css). }}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-3 sm:mb-6" data-page-header>
   <div>
-    <h2 class="pixel text-sm text-ink">{{heading}}</h2>
-    {{#if sub}}<p class="mt-2 max-w-prose text-sm text-ink-faint">{{sub}}</p>{{/if}}
+    <h2 class="pixel hidden text-sm text-ink lg:block">{{heading}}</h2>
+    {{#if sub}}<p class="max-w-prose text-sm text-ink-faint lg:mt-2">{{sub}}</p>{{/if}}
   </div>
   {{#if actionsPartial}}{{> (lookup . 'actionsPartial')}}{{/if}}
 </div>

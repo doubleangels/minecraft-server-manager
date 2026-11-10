@@ -56,9 +56,9 @@ function init(root) {
   // ---- in-place chip/banner patching (mirrors the roster page - same
   // action, same UI, no page flash and no silent success) ----
   const CHIP_ON = {
-    whitelist: ['border-grass-700', 'bg-grass-500/15', 'text-ok'],
-    op: ['border-diamond-700', 'bg-diamond-400/15', 'text-link'],
-    ban: ['border-danger/40', 'bg-redstone-500/15', 'text-danger'],
+    whitelist: ['border-ok/40', 'bg-ok/15', 'text-ok'],
+    op: ['border-link/40', 'bg-link/15', 'text-link'],
+    ban: ['border-danger/40', 'bg-danger/15', 'text-danger'],
   };
   function setChip(role, on, label) {
     const chip = root.querySelector(`[data-role-toggle="${role}"]`);
@@ -92,7 +92,7 @@ function init(root) {
     const status = root.querySelector('[data-player-status]');
     if (status)
       status.innerHTML =
-        '<span class="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><span class="status-dot bg-stone-500"></span> Offline</span>';
+        '<span class="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><span class="status-dot bg-ink-faint"></span> Offline</span>';
     root.querySelector('[data-act="kick"]')?.remove();
   }
 
@@ -167,7 +167,7 @@ function init(root) {
     content.className = 'space-y-3';
     content.innerHTML = `
       <div>
-        <label class="label">Ban reason (recorded in the ban list)</label>
+        <label class="label">Ban Reason (Recorded in the Ban List)</label>
         <input class="input" data-f="reason" placeholder="Banned by an operator" maxlength="256">
       </div>
       <div>
@@ -303,7 +303,7 @@ function init(root) {
   function kickModal() {
     const content = document.createElement('div');
     content.className = 'space-y-3 text-sm';
-    content.innerHTML = `<div><label class="label">Kick message (optional)</label><input class="input" data-f="message" maxlength="120" placeholder="Kicked by an operator"></div>`;
+    content.innerHTML = `<div><label class="label">Kick Message (Optional)</label><input class="input" data-f="message" maxlength="120" placeholder="Kicked by an operator"></div>`;
     openModal({
       title: `Kick ${name}`,
       content,
@@ -380,13 +380,13 @@ function init(root) {
         <select class="input" data-f="biome" data-label="Biome"><option value="">Loading biomes…</option></select>
       </div>
       <div data-tp-panel="player" class="hidden space-y-3">
-        <label class="label">Target player (online)</label>
+        <label class="label">Target Player (Online)</label>
         <select class="input" data-f="target" data-label="Target player"><option value="">Loading…</option></select>
       </div>
       <div data-tp-panel="rtp" class="hidden space-y-3">
         <div class="grid grid-cols-2 gap-2">
-          <div><label class="label">Min distance</label><input class="input" type="number" data-f="minDistance" value="500" min="0"></div>
-          <div><label class="label">Max distance</label><input class="input" type="number" data-f="maxDistance" value="5000" min="16"></div>
+          <div><label class="label">Min Distance</label><input class="input" type="number" data-f="minDistance" value="500" min="0"></div>
+          <div><label class="label">Max Distance</label><input class="input" type="number" data-f="maxDistance" value="5000" min="16"></div>
         </div>
         <div><label class="label">Around</label>
           <select class="input" data-f="center" data-label="Around">
@@ -398,7 +398,7 @@ function init(root) {
         <label class="label">Structure</label>
         <select class="input" data-f="structure" data-label="Structure"><option value="">Loading structures…</option></select>
         <div class="grid grid-cols-2 items-end gap-2">
-          <div><label class="label">Search radius</label><input class="input" type="number" data-f="structMaxDistance" value="5000" min="16"></div>
+          <div><label class="label">Search Radius</label><input class="input" type="number" data-f="structMaxDistance" value="5000" min="16"></div>
           <label class="flex items-center gap-2 pb-2"><input type="checkbox" class="msm-check" data-f="structRandom" checked> Surprise Me</label>
         </div>
       </div>`;

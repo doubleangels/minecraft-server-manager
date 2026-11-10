@@ -3,13 +3,13 @@
     reserves its height through --bottom-nav and sticky action bars sit on it.
     "More" opens the full sidebar for everything else. Phones and tablets:
     hidden from lg up, where the sidebar is always open. z 25, see input.css. }}
-<nav data-bottom-nav="app" class="fixed inset-x-0 bottom-0 z-[25] grid h-[calc(3.5rem+env(safe-area-inset-bottom))] grid-cols-5 bg-canvas pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] shadow-[inset_0_1px_0_var(--color-line)] lg:hidden" aria-label="Panel">
+<nav data-bottom-nav="app" class="fixed inset-x-0 bottom-0 z-[25] grid h-[calc(3.5rem+env(safe-area-inset-bottom))] grid-cols-5 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] shadow-[0_-4px_24px_rgba(0,0,0,0.2)] lg:hidden" aria-label="Panel">
   <a href="/" class="app-tab {{#if (eq active 'dashboard')}}active{{/if}}"{{#if (eq active 'dashboard')}} aria-current="page"{{/if}}>{{{icon 'layout-dashboard' 'size-5'}}}<span>Dashboard</span></a>
   <a href="/servers" class="app-tab {{#if (eq active 'servers')}}active{{/if}}"{{#if (eq active 'servers')}} aria-current="page"{{/if}}>{{{icon 'server' 'size-5'}}}<span>Servers</span></a>
   <a href="/modpacks" class="app-tab {{#if (or (eq active 'modpacks') (eq active 'worlds') (eq active 'blueprints'))}}active{{/if}}">{{{icon 'library' 'size-5'}}}<span>Library</span></a>
   <a href="/activity" class="app-tab {{#if (or (eq active 'activity') (eq active 'health'))}}active{{/if}}">
     {{{icon 'history' 'size-5'}}}<span>Activity</span>
-    {{#if healthCount}}<span class="badge badge-danger absolute right-1.5 top-1 px-1 text-[10px] leading-none" aria-label="{{healthCount}} health alerts">{{healthCount}}</span>{{/if}}
+    {{#if healthCount}}<span class="badge badge-danger absolute right-2 top-1 px-1 text-[10px] leading-none ring-2 ring-surface" aria-label="{{healthCount}} health alerts">{{healthCount}}</span>{{/if}}
   </a>
   <button type="button" class="app-tab {{#if (or (eq active 'updates') (eq active 'backups') (eq active 'schedules') (eq active 'storage') (eq active 'settings') (eq active 'permissions'))}}active{{/if}}" data-sidebar-open aria-label="More pages">{{{icon 'menu' 'size-5'}}}<span>More</span></button>
 </nav>

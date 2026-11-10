@@ -44,7 +44,7 @@ export async function postJSON(url, body) {
 export function uploadWorldModal({ onDone } = {}) {
   const content = document.createElement('div');
   content.innerHTML = `
-    <label class="label">World name</label>
+    <label class="label">World Name</label>
     <input class="input" data-w-name placeholder="My survival world" autocomplete="off">
     <label class="label mt-3">Archive (.zip, .mcworld, .tar, .tar.gz)</label>
     <label class="btn w-full cursor-pointer justify-center">
@@ -53,7 +53,7 @@ export function uploadWorldModal({ onDone } = {}) {
     </label>
     <p class="help" data-w-filename>No file selected. The world root (the folder with level.dat) is found automatically, including Bukkit split-dimension folders.</p>
     <div class="mt-3 hidden" data-w-progress>
-      <div class="meter"><div class="bg-grass-500" style="width:0%" data-w-bar></div></div>
+      <div class="meter"><div class="bg-ok" style="width:0%" data-w-bar></div></div>
       <p class="help mt-1" data-w-status>Uploading…</p>
     </div>`;
 
@@ -155,10 +155,10 @@ export function extractWorldModal({ serverId = null, onDone } = {}) {
         ${servers.map((s) => `<option value="${escapeHtml(s.id)}" data-desc="${escapeHtml(s.flavor)} · ${escapeHtml(s.status)}">${escapeHtml(s.name)}</option>`).join('')}
       </select>`
     }
-    <label class="label ${serverId ? '' : 'mt-3'}">Library entry name (optional)</label>
+    <label class="label ${serverId ? '' : 'mt-3'}">Library Entry Name (Optional)</label>
     <input class="input" data-x-name placeholder="Leave empty to name it after the server" autocomplete="off">
     <p class="help">Takes a consistent snapshot, and is safe to run while the server is up. The panel briefly pauses world saving, flushes everything to disk, copies it, then resumes saving.</p>
-    <div class="mt-3 hidden" data-x-progress><div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div></div>`;
+    <div class="mt-3 hidden" data-x-progress><div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div></div>`;
 
   openModal({
     title: 'Save World to Library',
@@ -202,22 +202,22 @@ export function installWorldModal(libId, libName, { serverId = null, onDone } = 
       serverId
         ? ''
         : `
-      <label class="label">Target server</label>
+      <label class="label">Target Server</label>
       <select class="input" data-i-server data-label="Install into server">
         ${servers.map((s) => `<option value="${escapeHtml(s.id)}" data-desc="${escapeHtml(s.flavor)} · ${escapeHtml(s.status)}">${escapeHtml(s.name)}</option>`).join('')}
       </select>`
     }
-    <label class="label ${serverId ? '' : 'mt-3'}">Install mode</label>
+    <label class="label ${serverId ? '' : 'mt-3'}">Install Mode</label>
     <select class="input" data-i-mode data-label="Install mode">
       <option value="replace" data-desc="Server must be stopped. The current world is backed up first.">Replace Current World</option>
       <option value="alongside" data-desc="Adds it as another world folder. Switch to it later with Activate.">Install Alongside</option>
     </select>
     <div class="mt-3 hidden" data-i-namewrap>
-      <label class="label">New world folder name</label>
+      <label class="label">New World Folder Name</label>
       <input class="input" data-i-name value="${escapeHtml(libName.replace(/[\\/:*?"<>|]/g, '_').slice(0, 64))}" autocomplete="off">
     </div>
     <p class="help">Compatibility (server type and Minecraft version) is checked before anything is touched. Replace mode takes a safety backup automatically.</p>
-    <div class="mt-3 hidden" data-i-progress><div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div></div>`;
+    <div class="mt-3 hidden" data-i-progress><div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div></div>`;
 
   const mode = content.querySelector('[data-i-mode]');
   mode.addEventListener('change', () => {

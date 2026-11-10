@@ -160,12 +160,12 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
   document.getElementById('mods-add-url')?.addEventListener('click', () => {
     const content = document.createElement('div');
     content.innerHTML = `
-      <label class="label">Mod URL or Modrinth slug</label>
+      <label class="label">Mod URL or Modrinth Slug</label>
       <input class="input font-mono" id="mod-url" placeholder="https://modrinth.com/mod/sodium" autocomplete="off">
       <p class="help">Paste almost any link: Modrinth, CurseForge, Hangar, or SpigotMC project pages, a GitHub repo or release ("owner/repo" works too), a Modrinth slug, or a direct .jar URL. The right build for this server's loader and MC version is picked automatically.</p>
-      <label class="label mt-3">Content type</label>
+      <label class="label mt-3">Content Type</label>
       <select class="input" id="mod-url-kind" data-label="Content type">
-        <option value="">Auto-detect</option>
+        <option value="">Auto-Detect</option>
         <option value="mod">Mod</option>
         <option value="plugin">Plugin</option>
         <option value="datapack">Datapack</option>
@@ -180,7 +180,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
              </label>`
           : ''
       }
-      <div class="mt-3 hidden" id="mod-url-progress"><div class="meter meter-indeterminate"><div class="bg-grass-500" style="width:25%"></div></div></div>`;
+      <div class="mt-3 hidden" id="mod-url-progress"><div class="meter meter-indeterminate"><div class="bg-ok" style="width:25%"></div></div></div>`;
     const modal = openModal({
       title: 'Add Mod by URL',
       content,
@@ -520,7 +520,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
         return;
       }
       if (!data.results.length) {
-        results.innerHTML = '<p class="p-6 text-center text-sm text-ink-faint">No matches for this loader/version.</p>';
+        results.innerHTML = '<p class="empty-inline">No matches for this loader/version.</p>';
         return;
       }
       results.innerHTML = '';
@@ -533,7 +533,7 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
       const installed = installedKeys.has(`${hit.platform}:${hit.projectId}`);
       row.innerHTML = `
         <div class="flex items-center gap-3">
-          ${hit.iconUrl ? `<img src="${escAttr(hit.iconUrl)}" alt="" class="size-10 shrink-0 rounded bg-inset object-cover">` : '<span class="grid size-10 shrink-0 place-items-center rounded bg-inset text-ink-faint">?</span>'}
+          ${hit.iconUrl ? `<img src="${escAttr(hit.iconUrl)}" alt="" class="size-10 shrink-0 rounded-md bg-inset object-cover">` : '<span class="grid size-10 shrink-0 place-items-center rounded-md bg-inset text-ink-faint">?</span>'}
           <div class="min-w-0 flex-1">
             <div class="truncate text-sm font-semibold"></div>
             <div class="truncate text-xs text-ink-faint" data-role="desc"></div>

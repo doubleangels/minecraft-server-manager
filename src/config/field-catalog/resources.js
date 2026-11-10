@@ -6,7 +6,7 @@ module.exports = [
   {
     key: 'MEMORY',
     scope: 'env',
-    label: 'RAM (Java heap)',
+    label: 'RAM (Java Heap)',
     help: 'Memory the Minecraft/Java process may use. The image hands this to Java as both the starting and the maximum heap, so a running server settles at this figure within its first minute and stays there even when nobody is playing. That is Java keeping what it was given, not a leak. Modpacks usually need 4 GB or more; the image default of 1 GB is only enough for small vanilla servers.',
     type: 'size-mb',
     unit: 'MB',
@@ -21,7 +21,7 @@ module.exports = [
   {
     key: 'INIT_MEMORY',
     scope: 'env',
-    label: 'Initial heap (advanced)',
+    label: 'Initial Heap (Advanced)',
     help: 'Sets a smaller starting heap than the maximum, so memory use grows with the world instead of sitting at the full heap from the start. Measured on a 2 GB heap: 512 MB here brought idle use from 2.6 GB down to about 1.3 GB. Leave empty to let "RAM (Java heap)" control both, which is what Aikar’s flags recommend for the steadiest performance.',
     type: 'size-mb',
     unit: 'MB',
@@ -35,7 +35,7 @@ module.exports = [
   {
     key: 'MAX_MEMORY',
     scope: 'env',
-    label: 'Maximum heap (advanced)',
+    label: 'Maximum Heap (Advanced)',
     help: 'Sets a different maximum heap than the initial one. Leave empty to let "RAM (Java heap)" control both.',
     type: 'size-mb',
     unit: 'MB',
@@ -49,7 +49,7 @@ module.exports = [
   {
     key: 'memory',
     scope: 'docker',
-    label: 'Container memory limit',
+    label: 'Container Memory Limit',
     help: 'The hard memory limit Docker enforces on the whole container. Keep it 25 to 50 percent above the Java heap: Java needs extra room beyond the heap, and if the server reaches this limit it is stopped instantly for running out of memory.',
     type: 'size-mb',
     unit: 'MB',
@@ -64,7 +64,7 @@ module.exports = [
   {
     key: 'memorySwap',
     scope: 'docker',
-    label: 'Container swap limit',
+    label: 'Container Swap Limit',
     help: 'Extra swap space the container may use beyond its memory limit. 0 disables swap. Swapping a Minecraft server causes heavy lag, so leave it at 0 unless you know you need it.',
     type: 'size-mb',
     unit: 'MB',
@@ -79,7 +79,7 @@ module.exports = [
   {
     key: 'cpus',
     scope: 'docker',
-    label: 'CPU limit',
+    label: 'CPU Limit',
     help: 'How many host CPU cores the server may use (Docker NanoCpus). 0 means unlimited. When a server hits its cap it slows down (tick lag) rather than being killed.',
     type: 'range',
     unit: 'cores',
@@ -94,7 +94,7 @@ module.exports = [
   {
     key: 'diskQuotaGb',
     scope: 'panel',
-    label: 'Disk quota',
+    label: 'Disk Quota',
     help: 'A limit on this server’s folder size, enforced by the panel itself, since Docker cannot limit disk use for this kind of storage. Over quota, actions that would grow the disk, like installing mods, adding worlds, or uploading files, are blocked until space is freed. Backups are stored outside this folder and don’t count toward it.',
     type: 'range',
     unit: 'GB',

@@ -23,19 +23,19 @@ if (largestBody) {
     .then((files) => {
       if (!files.length) {
         largestBody.innerHTML =
-          '<tr><td data-th="" class="p-6 text-center text-ink-faint">No files in the data folder yet.</td></tr>';
+          '<tr><td data-th="" colspan="3"><div class="empty-inline">No files in the data folder yet.</div></td></tr>';
         return;
       }
       largestBody.textContent = '';
       for (const f of files) {
         const tr = document.createElement('tr');
-        const cell = td(tr);
+        const cell = td(tr, '', 'File');
         const mono = document.createElement('span');
         mono.className = 'break-all font-mono text-xs';
         mono.textContent = f.path;
         cell.append(mono);
-        td(tr, 'text-ink-faint sm:w-24 sm:text-right').textContent = fmtBytes(f.size);
-        const linkCell = td(tr, 'sm:w-28 sm:text-right');
+        td(tr, 'text-ink-faint sm:w-24 sm:text-right', 'Size').textContent = fmtBytes(f.size);
+        const linkCell = td(tr, 'sm:w-28 sm:text-right', '');
         const a = document.createElement('a');
         a.href = f.link;
         a.dataset.tip = f.path;
@@ -46,13 +46,13 @@ if (largestBody) {
       }
     })
     .catch((err) => {
-      largestBody.innerHTML = `<tr><td data-th="" class="p-6 text-center text-ink-faint">Could not load the largest files: ${escapeHtml(err.message)}</td></tr>`;
+      largestBody.innerHTML = `<tr><td data-th="" class="p-6 text-center text-ink-faint">${escapeHtml(err instanceof TypeError ? friendlyError(err, { action: 'list the largest files' }) : err.message)}</td></tr>`;
     });
 }
 
-function td(tr, cls = '') {
+function td(tr, cls = '', th = '') {
   const cell = document.createElement('td');
-  cell.dataset.th = '';
+  cell.dataset.th = th;
   if (cls) cell.className = cls;
   tr.append(cell);
   return cell;
@@ -99,7 +99,7 @@ document.addEventListener('click', async (e) => {
     return toast('Nothing to clean up for this action right now.', { kind: 'info' });
   }
   const ok = await confirmDialog({
-    title: label,
+    title: `${label}?`,
     message: `This permanently removes ${preview.removed} item${preview.removed === 1 ? '' : 's'} and frees ${fmtBytes(preview.freedBytes)}.`,
     detail: days
       ? `Only items older than ${days} days are touched.`

@@ -73,13 +73,13 @@
         {{! The summary keeps a readable minimum width, so on a phone the
             who/when line drops below it instead of squeezing it to one word a line. }}
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-          <span class="badge">{{type}}</span>
+          <span class="badge">{{eventType type}}</span>
           <span class="min-w-[12rem] flex-1 break-words">{{summary}}</span>
           <span class="whitespace-nowrap text-xs text-ink-faint">{{actor}} · <span data-ts="{{ts}}">{{ts}}</span></span>
         </div>
         {{#if diff}}
           {{! break-all: unbroken values (paths, JVM flag strings) must wrap, not push past the card. }}
-          <div class="mt-2 break-all rounded bg-raised p-2 font-mono text-xs">
+          <div class="mt-2 break-all rounded-md bg-raised p-2 font-mono text-xs">
             {{#each diff}}<div><span class="text-ink-faint">{{@key}}:</span> <span class="text-danger line-through">{{this.[0]}}</span> → <span class="text-ok">{{this.[1]}}</span></div>{{/each}}
           </div>
         {{/if}}
@@ -89,7 +89,7 @@
       </li>
     {{/each}}
   </ol>
-  <div class="hidden p-8 text-center text-sm text-ink-faint" id="hist-no-match">No events match these filters.</div>
+  <div class="empty-inline hidden" id="hist-no-match">{{{icon 'search-x' 'size-6'}}}No events match these filters.</div>
 </div>
 {{else}}
   {{> empty-state iconName='history' title='No Events Recorded Yet' message='Everything that happens to this server (starts, stops, setting changes, backups, and crashes) is logged here, with who did it and when.'}}

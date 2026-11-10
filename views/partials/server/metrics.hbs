@@ -13,48 +13,48 @@
 
   {{! ---- Top stat strip ---- }}
   <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-    <div class="card p-3">
-      <div class="eyebrow">Status</div>
-      <div class="mt-1 flex items-center gap-1.5 text-sm font-bold {{statusText server.status}}">
+    <div class="card stat-tile">
+      <div class="stat-label">{{{icon 'activity' 'size-3.5'}}} Status</div>
+      <div class="stat-value flex items-center gap-2 text-xl {{statusText server.status}}">
         <span class="status-dot relative {{statusDot server.status}} {{#if (statusPulse server.status)}}pulse{{/if}}"></span>
         {{statusLabel server.status}}
       </div>
-      <div class="text-xs text-ink-faint">{{default server.statusDetail "-"}}</div>
+      {{#if server.statusDetail}}<div class="stat-sub">{{server.statusDetail}}</div>{{/if}}
     </div>
-    <div class="card p-3">
-      <div class="eyebrow">Uptime</div>
-      <div class="mt-1 text-lg font-bold tabular-nums" data-metric="uptime">{{default server.stats.uptime "-"}}</div>
+    <div class="card stat-tile">
+      <div class="stat-label">{{{icon 'timer' 'size-3.5'}}} Uptime</div>
+      <div class="stat-value" data-metric="uptime">{{default server.stats.uptime "-"}}</div>
     </div>
-    <div class="card p-3">
-      <div class="eyebrow">Players</div>
-      <div class="mt-1 text-lg font-bold tabular-nums" data-metric="players">{{server.players.online}}/{{server.players.max}}</div>
+    <div class="card stat-tile">
+      <div class="stat-label">{{{icon 'users' 'size-3.5'}}} Players</div>
+      <div class="stat-value" data-metric="players">{{server.players.online}}/{{server.players.max}}</div>
     </div>
-    <div class="card p-3">
-      <div class="eyebrow">TPS</div>
+    <div class="card stat-tile">
+      <div class="stat-label">{{{icon 'gauge' 'size-3.5'}}} TPS</div>
       {{#if server.stats.perf}}
-        <div class="mt-1 text-lg font-bold tabular-nums" data-metric="tps">{{server.stats.perf.tps1}}</div>
-        <div class="text-xs text-ink-faint" data-metric="mspt">{{#if server.stats.perf.mspt}}{{server.stats.perf.mspt}} ms/tick{{else}}last 1&nbsp;min{{/if}}</div>
+        <div class="stat-value" data-metric="tps">{{server.stats.perf.tps1}}</div>
+        <div class="stat-sub" data-metric="mspt">{{#if server.stats.perf.mspt}}{{server.stats.perf.mspt}} ms/tick{{else}}last 1&nbsp;min{{/if}}</div>
       {{else if (and server.stats.perfSupported (or (eq server.status 'running') (eq server.status 'starting') (eq server.status 'unhealthy')))}}
-        <div class="mt-1 text-lg font-bold tabular-nums text-ink-faint" data-metric="tps">…</div>
-        <div class="text-xs text-ink-faint">reading…</div>
+        <div class="stat-value text-ink-faint" data-metric="tps">…</div>
+        <div class="stat-sub">reading…</div>
       {{else if server.stats.perfSupported}}
         {{! Stopped: nothing to read, so no "reading…" that never resolves. }}
-        <div class="mt-1 text-lg font-bold tabular-nums text-ink-faint" data-metric="tps">-</div>
-        <div class="text-xs text-ink-faint">server not running</div>
+        <div class="stat-value text-ink-faint" data-metric="tps">-</div>
+        <div class="stat-sub">server not running</div>
       {{else}}
         <div class="mt-1 text-sm font-semibold text-ink-faint" data-metric="tps">Not reported</div>
-        <div class="text-xs text-ink-faint">needs Paper, Spark, or Forge</div>
+        <div class="stat-sub">needs Paper, Spark, or Forge</div>
       {{/if}}
     </div>
-    <div class="card p-3">
-      <div class="eyebrow">CPU</div>
-      <div class="mt-1 text-lg font-bold tabular-nums" data-metric="cpu">{{server.stats.cpuPct}}%</div>
-      <div class="text-xs text-ink-faint">{{#if server.resources.cpus}}of {{server.resources.cpus}} cores{{else}}no limit{{/if}}</div>
+    <div class="card stat-tile">
+      <div class="stat-label">{{{icon 'cpu' 'size-3.5'}}} CPU</div>
+      <div class="stat-value" data-metric="cpu">{{server.stats.cpuPct}}%</div>
+      <div class="stat-sub">{{#if server.resources.cpus}}of {{server.resources.cpus}} cores{{else}}no limit{{/if}}</div>
     </div>
-    <div class="card p-3">
-      <div class="eyebrow">Memory</div>
-      <div class="mt-1 text-lg font-bold tabular-nums" data-metric="mem">{{server.stats.memUsedMb}}</div>
-      <div class="text-xs text-ink-faint">/ {{server.resources.containerMemoryMb}} MB{{#if server.memory.heapMb}} · heap {{server.memory.heapMb}} MB{{/if}}</div>
+    <div class="card stat-tile">
+      <div class="stat-label">{{{icon 'memory-stick' 'size-3.5'}}} Memory</div>
+      <div class="stat-value" data-metric="mem">{{server.stats.memUsedMb}}</div>
+      <div class="stat-sub">/ {{server.resources.containerMemoryMb}} MB{{#if server.memory.heapMb}} · heap {{server.memory.heapMb}} MB{{/if}}</div>
     </div>
   </div>
 
@@ -88,8 +88,8 @@
         <div><dt class="text-xs text-ink-faint">Container Health</dt><dd class="font-medium">{{#if health.health}}{{capitalize health.health}}{{else}}Unknown{{/if}}</dd></div>
         <div><dt class="text-xs text-ink-faint">Boot Phase</dt><dd class="font-medium">{{#if (or (eq server.status 'running') (eq server.status 'starting') (eq server.status 'unhealthy'))}}{{default server.statusDetail "Running"}}{{else}}Not running{{/if}}</dd></div>
         <div><dt class="text-xs text-ink-faint">Last Exit Code</dt><dd class="font-medium">{{#if health}}{{#if health.exitCode}}{{health.exitCode}}{{else}}0 / running{{/if}}{{else}}Unknown{{/if}}</dd></div>
-        <div><dt class="text-xs text-ink-faint">Out-of-memory Kills</dt><dd class="font-medium">{{stability.oomKills}}{{#if stability.oomKills24h}} <span class="text-xs font-normal text-warn">· {{stability.oomKills24h}} / 24h</span>{{/if}}</dd></div>
-        <div><dt class="text-xs text-ink-faint">Auto-restarts</dt><dd class="font-medium">{{stability.autoRestarts}}{{#if stability.autoRestarts24h}} <span class="text-xs font-normal text-warn">· {{stability.autoRestarts24h}} / 24h</span>{{/if}}</dd></div>
+        <div><dt class="text-xs text-ink-faint">Out-of-Memory Kills</dt><dd class="font-medium">{{stability.oomKills}}{{#if stability.oomKills24h}} <span class="text-xs font-normal text-warn">· {{stability.oomKills24h}} / 24h</span>{{/if}}</dd></div>
+        <div><dt class="text-xs text-ink-faint">Auto-Restarts</dt><dd class="font-medium">{{stability.autoRestarts}}{{#if stability.autoRestarts24h}} <span class="text-xs font-normal text-warn">· {{stability.autoRestarts24h}} / 24h</span>{{/if}}</dd></div>
         <div><dt class="text-xs text-ink-faint">Crashes Logged</dt><dd class="font-medium">{{stability.crashes}}{{#if stability.crashes7d}} <span class="text-xs font-normal text-ink-faint">· {{stability.crashes24h}} / 24h, {{stability.crashes7d}} / 7d</span>{{/if}}</dd></div>
       </dl>
       {{#if lastCrash}}
@@ -106,7 +106,7 @@
     {{! ---- Recent activity ---- }}
     <div class="card p-4">
       <div class="mb-3 flex items-center justify-between gap-2">
-        <h3 class="font-semibold">Recent Activity</h3>
+        <h3 class="card-title">{{{icon 'history' 'size-4'}}}Recent Activity</h3>
         <a class="text-sm text-link hover:underline" href="/servers/{{server.id}}/history">View All →</a>
       </div>
       {{#if recentEvents.length}}
@@ -137,7 +137,7 @@
             {{#each breakdown}}
               <div>
                 <div class="mb-1 flex justify-between"><span>{{label}}</span><span class="text-ink-faint">{{bytes size}}</span></div>
-                <div class="meter"><div class="{{default color 'bg-stone-500'}}" style="width: {{this.pct}}%"></div></div>
+                <div class="meter"><div class="{{default color 'bg-ink-faint'}}" style="width: {{this.pct}}%"></div></div>
               </div>
             {{/each}}
           </div>
@@ -145,7 +145,7 @@
           <p class="text-sm text-ink-faint">No folder sizes yet. Run a storage scan from the <a class="text-link hover:underline" href="/storage">Storage page</a>.</p>
         {{/if}}
         <div class="mt-4 border-t border-line pt-3">
-          <div class="mb-1 flex justify-between text-xs"><span>Quota</span><span class="text-ink-faint">{{bytes server.disk.used}}{{#if server.disk.quota}} / {{bytes server.disk.quota}}{{else}} (no quota){{/if}}</span></div>
+          <div class="mb-1 flex justify-between text-xs"><span>Quota</span><span class="text-ink-faint">{{bytes server.disk.used}}{{#if server.disk.quota}} / {{bytes server.disk.quota}}{{else}} (No Quota){{/if}}</span></div>
           <div class="meter"><div class="{{meterColor server.disk.used server.disk.quota}}" style="width: {{pct server.disk.used server.disk.quota}}%"></div></div>
         </div>
         {{#if diskFree}}

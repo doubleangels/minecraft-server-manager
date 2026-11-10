@@ -299,7 +299,7 @@ async function remove(serverId, relPath, { actor = 'system' } = {}) {
     summary: `Deleted: ${rel} (${humanBytes(freedBytes)} freed).`,
     details: { path: rel, freedBytes },
   });
-  indexer.scheduleScan();
+  indexer.rescanSoon();
   return { freedBytes };
 }
 

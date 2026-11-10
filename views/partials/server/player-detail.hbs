@@ -5,7 +5,7 @@
 
   <div class="card mb-4 p-4">
     <div class="flex flex-wrap items-center gap-4">
-      <span class="grid size-14 shrink-0 place-items-center rounded-lg bg-inset text-xl font-bold">
+      <span class="grid size-14 shrink-0 place-items-center rounded-md bg-inset text-xl font-bold">
         {{#if player.bedrock}}{{{icon 'gamepad-2' 'size-6'}}}{{else}}{{player.name.[0]}}{{/if}}
       </span>
       <div class="min-w-0 flex-1">
@@ -14,9 +14,9 @@
           {{#if player.bedrock}}<span class="chip shrink-0" data-tip="Joined from Bedrock Edition via Geyser/Floodgate.">{{{icon 'gamepad-2' 'size-3'}}} Bedrock</span>{{/if}}
           <span data-player-status>
             {{#if player.online}}
-              <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot relative bg-grass-500 pulse"></span> Online</span>
+              <span class="flex items-center gap-1.5 text-xs font-medium text-ok"><span class="status-dot relative bg-ok pulse"></span> Online</span>
             {{else}}
-              <span class="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><span class="status-dot bg-stone-500"></span> Offline</span>
+              <span class="flex items-center gap-1.5 text-xs font-medium text-ink-faint"><span class="status-dot bg-ink-faint"></span> Offline</span>
             {{/if}}
           </span>
         </div>
@@ -24,13 +24,13 @@
         {{#if player.lastSeen}}<div class="text-xs text-ink-faint">seen ~{{player.lastSeen}}</div>{{/if}}
       </div>
       <div class="flex flex-wrap items-center gap-1.5">
-        <button class="chip {{#if player.whitelisted}}border-grass-700 bg-grass-500/15 text-ok{{/if}}"
+        <button class="chip {{#if player.whitelisted}}border-ok/40 bg-ok/15 text-ok{{/if}}"
                 data-role-toggle="whitelist" data-on="{{#if player.whitelisted}}1{{else}}0{{/if}}"
                 data-tip="{{#if player.whitelisted}}Remove from whitelist.{{else}}Add to whitelist.{{/if}}">{{{icon 'shield-check' 'size-3.5'}}} <span data-chip-label>Whitelist</span></button>
-        <button class="chip {{#if player.op}}border-diamond-700 bg-diamond-400/15 text-link{{/if}}"
+        <button class="chip {{#if player.op}}border-link/40 bg-link/15 text-link{{/if}}"
                 data-role-toggle="op" data-on="{{#if player.op}}1{{else}}0{{/if}}"
                 data-tip="{{#if player.op}}Remove operator status.{{else}}Make operator (level 4).{{/if}}">{{{icon 'shield' 'size-3.5'}}} <span data-chip-label>Op{{#if player.op}} L{{player.opLevel}}{{/if}}</span></button>
-        <button class="chip {{#if player.banned}}border-danger/40 bg-redstone-500/15 text-danger{{/if}}"
+        <button class="chip {{#if player.banned}}border-danger/40 bg-danger/15 text-danger{{/if}}"
                 data-role-toggle="ban" data-on="{{#if player.banned}}1{{else}}0{{/if}}"
                 data-tip="{{#if player.banned}}Pardon this player.{{else}}Ban this player.{{/if}}">{{{icon 'ban' 'size-3.5'}}} <span data-chip-label>{{#if player.banned}}Banned{{else}}Ban{{/if}}</span></button>
         {{#if player.online}}<button class="btn btn-ghost btn-sm" data-act="kick" data-tip="Kick with a message.">{{{icon 'log-out' 'size-3.5'}}} Kick</button>{{/if}}

@@ -11,13 +11,13 @@
     </div>
     <button class="btn btn-sm" id="inv-refresh" data-tip="Re-read the player's saved data file.">{{{icon 'refresh-cw' 'size-3.5'}}} Refresh</button>
     <button class="btn btn-sm" id="inv-snapshot" data-tip="Save this inventory as a snapshot for later comparison.">{{{icon 'camera' 'size-3.5'}}} Snapshot</button>
-    <div class="ml-auto flex gap-2">
+    <div class="flex w-full sm:ml-auto sm:w-auto gap-2">
       {{#if (or (eq server.status 'running') (eq server.status 'unhealthy'))}}
-        <button class="btn btn-sm" id="inv-give" data-tip="Browse every item on this server (vanilla and modded) and give one to an online player.">{{{icon 'gift' 'size-3.5'}}} Give Item</button>
-        <button class="btn btn-sm" id="inv-clear" data-tip="Remove items from an online player.">{{{icon 'eraser' 'size-3.5'}}} Clear Items</button>
+        <button class="btn btn-sm flex-1 sm:flex-none" id="inv-give" data-tip="Browse every item on this server (vanilla and modded) and give one to an online player.">{{{icon 'gift' 'size-3.5'}}} Give Item</button>
+        <button class="btn btn-sm flex-1 sm:flex-none" id="inv-clear" data-tip="Remove items from an online player.">{{{icon 'eraser' 'size-3.5'}}} Clear Items</button>
       {{else}}
-        <button class="btn btn-sm" id="inv-give" data-tip="Browse every item on this server and add one straight into the selected player's save file.">{{{icon 'gift' 'size-3.5'}}} Give Item</button>
-        <span data-tip="Start the server to clear items in bulk, or delete slots one by one below."><button class="btn btn-sm" id="inv-clear" disabled>{{{icon 'eraser' 'size-3.5'}}} Clear Items</button></span>
+        <button class="btn btn-sm flex-1 sm:flex-none" id="inv-give" data-tip="Browse every item on this server and add one straight into the selected player's save file.">{{{icon 'gift' 'size-3.5'}}} Give Item</button>
+        <span class="flex-1 sm:flex-none" data-tip="Start the server to clear items in bulk, or delete slots one by one below."><button class="btn btn-sm w-full sm:w-auto" id="inv-clear" disabled>{{{icon 'eraser' 'size-3.5'}}} Clear Items</button></span>
       {{/if}}
     </div>
   </div>
@@ -37,7 +37,7 @@
       the tab used to show only the toolbar while the fetches ran. }}
   <div class="card p-10 text-center text-sm text-ink-faint" id="inv-loading" aria-busy="true">
     <svg class="icon mx-auto size-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-    <p class="mt-2">Loading inventories…</p>
+    <p class="loading-state mt-2">Loading inventories…</p>
   </div>
 
   <div class="hidden" id="inv-view">
