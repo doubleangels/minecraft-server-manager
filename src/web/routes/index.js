@@ -341,6 +341,9 @@ async function renderServerList(req, res, next, { page }) {
         .slice(0, 6);
       context.activity = eventsVM(events);
       context.overview = buildDashboardOverview(servers, { user: req.user, visibleIds: res.locals.visibleServerIds });
+      context.hostSensors = await require('../../services/hostSensors')
+        .readSensors()
+        .catch(() => ({ available: false }));
     }
     res.render('dashboard', context);
   } catch (err) {
@@ -640,6 +643,10 @@ router.get(
       // Real per-category sizes from the storage index (view contract:
       // [{label, size, pct, color}]; empty → "run a scan" state).
       const indexer = require('../../storage/indexer');
+      // Host temperature and fans: the chart only renders when there is any.
+      context.hostSensors = await require('../../services/hostSensors')
+        .readSensors()
+        .catch(() => ({ available: false }));
 
       // --- Health & stability: values already collected elsewhere, never shown
       // on a live view. All best-effort - a Docker hiccup must not 500 the tab.

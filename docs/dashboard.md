@@ -18,6 +18,12 @@ A second row adds **Memory allotted** (and how much is in use), **Storage used**
 
 Your **Servers** come next, then the **Resource Overview** that charts every server's share of memory and CPU, then **Recent Activity**.
 
+**Host Sensors** shows the machine's CPU temperature, its hottest sensor, and up to three fan speeds, with a chart of the last 24 hours (one reading a minute; the history starts over when the panel restarts). It appears only when the host exposes sensors:
+
+- **Linux** (including the panel running in Docker on Linux): read from the kernel's hardware monitors, the same ones the `sensors` command shows. Fans appear when the motherboard's fan controller has a driver loaded; many boards need `lm-sensors`' `sensors-detect` run once on the host. A Raspberry Pi shows its CPU temperature.
+- **Docker Desktop on macOS or Windows**: the panel runs inside a virtual machine that has no sensors, so the card stays hidden.
+- If the host's `/sys` is mounted somewhere else in the container, point `HOST_SYS_PATH` at it.
+
 ## Server cards
 
 Each server shows as a card with its status (Running, Starting, Stopped, Crashed, and in-between states such as Unhealthy or Stalled), the type and Minecraft version, its game port, and its tags. Every card shows **players** and **disk** use against the quota; running servers also show live **CPU** and **memory**, updated continuously.

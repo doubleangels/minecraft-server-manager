@@ -1,0 +1,32 @@
+{{! Host temperature and fans, from the machine's own sensors (Linux hwmon and
+    thermal zones). Rendered only when the host exposes any. The chart loads
+    the last 24 hours (one reading a minute, kept in memory since the panel
+    started) and the tiles refresh every minute (pages/hostSensors.js). }}
+<div class="mt-8" data-host-sensors>
+  <div class="mb-3 flex items-center justify-between">
+    <h2 class="card-title">{{{icon 'thermometer' 'size-4'}}}Host Sensors</h2>
+  </div>
+  <div class="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-4">
+    <div class="card stat-tile">
+      <div class="stat-label">{{{icon 'cpu' 'size-3.5'}}} CPU Temperature</div>
+      <div class="stat-value"><span data-host-cpu>{{#if hostSensors.cpuTempC}}{{hostSensors.cpuTempC}}{{else}}-{{/if}}</span><span class="stat-unit"> °C</span></div>
+      <div class="stat-sub">hottest sensor <span data-host-max>{{#if hostSensors.maxTempC}}{{hostSensors.maxTempC}}{{else}}-{{/if}}</span> °C</div>
+    </div>
+    {{#each hostSensors.fans}}
+      {{#if (gt 3 @index)}}
+        <div class="card stat-tile">
+          <div class="stat-label">{{{icon 'fan' 'size-3.5'}}} <span class="truncate">{{this.label}}</span></div>
+          <div class="stat-value"><span data-host-fan="{{@index}}">{{this.rpm}}</span><span class="stat-unit"> rpm</span></div>
+          <div class="stat-sub">{{#if (eq this.rpm 0)}}stopped{{else}}spinning{{/if}}</div>
+        </div>
+      {{/if}}
+    {{/each}}
+  </div>
+  <div class="mt-4 card p-4">
+    <h3 class="mb-2 font-semibold">Last 24 Hours <span class="text-xs font-normal text-ink-faint">one reading a minute</span></h3>
+    <canvas class="max-w-full" data-chart="host-history" height="120" data-host-fans="{{hostSensors.fans.length}}"></canvas>
+    <p class="help">The history starts over when the panel restarts. Most CPUs slow themselves down above about 90 °C.</p>
+  </div>
+</div>
+<script src="/vendor/chart.umd.js"></script>
+<script type="module" src="/js/pages/hostSensors.js"></script>

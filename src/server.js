@@ -191,6 +191,10 @@ try {
 function startBackgroundServices(httpServer) {
   require('./ws').attachWebSockets(httpServer);
   require('./storage/indexer').startIndexer();
+  // Host temperature and fans for the dashboard chart (no Docker needed).
+  require('./services/hostSensors')
+    .startSensorHistory()
+    .catch((err) => logger.warn('Starting the host sensor history failed.', { err: serializeError(err) }));
   require('./crashes').startCrashWatcher({});
   require('./services/scheduler').startScheduler();
   require('./integrations/discord').startEventBridge();

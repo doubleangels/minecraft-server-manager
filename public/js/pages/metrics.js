@@ -127,6 +127,34 @@ function init(serverId, memLimitMb, cpuLimit) {
     { max: 20, unit: '', y1: ' ms' }
   );
 
+  // Host temperature (left axis, °C) and fan speeds (right axis, RPM). Fans
+  // get their datasets on the first sample, named as the host labels them.
+  const hostCanvas = document.querySelector('[data-chart="host"]');
+  const hostHasFans = Number(hostCanvas?.dataset.hostFans || 0) > 0;
+  const hostChart = makeChart(
+    hostCanvas,
+    [{ label: 'CPU °C', data: [], borderColor: colors.redstone, backgroundColor: 'transparent', yAxisID: 'y' }],
+    { max: 90, unit: '°', y1: hostHasFans ? ' rpm' : undefined }
+  );
+  const FAN_COLORS = [colors.diamond, colors.gold, colors.grass];
+  function pushHost(host) {
+    if (!hostChart || !host) return;
+    const fans = (host.fans || []).slice(0, 3);
+    if (hostChart.data.datasets.length === 1 && fans.length && hostHasFans) {
+      fans.forEach((f, i) =>
+        hostChart.data.datasets.push({
+          label: `${f.label} rpm`,
+          data: hostChart.data.labels.map(() => null),
+          borderColor: FAN_COLORS[i],
+          backgroundColor: 'transparent',
+          yAxisID: 'y1',
+        })
+      );
+      hostChart.options.plugins.legend.display = true;
+    }
+    push(hostChart, [host.cpuTempC, ...fans.map((f) => f.rpm)].slice(0, hostChart.data.datasets.length));
+  }
+
   let lastNet = null;
   let lastTs = 0;
 
@@ -207,6 +235,7 @@ function init(serverId, memLimitMb, cpuLimit) {
       lastNet = { rx: msg.netRx, tx: msg.netTx };
       lastTs = now;
       applyPerf(msg.perf, msg.perfSupported);
+      pushHost(msg.host);
     });
     ws.addEventListener('close', () => {
       if (document.hidden) return; // visibilitychange reconnects

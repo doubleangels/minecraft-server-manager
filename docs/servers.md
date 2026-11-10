@@ -57,7 +57,7 @@ The **World Controls** rail rides along on every tab: the in-game clock, weather
 
 ![World controls](images/world-controls.png)
 
-**Overview → Performance** shows TPS and milliseconds per tick, a health and stability card with crashes (last 24 h and 7 d), out-of-memory kills, and auto-restarts, and per-world sizes.
+**Overview → Performance** shows TPS and milliseconds per tick, a health and stability card with crashes (last 24 h and 7 d), out-of-memory kills, and auto-restarts, and per-world sizes. When the host machine exposes temperature sensors, a **Host Temperature & Fans** chart follows the CPU temperature and each fan's speed live, alongside the server's own charts. These are readings for the whole machine, not just this server.
 
 ![Live monitoring](images/monitoring-live.png)
 

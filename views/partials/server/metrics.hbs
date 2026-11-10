@@ -78,6 +78,14 @@
       <canvas class="max-w-full" data-chart="tps" height="140"></canvas>
       <p class="help">20 TPS is a healthy server. A lasting drop means the server can't keep up with what's happening in the world.</p>
     </div>
+    {{! Shown only when the host exposes sensors (Linux hwmon / thermal zones). }}
+    {{#if hostSensors.available}}
+      <div class="card p-4" data-host-card>
+        <h3 class="mb-2 font-semibold">Host Temperature{{#if hostSensors.fans.length}} &amp; Fans{{/if}} <span class="text-xs font-normal text-ink-faint">whole machine</span></h3>
+        <canvas class="max-w-full" data-chart="host" height="140" data-host-fans="{{hostSensors.fans.length}}"></canvas>
+        <p class="help">CPU temperature{{#if hostSensors.fans.length}} and fan speed{{/if}} as the host's own sensors report them. Most CPUs slow themselves down above about 90 °C.</p>
+      </div>
+    {{/if}}
   </div>
 
   {{! ---- Health & stability ---- }}

@@ -346,14 +346,21 @@ async function handleStats(ws, serverId) {
       // Fold in the latest cached tick-performance sample (TPS/MSPT) so the
       // metrics page can stream it on the same socket as CPU/mem/network.
       const live = liveCache.get(serverId);
-      ws.send(
-        JSON.stringify({
-          kind: 'stats',
-          ...sample,
-          perf: live.perf || null,
-          perfSupported: live.perfSupported !== false,
-        })
-      );
+      // Host temperature and fans ride along (cached, read at most every 2 s).
+      require('../services/hostSensors')
+        .liveReading()
+        .then((host) => {
+          if (ws.readyState !== ws.OPEN) return;
+          ws.send(
+            JSON.stringify({
+              kind: 'stats',
+              ...sample,
+              perf: live.perf || null,
+              perfSupported: live.perfSupported !== false,
+              host,
+            })
+          );
+        });
     },
     (err) => {
       if (ws.readyState !== ws.OPEN) return;

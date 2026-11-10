@@ -423,6 +423,18 @@ router.get(
   })
 );
 
+// Host temperature and fan readings (Linux sysfs), plus the dashboard chart's
+// minute-by-minute history when asked. Read-only and host-wide: any signed-in
+// user may see it, like the dashboard's other host figures.
+router.get(
+  '/system/sensors',
+  asyncHandler(async (req, res) => {
+    const sensors = require('../../services/hostSensors');
+    const current = await sensors.readSensors();
+    res.json({ ok: true, ...current, history: req.query.history ? sensors.sensorHistory() : undefined });
+  })
+);
+
 // Batched live data for client-side hydration (dashboard cards, headers).
 // Includes the DB status for EVERY server so the dashboard can move the
 // status dot when a server crashes or stops - hydration used to update only

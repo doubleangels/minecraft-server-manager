@@ -129,6 +129,7 @@
     {{> combined-graphs}}
   </div>
 </div>
+{{#if hostSensors.available}}{{> host-sensors}}{{/if}}
 {{/unless}}
 
 <div class="mt-8 {{#if serversOnly}}hidden{{/if}}">
