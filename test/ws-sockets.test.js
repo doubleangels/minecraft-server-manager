@@ -280,6 +280,8 @@ test('console: a configured label announces the command in game chat via tellraw
 });
 
 test('stats: samples fan out with perf folded in, one shared upstream, stopped after the last tab', async () => {
+  // Live stats come from the live cache, which tracks running servers.
+  require('../src/db').run("UPDATE servers SET status = 'running' WHERE id = ?", SERVER);
   statsFeeds.length = 0;
   const a = await open(`/ws/stats/${SERVER}`, { cookie: admin });
   assert.ok(await until(() => statsFeeds.length === 1));

@@ -188,6 +188,17 @@ Cross-cutting:
   retried, and a schedule whose last run is still waiting skips its next firing.
 - **Disk quotas** are enforced by the panel because Docker can't cap bind-mount usage: the indexer
   caches per-directory sizes and disk-growing operations are gated on them.
+- **Background load is kept proportional to what someone is looking at.**
+  - The storage indexer walks the data folder hourly and after panel file operations, but map tile
+    folders (BlueMap, Dynmap; often millions of files) are walked at most once a day and their totals
+    reused from `storage_deep_cache` in between.
+  - The live cache polls each running server's player list and TPS over one kept-open RCON
+    connection per server (`services/rconClient.js`, to the published RCON port on
+    `config.mapProxyHost`), falling back to `docker exec rcon-cli` when that route is unavailable.
+  - Docker stats stream per second only while a tab is polling live status or a server page's graph
+    is open (shared with that graph); otherwise each running server is sampled once a minute.
+  - Backups deflate at level 1: region files are already compressed inside, and higher levels cost
+    about 50% more CPU for the same size.
 - **Secrets** (RCON passwords, API keys, TOTP secrets, the Discord webhook URL) are encrypted at
   rest with AES-256-GCM using a dedicated random key at `$DATA_DIR/.secret-key` (mode `0600`,
   auto-generated). It's independent of `SESSION_SECRET`; a `SESSION_SECRET`-derived key is kept as a

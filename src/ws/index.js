@@ -13,7 +13,6 @@ const signature = require('cookie-signature');
 const config = require('../config');
 const db = require('../db');
 const { followLogs } = require('../docker/logs');
-const { statsStream } = require('../docker/stats');
 const { execCapture, inspectStatus } = require('../docker/containers');
 const { getServer } = require('../services/servers');
 const permissions = require('../services/permissions');
@@ -322,58 +321,6 @@ function subscribeConsole(serverId, sub) {
   };
 }
 
-// One upstream `docker stats --stream` per server, fanned out to every
-// connected /ws/stats client, instead of one per connection: several admins
-// (or one admin with several tabs) watching the same server's dashboard used
-// to each open an independent Docker stats stream and demux pipeline - real,
-// avoidable load on the Docker daemon and the panel process that scales with
-// concurrent VIEWERS rather than with server count.
-const statsBrokers = new Map(); // serverId -> { subscribers, errorSubscribers, endSubscribers, stop }
-
-function subscribeStats(serverId, onSample, onError, onEnd = () => {}) {
-  let broker = statsBrokers.get(serverId);
-  if (!broker) {
-    broker = { subscribers: new Set(), errorSubscribers: new Set(), endSubscribers: new Set(), stop: null };
-    statsBrokers.set(serverId, broker);
-    statsStream(
-      serverId,
-      (sample) => {
-        for (const fn of broker.subscribers) fn(sample);
-      },
-      {
-        // The upstream finished on its own (container stopped or restarted).
-        // Drop the broker so the next tab opens a fresh stream, and tell the
-        // tabs on this one so their sockets close and reconnect, instead of
-        // staying attached to a stream that will never send another sample.
-        onEnd: () => {
-          if (statsBrokers.get(serverId) === broker) statsBrokers.delete(serverId);
-          for (const fn of broker.endSubscribers) fn();
-        },
-      }
-    )
-      .then((stopFn) => {
-        if (statsBrokers.get(serverId) === broker) broker.stop = stopFn;
-        else stopFn(); // every subscriber left before the stream finished connecting
-      })
-      .catch((err) => {
-        if (statsBrokers.get(serverId) === broker) statsBrokers.delete(serverId);
-        for (const fn of broker.errorSubscribers) fn(err);
-      });
-  }
-  broker.subscribers.add(onSample);
-  broker.errorSubscribers.add(onError);
-  broker.endSubscribers.add(onEnd);
-  return () => {
-    broker.subscribers.delete(onSample);
-    broker.errorSubscribers.delete(onError);
-    broker.endSubscribers.delete(onEnd);
-    if (broker.subscribers.size === 0 && statsBrokers.get(serverId) === broker) {
-      statsBrokers.delete(serverId);
-      if (broker.stop) broker.stop(); // else the .then() above stops it once connected
-    }
-  };
-}
-
 async function handleStats(ws, serverId) {
   let unsubscribe = null;
   let closed = false;
@@ -390,7 +337,9 @@ async function handleStats(ws, serverId) {
   });
   ws.on('close', cleanup);
   const liveCache = require('../services/liveCache');
-  unsubscribe = subscribeStats(
+  // One Docker stats stream per server, owned by the live cache and shared by
+  // every tab watching it (and the dashboard numbers), not one per socket.
+  const unsub = await liveCache.subscribeStats(
     serverId,
     (sample) => {
       if (ws.readyState !== ws.OPEN) return;
@@ -417,6 +366,7 @@ async function handleStats(ws, serverId) {
       if (ws.readyState === ws.OPEN) ws.close(1011, 'stats stream ended');
     }
   );
+  unsubscribe = unsub;
   if (closed) unsubscribe(); // client left synchronously before subscribing even returned
 }
 

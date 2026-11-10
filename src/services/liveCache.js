@@ -9,6 +9,22 @@ const path = require('node:path');
 const db = require('../db');
 const { statsStream, statsOnce } = require('../docker/stats');
 const { execCaptureChecked, inspectStatus } = require('../docker/containers');
+const { rconCommand, closeRcon } = require('./rconClient');
+
+/**
+ * Run a polling RCON command: over the kept-open direct connection when it
+ * works, else `docker exec rcon-cli` as before. Same { stdout, exitCode }
+ * shape either way; a direct reply counts as a clean exit.
+ * @param {string} serverId
+ * @param {string[]} cmd an rcon-cli command line, e.g. ['rcon-cli', 'list']
+ */
+async function rconPoll(serverId, cmd) {
+  try {
+    return { stdout: await rconCommand(serverId, cmd.slice(1)), exitCode: 0 };
+  } catch {
+    return execCaptureChecked(serverId, cmd);
+  }
+}
 const { fetchLogs } = require('../docker/logs');
 const { parsePlayerList } = require('../utils/rconList');
 const { parseTps } = require('../utils/rconTps');
@@ -130,6 +146,104 @@ function statusDetail(live) {
   return null;
 }
 
+// ---- Stats: a per-second Docker stats stream only while someone watches ----
+// A stats stream costs the Docker daemon a cgroup read every second per
+// server, all day. Any open panel tab polls /api/servers/live every few
+// seconds (touch()), and the server page's live graph subscribes directly; when
+// neither has happened lately the streams close and each running server gets
+// one sample a minute instead (enough for the public API and alerts).
+const WATCH_MS = 45_000;
+const IDLE_SAMPLE_MS = 60_000;
+let lastWatchedAt = 0;
+
+/** Someone is looking at live numbers: stream every running server's stats. */
+function touch() {
+  const wasIdle = Date.now() - lastWatchedAt >= WATCH_MS;
+  lastWatchedAt = Date.now();
+  if (wasIdle) for (const [id, entry] of entries) ensureStream(id, entry);
+}
+
+function wantsStream(entry) {
+  return entry.subs.size > 0 || Date.now() - lastWatchedAt < WATCH_MS;
+}
+
+async function ensureStream(serverId, entry) {
+  if (entry.stopStats || entry.streamOpening) return;
+  entry.streamOpening = true;
+  try {
+    const stop = await statsStream(
+      serverId,
+      (sample) => {
+        entry.stats = { ...sample, at: Date.now() };
+        for (const sub of entry.subs) sub.onSample(sample);
+      },
+      {
+        // Docker closed the stream (the container restarted in place, which
+        // keeps its id, or went away). Drop the entry so the next sync()
+        // re-attaches, instead of serving the last sample forever.
+        onEnd: () => {
+          entry.stopStats = null;
+          if (entries.get(serverId) === entry) detach(serverId);
+        },
+      }
+    );
+    // Detached, or nobody wants it any more, while it was connecting.
+    if (entries.get(serverId) !== entry) stop();
+    else entry.stopStats = stop;
+  } catch (err) {
+    for (const sub of entry.subs) sub.onError(err);
+  } finally {
+    entry.streamOpening = false;
+  }
+}
+
+function stopStream(entry) {
+  if (!entry.stopStats) return;
+  const stop = entry.stopStats;
+  entry.stopStats = null;
+  try {
+    stop();
+  } catch {
+    /* closed */
+  }
+}
+
+/** Unwatched: one sample a minute instead of a stream. */
+async function sampleIdle(serverId, entry) {
+  if (entry.stats && Date.now() - entry.stats.at < IDLE_SAMPLE_MS) return;
+  try {
+    const sample = await statsOnce(serverId);
+    if (sample) entry.stats = { ...sample, at: Date.now() };
+  } catch {
+    /* container gone - sync() will detach */
+  }
+}
+
+/**
+ * Live stats for one running server, sample by sample, on the cache's own
+ * stream (one Docker stream per server however many tabs watch).
+ * @returns {Promise<() => void>} unsubscribe
+ */
+async function subscribeStats(serverId, onSample, onError, onEnd) {
+  let entry = entries.get(serverId);
+  if (!entry) {
+    await sync();
+    entry = entries.get(serverId);
+  }
+  if (!entry) {
+    onError(new Error('The server is not running.'));
+    return () => {};
+  }
+  const sub = { onSample, onError, onEnd };
+  entry.subs.add(sub);
+  ensureStream(serverId, entry);
+  return () => {
+    entry.subs.delete(sub);
+    // The last graph closed and no tab is polling: close the stream now.
+    if (!wantsStream(entry)) stopStream(entry);
+  };
+}
+
 async function attach(serverId, containerId = null) {
   if (entries.has(serverId)) return;
   const entry = {
@@ -144,6 +258,9 @@ async function attach(serverId, containerId = null) {
     perfSupported: true,
     perfTimer: null,
     containerId,
+    streamOpening: false,
+    // Live-stats subscribers (the server page's graph over /ws/stats).
+    subs: new Set(),
   };
   entries.set(serverId, entry);
 
@@ -154,24 +271,8 @@ async function attach(serverId, containerId = null) {
     /* leave null */
   }
 
-  try {
-    entry.stopStats = await statsStream(
-      serverId,
-      (sample) => {
-        entry.stats = { ...sample, at: Date.now() };
-      },
-      {
-        // Docker closed the stream (the container restarted in place, which
-        // keeps its id, or went away). Drop the entry so the next sync()
-        // re-attaches a live stream, instead of serving the last sample forever.
-        onEnd: () => {
-          if (entries.get(serverId) === entry) detach(serverId);
-        },
-      }
-    );
-  } catch {
-    /* stats unavailable - cache stays null */
-  }
+  if (wantsStream(entry)) await ensureStream(serverId, entry);
+  else await sampleIdle(serverId, entry);
 
   // detach() may have run while the awaits above were in flight (the server
   // stopped, or a recreate swapped the container). This entry is orphaned: stop
@@ -226,7 +327,7 @@ async function attach(serverId, containerId = null) {
         }
       }
 
-      const { stdout, exitCode } = await execCaptureChecked(serverId, ['rcon-cli', 'list']);
+      const { stdout, exitCode } = await rconPoll(serverId, ['rcon-cli', 'list']);
       const out = cleanText(stdout); // rcon-cli colorizes
       const parsed = parsePlayerList(out);
       if (parsed) {
@@ -280,7 +381,7 @@ async function attach(serverId, containerId = null) {
       for (const cmd of cmds) {
         let out;
         try {
-          out = cleanText((await execCaptureChecked(serverId, cmd)).stdout);
+          out = cleanText((await rconPoll(serverId, cmd)).stdout);
         } catch {
           continue;
         }
@@ -292,7 +393,7 @@ async function attach(serverId, containerId = null) {
         // Paper's `tps` omits MSPT - fill it from `mspt` when we can.
         if (perf.mspt == null && perf.source === 'paper' && cmd[cmd.length - 1] === 'tps') {
           try {
-            const m = parseTps(cleanText((await execCaptureChecked(serverId, ['rcon-cli', 'mspt'])).stdout));
+            const m = parseTps(cleanText((await rconPoll(serverId, ['rcon-cli', 'mspt'])).stdout));
             if (m && m.mspt != null) entry.perf.mspt = m.mspt;
           } catch {
             /* mspt is optional */
@@ -320,15 +421,13 @@ async function attach(serverId, containerId = null) {
 }
 
 function detach(serverId) {
+  closeRcon(serverId);
   const entry = entries.get(serverId);
   if (!entry) return;
-  if (entry.stopStats) {
-    try {
-      entry.stopStats();
-    } catch {
-      /* closed */
-    }
-  }
+  stopStream(entry);
+  // Live graphs on this server: their stream is over (stopped or restarted).
+  for (const sub of entry.subs) sub.onEnd();
+  entry.subs.clear();
   if (entry.playerTimer) clearInterval(entry.playerTimer);
   if (entry.phaseTimer) clearInterval(entry.phaseTimer);
   if (entry.perfTimer) clearInterval(entry.perfTimer);
@@ -368,6 +467,14 @@ async function sync() {
     // running, the serial loop left the last one blank for N round-trips.
     await Promise.all(toAttach);
     for (const id of [...entries.keys()]) if (!running.has(id)) detach(id);
+    // Stream while watched, otherwise close the stream and sample once a minute.
+    for (const [id, entry] of entries) {
+      if (wantsStream(entry)) ensureStream(id, entry);
+      else {
+        stopStream(entry);
+        sampleIdle(id, entry);
+      }
+    }
     syncThrottle.ok(logger.info, 'The live-cache reconcile recovered.');
   } catch (err) {
     syncThrottle.fail(logger.warn, 'A live-cache reconcile failed.', {
@@ -394,4 +501,15 @@ async function sampleOnce(serverId) {
   }
 }
 
-module.exports = { get, getAll, classifyPhase, statusDetail, startLiveCache, sync, detach, sampleOnce };
+module.exports = {
+  get,
+  getAll,
+  classifyPhase,
+  statusDetail,
+  startLiveCache,
+  sync,
+  detach,
+  sampleOnce,
+  touch,
+  subscribeStats,
+};

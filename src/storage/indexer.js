@@ -12,6 +12,20 @@ const logger = require('../logger')(path.basename(__filename));
 const { serializeError } = require('../utils/logSanitize');
 const { makeFailureThrottle } = require('../logger');
 const { STAT_BATCH } = require('../utils/statSizes');
+const { MAP_TILE_PREFIXES } = require('../services/backupFilter');
+
+// Map tile folders (BlueMap, Dynmap) are often millions of tiny files. Walking
+// them on every scan pegged CPU and disk for minutes at a time, so each one is
+// walked fully at most once per DEEP_TTL_MS and its cached total reused in
+// between (table storage_deep_cache). Sizes on the Storage page and quota checks
+// still include them, at most a day stale for that one folder.
+const DEEP_TTL_MS = 24 * 3600 * 1000;
+const TILE_SUFFIXES = MAP_TILE_PREFIXES.map((p) => p.replace(/\/$/, ''));
+/** True for data/servers/<id>/<map tile prefix>. */
+function isTileDir(rel) {
+  const m = /^servers\/[^/]+\/(.+)$/.exec(rel);
+  return Boolean(m && TILE_SUFFIXES.includes(m[1]));
+}
 
 /** stat() every path in bounded parallel batches; null for one that vanished. */
 async function statBatch(paths) {
@@ -43,8 +57,35 @@ async function scan() {
   try {
     const root = config.dataDir;
     const results = new Map(); // relPath -> {size, files}
+    const deepCache = new Map(
+      db.all('SELECT rel_path, size_bytes, file_count, scanned_at FROM storage_deep_cache').map((r) => [r.rel_path, r])
+    );
+    const seenTileDirs = new Set();
+    let deepWalks = 0;
 
     async function walk(abs, rel) {
+      if (isTileDir(rel)) {
+        seenTileDirs.add(rel);
+        const cached = deepCache.get(rel);
+        if (cached && Date.now() - cached.scanned_at < DEEP_TTL_MS) {
+          return { size: cached.size_bytes, files: cached.file_count };
+        }
+        const fresh = await walkTree(abs, rel);
+        deepWalks += 1;
+        db.run(
+          `INSERT INTO storage_deep_cache (rel_path, size_bytes, file_count, scanned_at) VALUES (?, ?, ?, ?)
+           ON CONFLICT(rel_path) DO UPDATE SET size_bytes = excluded.size_bytes, file_count = excluded.file_count, scanned_at = excluded.scanned_at`,
+          rel,
+          fresh.size,
+          fresh.files,
+          Date.now()
+        );
+        return fresh;
+      }
+      return walkTree(abs, rel);
+    }
+
+    async function walkTree(abs, rel) {
       let size = 0;
       let files = 0;
       let entries;
@@ -82,6 +123,16 @@ async function scan() {
 
     const total = await walk(root, '');
     results.set('', total);
+    // Forget tile folders that no longer exist (map removed, server deleted).
+    for (const rel of deepCache.keys()) {
+      if (!seenTileDirs.has(rel)) db.run('DELETE FROM storage_deep_cache WHERE rel_path = ?', rel);
+    }
+    logger.debug('Finished a storage index scan.', {
+      ms: Date.now() - started,
+      dirs: results.size,
+      tileDirsCached: seenTileDirs.size - deepWalks,
+      tileDirsWalked: deepWalks,
+    });
 
     // Skip the DB rewrite when the walk produced exactly what the table already
     // holds. In-place file rewrites that leave sizes unchanged (a rewritten
@@ -145,7 +196,10 @@ function cachedEqual(results) {
   return true;
 }
 
-function startIndexer({ intervalMs = 15 * 60 * 1000 } = {}) {
+// Hourly backstop: every upload, delete, copy, backup and restore already
+// schedules its own scan (scheduleScan below), so the interval only catches
+// changes made outside the panel (the game writing its world, a map render).
+function startIndexer({ intervalMs = 60 * 60 * 1000 } = {}) {
   scan().catch(onScanFailed);
   // Mutation-driven scheduleScan() calls frequently land near an interval tick;
   // re-walking the whole tree again minutes after one finished is pure waste,

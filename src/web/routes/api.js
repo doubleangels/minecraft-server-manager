@@ -430,6 +430,8 @@ router.get(
 router.get('/servers/live', (req, res) => {
   const liveCache = require('../../services/liveCache');
   const db = require('../../db');
+  // An open tab is watching: keep per-second stats streaming (see liveCache).
+  liveCache.touch();
   const all = liveCache.getAll();
   const out = {};
   const rows = permissions.filterVisible(

@@ -12,12 +12,10 @@
 // Stored as-is: formats that are already compressed. Deflating them again
 // saves well under 1% and costs most of the CPU time of a backup.
 
-/** Path prefixes (relative to the server folder, forward slashes) never backed up. */
-const EXCLUDED_PREFIXES = [
-  'logs/',
-  'debug/',
-  '.fabric/remappedJars/',
-  '.fabric/processedMods/',
+/** Map renderer tile folders (relative to the server folder): regenerable, and
+ *  often millions of tiny files. Backups skip them; the storage indexer sizes
+ *  them at most once a day. */
+const MAP_TILE_PREFIXES = [
   'bluemap/web/maps/',
   'plugins/BlueMap/web/maps/',
   'config/bluemap/web/maps/',
@@ -25,6 +23,9 @@ const EXCLUDED_PREFIXES = [
   'plugins/dynmap/web/tiles/',
   'config/dynmap/web/tiles/',
 ];
+
+/** Path prefixes (relative to the server folder, forward slashes) never backed up. */
+const EXCLUDED_PREFIXES = ['logs/', 'debug/', '.fabric/remappedJars/', '.fabric/processedMods/', ...MAP_TILE_PREFIXES];
 
 /** File names that are left out wherever they appear. */
 const EXCLUDED_NAMES = new Set(['session.lock']);
@@ -76,4 +77,12 @@ const SKIP_DIRS = EXCLUDED_PREFIXES.map((p) => p.replace(/\/$/, ''));
 const IGNORE_GLOBS = [...[...EXCLUDED_NAMES].map((n) => `**/${n}`), ...EXCLUDED_SUFFIXES.map((x) => `**/*${x}`)];
 const STORED_GLOBS = [...STORED_EXTENSIONS].map((ext) => `**/*${ext}`);
 
-module.exports = { isExcluded, shouldStore, EXCLUDED_PREFIXES, SKIP_DIRS, IGNORE_GLOBS, STORED_GLOBS };
+module.exports = {
+  isExcluded,
+  shouldStore,
+  MAP_TILE_PREFIXES,
+  EXCLUDED_PREFIXES,
+  SKIP_DIRS,
+  IGNORE_GLOBS,
+  STORED_GLOBS,
+};

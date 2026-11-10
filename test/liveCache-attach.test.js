@@ -18,9 +18,11 @@ let startedAt = '2026-01-01T00:00:00Z';
 let rconReply = async () => ({ stdout: 'There are 2 of a max of 20 players online: a, b', exitCode: 0 });
 let stopped = 0;
 let statsCb = null;
+let streamsOpened = 0;
 containers.inspectStatus = async () => ({ startedAt });
 containers.execCaptureChecked = (id, cmd) => rconReply(cmd);
 stats.statsStream = async (id, cb) => {
+  streamsOpened++;
   statsCb = cb;
   return () => {
     stopped++;
@@ -48,6 +50,7 @@ function seed(id, status, containerId = 'c1') {
 test('sync attaches running servers, reads players, and detaches when stopped', async () => {
   seed('srv_lc1', 'running');
   seed('srv_lc2', 'stopped');
+  liveCache.touch(); // a tab is watching: stats stream
   await liveCache.sync();
   await tick();
   const snap = liveCache.get('srv_lc1');
@@ -144,4 +147,28 @@ test('when no tps probe answers the server is marked unsupported', async (t) => 
 
 test('sampleOnce returns a sample', async () => {
   assert.deepEqual(await liveCache.sampleOnce('x'), { cpu: 1 });
+});
+
+test('with nobody watching, stats come from one sample a minute, not a stream', async () => {
+  // Push the last "watched" moment far into the past, then attach a server.
+  const realNow = Date.now;
+  Date.now = () => realNow() + 10 * 60_000;
+  try {
+    const before = stopped;
+    const opened = streamsOpened;
+    seed('srv_lc_idle', 'running', 'c-idle');
+    await liveCache.sync();
+    await tick();
+    assert.equal(streamsOpened, opened, 'no stream opened while unwatched');
+    assert.deepEqual(liveCache.get('srv_lc_idle').stats.cpu, 1, 'the one-shot sample fills in');
+    liveCache.touch();
+    await tick();
+    // A tab starts watching: every attached server streams (this one included).
+    assert.equal(streamsOpened - opened, Object.keys(liveCache.getAll()).length);
+    db.run("UPDATE servers SET status = 'stopped' WHERE id = 'srv_lc_idle'");
+    await liveCache.sync();
+    assert.ok(stopped > before, 'its stream closes when it stops');
+  } finally {
+    Date.now = realNow;
+  }
 });
