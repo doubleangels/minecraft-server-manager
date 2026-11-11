@@ -11,6 +11,8 @@ const { ensureNetwork } = require('./networks');
 const db = require('../db');
 const logger = require('../logger')(path.basename(__filename));
 const { redactCommand } = require('../utils/logSanitize');
+const config = require('../config');
+const { internalBindIp } = require('./portBind');
 
 const LABEL = 'msm.id';
 const GAME_PORT = '25565';
@@ -34,27 +36,52 @@ function containerName(serverId) {
  * @param {string} [spec.networkName]    host Docker network to attach to; created if it does not exist; default bridge
  * @param {Array}  [spec.extraBinds]     [{hostPath, containerPath, mode: 'rw'|'ro'}] - RAW host paths, not re-rooted
  */
-async function createContainer(spec) {
-  const docker = getDocker();
+/**
+ * Exposed ports and host bindings for a server container. The RCON port and
+ * internal feature ports (BlueMap) are published on `bindIp` only (see
+ * docker/portBind.js); the game, query, Bedrock and admin-added ports on
+ * every interface.
+ * @param {{game: number, rcon: number, bedrock?: number}} ports
+ * @param {Array<{container: string, host: number, internal?: boolean}>} extraPorts
+ * @param {string|null} bindIp
+ */
+function portSpec(ports, extraPorts, bindIp) {
+  const internal = (hostPort) =>
+    bindIp ? { HostIp: bindIp, HostPort: String(hostPort) } : { HostPort: String(hostPort) };
   const exposed = {
     [`${GAME_PORT}/tcp`]: {},
     [`${GAME_PORT}/udp`]: {}, // query protocol shares the game port
     [`${RCON_PORT}/tcp`]: {},
   };
   const bindings = {
-    [`${GAME_PORT}/tcp`]: [{ HostPort: String(spec.ports.game) }],
-    [`${GAME_PORT}/udp`]: [{ HostPort: String(spec.ports.game) }],
-    [`${RCON_PORT}/tcp`]: [{ HostPort: String(spec.ports.rcon) }],
+    [`${GAME_PORT}/tcp`]: [{ HostPort: String(ports.game) }],
+    [`${GAME_PORT}/udp`]: [{ HostPort: String(ports.game) }],
+    [`${RCON_PORT}/tcp`]: [internal(ports.rcon)],
   };
-  if (spec.ports.bedrock) {
+  if (ports.bedrock) {
     exposed[`${BEDROCK_PORT}/udp`] = {};
-    bindings[`${BEDROCK_PORT}/udp`] = [{ HostPort: String(spec.ports.bedrock) }];
+    bindings[`${BEDROCK_PORT}/udp`] = [{ HostPort: String(ports.bedrock) }];
   }
   // Feature ports (e.g. BlueMap's web server) + user-defined extras - [{container: '8100/tcp', host: 8123}]
-  for (const extra of spec.extraPorts || []) {
+  for (const extra of extraPorts || []) {
     exposed[extra.container] = {};
-    bindings[extra.container] = [{ HostPort: String(extra.host) }];
+    bindings[extra.container] = [extra.internal ? internal(extra.host) : { HostPort: String(extra.host) }];
   }
+  return { exposed, bindings };
+}
+
+/** Docker-level hardening for every server container (config can relax it). */
+function hardening() {
+  const out = {};
+  if (config.containerNoNewPrivileges) out.SecurityOpt = ['no-new-privileges:true'];
+  if (config.containerPidsLimit > 0) out.PidsLimit = config.containerPidsLimit;
+  return out;
+}
+
+async function createContainer(spec) {
+  const docker = getDocker();
+  const bindIp = spec.internalBindIp !== undefined ? spec.internalBindIp : await internalBindIp();
+  const { exposed, bindings } = portSpec(spec.ports, spec.extraPorts, bindIp);
 
   const memoryBytes = Math.round(spec.resources.memoryMb * 1024 * 1024);
   const swapBytes = memoryBytes + Math.round((spec.resources.swapMb || 0) * 1024 * 1024);
@@ -78,6 +105,7 @@ async function createContainer(spec) {
     // it the log grows for the life of the container: disk use, and slower
     // `docker logs --since` reads. The game keeps its full logs in logs/.
     LogConfig: { Type: 'json-file', Config: { 'max-size': '10m', 'max-file': '3' } },
+    ...hardening(),
   };
   if (spec.networkName) {
     const created = await ensureNetwork(spec.networkName);
@@ -94,6 +122,7 @@ async function createContainer(spec) {
     image: spec.image,
     ports: spec.ports,
     extraPorts: spec.extraPorts && spec.extraPorts.length ? spec.extraPorts : undefined,
+    internalBindIp: bindIp || 'all interfaces',
     memoryMb: spec.resources.memoryMb,
     swapMb: spec.resources.swapMb || 0,
     cpus: spec.resources.cpus || undefined,
@@ -647,6 +676,8 @@ module.exports = {
   containerName,
   containerRef,
   createContainer,
+  portSpec,
+  hardening,
   getContainer,
   removeStaleNameConflict,
   nameTakenByOther,

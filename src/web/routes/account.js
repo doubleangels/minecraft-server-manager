@@ -289,12 +289,21 @@ router.get('/push', (req, res) => {
   });
 });
 
-router.post('/push/subscriptions', (req, res) => {
-  const parsed = PushSubscriptionBody.safeParse(req.body);
-  if (!parsed.success) return pushError(res);
-  const device = pushService().subscribe(req.user.id, parsed.data.subscription, { label: parsed.data.label || '' });
-  res.status(201).json({ ok: true, device });
-});
+router.post(
+  '/push/subscriptions',
+  asyncHandler(async (req, res) => {
+    const parsed = PushSubscriptionBody.safeParse(req.body);
+    if (!parsed.success) return pushError(res);
+    try {
+      await require('../../services/webPush').transport.validate(parsed.data.subscription.endpoint);
+    } catch (err) {
+      logger.debug('Refused a push subscription endpoint.', { userId: req.user.id, reason: err.message });
+      return pushError(res);
+    }
+    const device = pushService().subscribe(req.user.id, parsed.data.subscription, { label: parsed.data.label || '' });
+    res.status(201).json({ ok: true, device });
+  })
+);
 
 router.patch('/push/subscriptions/:id', (req, res) => {
   const parsed = z.object({ categories: z.array(z.string()).max(10) }).safeParse(req.body);

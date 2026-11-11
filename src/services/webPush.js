@@ -15,9 +15,68 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const { dataPath } = require('../storage/pathGuard');
+const { safeFetch, assertPublicUrl } = require('../utils/urlGuard');
+const httpError = require('../utils/httpError');
 const logger = require('../logger')(path.basename(__filename));
 
 const KEY_FILE = '.push-key.json';
+
+// Browsers only ever hand out endpoints on their vendor's push service. The
+// panel POSTs to whatever endpoint a signed-in user registers, so anything
+// else (an internal host, say) is refused. PUSH_EXTRA_HOSTS adds hosts for an
+// unusual browser: a comma-separated list, each matching itself and its
+// subdomains.
+const PUSH_HOST_SUFFIXES = [
+  'fcm.googleapis.com', // Chrome, Edge (Android), Brave, Opera, Samsung Internet
+  'push.services.mozilla.com', // Firefox
+  'push.apple.com', // Safari
+  'notify.windows.com', // Edge (Windows)
+];
+
+function allowedHostSuffixes() {
+  const extra = (process.env.PUSH_EXTRA_HOSTS || '')
+    .split(',')
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean);
+  return [...PUSH_HOST_SUFFIXES, ...extra];
+}
+
+/** Is this host a known push service (or a subdomain of one)? */
+function isPushHost(host) {
+  const h = String(host || '').toLowerCase();
+  return allowedHostSuffixes().some((s) => h === s || h.endsWith(`.${s}`));
+}
+
+/**
+ * Throw a 400 unless `endpoint` is an https URL on a known push service that
+ * resolves to public addresses only.
+ * @param {string} endpoint
+ */
+async function validateEndpoint(endpoint) {
+  let u;
+  try {
+    u = new URL(endpoint);
+  } catch {
+    throw httpError(400, 'That push subscription has an invalid address.');
+  }
+  if (u.protocol !== 'https:' || !isPushHost(u.hostname)) {
+    throw httpError(400, 'That push subscription is not on a known browser push service.');
+  }
+  try {
+    await assertPublicUrl(u.toString());
+  } catch {
+    throw httpError(400, 'That push subscription points at an address the panel will not contact.');
+  }
+}
+
+/**
+ * The network side, swappable by tests. Sends through safeFetch: the address
+ * is re-checked and pinned at send time, and push services never redirect.
+ */
+const transport = {
+  validate: validateEndpoint,
+  post: (url, init) => safeFetch(url, { ...init, maxRedirects: 0 }),
+};
 const RECORD_SIZE = 4096;
 
 const b64u = (buf) => Buffer.from(buf).toString('base64url');
@@ -135,7 +194,18 @@ async function sendPush(sub, message, { ttl = 24 * 3600, urgency = 'normal', con
   };
   // A Topic collapses an undelivered message with a newer one of the same kind.
   if (topic) headers.Topic = topic.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32);
-  const res = await fetch(sub.endpoint, { method: 'POST', headers, body, signal: AbortSignal.timeout(10_000) });
+  // A stored endpoint is checked again: it may predate these rules, or its
+  // name may resolve somewhere else now.
+  await transport.validate(sub.endpoint);
+  headers['Content-Length'] = String(body.length);
+  const res = await transport.post(sub.endpoint, {
+    method: 'POST',
+    headers,
+    body,
+    signal: AbortSignal.timeout(10_000),
+  });
+  // Nothing in a push service's reply is needed; free the connection.
+  if (res.body && typeof res.body.cancel === 'function') res.body.cancel().catch(() => {});
   return { ok: res.ok, status: res.status, gone: res.status === 404 || res.status === 410 };
 }
 
@@ -151,4 +221,14 @@ function _resetKeys() {
   keys = null;
 }
 
-module.exports = { publicKey, sendPush, encrypt, vapidHeader, vapidKeys, _resetKeys };
+module.exports = {
+  publicKey,
+  sendPush,
+  encrypt,
+  vapidHeader,
+  vapidKeys,
+  validateEndpoint,
+  isPushHost,
+  transport,
+  _resetKeys,
+};

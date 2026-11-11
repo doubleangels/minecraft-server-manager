@@ -35,23 +35,27 @@ let cookie;
 let userId;
 let sent = [];
 let replyStatus = 201;
-const realFetch = global.fetch;
+const realValidate = webPush.transport.validate;
+const realPost = webPush.transport.post;
 
 test.before(async () => {
   await app.start();
   cookie = await app.adminCookie();
   userId = db.get("SELECT id FROM users WHERE role = 'admin'").id;
   app.seedServer('srv_push');
-  global.fetch = async (url, init) => {
-    if (String(url).startsWith('https://push.example')) {
-      sent.push({ url: String(url), headers: init.headers, body: init.body });
-      return new Response(null, { status: replyStatus });
-    }
-    return realFetch(url, init);
+  // No network here: stand in for the push service, keeping the real host
+  // rules but skipping DNS for the test host.
+  webPush.transport.validate = async (endpoint) => {
+    if (!String(endpoint).startsWith('https://push.example')) return realValidate(endpoint);
+  };
+  webPush.transport.post = async (url, init) => {
+    sent.push({ url: String(url), headers: init.headers, body: init.body });
+    return new Response(null, { status: replyStatus });
   };
 });
 test.after(async () => {
-  global.fetch = realFetch;
+  webPush.transport.validate = realValidate;
+  webPush.transport.post = realPost;
   await app.stop();
 });
 
@@ -230,4 +234,40 @@ test('a long task tells only the user who started it; short ones stay quiet', as
   await push.onTaskFinished({ title: 'Quick…', actor: admin, serverId: null, ok: true, durationMs: 2_000 });
   await push.onTaskFinished({ title: 'Nightly…', actor: 'scheduler', serverId: null, ok: false, durationMs: 60_000 });
   assert.equal(sent.length, 0);
+});
+
+test('endpoints off the browser push services, or on private addresses, are refused', async () => {
+  for (const endpoint of [
+    'https://10.0.0.5:8443/push',
+    'https://127.0.0.1/push',
+    'https://localhost/push',
+    'https://evil.example/push',
+    'https://fcm.googleapis.com.evil.example/push',
+  ]) {
+    const r = await app.req('POST', '/api/account/push/subscriptions', {
+      cookie,
+      body: { subscription: fakeSubscription(endpoint).json },
+    });
+    assert.equal(r.status, 400, endpoint);
+  }
+  assert.ok(webPush.isPushHost('fcm.googleapis.com'));
+  assert.ok(webPush.isPushHost('updates.push.services.mozilla.com'));
+  assert.ok(webPush.isPushHost('web.push.apple.com'));
+  assert.ok(webPush.isPushHost('wns2-by3p.notify.windows.com'));
+  assert.ok(!webPush.isPushHost('notfcm.googleapis.com.example'));
+});
+
+test('sendPush refuses a stored endpoint that is not a public push service', async () => {
+  const { json } = fakeSubscription('https://192.168.1.10/push');
+  await assert.rejects(realValidate(json.endpoint), (err) => err.status === 400);
+  // The real send path runs the same check before any request goes out.
+  const before = sent.length;
+  const saved = webPush.transport.validate;
+  webPush.transport.validate = realValidate;
+  try {
+    await assert.rejects(webPush.sendPush({ endpoint: json.endpoint, ...json.keys }, { title: 'x' }));
+  } finally {
+    webPush.transport.validate = saved;
+  }
+  assert.equal(sent.length, before);
 });

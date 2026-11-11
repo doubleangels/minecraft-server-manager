@@ -26,7 +26,8 @@ const NO_BODY = /\/(login|logout|setup|totp|2fa|password|api-tokens|keys)(\/|$)/
 
 // Polled endpoints (the task tray, live status, health) answer every few
 // seconds per open tab: debug, so the info log stays a record of actions.
-const POLLED = /^\/api\/(tasks|servers\/live|health|servers\/[^/]+\/(live|status|stats))(\/|$)/;
+// Map tiles stream by the hundred while a map is open.
+const POLLED = /^\/map\/|^\/api\/(tasks|servers\/live|health|servers\/[^/]+\/(live|status|stats))(\/|$)/;
 
 function shouldSkip(pathname) {
   if (SKIP_EXACT.has(pathname)) return true;
@@ -62,7 +63,8 @@ module.exports = function requestLog(req, res, next) {
     logged = true;
     const durationMs = Math.round(Number(process.hrtime.bigint() - start) / 1e5) / 10;
     const status = res.statusCode;
-    const pathOnly = req.originalUrl.split('?')[0];
+    // The live map's path carries an access token: never log it.
+    const pathOnly = req.originalUrl.split('?')[0].replace(/^(\/map\/[^/]+\/t\/)[^/]+/, '$1[token]');
     const write = req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS';
     const files = uploadedFiles(req);
     const meta = {

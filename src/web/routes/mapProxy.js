@@ -2,7 +2,17 @@
 
 // Authenticated reverse proxy for BlueMap's web UI: the map port is never
 // exposed to the browser directly - everything flows through the panel's
-// session-gated /map/<serverId>/… path. Plain stdlib http, GET/HEAD only.
+// /map/<serverId>/t/<token>/… path. Plain stdlib http, GET/HEAD only.
+//
+// Isolation: BlueMap's web files live in the server's data folder, so anyone
+// who can edit that folder (a files or content grant, or any mod in the
+// container) controls the HTML and script served here. It must never run with
+// the panel's session. So this router is mounted BEFORE requireAuth and
+// authenticates by a short-lived token in the path (services/mapToken.js),
+// minted by the Map tab after its view check; the iframe is sandboxed without
+// allow-same-origin; and every response carries a CSP sandbox, so even a
+// direct visit runs in an opaque origin that cannot read panel cookies or call
+// the panel's API as the signed-in user.
 //
 // BlueMap's HOST-published port (127.0.0.1 bare metal, host.docker.internal
 // when the panel is containerized - see config.mapProxyHost) is only ONE of
@@ -30,12 +40,41 @@ const containers = require('../../docker/containers');
 const { getMapConfig, BLUEMAP_CONTAINER_PORT } = require('../../services/map');
 const { getServer } = require('../../services/servers');
 const permissions = require('../../services/permissions');
+const mapToken = require('../../services/mapToken');
+const { getUser } = require('../../services/auth');
 
 const router = express.Router();
 
 const CONTAINER_PORT = parseInt(BLUEMAP_CONTAINER_PORT, 10); // '8100/tcp' -> 8100
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const PROBE_TIMEOUT_MS = 1500;
+// Pages larger than this are passed through untouched instead of buffered.
+const HTML_INJECT_MAX = 2 * 1024 * 1024;
+
+// Applied to every proxied response, replacing the panel's own CSP: an opaque
+// origin (sandbox without allow-same-origin), anything BlueMap needs inside it,
+// and framing by the panel only.
+const MAP_CSP = [
+  'sandbox allow-scripts',
+  "default-src 'self' data: blob: 'unsafe-inline' 'unsafe-eval'",
+  "frame-ancestors 'self'",
+].join('; ');
+
+// BlueMap reads and writes localStorage without a guard, and an opaque origin
+// has none (access throws), so its pages get an in-memory stand-in first. Its
+// settings then last for the open tab only.
+const STORAGE_SHIM =
+  '<script>(function(){try{window.localStorage.getItem("msm")}catch(e){var m={};var s={' +
+  'getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},' +
+  'setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},' +
+  'key:function(i){return Object.keys(m)[i]||null},get length(){return Object.keys(m).length}};' +
+  'try{Object.defineProperty(window,"localStorage",{value:s,configurable:true})}catch(_){}}})();</script>';
+
+function injectShim(html) {
+  const head = /<head[^>]*>/i.exec(html);
+  if (head) return html.slice(0, head.index + head[0].length) + STORAGE_SHIM + html.slice(head.index + head[0].length);
+  return STORAGE_SHIM + html;
+}
 
 // serverId -> { target: {host, port}, expiresAt }
 const targetCache = new Map();
@@ -97,15 +136,29 @@ async function resolveTarget(server, cfg) {
   return candidates[candidates.length - 1];
 }
 
+function setMapHeaders(res) {
+  res.setHeader('Content-Security-Policy', MAP_CSP);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Cache-Control', 'private, no-store');
+}
+
 router.use(
-  '/:id',
+  '/:id/t/:token',
   asyncHandler(async (req, res) => {
+    setMapHeaders(res);
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       logger.debug('Rejected a non-GET request to the map proxy.', { serverId: req.params.id, method: req.method });
       return res.status(405).send('Method not allowed');
     }
+    const userId = mapToken.verify(req.params.token, req.params.id);
+    const user = userId ? getUser(userId) : null;
+    if (!user) {
+      logger.debug('Rejected a map proxy request with a missing or expired token.', { serverId: req.params.id });
+      return res.status(403).send('This map link has expired. Reload the Map tab.');
+    }
     const server = getServer(req.params.id);
-    const visible = server && permissions.can(req.user, server.id, 'view');
+    const visible = server && permissions.can(user, server.id, 'view');
     const cfg = visible ? getMapConfig(server.id) : { enabled: false };
     if (!server || !visible || !cfg.enabled || !cfg.hostPort) {
       logger.debug('Rejected a map proxy request for a server without a live map.', { serverId: req.params.id });
@@ -121,6 +174,12 @@ router.use(
     const FORWARD_REQ = ['accept', 'accept-encoding', 'accept-language', 'range', 'if-none-match', 'if-modified-since'];
     const fwd = { host: `${target.host}:${target.port}` };
     for (const h of FORWARD_REQ) if (req.headers[h] != null) fwd[h] = req.headers[h];
+    // Pages get the storage shim, so ask for them uncompressed and whole.
+    const pagePath = /(?:\/|\.html?)$/i.test(req.path);
+    if (pagePath) {
+      delete fwd['accept-encoding'];
+      delete fwd.range;
+    }
 
     // Symmetrically, copy back only headers a static asset legitimately needs -
     // never a Set-Cookie / CSP / auth header BlueMap might emit.
@@ -151,7 +210,26 @@ router.use(
         for (const [k, v] of Object.entries(up.headers)) {
           if (COPY_RES.has(k.toLowerCase())) res.setHeader(k, v);
         }
-        up.pipe(res);
+        const isHtml = /^text\/html/i.test(String(up.headers['content-type'] || ''));
+        const plain = !up.headers['content-encoding'] || up.headers['content-encoding'] === 'identity';
+        const size = Number(up.headers['content-length'] || 0);
+        if (!isHtml || !plain || req.method === 'HEAD' || size > HTML_INJECT_MAX) return up.pipe(res);
+        const chunks = [];
+        let total = 0;
+        up.on('data', (c) => {
+          total += c.length;
+          if (total > HTML_INJECT_MAX) {
+            up.destroy(new Error('map page too large'));
+            return;
+          }
+          chunks.push(c);
+        });
+        up.on('end', () => {
+          const body = Buffer.from(injectShim(Buffer.concat(chunks).toString('utf8')));
+          res.removeHeader('etag');
+          res.setHeader('Content-Length', body.length);
+          res.end(body);
+        });
       }
     );
     upstream.on('timeout', () => upstream.destroy(new Error('timeout')));
@@ -181,5 +259,13 @@ router.use(
     req.pipe(upstream);
   })
 );
+
+// Anything else under /map (the old session-cookie URL, or a missing token)
+// is refused: the map only loads through a token.
+router.use((req, res) => {
+  setMapHeaders(res);
+  logger.debug('Rejected a map proxy request without a token.', { path: req.path });
+  res.status(403).send('Open the map from its server page.');
+});
 
 module.exports = router;

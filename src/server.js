@@ -85,6 +85,14 @@ try {
     logger.error('The SQLite integrity check could not run.', { err: serializeError(err) });
   }
 
+  // RCON and map ports follow INTERNAL_PORT_BIND; a container made under
+  // another policy shows a pending rebuild until it is rebuilt.
+  try {
+    require('./docker/portBind').syncBindPolicy();
+  } catch (err) {
+    logger.error('Checking the RCON and map port bind policy failed.', { err: serializeError(err) });
+  }
+
   // Rewrite any credential still encrypted under the legacy SESSION_SECRET-derived
   // key so a later SESSION_SECRET rotation can't strand it. No-op once done.
   try {

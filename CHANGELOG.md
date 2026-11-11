@@ -7,6 +7,22 @@ its own dated entry.
 
 ## [Unreleased]
 
+### Security
+
+- **The live map runs sandboxed.** BlueMap's web files live in each server's data folder, so anyone
+  who could edit that folder (or any mod) could make the Map tab run script as the person viewing
+  it. The map now loads in a sandboxed frame with its own short-lived link, never with your
+  sign-in. Map settings such as hidden markers last until you close the tab. Old `/map/<id>/` links
+  stop working; open the map from its server page.
+- **RCON and map ports are no longer published on every interface.** They are now bound to the
+  address the panel uses (`INTERNAL_PORT_BIND`, default `auto`). Existing servers show a pending
+  rebuild; rebuild each one to close the ports. Server containers also get `no-new-privileges` and a
+  limit of 4096 processes and threads.
+- **World archives can no longer plant links.** Symlinks and hardlinks in an uploaded `.tar` or
+  `.tar.gz` are skipped.
+- **Notifications only go to browser push services.** A device can no longer register an address
+  on your network for the panel to post to. Saved devices with such an address are removed.
+
 ### Added
 
 - **A database copy before every upgrade.** When the panel starts with schema changes to apply, it

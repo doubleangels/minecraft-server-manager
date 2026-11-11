@@ -1163,6 +1163,8 @@ function zipWorld(outFile, rootAbs, dimDirs = []) {
 }
 
 /** Route an archive to the right extractor by magic bytes (zip/.mcworld, tar, tar.gz). */
+const SAFE_TAR_TYPES = new Set(['File', 'OldFile', 'ContiguousFile', 'Directory']);
+
 async function extractArchive(file, destDir, originalName = '') {
   const fd = await fsp.open(file, 'r');
   const head = Buffer.alloc(265);
@@ -1203,7 +1205,10 @@ async function extractArchive(file, destDir, originalName = '') {
     return tar.x({
       file,
       cwd: destDir,
-      filter: (p) => !p.split(/[\\/]/).includes('..'),
+      // Plain files and folders only: a symlink or hardlink entry could point
+      // anywhere (world/x -> /data/.secret-key), and every later copy, backup
+      // and download would have to stay symlink-aware forever.
+      filter: (p, entry) => SAFE_TAR_TYPES.has(/** @type {any} */ (entry).type) && !p.split(/[\\/]/).includes('..'),
     });
   }
   throw httpError(400, `That doesn't look like a zip or tar archive${originalName ? ` (${originalName})` : ''}.`);
@@ -1342,6 +1347,7 @@ function sleep(ms) {
 }
 
 module.exports = {
+  extractArchive,
   isDimName,
   readLevelSpawn,
   detectWorldRoot,

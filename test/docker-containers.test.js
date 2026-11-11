@@ -91,7 +91,10 @@ test('createContainer builds the full spec: ports, limits, labels, healthcheck, 
   assert.deepEqual(spec.Labels, { 'msm.id': 'srv_spec', 'msm.managed': 'true' });
   assert.deepEqual(spec.HostConfig.PortBindings['25565/tcp'], [{ HostPort: '25570' }]);
   assert.deepEqual(spec.HostConfig.PortBindings['25565/udp'], [{ HostPort: '25570' }], 'query shares the game port');
-  assert.deepEqual(spec.HostConfig.PortBindings['25575/tcp'], [{ HostPort: '26570' }]);
+  // RCON is for the panel only: published on the loopback address here (F-02).
+  assert.deepEqual(spec.HostConfig.PortBindings['25575/tcp'], [{ HostIp: '127.0.0.1', HostPort: '26570' }]);
+  assert.deepEqual(spec.HostConfig.SecurityOpt, ['no-new-privileges:true']);
+  assert.equal(spec.HostConfig.PidsLimit, 4096);
   // Docker's copy of the console output is capped (3 files of 10 MB).
   assert.deepEqual(spec.HostConfig.LogConfig, { Type: 'json-file', Config: { 'max-size': '10m', 'max-file': '3' } });
   assert.deepEqual(spec.HostConfig.PortBindings['19132/udp'], [{ HostPort: '19140' }]);

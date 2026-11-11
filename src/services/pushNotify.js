@@ -150,6 +150,12 @@ async function deliver(row, message, { urgency = 'normal', topic = undefined } =
     }
     return res;
   } catch (err) {
+    if (err.status === 400) {
+      // The endpoint fails the push-service rules (stored before they existed).
+      db.run('DELETE FROM push_subscriptions WHERE id = ?', row.id);
+      logger.info('Removed a push subscription whose address the panel will not contact.', { subscriptionId: row.id });
+      return { ok: false, status: 0, gone: true };
+    }
     logger.warn('Sending a push notification failed.', { subscriptionId: row.id, err: err.message });
     return { ok: false, status: 0, gone: false };
   }

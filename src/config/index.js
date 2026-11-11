@@ -278,6 +278,15 @@ const config = {
   logLevel: resolveLogLevel(),
   sentry: resolveSentry(),
   mapProxyHost: resolveMapProxyHost(),
+  // Which host address the RCON and BlueMap ports are published on (only the
+  // panel uses them; docker/portBind.js resolves it). 'auto' (default) picks
+  // the address the panel reaches them on; 'all' publishes on every interface
+  // (the old behaviour); or an explicit IP.
+  internalPortBind: (process.env.INTERNAL_PORT_BIND || 'auto').trim().toLowerCase() || 'auto',
+  // Server container hardening: no-new-privileges, and a process/thread cap
+  // (0 = none). A big modpack runs a few hundred threads.
+  containerNoNewPrivileges: !/^(0|false|no|off)$/i.test((process.env.CONTAINER_NO_NEW_PRIVILEGES || '').trim()),
+  containerPidsLimit: numFromEnv('CONTAINER_PIDS_LIMIT', 4096, { min: 0, max: 1_000_000 }),
 
   // Docker image repository for Minecraft servers. Override for a private mirror
   // or air-gapped registry; the panel is otherwise an itzg/minecraft-server front-end.

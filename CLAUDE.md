@@ -48,9 +48,11 @@ docker/  ·  db/  ·  storage/     (infrastructure)
 ```
 
 - **`src/web/routes/`** — one Express router per domain (`servers`, `players`, `worlds`, `crashes`,
-  `blueprints`, `files`, …), mounted in [`src/web/app.js`](src/web/app.js). Two routers mount in the
-  **public zone** before `requireAuth`: `routes/status.js` (opt-in per-server HTML status pages) and
-  `routes/apiV1.js` (`/api/v1`, read-only JSON, Bearer-token auth, off by default).
+  `blueprints`, `files`, …), mounted in [`src/web/app.js`](src/web/app.js). Three routers mount in the
+  **public zone** before `requireAuth`: `routes/status.js` (opt-in per-server HTML status pages),
+  `routes/apiV1.js` (`/api/v1`, read-only JSON, Bearer-token auth, off by default), and
+  `routes/mapProxy.js` (the live map, authenticated by a short-lived path token and served under a
+  CSP sandbox, because its files come from the server's data folder and must never run as the user).
 - **`src/services/`** — the heart of the app; each service owns one domain.
 - **`src/docker/`** — dockerode wrappers: `connect` (endpoint auto-detected per-OS), `containers`,
   `logs`, `stats`, `images`, and `watcher` (turns Docker events into history + crash detection).

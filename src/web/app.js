@@ -414,6 +414,9 @@ function createApp() {
   // not also apply here; the router brings its own per-IP and per-token limiters.
   // originGuard/requireWrite below are GET-only no-ops for it. Keep this order.
   app.use('/api/v1', require('./routes/apiV1'));
+  // The live map: authenticated by a path token, not the session, and served
+  // sandboxed (routes/mapProxy.js explains why it sits out here).
+  app.use('/map', require('./routes/mapProxy'));
   // Cap /api request volume before any auth/DB work runs on a flood.
   app.use('/api', apiLimiter);
   app.use(requireAuth);
@@ -446,7 +449,6 @@ function createApp() {
   app.use('/api', require('./routes/api'));
   app.use('/api/tasks', require('./routes/tasks'));
   app.use('/api/solver', require('./routes/solver'));
-  app.use('/map', require('./routes/mapProxy'));
   app.use(routes);
 
   // 404 + error pages (kept friendly; detailed errors go to the server log only)

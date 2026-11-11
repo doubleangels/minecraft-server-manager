@@ -171,7 +171,8 @@ async function disableMap(serverId, { actor = 'system' } = {}) {
 /** Extra container ports for a server, consumed by the servers service. */
 function extraPortsFor(serverId) {
   const cfg = getMapConfig(serverId);
-  return cfg.enabled && cfg.hostPort ? [{ container: BLUEMAP_CONTAINER_PORT, host: cfg.hostPort }] : [];
+  // internal: only the panel's proxy uses it, so it is not published publicly.
+  return cfg.enabled && cfg.hostPort ? [{ container: BLUEMAP_CONTAINER_PORT, host: cfg.hostPort, internal: true }] : [];
 }
 
 async function freePort() {

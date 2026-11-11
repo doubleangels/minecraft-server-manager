@@ -639,6 +639,8 @@ router.get(
       const cfg = mapService.getMapConfig(row.id);
       context.mapEnabled = cfg.enabled;
       context.mapSupported = mapService.supportsMap(row);
+      // serverScope already checked view; the token carries that to the map.
+      if (cfg.enabled) context.mapToken = require('../../services/mapToken').mint(row.id, req.user.id);
     } else if (tab === 'metrics') {
       // Real per-category sizes from the storage index (view contract:
       // [{label, size, pct, color}]; empty → "run a scan" state).
