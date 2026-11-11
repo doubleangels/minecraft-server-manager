@@ -681,7 +681,7 @@ function init(root) {
     }
     box.innerHTML = `
       <div class="overflow-x-auto"><table class="table-base table-stack">
-        <thead><tr><th class="w-8"></th><th>Taken</th><th>Trigger</th><th class="text-right">Size</th></tr></thead>
+        <thead><tr><th scope="col" class="w-8"></th><th scope="col">Taken</th><th scope="col">Trigger</th><th scope="col" class="text-right">Size</th></tr></thead>
         <tbody>
           ${snapshots
             .map(
@@ -802,7 +802,7 @@ function init(root) {
       }
       box.innerHTML = `
         <div class="overflow-x-auto"><table class="table-base table-stack">
-          <thead><tr><th>Player</th><th>Where</th><th>Slot</th><th>Item</th><th class="text-right">Count</th></tr></thead>
+          <thead><tr><th scope="col">Player</th><th scope="col">Where</th><th scope="col">Slot</th><th scope="col">Item</th><th scope="col" class="text-right">Count</th></tr></thead>
           <tbody>
             ${results
               .map(

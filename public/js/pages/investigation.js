@@ -33,7 +33,7 @@ function init(serverId) {
     results.innerHTML = '';
     const table = document.createElement('table');
     table.className = 'table-base table-stack';
-    table.innerHTML = `<thead><tr><th>Player</th><th class="text-right">Stone Mined</th><th class="text-right">Diamonds</th><th class="text-right">Diamond Ratio</th><th>Verdict</th></tr></thead><tbody></tbody>`;
+    table.innerHTML = `<thead><tr><th scope="col">Player</th><th scope="col" class="text-right">Stone Mined</th><th scope="col" class="text-right">Diamonds</th><th scope="col" class="text-right">Diamond Ratio</th><th scope="col">Verdict</th></tr></thead><tbody></tbody>`;
     const tbody = table.querySelector('tbody');
     for (const p of players) {
       const tr = document.createElement('tr');

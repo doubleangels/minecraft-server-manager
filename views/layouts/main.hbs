@@ -6,12 +6,15 @@
   {{> app-head}}
 </head>
 <body class="min-h-screen" data-health-count="{{healthCount}}">
+  {{! First stop for keyboard users: jump past the sidebar and top bar. Hidden
+      until it has focus. }}
+  <a href="#main" class="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[75] focus:px-4 focus:py-2 focus:shadow-overlay">Skip to Content</a>
   <div class="flex min-h-screen">
     {{> sidebar}}
 
     <div class="flex min-w-0 flex-1 flex-col">
       {{> topbar}}
-      <main class="mx-auto w-full max-w-7xl flex-1 py-4 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:py-6 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:px-8">
+      <main id="main" tabindex="-1" class="focus:outline-none mx-auto w-full max-w-7xl flex-1 py-4 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:py-6 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:px-8">
         {{{body}}}
       </main>
       <footer class="border-t border-line py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] text-xs text-ink-faint sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]">

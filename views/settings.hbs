@@ -150,7 +150,7 @@
       <p class="help mt-0 max-w-prose">Each app connects with its own <b>access key</b> (sent as an <span class="font-mono">Authorization: Bearer</span> header). Make one key per app; anyone holding a key can see the servers you allow it: name, type, whether it's running, players online, and resource use. Cancel a key to cut that app off straight away.</p>
       <div class="mt-4 overflow-x-auto">
         <table class="table-base table-stack" id="api-tokens-table">
-          <thead><tr><th>Name</th><th>Key</th><th>Can See</th><th>Created</th><th>Last Used</th><th>Expires</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
+          <thead><tr><th scope="col">Name</th><th scope="col">Key</th><th scope="col">Can See</th><th scope="col">Created</th><th scope="col">Last Used</th><th scope="col">Expires</th><th scope="col">Status</th><th scope="col" class="text-right">Actions</th></tr></thead>
           <tbody>
             {{#each apiTokens}}
               <tr data-token-id="{{id}}">

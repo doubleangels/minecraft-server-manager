@@ -166,7 +166,7 @@ are round (status dots, switches, sliders). Never a bare `rounded`.
   actions (opaque, sits above the phone tab bar, never double-pads the safe area). Shared view partials: `page-header`, `brand-lockup`,
   `empty-state`, `settings/card`, `settings/toggle-row`.
 - **One z-index scale**, listed in `input.css`: topbar 20 · bottom tab bars 25 · sidebar
-  backdrop 30 · sidebar 40 · modal 60 · toasts 65 · connection banner 66 · dropdowns 68 · tooltip 70. Anything new picks a slot there.
+  backdrop 30 · sidebar 40 · modal 60 · toasts 65 · connection banner 66 · dropdowns 68 · tooltip 70 · skip link 75. Anything new picks a slot there.
 - **Write Tailwind classes as full literals** — the v4 scanner only emits utilities it sees
   verbatim. No `bg-${color}-500` assembly (that's why `STATUS_DOT` in `web/app.js` is a literal map).
 - Respect `@media (prefers-reduced-motion: reduce)` — it's already handled globally; don't fight it.

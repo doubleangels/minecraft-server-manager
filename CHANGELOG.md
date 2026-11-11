@@ -5,6 +5,23 @@ All notable changes to this project are documented here. The format is based on
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Each push is cut as a new release with
 its own dated entry.
 
+## [Unreleased]
+
+### Added
+
+- **A database copy before every upgrade.** When the panel starts with schema changes to apply, it
+  first copies its database to `backups/_panel/panel-pre-<version>.db` (the newest three are kept).
+  If the copy fails, the panel stops instead of changing the database without a way back.
+- **Skip to Content.** The first Tab on any page now offers a link past the sidebar and top bar.
+
+### Changed
+
+- Text fields show the same focus outline as buttons, not only a border colour change.
+- Every table header cell declares its column for screen readers.
+- The panel image no longer ships Bedrock Edition game data or the icon fonts and bundles it never
+  reads, about 360 MB less. The chatbot's recipe data loads on the first recipe question instead of
+  at startup.
+
 ## [0.14.1] - 2026-09-21
 
 Minecraft version updates now have to be earned: a newer version is only offered when every mod on

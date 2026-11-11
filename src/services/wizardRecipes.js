@@ -1,7 +1,13 @@
 // @ts-nocheck -- minecraft-data recipe ingredients have version-dependent shapes.
 'use strict';
 
-const minecraftData = require('minecraft-data');
+// minecraft-data is large and only recipe questions need it: load it on the
+// first one, not at boot.
+let mcData = null;
+function minecraftDataLib() {
+  if (!mcData) mcData = require('minecraft-data');
+  return mcData;
+}
 
 const RECIPE_WORDS_RE = /\b(?:craft(?:ing)?|recipe)\b/i;
 const HOW_TO_MAKE_RE = /\bhow\b.{0,40}\bmake\b/i;
@@ -26,6 +32,7 @@ function normalizeWords(value) {
 }
 
 function dataForVersion(version) {
+  const minecraftData = minecraftDataLib();
   const wanted = String(version || '').trim();
   if (wanted && wanted.toUpperCase() !== 'LATEST') {
     try {

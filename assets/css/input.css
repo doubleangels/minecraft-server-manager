@@ -458,7 +458,8 @@
      topbar shell 20 · bottom tab bars 25 · sidebar backdrop 30 ·
      sidebar 40 · modal 60 · toasts 65 (above modals - errors fired from modal
      actions must be readable) · connection banner 66 · dropdown menus 68
-     (they can open from inside a modal) · tooltip 70.
+     (they can open from inside a modal) · tooltip 70 · skip link 75 (only
+     while it has keyboard focus, above everything).
      Anything new picks a slot here first. ---- */
 
   /* Pixel heading - titles only, per design spec */
@@ -844,7 +845,8 @@
     @apply w-full rounded-sm border border-line-strong bg-inset px-3 py-2 text-sm text-ink
       transition-[border-color,box-shadow] duration-150
       placeholder:text-ink-faint focus:border-focus focus:outline-none
-      focus:ring-[3px] focus:ring-focus/25;
+      focus:ring-[3px] focus:ring-focus/25
+      focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus;
   }
   /* Fields advertise interactivity on hover (stone-500 reads stronger than
      line-strong in BOTH themes); focus keeps the diamond ring. */

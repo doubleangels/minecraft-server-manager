@@ -10,6 +10,8 @@ const db = require('./index');
 const logger = require('../logger')(path.basename(__filename));
 
 const MIGRATIONS_DIR = path.join(__dirname, 'migrations');
+// Copies taken before a schema change; the newest few are kept.
+const PRE_MIGRATION_KEEP = 3;
 
 // Before a later release renumbered duplicate 3-digit prefixes (010-015) to
 // unique ascending values, schema_migrations recorded those migrations under
@@ -38,11 +40,42 @@ const LEGACY_MIGRATION_ALIASES = {
 };
 
 /**
+ * Copy panel.db to backups/_panel/panel-pre-<version>.db before migrations
+ * change it, so a migration that goes wrong can be undone by putting the copy
+ * back. Checkpoints the WAL first, then VACUUM INTO writes one consistent,
+ * self-contained file. Runs at boot before anything else uses the database, so
+ * the synchronous copy blocks nothing. An existing copy for the same version is
+ * kept: it holds the state from before the first attempt.
+ * @returns {string} the copy's file name
+ */
+function snapshotBeforeMigrating() {
+  const { dataPath } = require('../storage/pathGuard');
+  const { version } = require('../../package.json');
+  const dir = dataPath('backups', '_panel');
+  fs.mkdirSync(dir, { recursive: true });
+  const name = `panel-pre-${String(version).replace(/[^0-9A-Za-z.-]/g, '_')}.db`;
+  const dest = path.join(dir, name);
+  if (fs.existsSync(dest)) return name;
+  db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+  db.exec(`VACUUM INTO '${dest.replace(/'/g, "''")}'`);
+  const copies = fs
+    .readdirSync(dir)
+    .filter((f) => /^panel-pre-.+\.db$/.test(f))
+    .map((f) => ({ f, t: fs.statSync(path.join(dir, f)).mtimeMs }))
+    .sort((a, b) => a.t - b.t);
+  for (const { f } of copies.slice(0, Math.max(0, copies.length - PRE_MIGRATION_KEEP))) {
+    fs.rmSync(path.join(dir, f), { force: true });
+  }
+  return name;
+}
+
+/**
  * Apply every migration not yet recorded. `dir` exists so a test can point the
  * runner at a throwaway folder instead of touching the real migrations.
- * @param {{ dir?: string }} [opts]
+ * @param {{ dir?: string, snapshot?: boolean }} [opts] snapshot: copy the
+ *   database before applying pending migrations (default on).
  */
-function migrate({ dir = MIGRATIONS_DIR } = {}) {
+function migrate({ dir = MIGRATIONS_DIR, snapshot = true } = {}) {
   db.exec(`CREATE TABLE IF NOT EXISTS schema_migrations (
     version TEXT PRIMARY KEY,
     applied_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -69,6 +102,29 @@ function migrate({ dir = MIGRATIONS_DIR } = {}) {
     seenNumbers.set(prefix, file);
   }
 
+  // Copy the database first when it already holds data and a migration is
+  // about to change it. A fresh install (nothing recorded yet) has nothing to
+  // lose. A failed copy stops the boot: migrating without a way back is the
+  // risk this guards against.
+  const pending = files.filter((f) => {
+    const v = f.replace(/\.js$/, '');
+    const legacy = LEGACY_MIGRATION_ALIASES[v];
+    return !applied.has(v) && !(legacy && legacy.some((old) => applied.has(old)));
+  });
+  if (snapshot && applied.size > 0 && pending.length > 0) {
+    try {
+      const file = snapshotBeforeMigrating();
+      logger.info('Copied the panel database before applying migrations.', { file, pending: pending.length });
+    } catch (err) {
+      throw new Error(
+        `Could not copy the panel database before migrating, so no migration was applied: ${err.message}`,
+        {
+          cause: err,
+        }
+      );
+    }
+  }
+
   let count = 0;
   for (const file of files) {
     const version = file.replace(/\.js$/, '');
@@ -92,4 +148,4 @@ function migrate({ dir = MIGRATIONS_DIR } = {}) {
   return count;
 }
 
-module.exports = { migrate };
+module.exports = { migrate, snapshotBeforeMigrating };

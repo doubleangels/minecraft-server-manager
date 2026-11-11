@@ -14,7 +14,7 @@
 {{#if updates.length}}
 <div class="card overflow-x-auto">
   <table class="table-base table-stack" id="updates-table">
-    <thead><tr><th>Server</th><th>Type</th><th>Subject</th><th>Current</th><th>Latest</th><th class="text-right">Actions</th></tr></thead>
+    <thead><tr><th scope="col">Server</th><th scope="col">Type</th><th scope="col">Subject</th><th scope="col">Current</th><th scope="col">Latest</th><th scope="col" class="text-right">Actions</th></tr></thead>
     <tbody>
       {{#each updates}}
         <tr data-update-row class="{{#if ignored}}opacity-60{{/if}}" data-server-id="{{serverId}}" data-server-name="{{server}}"

@@ -89,3 +89,41 @@ test('transaction() rolls back on throw', () => {
   );
   assert.equal(db.get('SELECT COUNT(*) AS n FROM _tx_probe').n, 0, 'insert was rolled back');
 });
+
+test('pending migrations on an existing database copy it to backups/_panel first', () => {
+  migrate();
+  const config = require('../src/config');
+  const { version } = require('../package.json');
+  const copy = path.join(config.dataDir, 'backups', '_panel', `panel-pre-${version}.db`);
+  fs.rmSync(copy, { force: true });
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'msm-migrations-'));
+  try {
+    fs.writeFileSync(
+      path.join(dir, '998_snapshot_probe.js'),
+      "exports.up = (db) => db.exec('CREATE TABLE snapshot_probe (id INTEGER)');\n"
+    );
+    assert.equal(migrate({ dir }), 1);
+    assert.ok(fs.existsSync(copy), 'the pre-migration copy exists');
+    // The copy holds the state from before the migration ran.
+    const { DatabaseSync } = require('node:sqlite');
+    const old = new DatabaseSync(copy, { readOnly: true });
+    try {
+      const names = old
+        .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
+        .all()
+        .map((r) => r.name);
+      assert.ok(names.includes('servers'));
+      assert.ok(!names.includes('snapshot_probe'));
+    } finally {
+      old.close();
+    }
+    // Nothing pending: no new copy is made.
+    fs.rmSync(copy, { force: true });
+    assert.equal(migrate({ dir }), 0);
+    assert.ok(!fs.existsSync(copy));
+  } finally {
+    db.exec('DROP TABLE IF EXISTS snapshot_probe');
+    db.run('DELETE FROM schema_migrations WHERE version = ?', '998_snapshot_probe');
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

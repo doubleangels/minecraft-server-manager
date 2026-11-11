@@ -11,7 +11,7 @@
   {{#if worlds.length}}
   <div class="card overflow-x-auto">
     <table class="table-base table-stack" id="worlds-table">
-      <thead><tr><th>World</th><th>Source</th><th>Compatibility</th><th class="text-right">Size</th><th class="text-right">Actions</th></tr></thead>
+      <thead><tr><th scope="col">World</th><th scope="col">Source</th><th scope="col">Compatibility</th><th scope="col" class="text-right">Size</th><th scope="col" class="text-right">Actions</th></tr></thead>
       <tbody>
         {{#each worlds}}
           <tr data-world-row data-id="{{id}}" data-name="{{name}}" data-size="{{size}}">

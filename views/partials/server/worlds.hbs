@@ -10,7 +10,7 @@
   {{#if worlds.length}}
   <div class="card overflow-x-auto">
     <table class="table-base table-stack" id="server-worlds-table">
-      <thead><tr><th>World</th><th>Dimensions</th><th class="text-right">Size</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
+      <thead><tr><th scope="col">World</th><th scope="col">Dimensions</th><th scope="col" class="text-right">Size</th><th scope="col">Status</th><th scope="col" class="text-right">Actions</th></tr></thead>
       <tbody>
         {{#each worlds}}
           <tr data-world-row data-world="{{name}}" data-size="{{sizeBytes}}" data-active="{{active}}">

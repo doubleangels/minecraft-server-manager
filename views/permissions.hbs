@@ -26,9 +26,9 @@
         <table class="table-base table-stack" id="permissions-table">
           <thead>
             <tr>
-              <th>User</th>
+              <th scope="col">User</th>
               {{#each matrix.servers}}
-                <th>
+                <th scope="col">
                   <span class="inline-flex items-center gap-2">
                     <img src="{{iconSrc icon}}" alt="" class="size-5 rounded-sm" style="background: {{accent}}" data-fallback-icon="/icons/servers/grass.svg">
                     <span class="truncate" title="{{name}}">{{name}}</span>

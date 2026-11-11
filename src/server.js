@@ -279,7 +279,8 @@ function startBackgroundServices(httpServer) {
       logger.info('Snapshotted the panel database.', { blockedMs, dir: 'data/backups/_panel' });
       const snaps = fs
         .readdirSync(dir)
-        .filter((f) => /^panel-.*\.db$/.test(f))
+        // Not the panel-pre-<version> copies taken before migrations.
+        .filter((f) => /^panel-\d.*\.db$/.test(f))
         .sort();
       for (const f of snaps.slice(0, Math.max(0, snaps.length - PANEL_DB_BACKUPS_KEEP))) {
         fs.rmSync(nodePath.join(dir, f), { force: true });

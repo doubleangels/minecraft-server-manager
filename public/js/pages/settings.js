@@ -581,7 +581,7 @@ function init() {
       clearAllBtn.classList.remove('hidden');
       lockBody.innerHTML = `
         <div class="overflow-x-auto"><table class="table-base table-stack"><thead><tr>
-          <th>Account</th><th>Scope</th><th>Address</th><th>Fails</th><th>Clears In</th><th class="text-right"></th>
+          <th scope="col">Account</th><th scope="col">Scope</th><th scope="col">Address</th><th scope="col">Fails</th><th scope="col">Clears In</th><th scope="col" class="text-right"></th>
         </tr></thead><tbody>${list
           .map(
             (l) => `<tr>

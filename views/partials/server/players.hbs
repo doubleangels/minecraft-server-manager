@@ -31,7 +31,7 @@
   <div class="card overflow-x-auto">
     <table class="table-base table-stack">
       <thead><tr>
-        <th>Player</th><th>Status</th><th>Roles</th><th>Details</th><th class="text-right">Actions</th>
+        <th scope="col">Player</th><th scope="col">Status</th><th scope="col">Roles</th><th scope="col">Details</th><th scope="col" class="text-right">Actions</th>
       </tr></thead>
       <tbody>
         {{#each players}}
@@ -160,7 +160,7 @@
     {{! Both branches stay in the DOM so bans/pardons can swap them in place. }}
     <div class="overflow-x-auto {{#unless bannedIps.length}}hidden{{/unless}}" id="banip-table">
       <table class="table-base table-stack">
-        <thead><tr><th>IP</th><th>Player</th><th>Reason</th><th>Date</th><th>Expires</th><th class="text-right">Actions</th></tr></thead>
+        <thead><tr><th scope="col">IP</th><th scope="col">Player</th><th scope="col">Reason</th><th scope="col">Date</th><th scope="col">Expires</th><th scope="col" class="text-right">Actions</th></tr></thead>
         <tbody id="banip-rows">
           {{#each bannedIps}}
             <tr data-banip-row="{{ip}}">

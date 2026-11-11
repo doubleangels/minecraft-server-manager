@@ -62,8 +62,19 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # --ignore-scripts: nothing in the production dependency set has a build script
 # (the one allowed script, esbuild's, is a devDependency), so scripts/ needn't
 # be present for this layer and seed-script churn can't invalidate it.
+# Then, in the same layer so the bytes never reach the image, drop data the
+# app never reads: minecraft-data's Bedrock folders (about 300 MB; only the
+# small common/ index is loaded, the chatbot's recipes use Java Edition data)
+# and lucide-static's fonts, bundles and sprite (about 57 MB; icons.js reads
+# single SVGs from icons/).
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile --prod --ignore-scripts
+    pnpm install --frozen-lockfile --prod --ignore-scripts \
+ && for d in node_modules/.pnpm/minecraft-data@*/node_modules/minecraft-data/minecraft-data/data/bedrock; do \
+      find "$d" -mindepth 1 -maxdepth 1 ! -name common -exec rm -rf {} +; \
+    done \
+ && for d in node_modules/.pnpm/lucide-static@*/node_modules/lucide-static; do \
+      rm -rf "$d/dist" "$d/font" "$d/sprite.svg" "$d/icon-nodes.json" "$d/tags.json"; \
+    done
 # Least-volatile inputs first so a src-only change re-copies as little as possible.
 COPY --from=build /app/public ./public
 COPY views ./views

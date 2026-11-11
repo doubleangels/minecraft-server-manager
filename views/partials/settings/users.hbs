@@ -3,7 +3,7 @@
   {{#> settings/card heading="Users" icon="users" id="users-card" desc="Who can sign in, and their role across the whole panel."}}
     <div class="overflow-x-auto">
       <table class="table-base table-stack" id="users-table">
-        <thead><tr><th>User</th><th>Role</th><th>2FA</th><th>Created</th><th class="text-right">Actions</th></tr></thead>
+        <thead><tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">2FA</th><th scope="col">Created</th><th scope="col" class="text-right">Actions</th></tr></thead>
         <tbody>
           {{#each users}}
             <tr data-user-id="{{id}}" data-username="{{username}}">
