@@ -436,6 +436,39 @@ function packChangelogUrl(platform, projectRef) {
 }
 
 /** Everything outdated, joined for the Updates page. */
+/**
+ * A server's container was just (re)built: record the image it now runs. When
+ * that is the image the last check offered, the "image update available" row
+ * is cleared at once, instead of lingering on the Updates page and in the
+ * badge until the next check re-pulls and re-compares. If an even newer image
+ * was found meanwhile, the offer stays.
+ * @param {string} serverId
+ * @param {string|null|undefined} imageId the new container's image id
+ */
+function noteContainerImage(serverId, imageId) {
+  if (!imageId) return;
+  const row = db.get(
+    "SELECT latest_version FROM update_checks WHERE subject_type = 'image' AND subject_id = ?",
+    serverId
+  );
+  if (!row) return;
+  invalidateOutdatedCache();
+  if (row.latest_version && row.latest_version !== imageId) {
+    db.run(
+      "UPDATE update_checks SET current_version = ? WHERE subject_type = 'image' AND subject_id = ?",
+      imageId,
+      serverId
+    );
+    return;
+  }
+  db.run(
+    `UPDATE update_checks SET current_version = ?, latest_version = NULL, latest_name = NULL, changelog_url = NULL
+      WHERE subject_type = 'image' AND subject_id = ?`,
+    imageId,
+    serverId
+  );
+}
+
 function listOutdated() {
   const rows = [];
   // ignored rows stay in the list (greyed, with an "un-ignore" action) so the
@@ -633,6 +666,13 @@ function countOutdatedByKind({ serverIds = null } = {}) {
       (SELECT COUNT(*) FROM update_checks c
          JOIN servers s ON s.id = c.subject_id AND s.deleted_at IS NULL AND s.update_policy != 'manual'${scope}
          WHERE c.subject_type = 'loader_build' AND c.latest_version IS NOT NULL
+           -- Same rule as listOutdated(): only while the server is still on the
+           -- build the check saw. After a loader update the list dropped the
+           -- row, but the badge kept counting it until the next check.
+           AND c.current_version IN (
+             json_extract(s.env_json, '$.PAPER_BUILD'), json_extract(s.env_json, '$.FORGE_VERSION'),
+             json_extract(s.env_json, '$.NEOFORGE_VERSION'), json_extract(s.env_json, '$.FABRIC_LOADER_VERSION'),
+             json_extract(s.env_json, '$.QUILT_LOADER_VERSION'))
            AND (c.ignored_version IS NULL OR c.ignored_version != c.latest_version))
       AS loader
   `,
@@ -669,6 +709,7 @@ function lastCheckedAt() {
 }
 
 module.exports = {
+  noteContainerImage,
   checkAll,
   listOutdated,
   countOutdated,

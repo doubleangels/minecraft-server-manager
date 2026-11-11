@@ -686,6 +686,16 @@ async function buildContainer(server, ports) {
     containerId = await containers.createContainer(containerSpec);
   }
   db.run('UPDATE servers SET container_id = ? WHERE id = ?', containerId, id);
+  // Record which image the container now runs, so an applied image update
+  // leaves the Updates page right away. Best-effort: a failed inspect only
+  // means the next update check settles it, as before. Lazy require: the
+  // checker requires this module.
+  try {
+    const status = await containers.inspectStatus(id);
+    require('../updates/checker').noteContainerImage(id, status.imageId);
+  } catch (err) {
+    logger.debug('Could not record the rebuilt container image.', { serverId: id, err: err.message });
+  }
 }
 
 /**
@@ -916,6 +926,9 @@ function updateServer(id, changes, { actor = 'system' } = {}) {
   if (!sets.length) return { server: before, needsRecreate: false };
   if (needsRecreate) sets.push('pending_recreate = 1');
   db.run(`UPDATE servers SET ${sets.join(', ')} WHERE id = ?`, ...params, id);
+  // The update count reads mc_version and the loader-build pins: an applied
+  // Minecraft or loader update must leave the badge now, not at the next check.
+  require('../updates/checker').invalidateOutdatedCache();
   recordEvent({
     serverId: id,
     actor,
