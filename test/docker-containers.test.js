@@ -92,6 +92,8 @@ test('createContainer builds the full spec: ports, limits, labels, healthcheck, 
   assert.deepEqual(spec.HostConfig.PortBindings['25565/tcp'], [{ HostPort: '25570' }]);
   assert.deepEqual(spec.HostConfig.PortBindings['25565/udp'], [{ HostPort: '25570' }], 'query shares the game port');
   assert.deepEqual(spec.HostConfig.PortBindings['25575/tcp'], [{ HostPort: '26570' }]);
+  // Docker's copy of the console output is capped (3 files of 10 MB).
+  assert.deepEqual(spec.HostConfig.LogConfig, { Type: 'json-file', Config: { 'max-size': '10m', 'max-file': '3' } });
   assert.deepEqual(spec.HostConfig.PortBindings['19132/udp'], [{ HostPort: '19140' }]);
   assert.deepEqual(spec.HostConfig.PortBindings['8100/tcp'], [{ HostPort: '8123' }]);
   assert.ok('8100/tcp' in spec.ExposedPorts && '19132/udp' in spec.ExposedPorts);

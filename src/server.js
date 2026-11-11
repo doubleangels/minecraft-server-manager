@@ -1,5 +1,11 @@
 'use strict';
 
+// Node's file-system work (the storage scan's stat calls, backup reads, page
+// renders' file reads) shares a pool of 4 threads by default, so one long
+// disk walk froze everything else. 8 keeps them flowing. Must be set before
+// anything touches the pool; an explicit environment value wins.
+process.env.UV_THREADPOOL_SIZE ||= '8';
+
 // Error-reporting seam FIRST - before anything else loads - so a future Sentry
 // wiring in instrument.js patches the runtime ahead of the rest of the app.
 require('./instrument');

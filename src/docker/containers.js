@@ -74,6 +74,10 @@ async function createContainer(spec) {
     MemorySwap: swapBytes,
     NanoCpus: spec.resources.cpus ? Math.round(spec.resources.cpus * 1e9) : 0,
     RestartPolicy: { Name: 'no' }, // the panel owns restarts (crash backoff, quota stops)
+    // Cap Docker's own copy of the console output (3 files of 10 MB). Without
+    // it the log grows for the life of the container: disk use, and slower
+    // `docker logs --since` reads. The game keeps its full logs in logs/.
+    LogConfig: { Type: 'json-file', Config: { 'max-size': '10m', 'max-file': '3' } },
   };
   if (spec.networkName) {
     const created = await ensureNetwork(spec.networkName);

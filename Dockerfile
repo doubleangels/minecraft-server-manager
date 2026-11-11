@@ -51,7 +51,8 @@ ENV NODE_ENV=production \
     DATA_DIR=/data \
     PANEL_HOST=0.0.0.0 \
     PANEL_PORT=25564 \
-    LOG_PRETTY=false
+    LOG_PRETTY=false \
+    UV_THREADPOOL_SIZE=8
 # Reuse the pnpm the build stage already downloaded instead of fetching it again
 # (one less network dependency in this stage). The bin path is read from pnpm's
 # own package.json so a PNPM_VERSION bump can't leave a dangling symlink.

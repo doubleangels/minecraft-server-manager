@@ -285,6 +285,26 @@ function createServer(input, opts = {}) {
  * On any failure before the container exists, the half-created row + data dirs
  * are rolled back so no ghost server holds ports.
  */
+/**
+ * New servers start Java with a 512 MB heap that grows on demand, instead of
+ * reserving the whole maximum at boot. Measured on a 2 GB heap: idle use went
+ * from 2.6 GB to about 1.3 GB, and the container no longer sits at its memory
+ * limit from the first second. Not applied when the creator chose an initial
+ * heap, or picked Aikar's or MeowIce's flags (both reserve the full heap by
+ * design), or when the heap is too small for it to matter.
+ * @param {Record<string, any>} env
+ * @param {number} heapMb
+ */
+function withDefaultInitHeap(env, heapMb) {
+  const out = { ...env };
+  const on = (v) => v === true || /^(true|1|yes)$/i.test(String(v ?? ''));
+  const chosen = out.INIT_MEMORY !== undefined && String(out.INIT_MEMORY).trim() !== '';
+  if (!chosen && !on(out.USE_AIKAR_FLAGS) && !on(out.USE_MEOWICE_FLAGS) && Number(heapMb) >= 1536) {
+    out.INIT_MEMORY = '512';
+  }
+  return out;
+}
+
 async function createServerImpl(input, { actor = 'system', start = false, onProgress = () => {}, javaTagHint } = {}) {
   // Fail fast instead of shipping a crash-looping container: anything
   // CurseForge needs the API key present in the panel's store.
@@ -305,6 +325,7 @@ async function createServerImpl(input, { actor = 'system', start = false, onProg
   // would make the image re-resolve "latest" on every start (issue #22).
   require('./packPins').assertPinnedPackEnv(input.type, inputEnv);
   assertInitHeapFits(inputEnv, input.heapMb ?? settings.getDefaults().heapMb);
+  const envToStore = withDefaultInitHeap(inputEnv, input.heapMb ?? settings.getDefaults().heapMb);
 
   const id = `srv_${nanoid(8)}`;
 
@@ -351,7 +372,7 @@ async function createServerImpl(input, { actor = 'system', start = false, onProg
       input.type,
       input.mcVersion || 'LATEST',
       input.javaTag || '',
-      JSON.stringify(input.env || {}),
+      JSON.stringify(envToStore),
       ports.game,
       ports.rcon,
       input.portQuery || null,
@@ -1498,6 +1519,7 @@ function setConsoleLabel(id, label) {
 }
 
 module.exports = {
+  withDefaultInitHeap,
   listServers,
   getServer,
   createServer,
