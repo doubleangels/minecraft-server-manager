@@ -26,7 +26,8 @@ services:
       - '25564:25564'
     extra_hosts:
       # Lets the panel container reach sibling containers' HOST-published ports
-      # (e.g. BlueMap's live map) via host.docker.internal - its own
+      # (BlueMap's live map, and the RCON connection behind live player counts
+      # and TPS) via host.docker.internal - its own
       # 127.0.0.1 is not the host's. Docker Desktop resolves this name for
       # free; plain Linux Engine (this deployment's target) needs it mapped
       # explicitly. Requires Docker Engine 20.10+.
@@ -49,6 +50,14 @@ services:
       - ${DATA_DIR_HOST}:/data
       # The panel manages servers through the host daemon (create/start/exec).
       - /var/run/docker.sock:/var/run/docker.sock
+    # Optional ceiling for the PANEL itself, so its background work (storage
+    # scans, backups) can never crowd out your Minecraft servers. These limit
+    # only this container; each server's memory and CPU are set per server in
+    # the panel. 1 GB and 2 CPUs is comfortable for a few servers; give it
+    # more if you run large modpacks or many backups at once. Backups and
+    # scans simply take longer under a tight CPU limit.
+    # mem_limit: 1g
+    # cpus: 2
     # Using a reverse proxy (Pangolin, NGINX, Traefik…) that reaches a server
     # directly over a Docker network (set per-server in Advanced Docker
     # Settings), instead of via its host-published ports? Put the panel on
