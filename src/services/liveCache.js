@@ -153,6 +153,7 @@ function statusDetail(live) {
 // neither has happened lately the streams close and each running server gets
 // one sample a minute instead (enough for the public API and alerts).
 const WATCH_MS = 45_000;
+const PERF_IDLE_MS = 60_000;
 const IDLE_SAMPLE_MS = 60_000;
 let lastWatchedAt = 0;
 
@@ -375,6 +376,10 @@ async function attach(serverId, containerId = null) {
   const refreshPerf = async () => {
     if (perfInFlight || entry.perfCmd === false) return;
     if (!(entry.players || entry.upConfirmed)) return;
+    // Every 10 s while someone is watching; once a minute otherwise (the
+    // public API still gets a fresh-enough number). The player list keeps its
+    // 20 s pace: restart warnings read it to decide whether anyone is online.
+    if (!wantsStream(entry) && entry.perf && Date.now() - entry.perf.at < PERF_IDLE_MS) return;
     perfInFlight = true;
     try {
       const cmds = entry.perfCmd ? [entry.perfCmd] : PERF_PROBES;
@@ -417,6 +422,7 @@ async function attach(serverId, containerId = null) {
   entry.phaseTimer = setInterval(refreshPhase, 8000);
   entry.phaseTimer.unref();
   entry.perfTimer = setInterval(refreshPerf, 10000);
+  entry.refreshPerf = refreshPerf;
   entry.perfTimer.unref();
 }
 
@@ -512,4 +518,6 @@ module.exports = {
   sampleOnce,
   touch,
   subscribeStats,
+  /** Tests: run one TPS timer tick now. */
+  _perfTick: (serverId) => entries.get(serverId)?.refreshPerf?.(),
 };

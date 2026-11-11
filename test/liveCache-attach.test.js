@@ -172,3 +172,45 @@ test('with nobody watching, stats come from one sample a minute, not a stream', 
     Date.now = realNow;
   }
 });
+
+test('TPS is read every 10 s while watched, once a minute when nobody is', async () => {
+  const calls = [];
+  rconReply = async (cmd) => {
+    calls.push(cmd.join(' '));
+    if (cmd.includes('list')) return { stdout: 'There are 0 of a max of 20 players online:', exitCode: 0 };
+    return { stdout: 'TPS from last 1m, 5m, 15m: 20.0, 20.0, 20.0', exitCode: 0 };
+  };
+  const realNow = Date.now;
+  let offset = 20 * 60_000; // well past the last "watched" moment
+  Date.now = () => realNow() + offset;
+  try {
+    seed('srv_lc_perf', 'running', 'c-perf');
+    await liveCache.sync();
+    await tick();
+    const entry = liveCache.get('srv_lc_perf');
+    assert.ok(entry.players, 'rcon answered');
+    // Force one probe, as the 10 s timer would.
+    const tpsCalls = () => calls.filter((c) => /tps/.test(c)).length;
+    // Simulate several timer ticks inside one idle minute: only the first reads.
+    const perfTick = async () => {
+      await liveCache._perfTick('srv_lc_perf');
+      await tick();
+    };
+    await perfTick();
+    const afterFirst = tpsCalls();
+    assert.ok(afterFirst >= 1);
+    offset += 10_000;
+    await perfTick();
+    offset += 10_000;
+    await perfTick();
+    assert.equal(tpsCalls(), afterFirst, 'no re-read within the idle minute');
+    // Someone opens the panel: the next tick reads again.
+    liveCache.touch();
+    await perfTick();
+    assert.ok(tpsCalls() > afterFirst);
+  } finally {
+    Date.now = realNow;
+    db.run("UPDATE servers SET status = 'stopped' WHERE id = 'srv_lc_perf'");
+    await liveCache.sync();
+  }
+});
