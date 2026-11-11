@@ -101,9 +101,23 @@ test('ingestStats snapshots new/changed stats and skips unchanged ones', async (
   assert.equal(p.playtimeSeconds, 300); // 6000 ticks / 20
   assert.equal(p.stats.deaths, 2);
 
-  // Unchanged stats => no new snapshot
-  const second = await stats.ingestStats(id);
+  // Unchanged stats => no new snapshot, and the file is not even re-read.
+  const fsp = require('node:fs/promises');
+  const realRead = fsp.readFile;
+  let reads = 0;
+  fsp.readFile = async (...args) => {
+    if (/[\/]stats[\/][^\/]+\.json$/.test(String(args[0]))) reads++;
+    return realRead(...args);
+  };
+  let second;
+  try {
+    second = await stats.ingestStats(id);
+  } finally {
+    fsp.readFile = realRead;
+  }
   assert.equal(second.snapshots, 0);
+  assert.equal(second.players, 1, 'still counts the player');
+  assert.equal(reads, 0, 'an unchanged stat file is skipped');
   const count = db.get('SELECT COUNT(*) n FROM player_stat_snapshots WHERE server_id = ?', id).n;
   assert.equal(count, 1);
 });

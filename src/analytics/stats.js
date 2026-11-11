@@ -103,6 +103,12 @@ async function pathExists(p) {
  * block the whole event loop - every other request, every WS console/stats
  * stream - for the full sweep with zero yield points in between.
  */
+// Per server: each stat file's modified time at the last pass. A player's
+// file only changes while they play, so a server with thousands of past
+// players re-reads a handful of files per pass instead of all of them. Empty
+// after a panel restart, so the first pass reads everything once.
+const lastMtimes = new Map(); // serverId -> Map(file -> mtimeMs)
+
 async function ingestStats(serverId) {
   const server = serversService.getServer(serverId);
   if (!server) {
@@ -128,19 +134,35 @@ async function ingestStats(serverId) {
   const files = await fsp.readdir(statsDir);
   // First pass: read + curate every stat file (still async, yielding per file).
   const rows = [];
+  const seen = lastMtimes.get(serverId) || new Map();
+  const next = new Map();
   for (const file of files) {
     if (!file.endsWith('.json')) continue;
     const uuid = uuidToDashed(path.basename(file, '.json'));
     if (!uuid) continue;
+    const abs = path.join(statsDir, file);
+    let mtimeMs;
+    try {
+      mtimeMs = (await fsp.stat(abs)).mtimeMs;
+    } catch {
+      continue; // removed between readdir and stat
+    }
+    if (seen.get(file) === mtimeMs) {
+      next.set(file, mtimeMs); // unchanged since the last pass: nothing new to store
+      continue;
+    }
     let curated;
     try {
-      curated = curate(JSON.parse(await fsp.readFile(path.join(statsDir, file), 'utf8')));
+      curated = curate(JSON.parse(await fsp.readFile(abs, 'utf8')));
     } catch {
-      continue; // partial write / malformed file - retry next cycle
+      continue; // partial write / malformed file - retry next cycle (mtime not recorded)
     }
+    next.set(file, mtimeMs);
     rows.push({ uuid, name: names.get(uuid) || '', json: JSON.stringify(curated) });
   }
-  if (!rows.length) return { players: 0, snapshots: 0 };
+  lastMtimes.set(serverId, next);
+  // `players` counts every player with stats, read this pass or not.
+  if (!rows.length) return { players: next.size, snapshots: 0 };
 
   // One lookup for the existing latest snapshot per uuid instead of one SELECT
   // per player (the N+1 that made a 200-player sweep issue ~200 serial queries
@@ -175,7 +197,7 @@ async function ingestStats(serverId) {
       }
     });
   }
-  return { players: rows.length, snapshots: inserts.length };
+  return { players: next.size, snapshots: inserts.length };
 }
 
 /** Periodic stat ingestion for all running servers. Returns a stop function. */
