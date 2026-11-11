@@ -96,4 +96,17 @@ const publicApiTokenLimiter = config.rateLimit.publicApiPerMin
     })
   : passthrough;
 
-module.exports = { apiLimiter, authLimiter, publicApiIpLimiter, publicApiTokenLimiter };
+/** Ceiling on the public, unauthenticated status pages. Plain-text 429 (it is a page, not an API). */
+const statusLimiter = config.rateLimit.statusPerMin
+  ? rateLimit({
+      windowMs: 60_000,
+      limit: config.rateLimit.statusPerMin,
+      standardHeaders: 'draft-7',
+      legacyHeaders: false,
+      handler: (req, res) =>
+        res.status(429).type('text/plain').send('Too many requests for this status page. Try again in a minute.'),
+      validate,
+    })
+  : passthrough;
+
+module.exports = { apiLimiter, authLimiter, publicApiIpLimiter, publicApiTokenLimiter, statusLimiter };

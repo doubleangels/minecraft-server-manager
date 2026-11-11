@@ -37,6 +37,12 @@ function attachWebSockets(httpServer) {
     // Origin on a WS handshake, so a mismatch is a cross-site attempt - reject
     // it. A missing Origin is a non-browser client (scripts, tests), which the
     // signed session cookie still gates below.
+    if (require('../web/middleware/hostGuard').refuseHost(req)) {
+      logger.warn('Rejected a WebSocket upgrade for an unknown host name.', { path: req.url.split('?')[0] });
+      socket.write('HTTP/1.1 421 Misdirected Request\r\n\r\n');
+      socket.destroy();
+      return;
+    }
     if (!originAllowed(req)) {
       logger.warn('Rejected a cross-origin WebSocket upgrade.', { path: req.url.split('?')[0] });
       socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');

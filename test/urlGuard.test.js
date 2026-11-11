@@ -177,3 +177,14 @@ test('safeFetch re-validates a redirect hop and rejects one that points at cloud
     /link-local, multicast, or unspecified/
   );
 });
+
+test('isBlockedIp covers all of fe80::/10, not just fe80', () => {
+  for (const ip of ['fe80::1', 'fe9a::1', 'fea0:1::2', 'febf:ffff::1', 'FEB0::1']) {
+    assert.equal(isBlockedIp(ip), true, ip);
+    assert.equal(isBlockedIp(ip, { allowPrivate: true }), true, `${ip} stays blocked for LAN callers`);
+  }
+  assert.equal(isBlockedIp('fec0::1'), true, 'site-local is private');
+  assert.equal(isBlockedIp('0:0:0:0:0:0:0:1'), true, 'expanded loopback');
+  assert.equal(isBlockedIp('fc::1'), true, '00fc:: is reserved ::/8, never a public host');
+  assert.equal(isBlockedIp('2606:4700::1111'), false, 'a public address is allowed');
+});

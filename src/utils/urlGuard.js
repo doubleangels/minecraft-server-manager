@@ -107,12 +107,15 @@ function ipv6EmbeddedIpv4(groups) {
 function isBlockedIpv6(ip, { allowPrivate = false } = {}) {
   const s = ip.toLowerCase();
   if (s === '::') return true; // unspecified (always blocked)
-  if (s.startsWith('fe80')) return true; // link-local (always blocked)
-  if (s.startsWith('ff')) return true; // multicast (always blocked)
+  // Judge prefixes on the first 16-bit group's value, not its spelling: the
+  // whole fe80::/10 runs fe80 to febf, and a group may be written short.
+  const groups = expandIpv6(s);
+  const first = parseInt(groups[0] || '0', 16) || 0;
+  if ((first & 0xffc0) === 0xfe80) return true; // link-local fe80::/10 (always blocked)
+  if ((first & 0xff00) === 0xff00) return true; // multicast ff00::/8 (always blocked)
   // Catches every IPv4-mapped spelling, not just the textual "::ffff:a.b.c.d"
   // shorthand - e.g. the fully-expanded "0:0:0:0:0:ffff:7f00:1" (=127.0.0.1).
   // The mapped v4 inherits the same allowPrivate policy.
-  const groups = expandIpv6(s);
   const mapped = ipv6MappedIpv4(groups);
   if (mapped) return isBlockedIpv4(mapped, { allowPrivate });
   // Other spellings that carry an IPv4 address inside an IPv6 one and can reach
@@ -121,8 +124,10 @@ function isBlockedIpv6(ip, { allowPrivate = false } = {}) {
   const embedded = ipv6EmbeddedIpv4(groups);
   if (embedded) return isBlockedIpv4(embedded, { allowPrivate });
   if (allowPrivate) return false; // LAN-facing caller keeps loopback + ULA
-  if (s === '::1') return true; // loopback
-  if (s.startsWith('fc') || s.startsWith('fd')) return true; // unique-local
+  if (groups.every((g, i) => (parseInt(g, 16) || 0) === (i === 7 ? 1 : 0))) return true; // loopback ::1
+  if ((first & 0xfe00) === 0xfc00) return true; // unique-local fc00::/7
+  if ((first & 0xffc0) === 0xfec0) return true; // deprecated site-local fec0::/10
+  if (first < 0x0100) return true; // the rest of reserved ::/8 (embedded v4 forms were judged above)
   return false;
 }
 

@@ -89,3 +89,16 @@ test('the public page never leaks admin data', async () => {
   assert.equal(r.status, 200);
   assert.ok(!/rcon|25599|26599|href="\/servers/i.test(r.text), 'no ports, rcon, or panel links');
 });
+
+test('the public page is briefly cacheable and rate limited per client', async () => {
+  statusPage.setStatusPage('srv_sp_a', { enabled: true, slug: 'my-server' });
+  const first = await app.req('GET', '/status/my-server', { headers: { Accept: 'text/html' } });
+  assert.equal(first.status, 200);
+  assert.equal(first.headers.get('cache-control'), 'public, max-age=5');
+  assert.ok(first.headers.get('ratelimit-policy'), 'the status limiter is in front of the page');
+  let last = first.status;
+  for (let i = 0; i < 70 && last !== 429; i++) {
+    last = (await app.req('GET', '/status/my-server', { headers: { Accept: 'text/html' } })).status;
+  }
+  assert.equal(last, 429);
+});

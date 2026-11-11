@@ -20,6 +20,12 @@ its own dated entry.
   limit of 4096 processes and threads.
 - **World archives can no longer plant links.** Symlinks and hardlinks in an uploaded `.tar` or
   `.tar.gz` are skipped.
+- **First-run setup is protected from DNS rebinding.** Until the admin account exists, a
+  localhost-only panel refuses unknown host names (421). Set `PANEL_ALLOWED_HOSTS` to the names you
+  use to make that check permanent, or to finish setup through a reverse proxy name.
+- **Public status pages are rate limited** (60 requests a minute per address,
+  `RATE_LIMIT_STATUS_PER_MIN`) and cacheable for 5 seconds.
+- The private-address check for outgoing requests now covers the whole IPv6 link-local range.
 - **Notifications only go to browser push services.** A device can no longer register an address
   on your network for the panel to post to. Saved devices with such an address are removed.
 

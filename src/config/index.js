@@ -317,6 +317,9 @@ const config = {
     // Per-token ceiling on the public /api/v1 surface (keyed on the token, IP
     // fallback when absent). 0 = off.
     publicApiPerMin: numFromEnv('RATE_LIMIT_PUBLIC_API_PER_MIN', 120, { min: 0, max: 1_000_000 }),
+    // Public status pages (/status/<slug>), per client IP. Each one refreshes
+    // about once a minute, so 60 covers a household behind one address.
+    statusPerMin: numFromEnv('RATE_LIMIT_STATUS_PER_MIN', 60, { min: 0, max: 1_000_000 }),
   },
 };
 

@@ -76,4 +76,4 @@ function httpServer() {
   return server;
 }
 
-module.exports = { start, stop, req, adminCookie, seedServer, httpServer };
+module.exports = { start, stop, req, adminCookie, seedServer, httpServer, baseUrl: () => base };
