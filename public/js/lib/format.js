@@ -22,3 +22,42 @@ export function escapeHtml(s) {
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
   );
 }
+
+// Auto-escaping HTML templates, so a call site cannot forget escapeHtml:
+//
+//   list.innerHTML = html`<li title="${name}">${name}</li>`;
+//
+// Every interpolated value is escaped, except another html`` result or a
+// value marked with rawHtml() (markup you built and trust). Arrays are joined,
+// each item following the same rule, so a nested map needs no .join(''):
+//
+//   html`<ul>${items.map((i) => html`<li>${i.label}</li>`)}</ul>`
+//
+// The result is an object whose toString() is the markup; assign it to
+// innerHTML, or call String() on it.
+class SafeHtml {
+  constructor(text) {
+    this.text = text;
+  }
+  toString() {
+    return this.text;
+  }
+}
+
+/** Mark markup as trusted so html`` inserts it unescaped. Never pass user text here. */
+export function rawHtml(markup) {
+  return new SafeHtml(String(markup ?? ''));
+}
+
+function htmlValue(v) {
+  if (v instanceof SafeHtml) return v.text;
+  if (Array.isArray(v)) return v.map(htmlValue).join('');
+  if (v === false || v === null || v === undefined) return '';
+  return escapeHtml(v);
+}
+
+export function html(strings, ...values) {
+  let out = strings[0];
+  for (let i = 0; i < values.length; i++) out += htmlValue(values[i]) + strings[i + 1];
+  return new SafeHtml(out);
+}

@@ -100,6 +100,14 @@ allocation, disk quotas, at-rest secret encryption), and wire formats are all de
 - `src/web/middleware/asyncHandler.js` — wraps async route handlers so rejections reach the error
   handler; prefer it over hand-written `try/catch → next(err)`.
 - `src/web/middleware/jsonErrorHandler.js` — the standard JSON error handler (redacts 5xx detail).
+- `public/js/lib/api.js` — `api(path, { method, body, action, timeoutMs })` for every JSON call from
+  page scripts: timeout, one error shape (message ready for a toast), and back to sign-in on a 401.
+  Keep a raw `fetch` only for uploads and downloads that need progress or a non-JSON body.
+- `public/js/lib/format.js` — `html` tagged template (auto-escapes every value; nest `html` results
+  freely, arrays are joined) and `rawHtml()` for markup you built yourself. Use it for anything
+  assigned to `innerHTML`. `test/client-ratchet.test.js` stops any file adding direct `fetch()` calls
+  or raw HTML template literals beyond its baseline in `test/fixtures/client-ratchet.json`; lower
+  the baseline when you migrate (`UPDATE_CLIENT_RATCHET=1`).
 - Template helpers for JSON the browser will `JSON.parse`: `{{jsonScript x}}` inside `<script>`
   text, `{{jsonAttr x}}` inside a `data-*` attribute. Either brace count works; the name is the rule.
 

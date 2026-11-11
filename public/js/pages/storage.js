@@ -3,23 +3,19 @@
 // numbers → real POST → reload.
 
 import { toast } from '../lib/toast.js';
-import { friendlyError } from '../lib/errors.js';
 import { confirmDialog } from '../lib/confirm.js';
 import { setBusy, withBusy } from '../lib/loading.js';
-import { fmtBytes, escapeHtml } from '../lib/format.js';
+import { fmtBytes, html } from '../lib/format.js';
+import { api } from '../lib/api.js';
 
 // Largest-files list loads after render (a bounded filesystem walk that used
 // to block the whole /storage render). Populated via DOM nodes never
 // innerHTML, so a path can't smuggle markup into the page.
 const largestBody = document.getElementById('largest-files-body');
 if (largestBody) {
-  fetch('/api/storage/largest-files')
-    .then(async (res) => {
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.ok === false)
-        throw new Error(data.error || friendlyError(res, { action: 'list the largest files' }));
-      return data.files;
-    })
+  // A bounded walk, but a big data folder can take a while.
+  api('/api/storage/largest-files', { action: 'list the largest files', timeoutMs: 120000 })
+    .then((data) => data.files)
     .then((files) => {
       if (!files.length) {
         largestBody.innerHTML =
@@ -46,7 +42,11 @@ if (largestBody) {
       }
     })
     .catch((err) => {
-      largestBody.innerHTML = `<tr><td data-th="" class="p-6 text-center text-ink-faint">${escapeHtml(err instanceof TypeError ? friendlyError(err, { action: 'list the largest files' }) : err.message)}</td></tr>`;
+      largestBody.innerHTML = String(
+        html`<tr>
+          <td data-th="" class="p-6 text-center text-ink-faint">${err.message}</td>
+        </tr>`
+      );
     });
 }
 
@@ -63,9 +63,8 @@ document.getElementById('storage-rescan')?.addEventListener('click', async (e) =
   const restore = setBusy(btn, 'Scanning…');
   toast('Re-scanning the data folder…', { kind: 'info' });
   try {
-    const res = await fetch('/api/storage/scan', { method: 'POST' });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.ok === false) throw new Error(data.error || friendlyError(res, { action: 'start the scan' }));
+    // A full scan of a large data folder can take minutes.
+    const data = await api('/api/storage/scan', { method: 'POST', action: 'start the scan', timeoutMs: 600000 });
     toast(
       data.skipped
         ? 'A scan is already running.'
@@ -123,13 +122,6 @@ document.addEventListener('click', async (e) => {
   }
 });
 
-async function postJSON(url, body) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body || {}),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.ok === false) throw new Error(data.error || friendlyError(res, { action: 'run that cleanup' }));
-  return data;
+function postJSON(url, body) {
+  return api(url, { method: 'POST', body: body || {}, action: 'run that cleanup', timeoutMs: 300000 });
 }

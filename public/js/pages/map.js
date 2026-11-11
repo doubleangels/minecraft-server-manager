@@ -1,7 +1,7 @@
 // Map tab: enable/disable BlueMap, plus a probe so the embed never shows the
 // proxy's raw error page while the map isn't serving yet.
 import { toast } from '../lib/toast.js';
-import { friendlyError } from '../lib/errors.js';
+import { api } from '../lib/api.js';
 import { confirmDialog } from '../lib/confirm.js';
 import { setBusy } from '../lib/loading.js';
 
@@ -52,14 +52,12 @@ document.addEventListener('click', async (e) => {
     const restore = setBusy(enableBtn, 'Installing…');
     toast('Installing BlueMap and allocating the map port…', { kind: 'info' });
     try {
-      const res = await fetch(`/api/servers/${id}/map/enable`, { method: 'POST' });
-      const data = await res.json();
-      if (data.ok) {
-        toast('Live map enabled. Restart the server to bring it up.');
-        setTimeout(() => location.reload(), 900);
-      } else {
-        toast(data.error || friendlyError(res, { action: 'enable the live map' }), { kind: 'error', timeout: 9000 });
-      }
+      // Installing BlueMap downloads it, so allow longer than the default.
+      await api(`/api/servers/${id}/map/enable`, { method: 'POST', action: 'enable the live map', timeoutMs: 120000 });
+      toast('Live map enabled. Restart the server to bring it up.');
+      setTimeout(() => location.reload(), 900);
+    } catch (err) {
+      toast(err.message, { kind: 'error', timeout: 9000 });
     } finally {
       restore();
     }
@@ -73,14 +71,11 @@ document.addEventListener('click', async (e) => {
     if (!ok) return;
     const restore = setBusy(disableBtn, 'Disabling…');
     try {
-      const res = await fetch(`/api/servers/${id}/map/disable`, { method: 'POST' });
-      const data = await res.json();
-      if (data.ok) {
-        toast('Live map disabled. Applies on the next restart.');
-        setTimeout(() => location.reload(), 900);
-      } else {
-        toast(data.error || friendlyError(res, { action: 'disable the live map' }), { kind: 'error' });
-      }
+      await api(`/api/servers/${id}/map/disable`, { method: 'POST', action: 'disable the live map' });
+      toast('Live map disabled. Applies on the next restart.');
+      setTimeout(() => location.reload(), 900);
+    } catch (err) {
+      toast(err.message, { kind: 'error' });
     } finally {
       restore();
     }

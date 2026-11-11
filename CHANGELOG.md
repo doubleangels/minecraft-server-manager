@@ -47,6 +47,9 @@ its own dated entry.
   and exits, so Docker (or systemd) restarts it in a known state. Set `MSM_KEEP_ALIVE_ON_FATAL=1`
   for the old behaviour. `MSM_EXIT_ON_FATAL=1` now only adds exiting on unhandled promise
   rejections.
+- Panel requests from the browser now give up after a time limit instead of spinning forever, and
+  an expired session goes back to sign-in instead of showing an error for every call. This is
+  rolling out page by page, starting with Storage and the live map.
 - Uploads are no longer cut off after five minutes, so large files on a slow connection finish.
 - Text fields show the same focus outline as buttons, not only a border colour change.
 - Every table header cell declares its column for screen readers.

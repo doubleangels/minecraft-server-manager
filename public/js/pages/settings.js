@@ -1,6 +1,7 @@
 // Panel Settings (API keys, localization, defaults, backup retention, public
 // API) and the Users section of Users & Permissions (accounts, lockouts).
 import { toast } from '../lib/toast.js';
+import { escapeHtml } from '../lib/format.js';
 import { friendlyError } from '../lib/errors.js';
 import { openModal } from '../lib/modal.js';
 import { confirmDialog } from '../lib/confirm.js';
@@ -222,13 +223,6 @@ function init() {
       content,
       actions: [{ label: 'Done', kind: 'primary', onClick: () => setTimeout(() => location.reload(), 300) }],
     });
-  }
-
-  function escapeHtml(s) {
-    return String(s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-    );
   }
 
   // ---- Users ----
