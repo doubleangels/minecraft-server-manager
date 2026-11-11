@@ -118,3 +118,11 @@ test('does not skip when event history was pruned past the backup', async () => 
   info = stopped('2026-01-01T12:00:00Z');
   assert.equal(await isScheduledBackupRedundant('srv_r'), false);
 });
+
+test("a backup's own verification does not count as a change since it", async () => {
+  seedBackup('2026-01-02 00:00:00');
+  seedEvent('backup-checked', '2026-01-02 00:00:05');
+  seedEvent('backup-verified', '2026-01-02 00:00:09');
+  info = stopped('2026-01-01T12:00:00.123456789Z');
+  assert.equal(await isScheduledBackupRedundant('srv_r'), true);
+});

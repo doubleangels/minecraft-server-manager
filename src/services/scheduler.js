@@ -188,7 +188,7 @@ async function backupAllServers({ actor, task, shrink = false }) {
     async (server) => {
       if (await backups.isScheduledBackupRedundant(server.id)) return; // stopped and already backed up
       const backup = await backups.createBackup(server.id, { reason: 'scheduled', actor, task, shrinkAfter: shrink });
-      await backups.verifyBackup(backup.id, { actor, task });
+      await backups.checkBackupStructure(backup.id, { actor, task });
     },
     task
   );
@@ -252,7 +252,7 @@ async function runTask(schedule, task = null) {
       });
       // Read the fresh archive back end to end. A damaged one throws, so the
       // run is marked failed and the operator hears about it now, not at restore time.
-      await backups.verifyBackup(backup.id, { actor, task });
+      await backups.checkBackupStructure(backup.id, { actor, task });
       break;
     }
     case 'backup-all':

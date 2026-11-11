@@ -35,7 +35,7 @@ servers.restartServer = rec('restart');
 servers.stopServer = rec('stop');
 servers.startServer = rec('start');
 backups.createBackup = rec('backup', { id: 'bk_sched' });
-backups.verifyBackup = rec('verify', { ok: true });
+backups.checkBackupStructure = rec('verify', { ok: true });
 let redundant = false;
 backups.isScheduledBackupRedundant = rec('redundant?', () => redundant);
 containers.execCapture = rec('rcon', 'There are 0 players');
@@ -99,7 +99,7 @@ test('a backup task creates a scheduled backup and forwards the shrink option', 
   assert.equal(typeof task.step, 'function', 'the backup reports progress into a tray task');
 });
 
-test('a scheduled backup is verified right after it is created', async () => {
+test('a scheduled backup is checked right after it is created', async () => {
   redundant = false;
   await fireOnce({ serverId: 'srv_sch_a', taskType: 'backup', payload: {} });
   const names = calls.map((c) => c[0]);

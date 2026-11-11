@@ -37,7 +37,7 @@ test('a backup refused because the server is busy retries, then runs', async (t)
     if (calls < 3) throw busy();
     return { id: 'bk_test' };
   });
-  t.mock.method(backups, 'verifyBackup', async () => {}); // a scheduled backup is read back after it is written
+  t.mock.method(backups, 'checkBackupStructure', async () => {}); // a scheduled backup is read back after it is written
   await runTaskWithRetry(job, { retryMs: 1, maxWaitMs: 50 });
   assert.equal(calls, 3);
 });
@@ -125,7 +125,7 @@ test("another run finishing does not clear a waiting run's flag", async (t) => {
     }
     return { id: 'bk_test' };
   });
-  t.mock.method(backups, 'verifyBackup', async () => {});
+  t.mock.method(backups, 'checkBackupStructure', async () => {});
   const b = fireJob(job, { retryMs: 60, maxWaitMs: 600 });
   await waiting;
   await new Promise((r) => setImmediate(r));

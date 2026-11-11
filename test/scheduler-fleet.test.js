@@ -28,7 +28,7 @@ backups.createBackup = async (id, opts) => {
   if (backupFails.has(id)) throw new Error('disk full');
   return { id: `bk_${id}` };
 };
-backups.verifyBackup = async (backupId) => {
+backups.checkBackupStructure = async (backupId) => {
   calls.push(['verify', backupId]);
 };
 

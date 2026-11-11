@@ -826,6 +826,75 @@ async function verifyBackupImpl(backupId, { actor = 'system', task = null } = {}
   }
 }
 
+/**
+ * Structure check: open the archive's central directory and confirm every
+ * entry's data lies inside the file, without decompressing anything. Catches
+ * what actually goes wrong in practice (a truncated or half-written archive:
+ * disk full, process killed) in milliseconds, where the full verify re-reads
+ * and inflates the whole archive. Used after scheduled backups; the Verify
+ * button still runs the full CRC check.
+ * @returns {Promise<{entries: number}>}
+ */
+function zipStructureCheck(zipFile) {
+  return new Promise((resolve, reject) => {
+    let size;
+    try {
+      size = fs.statSync(zipFile).size;
+    } catch (err) {
+      return reject(err);
+    }
+    yauzl.open(zipFile, { lazyEntries: true, autoClose: true }, (err, zip) => {
+      if (err) return reject(err);
+      let entries = 0;
+      zip.on('error', reject);
+      zip.on('end', () => resolve({ entries }));
+      zip.on('entry', (entry) => {
+        entries += 1;
+        // 30-byte local header + name + extra, then the compressed data.
+        const dataEnd = entry.relativeOffsetOfLocalHeader + 30 + entry.fileNameLength + entry.compressedSize;
+        if (dataEnd > size) {
+          zip.close();
+          return reject(new Error(`Entry runs past the end of the archive: ${entry.fileName}`));
+        }
+        zip.readEntry();
+      });
+      zip.readEntry();
+    });
+  });
+}
+
+/** After a scheduled backup: the fast structure check, recorded like a verify. */
+async function checkBackupStructure(backupId, { actor = 'system', task = null } = {}) {
+  const backup = db.get('SELECT * FROM backups WHERE id = ?', backupId);
+  if (!backup) throw httpError(404, 'Backup not found.');
+  const zipPath = dataPath(backup.rel_path);
+  try {
+    if (task) task.step('Checking the backup archive…');
+    const result = await zipStructureCheck(zipPath);
+    recordEvent({
+      serverId: backup.server_id,
+      actor,
+      type: 'backup-checked',
+      summary: `Checked backup ${backup.filename}: complete, ${result.entries} files.`,
+      details: { entries: result.entries },
+    });
+    return { ok: true, ...result };
+  } catch (err) {
+    logger.warn('A backup failed its structure check.', {
+      serverId: backup.server_id,
+      backupId,
+      err: serializeError(err),
+    });
+    recordEvent({
+      serverId: backup.server_id,
+      actor,
+      type: 'backup-verify-failed',
+      summary: `Backup ${backup.filename} is incomplete and may not restore.`,
+    });
+    throw httpError(422, 'This backup is incomplete and may not restore correctly. Take a fresh backup.');
+  }
+}
+
 /** Callers without a task of their own (the route) get one in the top-bar tray. */
 async function verifyBackup(backupId, opts = {}) {
   if (opts.task) return verifyBackupImpl(backupId, opts);
@@ -866,6 +935,12 @@ const NON_DATA_EVENT_TYPES = [
   'schedule-deleted',
   'backup-created',
   'backup-warning',
+  // A backup's own verification follows it. Missing these made every
+  // scheduled backup look like a change, so an unchanged server was never
+  // recognised as already backed up.
+  'backup-verified',
+  'backup-checked',
+  'backup-verify-failed',
   'backup-deleted',
   'backup-renamed',
   'update-check',
@@ -934,6 +1009,8 @@ async function isScheduledBackupRedundant(serverId) {
 }
 
 module.exports = {
+  checkBackupStructure,
+  zipStructureCheck,
   setBackupNote,
   isScheduledBackupRedundant,
   createBackup,
