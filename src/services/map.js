@@ -4,6 +4,7 @@
 // with the map web server exposed on a panel-allocated host port and served
 // to the browser only through the panel's authenticated proxy.
 
+const { safeJsonParse } = require('../utils/safeJson');
 const httpError = require('../utils/httpError');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -38,7 +39,7 @@ const SUPPORTED = new Set([
 function getMapConfig(serverId) {
   const row = db.get("SELECT * FROM integrations WHERE server_id = ? AND kind = 'bluemap'", serverId);
   if (!row) return { enabled: false, hostPort: null };
-  const cfg = JSON.parse(row.config_json || '{}');
+  const cfg = safeJsonParse(row.config_json, {}, { where: 'map', id: serverId, expect: 'object' });
   return { enabled: Boolean(row.enabled), hostPort: cfg.hostPort || null };
 }
 

@@ -6,6 +6,7 @@
 // per-event toggles live in plain config_json. Delivery is fire-and-forget:
 // a broken webhook must never break panel operations.
 
+const { safeJsonParse } = require('../utils/safeJson');
 const path = require('node:path');
 const httpError = require('../utils/httpError');
 const db = require('../db');
@@ -85,7 +86,7 @@ function row(serverId) {
 /** Masked, UI-safe view of the config. Never returns the webhook URL. */
 function getConfig(serverId) {
   const r = row(serverId);
-  const cfg = r ? JSON.parse(r.config_json || '{}') : {};
+  const cfg = r ? safeJsonParse(r.config_json, {}, { where: 'discord', id: r.server_id, expect: 'object' }) : {};
   return {
     enabled: Boolean(r && r.enabled),
     hasWebhook: Boolean(r && r.config_cipher),
@@ -118,7 +119,9 @@ function maskWebhook(url) {
  */
 function setConfig(serverId, { enabled, webhookUrl: url, events } = {}) {
   const existing = row(serverId);
-  const cfg = existing ? JSON.parse(existing.config_json || '{}') : {};
+  const cfg = existing
+    ? safeJsonParse(existing.config_json, {}, { where: 'discord', id: existing.server_id, expect: 'object' })
+    : {};
   const nextEvents = { ...DEFAULT_EVENTS, ...(cfg.events || {}), ...(events || {}) };
 
   let cipher = existing ? existing.config_cipher : null;
@@ -327,7 +330,7 @@ async function pollOnce() {
   const publicHost = settings.getPublicHost();
   const cfgFor = (serverId) => {
     const r = integById.get(serverId);
-    const cfg = r ? JSON.parse(r.config_json || '{}') : {};
+    const cfg = r ? safeJsonParse(r.config_json, {}, { where: 'discord', id: r.server_id, expect: 'object' }) : {};
     return {
       enabled: Boolean(r && r.enabled),
       hasWebhook: Boolean(r && r.config_cipher),

@@ -25,6 +25,11 @@ its own dated entry.
 
 ### Added
 
+- **A clean stop.** `docker stop` and Ctrl+C now let open requests finish, close live consoles,
+  and flush the database before exiting (`SHUTDOWN_GRACE_MS`, 20 seconds). The compose file adds
+  `init: true` and a 30 second stop grace period.
+- **One damaged setting no longer breaks the panel.** A server whose stored settings cannot be read
+  falls back to empty values, every page keeps working, and its page shows which settings to check.
 - **A database copy before every upgrade.** When the panel starts with schema changes to apply, it
   first copies its database to `backups/_panel/panel-pre-<version>.db` (the newest three are kept).
   If the copy fails, the panel stops instead of changing the database without a way back.
@@ -32,6 +37,11 @@ its own dated entry.
 
 ### Changed
 
+- **An uncaught error now restarts the panel.** After an uncaught exception the panel records it
+  and exits, so Docker (or systemd) restarts it in a known state. Set `MSM_KEEP_ALIVE_ON_FATAL=1`
+  for the old behaviour. `MSM_EXIT_ON_FATAL=1` now only adds exiting on unhandled promise
+  rejections.
+- Uploads are no longer cut off after five minutes, so large files on a slow connection finish.
 - Text fields show the same focus outline as buttons, not only a border colour change.
 - Every table header cell declares its column for screen readers.
 - The panel image no longer ships Bedrock Edition game data or the icon fonts and bundles it never

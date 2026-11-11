@@ -4,6 +4,7 @@
 // Server orchestration: CRUD, env assembly, container lifecycle. The single
 // place that turns a DB server row into a running itzg container.
 
+const { safeJsonParse } = require('../utils/safeJson');
 const httpError = require('../utils/httpError');
 const fs = require('node:fs');
 const fsp = require('node:fs/promises');
@@ -29,17 +30,23 @@ const { propEnvMap } = require('../config/field-catalog');
 
 function rowToServer(row, { parseOverrides = true } = {}) {
   if (!row) return null;
+  // A damaged JSON column falls back to empty (so every page still renders)
+  // and is listed in dataIssues, which the server page shows as a notice.
+  /** @type {string[]} */
+  const issues = [];
+  const opt = (field, expect) => ({ where: 'servers', id: row.id, field, expect, issues });
   const server = {
     ...row,
-    tags: JSON.parse(row.tags_json || '[]'),
-    env: JSON.parse(row.env_json || '{}'),
+    tags: safeJsonParse(row.tags_json, [], opt('Tags', 'array')),
+    env: safeJsonParse(row.env_json, {}, opt('Environment Variables', 'object')),
     containerName: row.container_name || null,
     networkName: row.network_name || null,
   };
   if (parseOverrides) {
-    server.extraPorts = JSON.parse(row.extra_ports_json || '[]');
-    server.extraBinds = JSON.parse(row.extra_binds_json || '[]');
+    server.extraPorts = safeJsonParse(row.extra_ports_json, [], opt('Extra Ports', 'array'));
+    server.extraBinds = safeJsonParse(row.extra_binds_json, [], opt('Extra Volumes', 'array'));
   }
+  server.dataIssues = issues;
   return server;
 }
 

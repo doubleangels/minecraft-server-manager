@@ -20,6 +20,11 @@ services:
     image: ghcr.io/anefzaoui/minecraft-server-manager:latest
     container_name: minecraft-server-manager
     restart: unless-stopped
+    # A small init as PID 1 (reaps child processes and forwards signals), and
+    # time for a clean stop: the panel finishes open requests and flushes its
+    # database within SHUTDOWN_GRACE_MS (20 s) of docker stop.
+    init: true
+    stop_grace_period: 30s
     ports:
       # Web UI. Change the left side to move it; the panel itself listens on
       # 25564 in-container. Bind to 127.0.0.1:25564 if a reverse proxy fronts it.
@@ -44,8 +49,11 @@ services:
       # SESSION_SECRET: change-me-to-a-long-random-string
       # LOG_LEVEL: info
       # RATE_LIMIT_API_PER_MIN: '1200'
-      # Hard-exit on an uncaught fault so this container restarts:
+      # An uncaught exception exits so this container restarts clean. Also exit
+      # on an unhandled promise rejection:
       # MSM_EXIT_ON_FATAL: '1'
+      # Or stay up after an uncaught exception (not recommended):
+      # MSM_KEEP_ALIVE_ON_FATAL: '1'
     volumes:
       - ${DATA_DIR_HOST}:/data
       # The panel manages servers through the host daemon (create/start/exec).

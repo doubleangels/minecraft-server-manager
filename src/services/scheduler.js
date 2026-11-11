@@ -4,6 +4,7 @@
 // and global maintenance (update check, storage rescan, tmp cleanup, backup
 // pruning). Every firing is a history event; next-run times come from croner.
 
+const { safeJsonParse } = require('../utils/safeJson');
 const path = require('node:path');
 const httpError = require('../utils/httpError');
 const { Cron } = require('croner');
@@ -493,7 +494,7 @@ function listSchedules() {
       task: TASK_TYPES[s.task_type]?.label || s.task_type,
       taskType: s.task_type,
       cron: s.cron,
-      payload: JSON.parse(s.payload_json || '{}'),
+      payload: safeJsonParse(s.payload_json, {}, { where: 'schedules', id: s.id, expect: 'object' }),
       enabled: Boolean(s.enabled),
       lastRun: s.last_run_at,
       lastRunMs: Number.isFinite(lastRunMs) ? lastRunMs : null,

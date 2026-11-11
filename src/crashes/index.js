@@ -5,6 +5,9 @@
 // with a parsed one-line summary + suspected mods, and links each to a
 // history event. All filesystem access goes through pathGuard.
 
+const { safeJsonParse } = require('../utils/safeJson');
+const parseSuspected = (row) =>
+  safeJsonParse(row.suspected_json, [], { where: 'crashes', id: row.id, expect: 'array' });
 const fs = require('node:fs');
 const fsp = fs.promises;
 const { nanoid } = require('nanoid');
@@ -324,12 +327,12 @@ function listCrashes(serverId, { limit } = {}) {
       `SELECT * FROM crash_reports WHERE server_id = ? ORDER BY file_mtime DESC${limit ? ' LIMIT ?' : ''}`,
       ...[serverId, ...(limit ? [limit] : [])]
     )
-    .map((row) => ({ ...row, suspected: JSON.parse(row.suspected_json || '[]') }));
+    .map((row) => ({ ...row, suspected: parseSuspected(row) }));
 }
 
 function getCrash(crashId) {
   const row = db.get('SELECT * FROM crash_reports WHERE id = ?', crashId);
-  return row ? { ...row, suspected: JSON.parse(row.suspected_json || '[]') } : null;
+  return row ? { ...row, suspected: parseSuspected(row) } : null;
 }
 
 /** Read a report's full text. The filename MUST be one indexed for this server. */

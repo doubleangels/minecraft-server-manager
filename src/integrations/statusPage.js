@@ -3,6 +3,8 @@
 // Public status page config (MP9). Opt-in per server; the slug is the only
 // thing exposed publicly, stored in plain config_json (nothing secret here).
 
+const { safeJsonParse } = require('../utils/safeJson');
+const parseCfg = (r) => safeJsonParse(r.config_json, {}, { where: 'statusPage', id: r.server_id, expect: 'object' });
 const httpError = require('../utils/httpError');
 const db = require('../db');
 
@@ -11,7 +13,7 @@ const SLUG_RE = /^[a-z0-9-]{3,40}$/;
 
 function getStatusPage(serverId) {
   const r = db.get('SELECT * FROM integrations WHERE server_id = ? AND kind = ?', serverId, KIND);
-  const cfg = r ? JSON.parse(r.config_json || '{}') : {};
+  const cfg = r ? safeJsonParse(r.config_json, {}, { where: 'statusPage', id: r.server_id, expect: 'object' }) : {};
   return {
     enabled: Boolean(r && r.enabled),
     slug: cfg.slug || null,
@@ -38,7 +40,7 @@ function setStatusPage(serverId, { enabled, slug }) {
     throw httpError(400, 'The page address must be 3 to 40 lowercase letters, numbers, or dashes.');
   const clash = db
     .all('SELECT server_id, config_json FROM integrations WHERE kind = ?', KIND)
-    .find((r) => r.server_id !== serverId && JSON.parse(r.config_json || '{}').slug === slug);
+    .find((r) => r.server_id !== serverId && parseCfg(r).slug === slug);
   if (clash) throw httpError(409, `That page address is already in use by another server.`);
 
   db.run(
@@ -59,7 +61,7 @@ function findBySlug(slug) {
   if (!SLUG_RE.test(String(slug))) return null;
   const r = db
     .all('SELECT server_id, config_json FROM integrations WHERE kind = ? AND enabled = 1', KIND)
-    .find((row) => JSON.parse(row.config_json || '{}').slug === slug);
+    .find((row) => parseCfg(row).slug === slug);
   return r ? r.server_id : null;
 }
 

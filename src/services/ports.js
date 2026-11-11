@@ -1,5 +1,6 @@
 'use strict';
 
+const { safeJsonParse } = require('../utils/safeJson');
 const httpError = require('../utils/httpError');
 
 // Host-port allocation. Scheme (user-approved): game ports first-free from
@@ -89,14 +90,18 @@ function dbPortsInUse({ exceptServerId } = {}) {
       used.add(r.port_rcon);
     }
     if (r.port_bedrock) used.add(r.port_bedrock);
-    for (const p of JSON.parse(r.extra_ports_json || '[]')) {
+    for (const p of safeJsonParse(r.extra_ports_json, [], { where: 'ports', id: r.id, expect: 'array' })) {
       if (p && p.hostPort) used.add(p.hostPort);
     }
   }
   // BlueMap's web-server port lives in `integrations`, not on the server row -
   // it must be unioned in too, or a fresh port allocation could collide with it.
-  for (const row of db.all("SELECT config_json FROM integrations WHERE kind = 'bluemap' AND enabled = 1")) {
-    const hostPort = JSON.parse(row.config_json || '{}').hostPort;
+  for (const row of db.all("SELECT server_id, config_json FROM integrations WHERE kind = 'bluemap' AND enabled = 1")) {
+    const hostPort = safeJsonParse(
+      row.config_json,
+      {},
+      { where: 'ports', id: row.server_id, expect: 'object' }
+    ).hostPort;
     if (hostPort) used.add(hostPort);
   }
   used.add(config.port); // never hand out the panel's own port

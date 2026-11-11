@@ -259,8 +259,11 @@ Cross-cutting:
    compatibility scans left running by a previous process as interrupted
    (`compat.reconcileScans()`), then seed starter blueprints (guarded).
 7. Start the HTTP + WS server. On an exposed bind, print the first-run `/setup` PIN.
-8. Install the post-boot runtime guard (catches uncaught faults; `MSM_EXIT_ON_FATAL=1` makes it
-   hard-exit for supervised deployments).
+8. Install the post-boot runtime guard (`src/lifecycle.js`): an uncaught exception is recorded and
+   the process exits for its supervisor to restart (`MSM_KEEP_ALIVE_ON_FATAL=1` keeps it up); an
+   unhandled rejection is recorded and kept alive (`MSM_EXIT_ON_FATAL=1` exits on those too). The
+   SIGTERM / SIGINT handler stops taking requests, closes WebSocket clients, checkpoints the SQLite
+   WAL and closes the database within `SHUTDOWN_GRACE_MS`.
 9. Start background services: WS broker, storage indexer, crash + inventory watchers, scheduler,
    Discord event bridge, chatbot outreach watcher, and the **daily maintenance timer** (prune old
    analytics rows, chatbot transcripts, event history (365 days) and API cache rows, then snapshot

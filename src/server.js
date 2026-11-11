@@ -17,50 +17,17 @@ require('./preflight');
 const logger = require('./logger')('boot');
 // Every outbound HTTP call (Modrinth, CurseForge, Discord…) gets a log line.
 require('./utils/outboundLog').installOutboundLog();
-const { captureError, closeSentry } = require('./instrument');
+const { captureError } = require('./instrument');
 const { serializeError } = require('./utils/logSanitize');
 const { makeFailureThrottle } = require('./logger');
 
 // How often boot re-checks a Docker daemon that was not reachable yet.
 const DOCKER_RETRY_MS = 15_000;
 
-function bailOut(code = 1) {
-  closeSentry().finally(() => process.exit(code));
-}
+const { bailOut, configureHttpServer, installRuntimeGuards, installShutdown } = require('./lifecycle');
 
-function installRuntimeGuards() {
-  // Last-resort safety net: a control panel must stay up. The specific fixes (e.g.
-  // WebSocket 'error' handlers) prevent the known crash paths; this backstop keeps
-  // a stray uncaught error or rejected promise from taking the whole panel down.
-  // Installed only AFTER a successful boot, so startup errors stay fatal and
-  // visible instead of being silently swallowed.
-  //
-  // Operators running under a supervisor (systemd, Docker restart:) that WANT a
-  // hard restart on an unexpected fault can set MSM_EXIT_ON_FATAL=1.
-  const exitOnFatal = /^(1|true|yes)$/i.test(process.env.MSM_EXIT_ON_FATAL || '');
-
-  const report = (kind, err) => {
-    const info = serializeError(err);
-    // Structured line for log aggregators, plus a panel event so it surfaces in
-    // Activity (and Discord Alerts, if wired) rather than only in stdout.
-    logger.error('Caught a fatal runtime fault and kept the panel alive.', { kind, err: info });
-    captureError(err, { scope: 'runtime-guard', kind });
-    try {
-      require('./events').recordEvent({
-        type: 'panel-error',
-        actor: 'system',
-        summary: `Uncaught ${kind}: ${info.errorMessage}.`.slice(0, 300),
-        details: info,
-      });
-    } catch {
-      /* the DB may be exactly what broke - never let reporting throw */
-    }
-    if (exitOnFatal) process.exit(1);
-  };
-
-  process.on('uncaughtException', (err) => report('exception', err));
-  process.on('unhandledRejection', (reason) => report('rejection', reason));
-}
+// Set once the WebSocket server is attached, so a shutdown can close its clients.
+let wss = null;
 
 try {
   const config = require('./config');
@@ -134,6 +101,7 @@ try {
   const app = createApp();
 
   const httpServer = app.listen(config.port, config.host, () => {
+    installShutdown({ httpServer, getWss: () => wss, graceMs: config.shutdownGraceMs });
     const shownHost = config.host === '0.0.0.0' || config.host === '::' ? 'localhost' : config.host;
     logger.info('The panel is listening.', {
       url: `http://${shownHost}:${config.port}`,
@@ -171,6 +139,8 @@ try {
     startBackgroundServices(httpServer);
   });
 
+  configureHttpServer(httpServer);
+
   httpServer.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
       logger.fatal(
@@ -203,7 +173,7 @@ try {
 // Everything that runs once the panel is listening. Split out so a throw here is
 // clearly a post-boot background failure, not a startup failure.
 function startBackgroundServices(httpServer) {
-  require('./ws').attachWebSockets(httpServer);
+  wss = require('./ws').attachWebSockets(httpServer);
   require('./storage/indexer').startIndexer();
   // Host temperature and fans for the dashboard chart (no Docker needed).
   require('./services/hostSensors')

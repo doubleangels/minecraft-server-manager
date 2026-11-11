@@ -282,6 +282,9 @@ const config = {
   // panel uses them; docker/portBind.js resolves it). 'auto' (default) picks
   // the address the panel reaches them on; 'all' publishes on every interface
   // (the old behaviour); or an explicit IP.
+  // How long a graceful shutdown waits for open requests (keep it under the
+  // container's stop grace period; the shipped compose file allows 30 s).
+  shutdownGraceMs: numFromEnv('SHUTDOWN_GRACE_MS', 20_000, { min: 1000, max: 600_000 }),
   internalPortBind: (process.env.INTERNAL_PORT_BIND || 'auto').trim().toLowerCase() || 'auto',
   // Server container hardening: no-new-privileges, and a process/thread cap
   // (0 = none). A big modpack runs a few hundred threads.

@@ -180,6 +180,9 @@ async function serverVM(s, { withLive = true, ctx = null } = {}) {
     // manual version pick (#22).
     packUnpinned: require('../services/packPins').unpinnedPackSelectors(s.type, s.env).length > 0,
     pendingRecreate: Boolean(s.pending_recreate),
+    // Stored settings that could not be read (servers.rowToServer): shown as
+    // a notice on the server's page so they can be fixed.
+    dataIssues: Array.isArray(s.dataIssues) ? s.dataIssues : [],
     lastStarted: s.last_started_at || '-',
     created: s.created_at,
     consoleLabel: s.console_label || '',

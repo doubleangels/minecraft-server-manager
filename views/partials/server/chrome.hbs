@@ -93,3 +93,12 @@
     </div>
   {{/if}}
 </div>
+{{! A stored setting this page could not read (it fell back to empty so the
+    panel keeps working). Saving the affected setting again rewrites it. }}
+{{#if server.dataIssues.length}}
+  <div class="notice notice-warn mb-4 text-sm sm:mb-6" data-server-data-issues>
+    {{{icon 'triangle-alert' 'size-4'}}}
+    <p>Some saved settings for this server could not be read and are shown empty: {{#each server.dataIssues}}{{#if @index}}, {{/if}}{{this}}{{/each}}. Check them in Settings and save again.</p>
+  </div>
+{{/if}}
+
