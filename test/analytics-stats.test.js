@@ -106,7 +106,7 @@ test('ingestStats snapshots new/changed stats and skips unchanged ones', async (
   const realRead = fsp.readFile;
   let reads = 0;
   fsp.readFile = async (...args) => {
-    if (/[\/]stats[\/][^\/]+\.json$/.test(String(args[0]))) reads++;
+    if (/[/\\]stats[/\\][^/\\]+\.json$/.test(String(args[0]))) reads++;
     return realRead(...args);
   };
   let second;
