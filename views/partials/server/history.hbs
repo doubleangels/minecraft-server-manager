@@ -31,7 +31,7 @@
       {{#each crashReports}}
         <div class="p-3" data-crash-card data-crash-id="{{id}}" data-crash-file="{{file}}" {{#if mclogsUrl}}data-crash-mclogs="{{mclogsUrl}}"{{/if}}>
           <div class="flex flex-wrap items-center gap-2 text-sm">
-            {{#unless viewed}}<span class="badge badge-danger">new</span>{{/unless}}
+            {{#unless viewed}}<span class="badge badge-danger">New</span>{{/unless}}
             <span class="min-w-0 break-all font-mono text-xs text-ink-faint">{{file}}</span>
             <span class="ml-auto whitespace-nowrap text-xs tabular-nums text-ink-faint"><span data-ts="{{ts}}">{{ts}}</span> · {{bytes size}}</span>
           </div>

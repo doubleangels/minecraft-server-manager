@@ -123,7 +123,7 @@
   {{#if compatVersions.length}}
     <div class="mb-2 flex flex-wrap items-center gap-2">
       <h3 class="font-semibold">Future Versions</h3>
-      {{#if compat.report.partial}}<span class="badge badge-warn">still checking</span>{{/if}}
+      {{#if compat.report.partial}}<span class="badge badge-warn">Still Checking</span>{{/if}}
       <span class="ml-auto text-xs text-ink-faint">Nearest first. Open one to see which mods are ready.</span>
     </div>
     <div class="grid gap-2" id="compat-versions">
@@ -137,7 +137,7 @@
             {{else if (eq status 'unknown')}}
               <span class="badge badge-warn">Unknown</span>
             {{else}}
-              <span class="badge badge-danger">{{missingCount}} without a build</span>
+              <span class="badge badge-danger">{{missingCount}} Without a Build</span>
             {{/if}}
             <span class="ml-auto font-mono text-xs text-ink-faint">{{readyCount}}/{{../compat.report.knownCount}} ready</span>
           </summary>

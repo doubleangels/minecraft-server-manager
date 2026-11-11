@@ -156,7 +156,7 @@ function init(serverId) {
     li.className = 'flex flex-wrap items-baseline gap-2 p-2.5 text-sm';
     const badge = document.createElement('span');
     badge.className = `badge shrink-0 ${BADGE[evt.type] || 'bg-inset text-ink-soft'}`;
-    badge.textContent = evt.type;
+    badge.textContent = evt.type.charAt(0).toUpperCase() + evt.type.slice(1); // a label: Title Case
     const player = document.createElement('span');
     player.className = 'min-w-0 font-medium [overflow-wrap:anywhere]';
     player.textContent = evt.player;

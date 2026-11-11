@@ -126,13 +126,15 @@ const logger = require('../logger')(require('node:path').basename(__filename));
 ## Styling & UI (Tailwind v4, server-rendered Handlebars)
 
 CSS source is [`assets/css/input.css`](assets/css/input.css) (`pnpm run build:css` / `watch:css`
-→ `public/css/app.css`). It has three commitments — a cool "stone" neutral ramp with grass green as
-the single accent, IBM Plex Sans body + Press Start 2P for titles, and cards on a fixed
-sidebar+topbar shell. Match the existing register: blocky (`rounded-sm`), tactile (buttons
-physically press on `:active`).
+→ `public/css/app.css`). Foundations: a cool "stone" neutral ramp with grass green as the single
+accent; IBM Plex Sans for all text, on a clear size and weight scale (page titles `text-2xl
+font-semibold`); Press Start 2P only in the brand logotype and error codes, never for titles; soft,
+consistent corners set through the radius tokens; flat controls with a hairline border and a soft
+shadow (buttons scale slightly on `:active`, no bevels); cards on a fixed sidebar+topbar shell. Never
+force text to uppercase in CSS: text shows exactly as written, so write it in the right case.
 
 **One radius per role** (`test/ui-register.test.js` enforces the mechanical parts):
-`rounded-sm` for every control and small inline piece (buttons, fields, icon buttons, chips, badges,
+The tokens make these 6px / 8px / 12px. `rounded-sm` for every control and small inline piece (buttons, fields, icon buttons, chips, badges,
 tabs, nav items, meters, icon tiles up to `size-8`); `rounded-md` for panels nested inside a card
 (notices, the console, bordered lists, previews) and icon tiles above `size-8`; `rounded-lg` for
 top-level surfaces (cards, modals, menus, stacked table rows); `rounded-full` only for things that
@@ -177,12 +179,13 @@ validation and error messages, and the docs — follows one house style (full de
 
 ### Title Case vs. sentence case
 
-- **Title Case:** buttons; short selectable choices (dropdown options, radio/checkbox labels, tabs,
+- **Title Case:** buttons; badges and status labels ("Hash Mismatch", "Admin Only"); short selectable choices (dropdown options, radio/checkbox labels, tabs,
   overflow-menu items, toggle chips); `<h2>` / `<h3>` section and card headings; table `<th>`;
   field captions (`.label`, `<dt>`, every field-catalog `label`); non-progress `openModal` titles.
   Parentheticals and every hyphenated part included: "Viewer (Read-Only)", "Sign-In Security".
   Show a stored id as a label through the `titleCase` / `eventType` template helpers.
-- **ALL CAPS:** only `page-header heading=`.
+- **Page titles** (`page-header heading=`) are Title Case like every other heading. No ALL CAPS
+  anywhere, and no CSS `uppercase`: the old rule hid lowercase badges and labels.
 - **Sentence case (a full sentence):** everything else — help, hints, tooltips, placeholders,
   empty-state bodies, toasts, confirm-dialog bodies _and_ titles, event and history summaries.
 - Proper nouns stay capitalised in any casing: Minecraft, Mojang, Docker, Java, RCON, Modrinth,

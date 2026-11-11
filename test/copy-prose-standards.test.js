@@ -1005,8 +1005,8 @@ function scanHtml(source, name, { lineBase = 0, colBase = 0 } = {}) {
         const text = cleanHbs(alt);
         if (!stripDyn(text)) continue;
         universal(name, line, col, text);
-        // A page-header heading is ALL CAPS by design.
-        if (isTitle && text !== text.toUpperCase()) checkTitleCase(name, line, col, text, `partial ${key}`);
+        // Page titles are Title Case like every other heading (no ALL CAPS).
+        if (isTitle) checkTitleCase(name, line, col, text, `partial ${key}`);
         else if (!isTitle) sentence(name, line, col, text, tail(text));
       }
     }

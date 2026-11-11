@@ -55,14 +55,14 @@
             </td>
             <td data-th="Source">
               {{#if (eq source 'pack')}}
-                <span class="badge badge-info">pack</span>
+                <span class="badge badge-info">Pack</span>
               {{else if (eq source 'overlay')}}
-                <span class="badge badge-ok">custom</span>
+                <span class="badge badge-ok">Custom</span>
                 {{#if sharedWith}}<div class="mt-1 text-[11px] text-ink-faint">on {{sharedWith}} server{{#if (gt sharedWith 1)}}s{{/if}}</div>{{/if}}
               {{else}}
-                <span class="badge">file</span>
+                <span class="badge">File</span>
               {{/if}}
-              {{#if (eq kind 'datapack')}}<div class="mt-1"><span class="badge">datapack</span></div>{{/if}}
+              {{#if (eq kind 'datapack')}}<div class="mt-1"><span class="badge">Datapack</span></div>{{/if}}
             </td>
             <td data-th="Version">
               {{default version '-'}}

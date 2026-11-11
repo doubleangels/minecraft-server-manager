@@ -9,15 +9,17 @@
 @source '../../views';
 @source '../../public/js';
 
-/* ---- The three commitments ----
+/* ---- Design foundations ----
    Palette: a cool-tinted "stone" neutral ramp (#0e1113 → #fafbfb) with grass green
    #3fa62b as the single accent, taken from the grass block itself; diamond, redstone
    and gold serve info/danger/warning and come from the same source material.
-   Type: IBM Plex Sans for body - an engineered grotesque that suits an infrastructure
-   tool and stays quiet under Press Start 2P, the pixel display face (titles only)
-   that carries the product's character.
-   Structural primitive: cards on the canvas inside a fixed sidebar + topbar shell;
-   surfaces separate by background shift first, hairline border second. */
+   Type: IBM Plex Sans for everything people read, with a clear size and weight
+   scale. Press Start 2P appears only in the brand logotype, where it carries the
+   product's character; it is never used for page or section titles.
+   Shape: soft, consistent corners (6px controls, 8px inner panels, 12px cards and
+   menus, 16px dialogs) set once through the radius tokens below.
+   Depth: flat controls with a hairline border and a soft shadow; cards on the canvas
+   inside a fixed sidebar + topbar shell. Text is never forced to uppercase. */
 
 /* Dark is the default theme; light mode is opt-in via <html data-theme="light">.
    Toggling swaps the semantic tokens below, so components only ever reference
@@ -85,6 +87,14 @@
   --color-stone-900: #1b1f23;
   --color-stone-925: #16191c;
   --color-stone-950: #0e1113;
+
+  /* One radius scale, softened from the old 2/4/6px blocks. Components keep
+     their role (rounded-sm controls, rounded-md inner panels, rounded-lg cards),
+     so the whole panel changes shape here, in one place. */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 
   --font-pixel: 'Press Start 2P', 'Courier New', monospace;
   --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
@@ -336,12 +346,6 @@
   ::selection {
     @apply bg-grass-600/60 text-stone-25;
   }
-  /* Everything clickable gets a physical press, even outside .btn (flavor
-     tiles, icon pickers, chips) - part of the Minecraft tactility. Segmented
-     controls are exempt: a selected tab that keeps bouncing reads as broken. */
-  button:not(.btn):not(.msm-toggle):not(.seg-btn):active {
-    transform: translateY(1px);
-  }
   /* Keep pixel-art crisp if the browser ever rasterizes/scales it. */
   img[src^='/icons/servers/'] {
     image-rendering: pixelated;
@@ -464,61 +468,40 @@
     line-height: 1.6;
   }
 
-  /* Minecraft-style buttons: blocky, beveled (light top edge, dark bottom
-     edge), and they physically PRESS - on :active the button shifts down and
-     the bevel inverts, exactly like clicking a button in-game. */
+  /* Buttons: flat, with a hairline border and a soft shadow; pressing gives a
+     small, quick scale-down instead of the old bevel flip. Primary and danger
+     carry color; ghost is text-only until hovered. */
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-sm border border-line-strong
-      bg-raised px-3.5 py-2 text-sm font-medium text-ink hover:bg-inset focus-visible:outline-2 focus-visible:outline-offset-2
-      focus-visible:outline-focus disabled:pointer-events-none disabled:opacity-50;
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.07),
-      inset 0 -3px 0 rgb(0 0 0 / 0.28);
+      bg-raised px-3.5 py-2 text-sm font-semibold text-ink hover:border-stone-500 hover:bg-inset
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus
+      disabled:pointer-events-none disabled:opacity-50;
+    box-shadow: var(--shadow-raised);
     transition:
       background-color var(--duration-state) var(--ease-standard),
       border-color var(--duration-state) var(--ease-standard),
       color var(--duration-state) var(--ease-standard),
       box-shadow var(--duration-state) var(--ease-standard),
-      transform 75ms ease-out;
+      transform 100ms ease-out;
   }
   .btn:active {
-    transform: translateY(2px);
-    box-shadow:
-      inset 0 2px 0 rgb(0 0 0 / 0.22),
-      inset 0 -1px 0 rgb(255 255 255 / 0.05);
+    transform: scale(0.98);
   }
   .btn-primary {
     /* Hover darkens: white text passes 4.5:1 on grass-600/700 but not grass-500. */
-    @apply border-grass-800 bg-grass-600 text-stone-25 hover:bg-grass-700;
+    @apply border-transparent bg-grass-600 text-stone-25 hover:border-transparent hover:bg-grass-700;
     box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.22),
-      inset 0 -3px 0 rgb(0 0 0 / 0.32);
-    text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
-  }
-  .btn-primary:active {
-    box-shadow:
-      inset 0 2px 0 rgb(0 0 0 / 0.28),
-      inset 0 -1px 0 rgb(255 255 255 / 0.08);
+      0 1px 2px rgb(14 17 19 / 0.25),
+      inset 0 1px 0 rgb(255 255 255 / 0.12);
   }
   .btn-danger {
-    @apply border-redstone-800 bg-redstone-600 text-stone-25 hover:bg-redstone-700;
+    @apply border-transparent bg-redstone-600 text-stone-25 hover:border-transparent hover:bg-redstone-700;
     box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.18),
-      inset 0 -3px 0 rgb(0 0 0 / 0.32);
-    text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
-  }
-  .btn-danger:active {
-    box-shadow:
-      inset 0 2px 0 rgb(0 0 0 / 0.28),
-      inset 0 -1px 0 rgb(255 255 255 / 0.08);
+      0 1px 2px rgb(14 17 19 / 0.25),
+      inset 0 1px 0 rgb(255 255 255 / 0.1);
   }
   .btn-ghost {
-    @apply border-transparent bg-transparent hover:bg-inset;
-    box-shadow: none;
-    text-shadow: none;
-  }
-  .btn-ghost:active {
-    transform: translateY(1px);
+    @apply border-transparent bg-transparent hover:border-transparent hover:bg-inset;
     box-shadow: none;
   }
   .btn-sm {
@@ -603,7 +586,7 @@
   .seg-pill {
     @apply pointer-events-none absolute left-0 top-0 rounded-sm bg-raised opacity-0;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      var(--shadow-raised),
       inset 0 0 0 1px var(--color-line-strong);
     transition:
       transform 200ms cubic-bezier(0.3, 0.7, 0.4, 1),
@@ -628,7 +611,7 @@
   .seg-btn[aria-pressed='true'] {
     @apply bg-raised text-ok;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      var(--shadow-raised),
       inset 0 0 0 1px var(--color-line-strong);
   }
   .seg-btn:disabled {
@@ -759,7 +742,7 @@
   /* Badges: neutral by default; the four semantic variants are the ONLY badge
      colorways - no ad-hoc bg/text pairs at call sites. */
   .badge {
-    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide bg-inset text-ink-soft;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-sm px-2 py-0.5 text-xs font-medium bg-inset text-ink-soft;
   }
   .badge-ok {
     @apply bg-grass-500/15 text-ok;
@@ -775,7 +758,6 @@
   }
 
   .chip {
-    /* rounded-sm, not a pill - the whole product sits in the blocky register. */
     @apply inline-flex items-center gap-1 rounded-sm border border-line bg-inset px-2 py-0.5 text-xs text-ink-soft;
   }
 
@@ -880,11 +862,11 @@
     @apply mt-1 max-w-prose text-xs leading-relaxed text-ink-faint;
   }
 
-  /* Section eyebrow - the small all-caps label above a group of controls
-     (sidebar "Servers", world-controls sections, modpacks column headers).
-     Was hand-rolled as this exact utility string ~15 times. */
+  /* Section eyebrow - the small label above a group of controls (sidebar
+     groups, world-controls sections, column headers). Written in Title Case at
+     the call site and shown as written; never forced to uppercase. */
   .eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-wider text-ink-faint;
+    @apply text-xs font-semibold text-ink-faint;
   }
 
   /* Inline code inside body copy (a var name, a command, a hostname). Three
@@ -899,7 +881,7 @@
   }
   /* px-4 so the first/last columns align with card headers and card padding. */
   .table-base th {
-    @apply border-b border-line px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-ink-faint;
+    @apply border-b border-line px-4 py-2.5 text-xs font-semibold text-ink-faint;
   }
   .table-base td {
     @apply border-b border-line/60 px-4 py-2.5 align-middle;
@@ -957,7 +939,7 @@
       content: attr(data-th);
       /* Long labels (a server name heading a permissions column) wrap within
          about half the row instead of pushing the value off-screen. */
-      @apply max-w-[55%] shrink-0 text-xs font-semibold uppercase tracking-wider text-ink-faint;
+      @apply max-w-[55%] shrink-0 text-xs font-medium text-ink-faint;
     }
     .table-stack td[data-th='']::before {
       content: none;
@@ -978,27 +960,15 @@
   /* The current page is a tinted pill, the one active marker used across
      the panel (tabs, sub-tabs, phone tab bars); no accent line on an edge. */
   .nav-item.active {
-    @apply bg-grass-600/15 text-ok;
-    /* A left accent bar on top of the tint, so the current page is
-       unmistakable even at a glance down a long sidebar. */
-    box-shadow: inset 3px 0 0 var(--color-ok);
+    @apply bg-grass-600/15 font-semibold text-ok;
   }
 
-  /* Meters read like the in-game XP bar: blocky, with a beveled trough and a
-     glossy top edge on the fill. */
+  /* Meters: a clean rounded bar on a recessed track. */
   .meter {
-    @apply relative h-2.5 w-full overflow-hidden rounded-sm bg-inset;
-    box-shadow:
-      inset 0 1px 2px rgb(0 0 0 / 0.4),
-      inset 0 -1px 0 rgb(255 255 255 / 0.05);
+    @apply relative h-2 w-full overflow-hidden rounded-full bg-inset;
   }
   .meter > div {
-    /* Width (not scaleX) is transitioned on purpose: scaling would distort the
-       fill's beveled inset shadows. */
-    @apply h-full rounded-sm transition-[width];
-    box-shadow:
-      inset 0 2px 0 rgb(255 255 255 / 0.3),
-      inset 0 -2px 0 rgb(0 0 0 / 0.25);
+    @apply h-full rounded-full transition-[width];
   }
   /* Indeterminate meter: an honest sliding block (progress unknown), replacing
      fake pulsing bars stuck at an arbitrary percentage. Set the fill to ~25%. */
@@ -1074,7 +1044,7 @@
       transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus;
   }
   input[type='checkbox'].msm-check {
-    @apply rounded-sm;
+    @apply rounded-[0.25rem];
     /* The checkmark lives on the element at size 0, so checking GROWS it in
        with a small overshoot and unchecking shrinks it away. */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
@@ -1171,16 +1141,16 @@
     @apply h-2 rounded-full bg-inset;
   }
   input[type='range'].msm-range::-webkit-slider-thumb {
-    @apply -mt-1 size-4 appearance-none rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
+    @apply -mt-1 size-4 appearance-none rounded-full border-2 border-grass-500 bg-stone-25 shadow-raised;
   }
   input[type='range'].msm-range::-moz-range-thumb {
-    @apply size-4 rounded-sm border border-grass-700 bg-grass-500 shadow-raised;
+    @apply size-4 rounded-full border-2 border-grass-500 bg-stone-25 shadow-raised;
   }
   input[type='range'].msm-range.msm-range-alt::-webkit-slider-thumb {
-    @apply border-diamond-700 bg-diamond-400;
+    @apply border-diamond-400;
   }
   input[type='range'].msm-range.msm-range-alt::-moz-range-thumb {
-    @apply border-diamond-700 bg-diamond-400;
+    @apply border-diamond-400;
   }
 
   .msm-select {
@@ -1195,11 +1165,9 @@
     display: none;
   }
 
-  /* Subtle "dirt" texture strip used on page headers */
+  /* A soft accent wash at the top of a header card. */
   .texture-top {
-    background-image:
-      linear-gradient(to bottom, rgb(63 166 43 / 0.08), transparent 60%),
-      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.015) 0 8px, transparent 8px 16px);
+    background-image: linear-gradient(to bottom, rgb(63 166 43 / 0.07), transparent 70%);
   }
 }
 

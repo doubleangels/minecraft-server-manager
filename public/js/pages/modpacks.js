@@ -169,7 +169,7 @@ async function loadInstalledMods(content, serverId) {
           <span class="block truncate font-mono text-[11px] text-ink-faint">${escapeHtml(m.file)}</span>
         </span>
         ${m.version ? `<span class="shrink-0 font-mono text-xs text-ink-faint">${escapeHtml(m.version)}</span>` : ''}
-        ${m.enabled ? '' : '<span class="badge shrink-0">disabled</span>'}
+        ${m.enabled ? '' : '<span class="badge shrink-0">Disabled</span>'}
       </div>`
       )
       .join('');

@@ -68,7 +68,7 @@ test('a server with unread crash reports is marked red on its page, its card and
     page,
     /card mb-4 overflow-hidden sm:mb-6 border-danger\/50" style="border-top: 3px solid var\(--color-danger\)"/
   );
-  assert.match(page, /badge badge-danger">1 new crash</);
+  assert.match(page, /badge badge-danger">1 New Crash</);
   const dash = await html('/');
   assert.match(dash, /border-danger\/50 bg-danger\/10"/);
   assert.match(dash, /Servers by Status/);

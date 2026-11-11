@@ -168,9 +168,9 @@ async function createFrom(body, name) {
 
 function showReport(server, report) {
   const BADGE = {
-    ok: '<span class="badge badge-ok">ok</span>',
-    'hash-mismatch': '<span class="badge badge-warn">hash mismatch</span>',
-    failed: '<span class="badge badge-danger">failed</span>',
+    ok: '<span class="badge badge-ok">OK</span>',
+    'hash-mismatch': '<span class="badge badge-warn">Hash Mismatch</span>',
+    failed: '<span class="badge badge-danger">Failed</span>',
   };
   const content = document.createElement('div');
   content.className = 'space-y-3 text-sm';

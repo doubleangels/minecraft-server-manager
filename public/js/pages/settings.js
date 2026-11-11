@@ -581,7 +581,7 @@ function init() {
       clearAllBtn.classList.remove('hidden');
       lockBody.innerHTML = `
         <div class="overflow-x-auto"><table class="table-base table-stack"><thead><tr>
-          <th>Account</th><th>Scope</th><th>Address</th><th>Fails</th><th>Clears in</th><th class="text-right"></th>
+          <th>Account</th><th>Scope</th><th>Address</th><th>Fails</th><th>Clears In</th><th class="text-right"></th>
         </tr></thead><tbody>${list
           .map(
             (l) => `<tr>
@@ -589,7 +589,7 @@ function init() {
               <td data-th="Scope">${l.scope === 'account' ? 'Whole account' : 'This address'}</td>
               <td data-th="Address" class="font-mono text-xs">${esc(l.ip || '-')}</td>
               <td data-th="Fails" class="tabular-nums">${l.count}</td>
-              <td data-th="Clears in" class="tabular-nums">${l.minutesLeft} min</td>
+              <td data-th="Clears In" class="tabular-nums">${l.minutesLeft} min</td>
               <td data-th="" class="text-right"><button class="btn btn-ghost btn-sm" data-unlock data-username="${esc(l.username)}" ${l.ip ? `data-ip="${esc(l.ip)}"` : ''}>Unlock</button></td>
             </tr>`
           )

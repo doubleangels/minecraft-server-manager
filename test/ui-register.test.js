@@ -54,3 +54,15 @@ test('buttons, links and fields use the control radius', () => {
   }
   assert.deepEqual(bad, [], 'controls are rounded-sm; rounded-md/lg are for panels and surfaces');
 });
+
+test('no forced uppercase: text shows as written, so it is written in the right case', () => {
+  const bad = [];
+  for (const f of sources) {
+    const text = read(f);
+    // The Tailwind utility as a whole class (not "uppercase" inside a word or a JS method).
+    for (const m of text.matchAll(/(?<=[\s"'`])uppercase(?=[\s"'`])/g)) bad.push(`${f}:${lineOf(text, m.index)}`);
+  }
+  assert.deepEqual(bad, []);
+  const css = fs.readFileSync(path.join(ROOT, 'assets/css/input.css'), 'utf8');
+  assert.doesNotMatch(css, /@apply[^;]*\buppercase\b/, 'no component forces uppercase either');
+});

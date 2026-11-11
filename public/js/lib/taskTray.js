@@ -108,7 +108,7 @@ function init() {
         <div class="flex items-center gap-2">
           <span class="min-w-0 flex-1 truncate font-medium"></span>
           <span class="shrink-0 text-[11px] ${t.state === 'failed' ? 'text-danger' : t.state === 'done' ? 'text-ok' : 'text-ink-faint'}">
-            ${t.state === 'running' ? `${Math.round(t.elapsedMs / 1000)}s` : t.state}
+            ${t.state === 'running' ? `${Math.round(t.elapsedMs / 1000)}s` : t.state === 'done' ? 'Done' : 'Failed'}
           </span>
         </div>
         <div class="truncate text-xs text-ink-faint" data-step></div>

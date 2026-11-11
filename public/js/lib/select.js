@@ -96,7 +96,7 @@ function openPicker(select, btn) {
       if (opt.group && opt.group !== lastGroup) {
         lastGroup = opt.group;
         const g = document.createElement('div');
-        g.className = 'px-2 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-faint';
+        g.className = 'px-2 pt-3 pb-1 text-xs font-semibold text-ink-faint';
         g.textContent = opt.group;
         list.appendChild(g);
       }

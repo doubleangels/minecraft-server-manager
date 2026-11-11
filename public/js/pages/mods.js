@@ -246,12 +246,12 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
     if (!v) return '';
     if (v.status === 'ok')
       return v.mcOk === null
-        ? '<span class="badge" data-tip="Loader matches; MC version could not be verified.">fits (MC unverified)</span>'
-        : '<span class="badge badge-ok">fits this server</span>';
-    if (v.status === 'wrong-loader') return '<span class="badge badge-warn">wrong loader</span>';
-    if (v.status === 'wrong-mc') return '<span class="badge badge-warn">wrong MC version</span>';
-    if (v.status === 'wrong-kind') return '<span class="badge badge-warn">wrong content type</span>';
-    return '<span class="badge" data-tip="Not found on Modrinth/CurseForge and no readable metadata.">unidentified</span>';
+        ? '<span class="badge" data-tip="Loader matches; MC version could not be verified.">Fits (MC Unverified)</span>'
+        : '<span class="badge badge-ok">Fits This Server</span>';
+    if (v.status === 'wrong-loader') return '<span class="badge badge-warn">Wrong Loader</span>';
+    if (v.status === 'wrong-mc') return '<span class="badge badge-warn">Wrong MC Version</span>';
+    if (v.status === 'wrong-kind') return '<span class="badge badge-warn">Wrong Content Type</span>';
+    return '<span class="badge" data-tip="Not found on Modrinth/CurseForge and no readable metadata.">Unidentified</span>';
   };
 
   function openZipPreview(preview, uploadToken) {
@@ -309,11 +309,11 @@ function init(serverId, serverType, mcVersion, serverLoader, cfEnabled) {
         : `${item.filename}${idn.version ? `, ${idn.version}` : ''}${idn.source ? ` · via ${idn.source}` : ''}`;
       const badges = row.querySelector('[data-role="badges"]');
       if (item.installed) badges.insertAdjacentHTML('beforeend', '<span class="badge badge-ok">Installed</span>');
-      if (missing) badges.insertAdjacentHTML('beforeend', '<span class="badge badge-danger">missing</span>');
+      if (missing) badges.insertAdjacentHTML('beforeend', '<span class="badge badge-danger">Missing</span>');
       else if (isBlocked)
         badges.insertAdjacentHTML(
           'beforeend',
-          '<span class="badge badge-warn" data-tip="The author disallows automated downloads, so resolve it after import.">manual download</span>'
+          '<span class="badge badge-warn" data-tip="The author disallows automated downloads, so resolve it after import.">Manual Download</span>'
         );
       else badges.insertAdjacentHTML('beforeend', verdictBadge(item.verdict));
       rows.push({ item, row, isBlocked, missing });

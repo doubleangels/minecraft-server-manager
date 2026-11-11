@@ -141,7 +141,7 @@ test('the health page lists alerts, and the API dismisses and clears for the sig
 
   let r = await h.req('GET', '/health', { cookie });
   assert.equal(r.status, 200);
-  assert.match(r.text, /Health · 24h|HEALTH/);
+  assert.match(r.text, /Health · 24h|>Health<\/h2>/);
   assert.match(r.text, new RegExp(`data-alert-id="${first}"`));
   assert.match(r.text, /href="\/health"[\s\S]*?badge-danger ml-auto">2</); // sidebar badge
   assert.match(r.text, /Exit Code/);

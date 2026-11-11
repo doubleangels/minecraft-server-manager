@@ -128,7 +128,9 @@ users:
 
 - **Casing:** Title Case for buttons and for short selectable choices (dropdown
   options, radio and checkbox labels, tabs, overflow-menu items, toggle chips).
-  The `page-header heading=` stays ALL CAPS. `<h2>` / `<h3>` section and card
+  Badges and status labels ("Hash Mismatch", "Admin Only") are Title Case.
+  The `page-header heading=` is Title Case too (no ALL CAPS, and no CSS
+  `uppercase` anywhere: text shows as written). `<h2>` / `<h3>` section and card
   headings, table `<th>`, field captions (the `.label` above an input, a `<dt>`,
   every field-catalog `label`), and non-progress `openModal` titles are Title
   Case too. Title Case covers a parenthetical ("Viewer (Read-Only)", "Disk Quota

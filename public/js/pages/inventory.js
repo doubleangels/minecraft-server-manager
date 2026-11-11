@@ -130,7 +130,7 @@ function init(root) {
     if (!item) {
       cell.className += 'border-line bg-inset/40';
       if (label)
-        cell.innerHTML = `<span class="max-w-full truncate px-0.5 text-[8px] uppercase tracking-wide text-ink-faint/60">${esc(label)}</span>`;
+        cell.innerHTML = `<span class="max-w-full truncate px-0.5 text-[9px] font-medium text-ink-faint/70">${esc(label.charAt(0).toUpperCase() + label.slice(1))}</span>`;
       // A picker cell (onPick, no `at`: the Move To grids) has no page slot of
       // its own; it describes what picking it does instead. Reading `at` here
       // for one threw, so the Move To window opened with no grids at all.
@@ -470,7 +470,7 @@ function init(root) {
 
     const section = (label, container, count, itemsBySlot, offset = 0, labels = null) => {
       const box = document.createElement('div');
-      box.innerHTML = `<div class="mb-1 text-[11px] uppercase tracking-wider text-ink-faint">${esc(label)}</div>`;
+      box.innerHTML = `<div class="mb-1 text-xs font-semibold text-ink-faint">${esc(label)}</div>`;
       // All 9 columns fit on a phone (cells shrink to the width, like the game's
       // own inventory) instead of the last ones hiding off to the right behind
       // a scroll nobody notices. sm+ keeps the fixed slot size.
@@ -766,7 +766,7 @@ function init(root) {
     const box = el('inv-diff');
     const section = (title, cls, entries, kind) => `
       <div class="rounded-md border border-line p-3">
-        <div class="mb-2 text-xs font-semibold uppercase tracking-wider ${cls}">${title} (${entries.length})</div>
+        <div class="mb-2 text-xs font-semibold ${cls}">${title} (${entries.length})</div>
         ${entries.length ? `<ul class="space-y-0.5">${entries.map((e) => diffLine(e, kind)).join('')}</ul>` : '<p class="text-xs text-ink-faint">Nothing here.</p>'}
       </div>`;
     box.innerHTML = `

@@ -39,16 +39,18 @@
     {{! Label hides below sm: (icon-only) - the topbar is already tight on a
         phone (hamburger + title + this + theme + avatar); aria-label keeps it
         announced to screen readers regardless of which span is visible. }}
-    <a href="/servers/new" class="btn btn-primary btn-sm" aria-label="Create a Server" data-tip="Create a new server.">{{{icon 'plus' 'size-3.5'}}} <span class="hidden sm:inline">Create a Server</span></a>
+    {{! Phone: a quiet icon button (a filled block in every page's top bar was
+        the loudest thing on screen); from sm the full primary button. }}
+    <a href="/servers/new" class="btn btn-ghost btn-sm text-ok sm:hidden" aria-label="Create a Server">{{{icon 'plus' 'size-5'}}}</a>
+    <a href="/servers/new" class="btn btn-primary btn-sm hidden sm:inline-flex" data-tip="Create a new server.">{{{icon 'plus' 'size-3.5'}}} Create a Server</a>
     {{! Installed app only: there is no browser reload button there. }}
     <button type="button" class="btn btn-ghost btn-sm hidden sm:[@media(display-mode:standalone)]:inline-flex" data-app-refresh aria-label="Refresh" data-tip="Reload this page.">{{{icon 'refresh-cw' 'size-4'}}}</button>
     <button id="theme-toggle" class="btn btn-ghost btn-sm hidden sm:inline-flex" aria-label="Toggle theme" data-tip="Switch between the dark and light theme.">
       <span data-theme-icon="dark">{{{icon 'moon' 'size-4'}}}</span><span data-theme-icon="light" class="hidden">{{{icon 'sun' 'size-4'}}}</span>
     </button>
-    {{! rounded-md, not a circle - the only fully-round control would break the
-        blocky register. Diamond is identity color here (decorative, not meaning),
-        used only as the fallback initial-letter background. }}
-    <button class="grid size-8 place-items-center overflow-hidden rounded-sm bg-diamond-700 text-xs font-bold text-stone-25 [@media(pointer:coarse)]:size-11" data-menu="user-menu" data-tip="{{user.username}} ({{capitalize user.role}})" data-user-totp-enabled="{{#if user.totpEnabled}}1{{/if}}" data-user-avatar="{{user.avatar}}">
+    {{! A round avatar, as people expect one to look. Diamond is identity color
+        here (decorative, not meaning), only the fallback initial's background. }}
+    <button class="grid size-8 place-items-center overflow-hidden rounded-full bg-diamond-700 text-xs font-bold text-stone-25 ring-2 ring-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus [@media(pointer:coarse)]:size-10" data-menu="user-menu" data-tip="{{user.username}} ({{capitalize user.role}})" data-user-totp-enabled="{{#if user.totpEnabled}}1{{/if}}" data-user-avatar="{{user.avatar}}">
       {{#if (avatarSrc user.avatar)}}
         <img src="{{avatarSrc user.avatar}}" alt="" class="size-full object-contain">
       {{else}}

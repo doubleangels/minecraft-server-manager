@@ -897,7 +897,7 @@ function initModBrowser() {
   function rowHtml(m, isDep) {
     const k = key(m.platform, m.ref);
     const platChip = `<span class="chip shrink-0 text-[11px]">${m.platform === 'curseforge' ? 'CurseForge' : 'Modrinth'}</span>`;
-    const depBadge = isDep ? '<span class="badge badge-info">dependency</span>' : '';
+    const depBadge = isDep ? '<span class="badge badge-info">Dependency</span>' : '';
     return `
       <div class="flex items-start gap-3 rounded-md border border-line bg-raised p-3" data-key="${escapeHtml(k)}">
         ${packIconHtml(m.iconUrl, 'size-10')}
@@ -1623,7 +1623,7 @@ function initSolver({ onApplied = () => {} } = {}) {
     // sibling callouts on the same page already used the token pairs.
     head.className = isPartial ? 'notice notice-warn block p-4' : 'notice notice-ok block p-4';
     head.innerHTML = `
-      <p class="text-xs font-semibold uppercase tracking-wider ${isPartial ? 'text-warn' : 'text-ok'}">${isPartial ? 'Best partial match' : 'Best match'}</p>
+      <p class="text-xs font-semibold ${isPartial ? 'text-warn' : 'text-ok'}">${isPartial ? 'Best Partial Match' : 'Best Match'}</p>
       <p class="mt-1 text-lg font-semibold">${escapeHtml(pair.loaderLabel)} on Minecraft ${escapeHtml(pair.mcVersion)}</p>
       <p class="text-sm text-ink-faint">${
         isPartial

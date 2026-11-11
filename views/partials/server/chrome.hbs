@@ -29,7 +29,7 @@
           </span>
           <span class="badge badge-warn {{#unless server.statusDetail}}hidden{{/unless}}" data-status-detail="{{server.id}}">{{server.statusDetail}}</span>
           {{#if server.updateAvailable}}<span class="badge badge-warn">Update Available</span>{{/if}}
-          {{#if server.crashesUnread}}<span class="badge badge-danger">{{server.crashesUnread}} new {{plural server.crashesUnread 'crash' 'crashes'}}</span>{{/if}}
+          {{#if server.crashesUnread}}<span class="badge badge-danger">{{server.crashesUnread}} New {{plural server.crashesUnread 'Crash' 'Crashes'}}</span>{{/if}}
         </div>
         <p class="mt-1 flex flex-wrap gap-x-3 text-xs text-ink-faint">
           <span><b class="font-semibold text-ink-soft">{{server.flavor}}</b> {{server.mcVersion}}</span>
