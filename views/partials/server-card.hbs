@@ -2,7 +2,7 @@
     for redstone and a red outline, so it stands out in a full grid. }}
 <a href="/servers/{{id}}" data-server-card="{{id}}" data-server-name="{{name}}" data-server-status="{{status}}" data-players-online="{{players.online}}" class="card group relative block overflow-hidden transition hover:border-line-strong hover:shadow-raised{{#if (or (eq status 'crashed') crashesUnread)}} border-danger/50 bg-danger/10{{/if}}"
    data-filter="{{name}} {{flavor}} {{mcVersion}}{{#each tags}} {{this}}{{/each}}"
-   style="border-top: 3px solid {{#if (or (eq status 'crashed') crashesUnread)}}var(--color-danger){{else}}{{accent}}{{/if}}">
+   style="border-top: 2px solid {{#if (or (eq status 'crashed') crashesUnread)}}var(--color-danger){{else}}color-mix(in srgb, {{accent}} 65%, transparent){{/if}}">
   <div class="p-4">
     <div class="flex items-start gap-3">
       <img src="{{iconSrc this.icon}}" alt="" class="size-11 shrink-0 rounded-md" style="background: {{accent}}" data-fallback-icon="/icons/servers/grass.svg">

@@ -950,6 +950,25 @@
     .table-stack td:empty {
       @apply hidden;
     }
+    .table-stack tbody tr {
+      @apply relative;
+    }
+    /* A row's single overflow ("…") button: pinned in the card's top-right
+       corner instead of a divider and a line of its own. */
+    .table-stack td.stack-corner {
+      @apply absolute top-2 right-2 m-0 border-0 p-0;
+    }
+    .table-stack tr:has(> td.stack-corner) > td:first-child {
+      @apply pr-11;
+    }
+    /* An empty-state or message row (one cell spanning the table) is not a
+       record: no card around it, or it reads as a box inside a box. */
+    .table-stack tbody tr:has(> td[colspan]:only-child) {
+      @apply border-0 bg-transparent p-0 shadow-none;
+    }
+    .table-stack tbody tr > td[colspan]:only-child {
+      @apply m-0 block border-0 pt-0;
+    }
   }
 
   .nav-item {

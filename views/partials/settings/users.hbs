@@ -34,7 +34,7 @@
                 {{/if}}
               </td>
               <td data-th="Created" class="whitespace-nowrap text-xs text-ink-faint" data-ts="{{createdAt}}">{{createdAt}}</td>
-              <td data-th="" class="text-right">
+              <td data-th="" class="stack-corner text-right">
                 <button class="btn btn-ghost btn-sm" data-menu="user-menu-{{@index}}" data-tip="Actions for {{username}}." aria-label="Actions for {{username}}">{{{icon 'ellipsis' 'size-3.5'}}}</button>
                 <template id="user-menu-{{@index}}">
                   <button data-user-password data-user-id="{{id}}" data-username="{{username}}">{{{icon 'key' 'size-3.5'}}} Set Password</button>

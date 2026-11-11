@@ -16,6 +16,16 @@
     <div class="stat-label">{{{icon 'server' 'size-3.5'}}} Servers Online</div>
     {{! Green only when something IS online - 0/3 in success green lied. }}
     <div class="stat-value {{#if totals.running}}text-ok{{/if}}">{{totals.running}}<span class="stat-unit"> / {{totals.total}}</span></div>
+    {{! Every status at a glance, under the number (was a card of its own). }}
+    <div class="stat-sub mt-1.5 flex flex-wrap gap-x-3 gap-y-1" data-status-breakdown>
+      {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot bg-ok"></span>{{overview.byStatus.running}} Running</span>{{/if}}
+      {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot bg-warn"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
+      {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5 text-warn"><span class="status-dot bg-warn"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
+      {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
+      {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot bg-link"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
+      {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
+      {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot bg-ink-faint"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
+    </div>
   </div>
   <div class="card stat-tile">
     <div class="stat-label">{{{icon 'users' 'size-3.5'}}} Players Connected</div>
@@ -60,20 +70,6 @@
 
 
 
-{{#unless serversOnly}}
-<div class="mb-6 {{#if noServers}}hidden{{/if}}">
-  <h2 class="card-title mb-3">{{{icon 'activity' 'size-4'}}}Servers by Status</h2>
-  <div class="card flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-sm">
-    {{#if overview.byStatus.running}}<span class="flex items-center gap-1.5"><span class="status-dot bg-ok"></span>{{overview.byStatus.running}} Running</span>{{/if}}
-    {{#if overview.byStatus.starting}}<span class="flex items-center gap-1.5"><span class="status-dot bg-warn"></span>{{overview.byStatus.starting}} Starting</span>{{/if}}
-    {{#if overview.byStatus.unhealthy}}<span class="flex items-center gap-1.5 text-warn"><span class="status-dot bg-warn"></span>{{overview.byStatus.unhealthy}} Unhealthy</span>{{/if}}
-    {{#if overview.byStatus.stalled}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.stalled}} Stalled</span>{{/if}}
-    {{#if overview.byStatus.updating}}<span class="flex items-center gap-1.5"><span class="status-dot bg-link"></span>{{overview.byStatus.updating}} Updating</span>{{/if}}
-    {{#if overview.byStatus.crashed}}<span class="flex items-center gap-1.5 font-semibold text-danger"><span class="status-dot bg-danger"></span>{{overview.byStatus.crashed}} Crashed</span>{{/if}}
-    {{#if overview.byStatus.stopped}}<span class="flex items-center gap-1.5"><span class="status-dot bg-ink-faint"></span>{{overview.byStatus.stopped}} Stopped</span>{{/if}}
-  </div>
-</div>
-{{/unless}}
 
 {{#unless noServers}}
 {{#unless serversOnly}}<h2 class="card-title mb-3">{{{icon 'server' 'size-4'}}}Servers</h2>{{/unless}}
