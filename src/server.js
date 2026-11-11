@@ -333,8 +333,17 @@ function startBackgroundServices(httpServer) {
     await serversService.refreshStatuses({ boot: true });
     // Periodic reconcile: without it, cached statuses drift after any missed
     // docker event and healthcheck-less servers stay 'starting' forever.
+    // Docker events report ordinary changes at once, so the full pass (a
+    // Docker inspect per server) runs every 5 minutes, and every minute only
+    // while some server is starting, stalled or unhealthy: the states this
+    // pass resolves by reading the boot log.
     const statusThrottle = makeFailureThrottle();
+    const TRANSITIONAL = new Set(['starting', 'stalled', 'unhealthy']);
+    let lastFullReconcile = Date.now();
     const statusTimer = setInterval(() => {
+      const busy = serversService.listServers().some((s) => TRANSITIONAL.has(s.status));
+      if (!busy && Date.now() - lastFullReconcile < 5 * 60_000) return;
+      lastFullReconcile = Date.now();
       serversService
         .refreshStatuses()
         .then(() => statusThrottle.ok(logger.info, 'The server status reconcile recovered.'))
