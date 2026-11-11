@@ -199,6 +199,13 @@ Cross-cutting:
     is open (shared with that graph); otherwise each running server is sampled once a minute.
   - Backups deflate at level 1: region files are already compressed inside, and higher levels cost
     about 50% more CPU for the same size.
+- **Push notifications** use Web Push with no third-party library: `services/webPush.js` signs
+  requests with the panel's VAPID key (`$DATA_DIR/.push-key.json`, created on first use, mode
+  `0600`) and encrypts each payload for its device (RFC 8291, aes128gcm). `services/pushNotify.js`
+  decides who hears what: `recordEvent()` hands every event to it, alert types map to a category
+  (problems, failures), and the task runner reports long tasks to the user who started them. A user
+  only receives alerts for servers they can see; panel-wide alerts go to admins. Subscriptions the
+  push service reports gone (404/410) are deleted.
 - **Secrets** (RCON passwords, API keys, TOTP secrets, the Discord webhook URL) are encrypted at
   rest with AES-256-GCM using a dedicated random key at `$DATA_DIR/.secret-key` (mode `0600`,
   auto-generated). It's independent of `SESSION_SECRET`; a `SESSION_SECRET`-derived key is kept as a

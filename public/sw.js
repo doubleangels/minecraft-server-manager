@@ -3,10 +3,12 @@
 // pages and /api always come from the network, so nothing shown is ever stale.
 // Only the offline page and the static look it needs are kept, plus fonts and
 // icons (content-stable, see the immutable Cache-Control in web/app.js).
-// Push notifications for finished tasks are shown through this worker too,
-// because Android Chrome cannot construct `new Notification()` in a page.
+// Notifications are shown through this worker: push messages from the panel
+// (crashes, failed backups, finished tasks; they arrive even with the app
+// closed), and the in-page fallback, because Android Chrome cannot construct
+// `new Notification()` in a page.
 
-const CACHE = 'msm-shell-v2';
+const CACHE = 'msm-shell-v3';
 const SHELL = ['/offline.html', '/css/app.css', '/favicon.svg', '/icons/pickaxe-192.png'];
 
 self.addEventListener('install', (event) => {
@@ -74,7 +76,52 @@ self.addEventListener('fetch', (event) => {
   // Everything else (scripts, /api, …) goes straight to the network untouched.
 });
 
-// Tapping a "task finished" notification focuses an open panel tab, or opens one.
+// A push message from the panel. Always shown: browsers (Safari above all)
+// withdraw push permission from a site that receives pushes without showing
+// them. The tag replaces an older alert of the same kind for the same server.
+self.addEventListener('push', (event) => {
+  let msg = {};
+  try {
+    msg = event.data ? event.data.json() : {};
+  } catch {
+    msg = { title: event.data ? event.data.text() : '' };
+  }
+  event.waitUntil(
+    self.registration.showNotification(msg.title || 'Minecraft Server Manager', {
+      body: msg.body || '',
+      icon: '/icons/pickaxe-192.png',
+      badge: '/icons/pickaxe-badge-96.png',
+      tag: msg.tag || undefined,
+      renotify: Boolean(msg.tag),
+      data: { url: msg.url || '/' },
+    })
+  );
+});
+
+// The browser replaced this device's subscription (it does so now and then):
+// sign the new one up, so alerts keep arriving.
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil(
+    (async () => {
+      const res = await fetch('/api/account/push', { credentials: 'same-origin' });
+      if (!res.ok) return;
+      const { publicKey } = await res.json();
+      const raw = atob(publicKey.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (publicKey.length % 4)) % 4));
+      const sub = await self.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: Uint8Array.from(raw, (c) => c.charCodeAt(0)),
+      });
+      await fetch('/api/account/push/subscriptions', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub.toJSON(), label: 'Renewed by the browser' }),
+      });
+    })().catch(() => {})
+  );
+});
+
+// Tapping a notification focuses an open panel tab on its page, or opens one.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const target = (event.notification.data && event.notification.data.url) || '/';

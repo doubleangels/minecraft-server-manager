@@ -66,7 +66,7 @@ Android and computers only install the panel when it is served over HTTPS (or op
 
 Once installed:
 
-- **Notify Me When Tasks Finish** in the account menu sends a system notification when a backup, restore, update or other background task finishes while the panel isn't on screen.
+- **Notifications** in the account menu sends alerts to this device even with the app closed: **Server Problems** (a crash, running out of memory, a stuck startup, a server that won't stop), **Backup and Update Failures**, and **My Finished Tasks** (a backup, install or update you started, over 15 seconds). Pick any mix per device, and use **Send a Test Notification** to check it works. You only hear about servers you can see. It needs the panel served over HTTPS and able to reach the internet (the alerts travel through your browser's push service). On iPhone and iPad, turn it on from the installed app (iOS 16.4 or later). If you set the contact push services see, use `PUSH_CONTACT` (a `mailto:` or `https://` address).
 - The app icon shows a badge with the number of unread [health alerts](dashboard.md), where the system supports badges.
 - There's no browser bar, so the top bar has a **Refresh** button, and pulling down from the top of a page reloads it.
 - If the panel can't be reached, you get a clear offline screen with a **Try Again** button instead of a browser error. Nothing is cached that could show you out-of-date server data: every page and number still comes live from the panel.

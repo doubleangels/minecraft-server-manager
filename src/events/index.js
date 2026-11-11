@@ -76,6 +76,18 @@ function recordEvent({ serverId = null, actor = 'system', type, summary, details
     details: details && Object.keys(details).length ? details : undefined,
     logExcerpt: excerptRel || undefined,
   });
+  // Alert-worthy events also go to subscribed devices as push notifications.
+  // After this call returns, and never able to fail it. Lazy require: the
+  // push module reads permissions, which requires this module.
+  setImmediate(() => {
+    try {
+      require('../services/pushNotify')
+        .onEvent({ eventId, type, serverId, summary })
+        .catch((err) => logger.warn('Pushing an event to devices failed.', { type, err: err.message }));
+    } catch (err) {
+      logger.warn('Pushing an event to devices failed.', { type, err: err.message });
+    }
+  });
   return eventId;
 }
 

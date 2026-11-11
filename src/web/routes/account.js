@@ -263,6 +263,72 @@ router.delete(
   })
 );
 
+// ---- Push notifications (Web Push) ----
+// A device subscribes with the panel's public key, then picks which kinds of
+// alerts it wants. Every route acts on the signed-in user's own devices only.
+const pushService = () => require('../../services/pushNotify');
+const PushSubscriptionBody = z.object({
+  subscription: z.object({
+    endpoint: z.string().url().max(1000).startsWith('https://'),
+    keys: z.object({ p256dh: z.string().min(40).max(200), auth: z.string().min(8).max(100) }),
+  }),
+  label: z.string().max(80).optional(),
+});
+const pushError = (res) =>
+  res
+    .status(400)
+    .json({ ok: false, error: 'This device sent a push subscription the panel could not use. Try again.' });
+
+router.get('/push', (req, res) => {
+  const endpoint = typeof req.query.endpoint === 'string' ? req.query.endpoint : '';
+  res.json({
+    ok: true,
+    publicKey: require('../../services/webPush').publicKey(),
+    categories: pushService().CATEGORIES,
+    device: endpoint ? pushService().findByEndpoint(endpoint, req.user.id) : null,
+  });
+});
+
+router.post('/push/subscriptions', (req, res) => {
+  const parsed = PushSubscriptionBody.safeParse(req.body);
+  if (!parsed.success) return pushError(res);
+  const device = pushService().subscribe(req.user.id, parsed.data.subscription, { label: parsed.data.label || '' });
+  res.status(201).json({ ok: true, device });
+});
+
+router.patch('/push/subscriptions/:id', (req, res) => {
+  const parsed = z.object({ categories: z.array(z.string()).max(10) }).safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ ok: false, error: 'Pick which alerts this device should get.' });
+  const device = pushService().setCategories(req.params.id, req.user.id, parsed.data.categories);
+  if (!device) return res.status(404).json({ ok: false, error: 'This device is not signed up for notifications.' });
+  res.json({ ok: true, device });
+});
+
+router.delete('/push/subscriptions/:id', (req, res) => {
+  pushService().unsubscribe(req.params.id, req.user.id);
+  res.json({ ok: true });
+});
+
+router.post(
+  '/push/subscriptions/:id/test',
+  asyncHandler(async (req, res) => {
+    const result = await pushService().sendTest(req.params.id, req.user.id);
+    if (!result) return res.status(404).json({ ok: false, error: 'This device is not signed up for notifications.' });
+    if (result.gone) {
+      return res
+        .status(410)
+        .json({ ok: false, error: 'This device stopped accepting notifications. Turn them on again.' });
+    }
+    if (!result.ok) {
+      return res.status(502).json({
+        ok: false,
+        error: "The browser's push service did not accept the test. Check the panel can reach the internet.",
+      });
+    }
+    res.json({ ok: true });
+  })
+);
+
 router.use(makeJsonErrorHandler('account', { fileTooLarge: AVATAR_TOO_LARGE }));
 
 module.exports = router;

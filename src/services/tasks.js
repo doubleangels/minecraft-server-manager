@@ -21,6 +21,22 @@ const TTL_MS = 10 * 60 * 1000; // finished tasks linger for late polls
  * run(title, opts, fn) wraps a promise-returning fn with automatic done/fail.
  * track(title, opts, fn) does the same but returns fn's result to an awaiting caller.
  */
+/** A long task its user started has ended: their devices may want to know. */
+function notifyFinished(task, ok, error = null) {
+  setImmediate(() => {
+    require('./pushNotify')
+      .onTaskFinished({
+        title: task.title,
+        actor: task.actor,
+        serverId: task.serverId,
+        ok,
+        error: error && error.message ? error.message : error ? String(error) : null,
+        durationMs: Date.now() - task.startedAt,
+      })
+      .catch((err) => logger.warn('Pushing a task result to devices failed.', { taskId: task.id, err: err.message }));
+  });
+}
+
 function createTask(title, { serverId = null, actor = 'system' } = {}) {
   const id = `task_${nanoid(10)}`;
   const task = {
@@ -79,6 +95,7 @@ function createTask(title, { serverId = null, actor = 'system' } = {}) {
         result: summarizeBody(result),
       });
       task.state = 'done';
+      notifyFinished(task, true);
       task.result = result;
       task.finishedAt = Date.now();
       scheduleCleanup(id);
@@ -94,6 +111,7 @@ function createTask(title, { serverId = null, actor = 'system' } = {}) {
         err: serializeError(error),
       });
       task.state = 'failed';
+      notifyFinished(task, false, error);
       task.error = error && error.message ? error.message : String(error);
       const extra = {};
       if (error && error.requiresForce) extra.requiresForce = true;
